@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Django
+*.sqlite3
+db.sqlite3
+staticfiles/
+media/
+
+# Logs
+*.log
+
+# Type checker caches
+.mypy_cache/
+
+# Node / frontend
+node_modules/
+*.tsbuildinfo
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
