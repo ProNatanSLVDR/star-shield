@@ -1,0 +1,33 @@
+
+services:
+  django:
+    build:
+      context: .
+    restart: unless-stopped
+    command: []
+    volumes:
+      - ./:/app
+      - dev_logs:/logs
+      - dev_media:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./dev.env
+    depends_on:
+      - db
+
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./dev.env
+
+
+volumes:
+  postgres_data:
+  dev_logs:
+  dev_media:
+
+
