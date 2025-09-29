@@ -1,4 +1,4 @@
-FROM python:3.12.11-slim-buster
+FROM python:3.12.11
 
 # set work directory
 WORKDIR /app
@@ -15,4 +15,4 @@ RUN pip install -r requirements.txt
 # copy project
 COPY . .
 
-RUN python prod.manage.py collectstatic --noinput
+#RUN python prod.manage.py collectstatic --noinput
