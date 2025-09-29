@@ -1,4 +1,4 @@
-FROM python:3.12.11
+FROM nikolaik/python-nodejs:python3.12-nodejs24
 
 # set work directory
 WORKDIR /app

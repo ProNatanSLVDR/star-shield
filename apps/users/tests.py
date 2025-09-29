@@ -33,6 +33,7 @@ class AuthenticationViewsTests(TestCase):
         response = self.client.post(
             reverse("users:login"),
             {"username": "user@example.com", "password": "testpass123"},
+            follow=True,
         )
 
         self.assertRedirects(response, reverse("dashboard"))
