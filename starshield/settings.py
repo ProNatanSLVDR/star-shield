@@ -33,6 +33,7 @@ class Base(Configuration):
     THIRD_PARTY_APPS = [
         'django_tenants',
         'django_htmx',
+        'django_components',
         'tailwind',
     ]
 
@@ -81,12 +82,21 @@ class Base(Configuration):
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
             'DIRS': [],
-            'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
                     'django.template.context_processors.request',
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
+                ],
+                'loaders': [
+                    (
+                        'django.template.loaders.cached.Loader',
+                        [
+                            'django.template.loaders.filesystem.Loader',
+                            'django.template.loaders.app_directories.Loader',
+                            'django_components.template_loader.Loader',
+                        ],
+                    ),
                 ],
             },
         },
@@ -151,6 +161,11 @@ class Base(Configuration):
 
     WEBAPP_DOMAIN = os.getenv('WEBAPP_DOMAIN')
     STATIC_URL = 'static/'
+    STATICFILES_FINDERS = [
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'django_components.finders.ComponentsFileSystemFinder',
+    ]
 
     # Misc
 
