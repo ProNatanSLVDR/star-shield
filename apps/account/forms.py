@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from django import forms
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import (
-    AuthenticationForm,
     UserCreationForm as DjangoUserCreationForm,
     UserChangeForm as DjangoUserChangeForm,
 )
@@ -11,16 +11,49 @@ from django.core.exceptions import ValidationError
 from .models import User
 
 
-class EmailAuthenticationForm(AuthenticationForm):
-    username = forms.EmailField(
+class EmailAuthenticationForm(forms.Form):
+    email = forms.EmailField(
         label="Email",
         widget=forms.EmailInput(attrs={"autocomplete": "email"}),
         max_length=254,
     )
+    password = forms.CharField(widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}))
+
+    error_messages = {
+        "invalid_login": "Invalid email or password.",
+        "inactive": "This account is inactive.",
+    }
+
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        self.user_cache: User | None = None
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        password = self.cleaned_data.get("password")
+
+        if not email or not password:
+            raise ValidationError(self.error_messages["invalid_login"], code="invalid_login")
+
+        user = authenticate(
+            request=self.request,
+            username=email,
+            password=password,
+        )
+        if user is None or not isinstance(user, User):
+            raise ValidationError(self.error_messages["invalid_login"], code="invalid_login")
+
+        self.confirm_login_allowed(user)
+        self.user_cache = user
+        return self.cleaned_data
 
     def confirm_login_allowed(self, user: User) -> None:
-        if not user.is_active:
-            raise ValidationError("This account is inactive.", code="inactive")
+        if not getattr(user, "is_active", False):
+            raise ValidationError(self.error_messages["inactive"], code="inactive")
+
+    def get_user(self) -> User | None:
+        return self.user_cache
 
 
 class UserCreationForm(DjangoUserCreationForm):

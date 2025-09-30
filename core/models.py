@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from django_tenants.models import TenantMixin, DomainMixin
 
 
-# Modèles premier niveau
 class Entreprise(TenantMixin):
     nom = models.CharField(max_length=100)
 

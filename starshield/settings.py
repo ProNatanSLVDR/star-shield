@@ -38,12 +38,12 @@ class Base(Configuration):
     ]
 
     SHARED_APPS = [
-        'auths',
+        'core',
         "theme",
     ]
 
     TENANT_APPS = [
-        'apps.users',
+        'apps.account',
         'apps.reviews',
         'apps.roulette',
     ]
@@ -121,8 +121,8 @@ class Base(Configuration):
     DATABASE_ROUTERS = (
         'django_tenants.routers.TenantSyncRouter',
     )
-    TENANT_MODEL = 'auths.Entreprise'
-    TENANT_DOMAIN_MODEL = 'auths.DomaineEntreprise'
+    TENANT_MODEL = 'core.Entreprise'
+    TENANT_DOMAIN_MODEL = 'core.DomaineEntreprise'
     DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
@@ -135,10 +135,13 @@ class Base(Configuration):
         {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
     ]
 
-    AUTH_USER_MODEL = 'users.User'
+    AUTH_USER_MODEL = 'account.User'
+    AUTHENTICATION_BACKENDS = [
+        'django.contrib.auth.backends.ModelBackend',
+    ]
     LOGIN_REDIRECT_URL = '/'
     LOGOUT_REDIRECT_URL = '/'
-    LOGIN_URL = 'auths:login'
+    LOGIN_URL = 'account:login'
     LOGIN_EXEMPT_PATHS = (
         '/auth/login/',
         '/auth/signup/',
@@ -165,6 +168,9 @@ class Base(Configuration):
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
         'django_components.finders.ComponentsFileSystemFinder',
+    ]
+    STATICFILES_DIRS = [
+        BASE_DIR / "theme" / "static",
     ]
 
     # Misc

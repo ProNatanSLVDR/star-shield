@@ -13,23 +13,27 @@ def login_view(request: HttpRequest) -> HttpResponse:
         return redirect("dashboard")
 
     if request.method == "POST":
-        form = EmailAuthenticationForm(request, data=request.POST)
+        form = EmailAuthenticationForm(request=request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            login(request, user)
-            return redirect("dashboard")
-        messages.error(request, "Invalid email or password.")
+            if user is None:
+                messages.error(request, "Invalid email or password.")
+            else:
+                login(request, user)
+                return redirect("dashboard")
+        else:
+            messages.error(request, "Invalid email or password.")
     else:
-        form = EmailAuthenticationForm(request)
+        form = EmailAuthenticationForm(request=request)
 
-    return render(request, "auths/login.html", {"form": form})
+    return render(request, "account/login.html", {"form": form})
 
 
 @login_required
 @require_POST
 def logout_view(request: HttpRequest) -> HttpResponse:
     logout(request)
-    return redirect("auths:login")
+    return redirect("account:login")
 
 
 def signup_view(request: HttpRequest) -> HttpResponse:
@@ -48,7 +52,7 @@ def signup_view(request: HttpRequest) -> HttpResponse:
                     "Your account was created, but we could not log you in automatically. "
                     "Use your email and password to log in.",
                 )
-                return redirect("auths:login")
+                return redirect("account:login")
 
             login(request, authenticated_user)
             messages.success(request, "Welcome! Your account is ready.")
@@ -57,4 +61,4 @@ def signup_view(request: HttpRequest) -> HttpResponse:
     else:
         form = UserCreationForm()
 
-    return render(request, "auths/signup.html", {"form": form})
+    return render(request, "account/signup.html", {"form": form})

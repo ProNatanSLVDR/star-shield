@@ -31,7 +31,7 @@ class AuthenticationViewsTests(TestCase):
         User.objects.create_user(email="user@example.com", password="testpass123")
 
         response = self.client.post(
-            reverse("users:login"),
+            reverse("account:login"),
             {"username": "user@example.com", "password": "testpass123"},
             follow=True,
         )
@@ -40,7 +40,7 @@ class AuthenticationViewsTests(TestCase):
 
     def test_signup_creates_user_and_logs_in(self):
         response = self.client.post(
-            reverse("users:signup"),
+            reverse("account:signup"),
             {
                 "email": "newuser@example.com",
                 "first_name": "New",
@@ -58,7 +58,7 @@ class AuthenticationViewsTests(TestCase):
         user = User.objects.create_user(email="user@example.com", password="testpass123")
         self.client.login(username="user@example.com", password="testpass123")
 
-        response = self.client.get(reverse("users:logout"))
+        response = self.client.get(reverse("account:logout"))
 
         self.assertEqual(response.status_code, 405)
 
@@ -66,6 +66,6 @@ class AuthenticationViewsTests(TestCase):
         user = User.objects.create_user(email="user@example.com", password="testpass123")
         self.client.login(username="user@example.com", password="testpass123")
 
-        response = self.client.post(reverse("users:logout"))
+        response = self.client.post(reverse("account:logout"))
 
-        self.assertRedirects(response, reverse("users:login"))
+        self.assertRedirects(response, reverse("account:login"))
