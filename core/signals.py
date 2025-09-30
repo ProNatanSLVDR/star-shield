@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, Iterable
 
 from django.conf import settings
 from django.db import transaction
@@ -16,8 +16,8 @@ LOGGER = logging.getLogger(__name__)
 @receiver(post_migrate)
 def ensure_public_tenant(sender: Any, **kwargs: Any) -> None:
     try:
-        schema_name = "public"
-        tenant_name = "app"
+        schema_name = settings.PUBLIC_SCHEMA_NAME
+        tenant_name = getattr(settings, "PUBLIC_TENANT_NAME", "Public")
         domain_name = getattr(settings, "WEBAPP_DOMAIN")
 
         tenant_model = get_tenant_model()
@@ -38,8 +38,6 @@ def ensure_public_tenant(sender: Any, **kwargs: Any) -> None:
                 tenant=tenant,
                 defaults={"is_primary": True},
             )
-
-            domain_model.objects.filter(tenant=tenant).exclude(domain=domain_name).update(is_primary=False)
     except (ProgrammingError, OperationalError):
         return
     except Exception:  # pylint: disable=broad-except

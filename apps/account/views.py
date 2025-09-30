@@ -1,64 +1,46 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_not_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
+from .forms import UserLoginForm
 
-from .forms import EmailAuthenticationForm, UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
 
+@login_not_required
+@require_http_methods(["GET", "POST"])
 def login_view(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("dashboard")
 
     if request.method == "POST":
-        form = EmailAuthenticationForm(request=request, data=request.POST)
+        form = UserLoginForm(request.POST)
         if form.is_valid():
-            user = form.get_user()
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
+
+            user = authenticate(request=request, email=email, password=password)
+
             if user is None:
-                messages.error(request, "Invalid email or password.")
+                messages.error(request, _("Email ou mot de passe incorrect."))
             else:
-                login(request, user)
-                return redirect("dashboard")
+                if not user.is_active:
+                    messages.error(request, _("Ce compte est inactif."))
+                else:
+                    login(request, user)
+                    return redirect("dashboard")
         else:
-            messages.error(request, "Invalid email or password.")
+            messages.error(request, _("Email ou mot de passe incorrect."))
     else:
-        form = EmailAuthenticationForm(request=request)
+        form = UserLoginForm()
 
     return render(request, "account/login.html", {"form": form})
 
 
-@login_required
-@require_POST
+@require_http_methods(["POST"])
 def logout_view(request: HttpRequest) -> HttpResponse:
     logout(request)
     return redirect("account:login")
 
-
-def signup_view(request: HttpRequest) -> HttpResponse:
-    if request.user.is_authenticated:
-        return redirect("dashboard")
-
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            password = form.cleaned_data.get("password1", "")
-            authenticated_user = authenticate(request=request, username=user.email, password=password)
-            if authenticated_user is None:
-                messages.warning(
-                    request,
-                    "Your account was created, but we could not log you in automatically. "
-                    "Use your email and password to log in.",
-                )
-                return redirect("account:login")
-
-            login(request, authenticated_user)
-            messages.success(request, "Welcome! Your account is ready.")
-            return redirect("dashboard")
-        messages.error(request, "Please correct the errors below.")
-    else:
-        form = UserCreationForm()
-
-    return render(request, "account/signup.html", {"form": form})

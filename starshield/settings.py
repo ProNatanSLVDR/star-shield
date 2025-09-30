@@ -28,16 +28,22 @@ class Base(Configuration):
 
     # Application definition
 
+    SHARED_APPS = [
+        # Django
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
 
-
-    THIRD_PARTY_APPS = [
+        # Third-party
         'django_tenants',
         'django_htmx',
         'django_components',
         'tailwind',
-    ]
 
-    SHARED_APPS = [
+        # Apps
         'core',
         "theme",
     ]
@@ -49,14 +55,6 @@ class Base(Configuration):
     ]
 
     INSTALLED_APPS = [
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-
-        *THIRD_PARTY_APPS,
         *SHARED_APPS,
         *TENANT_APPS,
     ]
