@@ -31,6 +31,8 @@ class Base(Configuration):
     THIRD_PARTY_APPS = [
         'allauth',
         'allauth.account',
+        'allauth.socialaccount',
+        'allauth.socialaccount.providers.google',
 
         'django_htmx',
         'django_components',
@@ -68,6 +70,7 @@ class Base(Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         "django_htmx.middleware.HtmxMiddleware",
+        "allauth.account.middleware.AccountMiddleware",
     ]
 
     ROOT_URLCONF = 'starshield.urls'
@@ -132,16 +135,36 @@ class Base(Configuration):
         'allauth.account.auth_backends.AuthenticationBackend',
         'auths.auth_backends.EmailBackend',
     ]
-    LOGIN_REDIRECT_URL = '/'
-    LOGOUT_REDIRECT_URL = '/'
+    
+    LOGIN_REDIRECT_URL = 'dashboard:accueil'
+    LOGOUT_REDIRECT_URL = 'auths:login'
     LOGIN_URL = 'auths:login'
     LOGIN_EXEMPT_PATHS = (
-        '/auth/login/',
-        '/auth/register/',
+        '/auths/login/',
+        '/auths/register/',
         '/admin/login/',
         '/admin/logout/',
         '/admin/password_reset/',
+        '/accounts/',
+        '/accounts/google/login/',
+        '/accounts/google/login/callback/',
     )
+
+    ACCOUNT_ADAPTER = 'auths.adapters.AccountAdapter'
+
+    SOCIALACCOUNT_PROVIDERS = {
+        'google': {
+            'APP': {
+                'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
+                'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
+                'key': ''
+            },
+            'SCOPE': ['profile', 'email'],
+            'AUTH_PARAMS': {
+                'access_type': 'offline'
+            },
+        }
+    }
 
 
     # Internationalization

@@ -32,11 +32,31 @@ class AuthenticationViewsTests(TestCase):
 
         response = self.client.post(
             reverse("auths:login"),
-            {"username": "user@example.com", "password": "testpass123"},
+            {"email": "user@example.com", "password": "testpass123"},
             follow=True,
         )
 
-        self.assertRedirects(response, reverse("dashboard"))
+        self.assertRedirects(response, reverse("dashboard:accueil"))
+
+    def test_login_redirects_to_next_when_provided(self):
+        User.objects.create_user(email="user@example.com", password="testpass123")
+
+        response = self.client.post(
+            reverse("auths:login") + "?next=/protected/",
+            {"email": "user@example.com", "password": "testpass123"},
+        )
+
+        self.assertRedirects(response, "/protected/", fetch_redirect_response=False)
+
+    def test_login_redirects_to_next_when_provided(self):
+        User.objects.create_user(email="user@example.com", password="testpass123")
+
+        response = self.client.post(
+            reverse("auths:login") + "?next=/protected/",
+            {"email": "user@example.com", "password": "testpass123"},
+        )
+
+        self.assertRedirects(response, "/protected/", fetch_redirect_response=False)
 
     def test_signup_creates_user_and_logs_in(self):
         response = self.client.post(
@@ -51,7 +71,7 @@ class AuthenticationViewsTests(TestCase):
             follow=True,
         )
 
-        self.assertRedirects(response, reverse("dashboard"))
+        self.assertRedirects(response, reverse("dashboard:accueil"))
         self.assertTrue(User.objects.filter(email="newuser@example.com").exists())
 
     def test_logout_requires_post(self):

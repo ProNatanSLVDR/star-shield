@@ -49,9 +49,16 @@ def register_view(request: HttpRequest) -> HttpResponse:
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            messages.success(request, _("Votre compte a été créé avec succès."))
-            return redirect("dashboard")
+            authenticated_user = authenticate(
+                request=request,
+                email=user.email,
+                password=form.cleaned_data["password1"],
+            )
+
+            if authenticated_user is not None and authenticated_user.is_active:
+                login(request, authenticated_user)
+                messages.success(request, _("Votre compte a été créé avec succès."))
+                return redirect("dashboard")
         else:
             messages.error(request, _("Merci de corriger les erreurs signalées."))
     else:

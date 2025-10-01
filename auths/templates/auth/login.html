@@ -1,4 +1,5 @@
 {% extends "auth/auth_base.html" %}
+{% load socialaccount %}
 
 {% block auth_content %}
     <div class="grid min-h-screen lg:grid-cols-2">
@@ -86,10 +87,10 @@
                                 <span class="bg-white relative z-10 px-4">Ou continuer avec</span>
                             </div>
 
-                            <button type="button" class="btn w-full gap-3 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary/60 hover:bg-primary/5 focus-visible:ring focus-visible:ring-primary/30">
+                            <a href="{% provider_login_url 'google' process='login' %}" class="btn w-full gap-3 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary/60 hover:bg-primary/5 focus-visible:ring focus-visible:ring-primary/30">
                                 <i class="fa-brands fa-google text-xl text-primary" aria-hidden="true"></i>
                                 Se connecter avec Google
-                            </button>
+                            </a>
 
                             <div class="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-600">
                                 Pas encore de compte ?

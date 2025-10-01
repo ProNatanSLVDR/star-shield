@@ -6,8 +6,15 @@ from django.core.exceptions import ValidationError
 
 
 class UserLoginForm(forms.Form):
-    email = forms.EmailField(max_length=75, widget=forms.EmailInput(attrs={"autocomplete": "email"}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}))
+    email = forms.EmailField(
+        max_length=75,
+        widget=forms.EmailInput(attrs={"autocomplete": "email"}),
+        label="Email",
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
+        label="Mot de passe",
+    )
 
 
 class UserRegistrationForm(forms.Form):
