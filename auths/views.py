@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_not_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
-from .forms import UserLoginForm
+from .forms import UserLoginForm, UserRegistrationForm
 
 from django.utils.translation import gettext_lazy as _
 
@@ -36,11 +36,32 @@ def login_view(request: HttpRequest) -> HttpResponse:
     else:
         form = UserLoginForm()
 
-    return render(request, "account/login.html", {"form": form})
+    return render(request, "auth/login.html", {"form": form})
+
+
+@login_not_required
+@require_http_methods(["GET", "POST"])
+def register_view(request: HttpRequest) -> HttpResponse:
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, _("Votre compte a été créé avec succès."))
+            return redirect("dashboard")
+        else:
+            messages.error(request, _("Merci de corriger les erreurs signalées."))
+    else:
+        form = UserRegistrationForm()
+
+    return render(request, "auth/register.html", {"form": form})
 
 
 @require_http_methods(["POST"])
 def logout_view(request: HttpRequest) -> HttpResponse:
     logout(request)
-    return redirect("account:login")
+    return redirect("auths:login")
 

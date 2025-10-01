@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+    <main class="relative flex min-h-screen items-center bg-gradient-to-br from-white via-slate-50 to-rose-50 px-4 py-16 sm:px-6 lg:px-12">
+        <div class="mx-auto w-full max-w-3xl">
+            <div class="relative overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-2xl shadow-rose-100">
+                <div class="absolute -left-28 -top-20 size-56 rounded-full bg-error/10 blur-3xl"></div>
+                <div class="absolute -right-24 -bottom-24 size-48 rounded-full bg-rose-200/40 blur-3xl"></div>
+
+                <div class="relative flex flex-col items-center gap-6 px-8 py-12 text-center sm:px-12">
+                    <span class="badge badge-error badge-outline badge-lg">500</span>
+                    <div class="inline-flex size-16 items-center justify-center rounded-full bg-error/10 text-error">
+                        <i class="fa-solid fa-screwdriver-wrench text-2xl" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="text-4xl font-semibold text-slate-900 sm:text-5xl">{% blocktrans %}Erreur interne du serveur{% endblocktrans %}</h1>
+                    <p class="max-w-xl text-base text-slate-600 sm:text-lg">{% blocktrans %}Nous travaillons à résoudre ce problème au plus vite.{% endblocktrans %}</p>
+                    <div class="flex flex-wrap items-center justify-center gap-4">
+                        <a href="{% url 'dashboard:accueil' %}" class="btn btn-primary btn-wide gap-2 rounded-full shadow-lg shadow-rose-100">
+                            <i class="fa-solid fa-house" aria-hidden="true"></i>
+                            {% blocktrans %}Retourner à l’accueil{% endblocktrans %}
+                        </a>
+                        <a href="mailto:support@starshield.app" class="btn btn-outline btn-error gap-2 rounded-full">
+                            <i class="fa-solid fa-headset" aria-hidden="true"></i>
+                            {% blocktrans %}Contacter le support{% endblocktrans %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+

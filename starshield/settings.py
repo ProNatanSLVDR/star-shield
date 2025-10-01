@@ -28,8 +28,25 @@ class Base(Configuration):
 
     # Application definition
 
-    SHARED_APPS = [
-        # Django
+    THIRD_PARTY_APPS = [
+        'allauth',
+        'allauth.account',
+
+        'django_htmx',
+        'django_components',
+        'tailwind',
+    ]
+
+    CUSTOM_APPS = [
+        'theme',
+        'core',
+        'auths',
+        'apps.dashboard',
+        'apps.reviews',
+        'apps.roulette',
+    ]
+
+    INSTALLED_APPS = [
         'django.contrib.admin',
         'django.contrib.auth',
         'django.contrib.contenttypes',
@@ -37,30 +54,11 @@ class Base(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
 
-        # Third-party
-        'django_tenants',
-        'django_htmx',
-        'django_components',
-        'tailwind',
-
-        # Apps
-        'core',
-        "theme",
-    ]
-
-    TENANT_APPS = [
-        'apps.account',
-        'apps.reviews',
-        'apps.roulette',
-    ]
-
-    INSTALLED_APPS = [
-        *SHARED_APPS,
-        *TENANT_APPS,
+        *THIRD_PARTY_APPS,
+        *CUSTOM_APPS,
     ]
 
     MIDDLEWARE = [
-        'django_tenants.middleware.main.TenantMainMiddleware',
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
@@ -108,19 +106,14 @@ class Base(Configuration):
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django_tenants.postgresql_backend',
+            'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('POSTGRES_DB'),
             'USER': os.getenv('POSTGRES_USER'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-            'HOST': "db",
+            'HOST': 'db',
             'PORT': os.getenv('POSTGRES_PORT'),
         }
     }
-    DATABASE_ROUTERS = (
-        'django_tenants.routers.TenantSyncRouter',
-    )
-    TENANT_MODEL = 'core.Entreprise'
-    TENANT_DOMAIN_MODEL = 'core.DomaineEntreprise'
     DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
@@ -133,16 +126,18 @@ class Base(Configuration):
         {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
     ]
 
-    AUTH_USER_MODEL = 'account.User'
+    AUTH_USER_MODEL = 'auths.User'
     AUTHENTICATION_BACKENDS = [
         'django.contrib.auth.backends.ModelBackend',
+        'allauth.account.auth_backends.AuthenticationBackend',
+        'auths.auth_backends.EmailBackend',
     ]
     LOGIN_REDIRECT_URL = '/'
     LOGOUT_REDIRECT_URL = '/'
-    LOGIN_URL = 'account:login'
+    LOGIN_URL = 'auths:login'
     LOGIN_EXEMPT_PATHS = (
         '/auth/login/',
-        '/auth/signup/',
+        '/auth/register/',
         '/admin/login/',
         '/admin/logout/',
         '/admin/password_reset/',
