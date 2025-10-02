@@ -12,9 +12,10 @@ class UserModelTests(TestCase):
         self.assertEqual(user.email, "user@example.com")
         self.assertTrue(user.check_password("testpass123"))
 
-    def test_create_user_without_password_raises_error(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_user(email="user@example.com", password=None)
+    def test_create_user_without_password_sets_unusable_password(self):
+        user = User.objects.create_user(email="user@example.com", password=None)
+
+        self.assertFalse(user.has_usable_password())
 
     def test_create_user_without_email_raises_error(self):
         with self.assertRaises(ValueError):
@@ -48,12 +49,16 @@ class AuthenticationViewsTests(TestCase):
 
         self.assertRedirects(response, "/protected/", fetch_redirect_response=False)
 
-    def test_login_redirects_to_next_when_provided(self):
+    def test_login_respects_next_in_post_data(self):
         User.objects.create_user(email="user@example.com", password="testpass123")
 
         response = self.client.post(
-            reverse("auths:login") + "?next=/protected/",
-            {"email": "user@example.com", "password": "testpass123"},
+            reverse("auths:login"),
+            {
+                "email": "user@example.com",
+                "password": "testpass123",
+                "next": "/protected/",
+            },
         )
 
         self.assertRedirects(response, "/protected/", fetch_redirect_response=False)
@@ -75,7 +80,7 @@ class AuthenticationViewsTests(TestCase):
         self.assertTrue(User.objects.filter(email="newuser@example.com").exists())
 
     def test_logout_requires_post(self):
-        user = User.objects.create_user(email="user@example.com", password="testpass123")
+        User.objects.create_user(email="user@example.com", password="testpass123")
         self.client.login(username="user@example.com", password="testpass123")
 
         response = self.client.get(reverse("auths:logout"))

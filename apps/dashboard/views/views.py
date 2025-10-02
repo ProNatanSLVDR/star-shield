@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 
 
-def accueil_view(request):
+def accueil_view(request: HttpRequest) -> HttpResponse:
 
     context = {}
     return render(request, "accueil.html", context)

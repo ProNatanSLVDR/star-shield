@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="min-h-screen bg-transparent">
+        <div class="flex h-screen w-full bg-gradient-to-br from-white via-slate-50 to-indigo-50/60 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+            <aside
+                id="dashboard-sidebar"
+                class="hidden h-full w-72 flex-col border-r border-indigo-100 bg-white/90 px-6 py-6 shadow-sm shadow-indigo-100 lg:flex"
+                aria-label="Main navigation"
+            >
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-lg font-semibold text-slate-900">
+                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold uppercase">
+                            SS
+                        </span>
+                        <span>StarShield</span>
+                    </div>
+                </div>
+
+                <nav class="mt-8 flex-1 overflow-y-auto">
+                    {% block dashboard_sidebar %}
+                        {% include "sidebar_main.html" %}
+                    {% endblock dashboard_sidebar %}
+                </nav>
+
+                <div class="mt-6 border-t border-indigo-100 pt-6">
+                    {% with user=request.user %}
+                        <div class="flex items-center gap-3">
+                            {% with label=user.get_full_name|default:user.get_username %}
+                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-semibold uppercase">
+                                    {{ label|slice:":2"|upper }}
+                                </span>
+                            {% endwith %}
+                            <div class="text-sm min-w-0">
+                                {% with display_name=user.get_full_name|default:user.get_username %}
+                                    <p class="font-medium text-slate-900 truncate" title="{{ display_name }}">{{ display_name|truncatechars:28 }}</p>
+                                {% endwith %}
+                                {% if user.email %}
+                                    <p class="text-xs text-slate-500 truncate" title="{{ user.email }}">{{ user.email|truncatechars:32 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endwith %}
+                </div>
+            </aside>
+
+            <div class="flex flex-1 flex-col">
+                <main class="flex-1 overflow-y-auto bg-white/80">
+                    <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
+                        {% block dashboard_content %}
+                        {% endblock %}
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+

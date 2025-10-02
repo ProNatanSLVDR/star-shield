@@ -12,11 +12,13 @@ class UserManager(BaseUserManager):
             raise ValueError("An email address is required.")
 
         normalized_email = self.normalize_email(email).lower()
-        if password is None:
-            raise ValueError("A password is required.")
-
         user = self.model(email=normalized_email, **extra_fields)
-        user.set_password(password)
+
+        if password and password.strip():
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+
         user.save(using=self._db)
         return user
 
@@ -36,6 +38,9 @@ class UserManager(BaseUserManager):
 
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
+
+        if not password or not password.strip():
+            raise ValueError("Superuser must have a password.")
 
         return self._create_user(email, password, **extra_fields)
 

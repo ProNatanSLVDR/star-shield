@@ -19,6 +19,10 @@
                         <form action="{% url 'auths:login' %}" method="POST" class="flex flex-col gap-6 p-6 md:p-10">
                             {% csrf_token %}
 
+                            {% if next %}
+                                <input type="hidden" name="next" value="{{ next }}" />
+                            {% endif %}
+
                             {% if messages %}
                                 <div class="space-y-2">
                                     {% for message in messages %}
@@ -87,7 +91,7 @@
                                 <span class="bg-white relative z-10 px-4">Ou continuer avec</span>
                             </div>
 
-                            <a href="{% provider_login_url 'google' process='login' %}" class="btn w-full gap-3 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary/60 hover:bg-primary/5 focus-visible:ring focus-visible:ring-primary/30">
+                            <a href="{% provider_login_url 'google' process='login' next=next %}" class="btn w-full gap-3 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary/60 hover:bg-primary/5 focus-visible:ring focus-visible:ring-primary/30">
                                 <i class="fa-brands fa-google text-xl text-primary" aria-hidden="true"></i>
                                 Se connecter avec Google
                             </a>
