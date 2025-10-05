@@ -40,8 +40,6 @@ class Base(Configuration):
     ]
 
     CUSTOM_APPS = [
-        'theme',
-        'core',
         'auths',
         'apps.dashboard',
         'apps.reviews',
@@ -106,19 +104,7 @@ class Base(Configuration):
 
     # Database
     # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB'),
-            'USER': os.getenv('POSTGRES_USER'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-            'HOST': 'db',
-            'PORT': os.getenv('POSTGRES_PORT'),
-        }
-    }
     DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
     # Auths
 
@@ -139,16 +125,7 @@ class Base(Configuration):
     LOGIN_REDIRECT_URL = 'dashboard:accueil'
     LOGOUT_REDIRECT_URL = 'auths:login'
     LOGIN_URL = 'auths:login'
-    LOGIN_EXEMPT_PATHS = (
-        '/auths/login/',
-        '/auths/register/',
-        '/admin/login/',
-        '/admin/logout/',
-        '/admin/password_reset/',
-        '/accounts/',
-        '/accounts/google/login/',
-        '/accounts/google/login/callback/',
-    )
+    LOGIN_EXEMPT_PATHS = ()
 
     ACCOUNT_ADAPTER = 'auths.adapters.AccountAdapter'
 
@@ -196,6 +173,25 @@ class Base(Configuration):
 class Dev(Base):
     DEBUG = True
 
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
 class Prod(Base):
     DEBUG = False
+
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': 'db',
+            'PORT': os.getenv('POSTGRES_PORT'),
+        }
+    }
 

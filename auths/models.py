@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -45,10 +43,24 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class Entreprise(models.Model):
+    nom = models.CharField(max_length=100)
+
+    created_on = models.DateField(auto_now_add=True)
+    modified_on = models.DateField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.nom
+
+class User(AbstractBaseUser):
+    entreprise = models.ForeignKey(Entreprise, on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
+
+    # Infos Personnelles
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
+
+    # Misc
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -59,22 +71,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS: list[str] = []
 
-    class Meta:
-        verbose_name = "User"
-        verbose_name_plural = "Users"
-
     def __str__(self) -> str:
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}".strip()
         return self.email
 
-    def clean(self) -> None:
-        super().clean()
-        if not self.email:
-            raise ValidationError({"email": "Email is required."})
-
-    def get_full_name(self) -> str:
-        return f"{self.first_name} {self.last_name}".strip()
-
-    def get_short_name(self) -> str:
-        return self.first_name or self.email

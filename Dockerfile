@@ -4,8 +4,8 @@ FROM nikolaik/python-nodejs:python3.12-nodejs24
 WORKDIR /app
 
 # set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # install dependencies
 RUN pip install --upgrade pip
