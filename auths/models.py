@@ -1,5 +1,6 @@
 from __future__ import annotations
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -52,7 +53,7 @@ class Entreprise(models.Model):
     def __str__(self) -> str:
         return self.nom
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     entreprise = models.ForeignKey(Entreprise, on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
 

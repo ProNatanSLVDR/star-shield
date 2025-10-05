@@ -16,7 +16,7 @@ urlpatterns = [
     path('error/500/', errorviews.error_500_preview, name='error_500_preview'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-handler404 = "errorviews.error_404"
-handler500 = "errorviews.error_500"
+handler404 = "starshield.errorviews.error_404"
+handler500 = "starshield.errorviews.error_500"
 
 

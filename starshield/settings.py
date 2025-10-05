@@ -78,7 +78,7 @@ class Base(Configuration):
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
+            'DIRS': [BASE_DIR / "templates"],
             'OPTIONS': {
                 'context_processors': [
                     'django.template.context_processors.request',
@@ -154,8 +154,6 @@ class Base(Configuration):
 
 
     # URLS
-
-    WEBAPP_DOMAIN = os.getenv('WEBAPP_DOMAIN')
     STATIC_URL = 'static/'
     STATICFILES_FINDERS = [
         'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -163,12 +161,12 @@ class Base(Configuration):
         'django_components.finders.ComponentsFileSystemFinder',
     ]
     STATICFILES_DIRS = [
-        BASE_DIR / "theme" / "static",
+        BASE_DIR / "static",
     ]
 
     # Misc
 
-    TAILWIND_APP_NAME = 'theme'
+
 
 class Dev(Base):
     DEBUG = True

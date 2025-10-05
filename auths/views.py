@@ -4,8 +4,9 @@ from django.contrib.auth.decorators import login_not_required
 from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
-
 from django.utils.translation import gettext_lazy as _
+
+from .forms import UserLoginForm
 
 
 @login_not_required
@@ -37,7 +38,7 @@ def login_view(request):
         form = UserLoginForm()
 
     context = {"form": form}
-    return render(request, "auth/login.html", context)
+    return render(request, "auths/login.html", context)
 
 
 

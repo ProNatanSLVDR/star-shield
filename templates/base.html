@@ -1,12 +1,14 @@
-{% load static tailwind_tags %}
+{% load static %}
+
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-gradient-to-br from-white via-primary/5 to-secondary/10">
+<html lang="fr">
     <head>
         <title>StarShield</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        {% tailwind_css %}
+
+        <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}">
 
         <script defer src="{% static 'icons/brands.min.js' %}"></script>
         <script defer src="{% static 'icons/solid.min.js' %}"></script>
@@ -22,4 +24,5 @@
     </body>
 
     <script src="{% static 'htmx.min.js' %}"></script>
+    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
 </html>
