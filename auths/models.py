@@ -41,6 +41,13 @@ class UserManager(BaseUserManager):
         if not password or not password.strip():
             raise ValueError("Superuser must have a password.")
 
+        try:
+            admin_entreprise, _ = Entreprise.objects.get_or_create(nom="admin")
+        except Exception as exc:
+            raise ValueError("Failed to ensure the admin entreprise exists.") from exc
+
+        extra_fields["entreprise"] = admin_entreprise
+
         return self._create_user(email, password, **extra_fields)
 
 

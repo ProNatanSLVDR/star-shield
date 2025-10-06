@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="min-vh-100 d-flex flex-column bg-body-tertiary">
+        <div class="container py-5 my-auto">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-5">
+                    <div class="text-center mb-4">
+                        <a href="{% url 'auths:login' %}" class="d-inline-flex align-items-center justify-content-center gap-2 text-decoration-none text-dark">
+                            <span class="d-inline-flex rounded-circle align-items-center justify-content-center bg-white shadow-sm" style="width: 3rem; height: 3rem;">
+                                <i class="fa-solid fa-map-signs fs-4 text-dark" aria-hidden="true"></i>
+                            </span>
+                            <span class="fw-semibold fs-4">StarShield</span>
+                        </a>
+                    </div>
+
+                    {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                                {% if "error" in message.tags %}
+                                    <div class="alert alert-danger border-0 rounded-4" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% elif "warning" in message.tags %}
+                                    <div class="alert alert-warning border-0 rounded-4" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% elif "success" in message.tags %}
+                                    <div class="alert alert-success border-0 rounded-4" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info border-0 rounded-4" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        {% block auths_card_header %}
+                            <div class="position-relative px-4 px-lg-5 py-3 bg-primary bg-gradient text-white">
+                                <div class="position-absolute top-0 end-0 translate-middle opacity-25 d-none d-sm-block">
+                                    <span class="d-inline-flex border border-light border-2 rounded-circle p-3"></span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between gap-3">
+                                    <div>
+                                        {% block auths_card_title %}
+                                            <h2 class="h5 mb-0 text-white">Connexion</h2>
+                                        {% endblock %}
+                                        {% block auths_card_subtitle %}
+                                            <p class="mb-0 text-white-50 small mt-1">Accédez à vos outils en toute tranquillité.</p>
+                                        {% endblock %}
+                                    </div>
+                                    <span class="d-none d-sm-inline-flex text-white-50 fs-4">
+                                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        {% endblock %}
+                        <div class="card-body px-4 pt-3 pb-4">
+                            {% block auths_content %}{% endblock %}
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        {% block auths_footer %}{% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
