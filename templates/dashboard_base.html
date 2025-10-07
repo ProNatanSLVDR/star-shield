@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block body %}
     <div class="bg-body-tertiary w-100 h-100 d-flex flex-row">
 
         <!-- Sidebar -->
@@ -62,7 +62,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'auths:logout' %}">
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'account_logout' %}">
                                         <span><i class="fa-solid fa-right-from-bracket"></i></span>
                                         <span>{% blocktrans %}Se déconnecter{% endblocktrans %}</span>
                                     </a>
@@ -82,5 +82,5 @@
             </div>
         </section>
     </div>
-{% endblock content %}
+{% endblock body %}
 

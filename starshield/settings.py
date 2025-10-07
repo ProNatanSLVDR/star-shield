@@ -134,8 +134,6 @@ class Base(Configuration):
     LOGIN_URL = 'account_login'
     LOGIN_EXEMPT_PATHS = ()
 
-    ACCOUNT_ADAPTER = 'auths.adapters.AccountAdapter'
-
     SOCIALACCOUNT_PROVIDERS = {
         'google': {
             'APP': {
@@ -144,15 +142,16 @@ class Base(Configuration):
                 'key': ''
             },
             'SCOPE': ['profile', 'email'],
-            'AUTH_PARAMS': {
-                'access_type': 'offline'
-            },
+            'EMAIL_AUTHENTICATION': True,
         }
     }
 
     ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+    ACCOUNT_SESSION_REMEMBER = True
     ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
     ACCOUNT_LOGIN_METHODS = {'email'}
+    SOCIALACCOUNT_LOGIN_ON_GET = True
+    ACCOUNT_LOGOUT_ON_GET = True
 
 
     # Internationalization

@@ -1,5 +1,5 @@
 {% if href %}
-    <a href="{{href}}" class="btn {{classes}}">
+    <a href=" {% slot href %} {% endslot %} " class="btn {{classes}}">
         {% if icon %}
             <i class="{{icon}}"></i>
         {% endif %}
