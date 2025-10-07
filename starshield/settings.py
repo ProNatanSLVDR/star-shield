@@ -130,8 +130,8 @@ class Base(Configuration):
     ]
     
     LOGIN_REDIRECT_URL = 'dashboard:accueil'
-    LOGOUT_REDIRECT_URL = 'auths:login'
-    LOGIN_URL = 'auths:login'
+    LOGOUT_REDIRECT_URL = 'account_login'
+    LOGIN_URL = 'account_login'
     LOGIN_EXEMPT_PATHS = ()
 
     ACCOUNT_ADAPTER = 'auths.adapters.AccountAdapter'
