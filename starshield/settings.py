@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from configurations import Configuration
 import os
+from django_components import ComponentsSettings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,6 +86,9 @@ class Base(Configuration):
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                 ],
+                'builtins': [
+                    'django_components.templatetags.component_tags',
+                ],
                 'loaders': [
                     (
                         'django.template.loaders.cached.Loader',
@@ -98,6 +102,10 @@ class Base(Configuration):
             },
         },
     ]
+
+    COMPONENTS = ComponentsSettings(
+        dirs=[BASE_DIR / "components"],
+    )
 
     WSGI_APPLICATION = 'starshield.wsgi.application'
 
@@ -119,7 +127,6 @@ class Base(Configuration):
     AUTHENTICATION_BACKENDS = [
         'django.contrib.auth.backends.ModelBackend',
         'allauth.account.auth_backends.AuthenticationBackend',
-        'auths.auth_backends.EmailBackend',
     ]
     
     LOGIN_REDIRECT_URL = 'dashboard:accueil'
@@ -142,6 +149,10 @@ class Base(Configuration):
             },
         }
     }
+
+    ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+    ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+    ACCOUNT_LOGIN_METHODS = {'email'}
 
 
     # Internationalization

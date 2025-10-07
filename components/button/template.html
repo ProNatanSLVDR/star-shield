@@ -1,0 +1,19 @@
+{% if href %}
+    <a href="{{href}}" class="btn {{classes}}">
+        {% if icon %}
+            <i class="{{icon}}"></i>
+        {% endif %}
+        {% if text %}
+            {{text}}
+        {% endif %}
+    </a>
+{% else %}
+    <button class="btn {{classes}}">
+        {% if icon %}
+            <i class="{{icon}}"></i>
+        {% endif %}
+        {% if text %}
+            {{text}}
+        {% endif %}
+    </button>
+{% endif %}

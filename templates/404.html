@@ -3,28 +3,32 @@
 {% load i18n %}
 
 {% block content %}
-    <main class="relative flex min-h-screen items-center bg-gradient-to-br from-white via-slate-50 to-indigo-50 px-4 py-16 sm:px-6 lg:px-12">
-        <div class="mx-auto w-full max-w-3xl">
-            <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-indigo-100">
-                <div class="absolute -left-24 -top-24 size-48 rounded-full bg-primary/10 blur-3xl"></div>
-                <div class="absolute -right-20 -bottom-24 size-40 rounded-full bg-indigo-200/30 blur-3xl"></div>
+    <main class="position-relative d-flex align-items-center justify-content-center min-vh-100 py-5" style="background: linear-gradient(145deg, #ffffff 0%, #f2f6ff 45%, #dbe4ff 100%);">
+        <div class="position-absolute top-0 start-0 translate-middle bg-primary opacity-10 rounded-circle" style="width: 18rem; height: 18rem;" aria-hidden="true"></div>
+        <div class="position-absolute bottom-0 end-0 translate-middle bg-primary-subtle opacity-50 rounded-circle" style="width: 14rem; height: 14rem;" aria-hidden="true"></div>
 
-                <div class="relative flex flex-col items-center gap-6 px-8 py-12 text-center sm:px-12">
-                    <span class="badge badge-primary badge-outline badge-lg">404</span>
-                    <div class="inline-flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <i class="fa-solid fa-map-signs text-2xl" aria-hidden="true"></i>
-                    </div>
-                    <h1 class="text-4xl font-semibold text-slate-900 sm:text-5xl">{% blocktrans %}Page non trouvée{% endblocktrans %}</h1>
-                    <p class="max-w-xl text-base text-slate-600 sm:text-lg">{% blocktrans %}Nous sommes désolés, nous n’avons pas trouvé la page que vous recherchez.{% endblocktrans %}</p>
-                    <div class="flex flex-wrap items-center justify-center gap-4">
-                        <a href="{% url 'dashboard:accueil' %}" class="btn btn-primary btn-wide gap-2 rounded-full shadow-lg shadow-indigo-100">
-                            <i class="fa-solid fa-house" aria-hidden="true"></i>
-                            {% blocktrans %}Retourner à l’accueil{% endblocktrans %}
-                        </a>
-                        <a href="mailto:support@starshield.app" class="btn btn-outline btn-primary gap-2 rounded-full">
-                            <i class="fa-solid fa-headset" aria-hidden="true"></i>
-                            {% blocktrans %}Contacter le support{% endblocktrans %}
-                        </a>
+        <div class="container position-relative">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-9 col-xl-7">
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div class="card-body d-flex flex-column align-items-center text-center gap-4 px-4 px-sm-5 py-5">
+                            <span class="badge rounded-pill text-bg-primary fs-5 px-3 py-2">404</span>
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle" style="width: 4rem; height: 4rem;">
+                                <i class="fa-solid fa-map-signs fs-2 text-primary" aria-hidden="true"></i>
+                            </div>
+                            <h1 class="fw-semibold text-dark display-6 mb-0">{% blocktrans %}Page non trouvée{% endblocktrans %}</h1>
+                            <p class="text-muted fs-5 mb-0">{% blocktrans %}Nous sommes désolés, nous n’avons pas trouvé la page que vous recherchez.{% endblocktrans %}</p>
+                            <div class="d-flex flex-wrap justify-content-center gap-3">
+                                <a href="{% url 'dashboard:accueil' %}" class="btn btn-primary btn-lg px-4 shadow-sm">
+                                    <i class="fa-solid fa-house me-2" aria-hidden="true"></i>
+                                    {% blocktrans %}Retourner à l’accueil{% endblocktrans %}
+                                </a>
+                                <a href="mailto:support@starshield.pro" class="btn btn-outline-primary btn-lg px-4">
+                                    <i class="fa-solid fa-headset me-2" aria-hidden="true"></i>
+                                    {% blocktrans %}Contacter le support{% endblocktrans %}
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

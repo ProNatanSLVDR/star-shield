@@ -69,10 +69,20 @@
             <span class="small text-secondary">Connexion sécurisée</span>
         </div>
 
-        <div class="d-grid">
+        <div class="d-grid mb-3">
             <button type="submit" class="btn btn-dark btn-lg rounded-4 fs-6 fw-bold">Se connecter</button>
         </div>
+
+        <div class="text-center small text-muted mb-3">ou</div>
+
+
     </form>
+    <div class="d-grid">
+        {% component "button"
+        classes="btn-outline-dark btn-lg rounded-4 fw-semibold d-inline-flex align-items-center justify-content-center gap-2"
+        icon="fa-brands fa-google"
+        text="Continuer avec Google" href=google_login_url / %}
+    </div>
 {% endblock %}
 
 {% block auths_footer %}

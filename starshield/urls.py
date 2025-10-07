@@ -7,7 +7,6 @@ from . import errorviews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auths/', include(('auths.urls', 'auths'), namespace='auths')),
     path('accounts/', include('allauth.urls')),
     path('', include(('apps.dashboard.urls', 'dashboard'), namespace='dashboard')),
     path('', include('django_components.urls')),

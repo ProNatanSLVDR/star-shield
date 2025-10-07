@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
-    <div class="bg-body-tertiary w-100 h-100">
+    <div class="bg-body-tertiary w-100 h-100 d-flex flex-row">
 
         <!-- Sidebar -->
         <section class="vh-100 d-flex p-2" style="width: 275px;">
@@ -30,9 +31,54 @@
                         {% endblock %}
                     </div>
                     <div class="p-3 border-top border-light-subtle bg-body-tertiary">
-
+                        <div class="dropup w-100">
+                            <button class="nav-link w-100 dropdown-toggle text-start d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                                <span class="text-primary-emphasis">
+                                    <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                                </span>
+                                <span class="flex-grow-1 text-truncate">
+                                    {% if request.user.first_name and request.user.last_name %}
+                                        {{ request.user.first_name }} {{ request.user.last_name }}
+                                    {% else %}
+                                        {{ request.user.email|truncatechars:20 }}
+                                    {% endif %}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu w-100">
+                                {% if request.user.is_superuser %}
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'admin:index' %}">
+                                            <span><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                                            <span>Administration</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="">
+                                        <span><i class="fa-solid fa-user"></i></span>
+                                        <span>{% blocktrans %}Mon profil{% endblocktrans %}</span>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'auths:logout' %}">
+                                        <span><i class="fa-solid fa-right-from-bracket"></i></span>
+                                        <span>{% blocktrans %}Se déconnecter{% endblocktrans %}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <section class="flex-grow-1 p-2 ps-0 h-100 overflow-y-auto overflow-x-hidden">
+            <div class="bg-white rounded rounded-4 border overflow-x-hidden">
+                {% block dashboard_content %}
+                {% endblock dashboard_content %}
             </div>
         </section>
     </div>
