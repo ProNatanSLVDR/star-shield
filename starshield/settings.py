@@ -137,8 +137,8 @@ class Base(Configuration):
     SOCIALACCOUNT_PROVIDERS = {
         'google': {
             'APP': {
-                'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
-                'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
+                'client_id': os.getenv('GOOGLE_LOGIN_CLIENT_ID', ''),
+                'secret': os.getenv('GOOGLE_LOGIN_CLIENT_SECRET', ''),
                 'key': ''
             },
             'SCOPE': ['profile', 'email'],
@@ -158,10 +158,14 @@ class Base(Configuration):
     ACCOUNT_LOGOUT_ON_GET = True
     ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
-
+    # Account email verification
     ACCOUNT_EMAIL_VERIFICATION = "mandatory"
     ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+    # Account Only one email
     ACCOUNT_CHANGE_EMAIL = True
+
+    # Account email verification by code instead of link
     ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
 
 
@@ -185,9 +189,16 @@ class Base(Configuration):
         BASE_DIR / "static",
     ]
 
-    # Misc
+    # Email
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # TODO: Change to SMTP backend
 
+
+
+
+    # Misc
+
+    GOOGLE_GMB_CLIENT_ID = os.getenv('GOOGLE_GMB_CLIENT_ID')
+    GOOGLE_GMB_CLIENT_SECRET = os.getenv('GOOGLE_GMB_CLIENT_SECRET')
 
 
 class Dev(Base):

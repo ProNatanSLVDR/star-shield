@@ -7,7 +7,6 @@ from utils.qrcodes import generate_qrcode
 def accueil_view(request: HttpRequest) -> HttpResponse:
     qrcode = generate_qrcode("https://www.google.com")
 
-    print(qrcode)
     context = {
         "qrcode": qrcode,
     }
