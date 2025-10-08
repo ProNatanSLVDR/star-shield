@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from auths.models import Entreprise
+from allauth.account.models import EmailAddress
 
 
 class EntrepriseModelTests(TestCase):
@@ -87,5 +88,17 @@ class UserModelTests(TestCase):
                 entreprise=self.entreprise,
                 is_superuser=False,
             )
+
+    def test_create_superuser_autoverifies_email(self):
+        superuser = self.UserModel.objects.create_superuser(
+            email="admin@example.com",
+            password="password123",
+        )
+
+        email_address = EmailAddress.objects.filter(user=superuser, email="admin@example.com").first()
+
+        self.assertIsNotNone(email_address)
+        self.assertTrue(email_address.verified)
+        self.assertTrue(email_address.primary)
 
 

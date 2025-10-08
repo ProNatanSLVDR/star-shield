@@ -1,7 +1,12 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-
 from .models import User
+from django.contrib import admin
+from allauth.account.decorators import secure_admin_login
+
+admin.autodiscover()
+admin.site.login = secure_admin_login(admin.site.login)
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):

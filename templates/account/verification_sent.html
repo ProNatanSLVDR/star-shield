@@ -1,0 +1,31 @@
+{% extends "allauth/layouts/base.html" %}
+{% load socialaccount %}
+{% load i18n %}
+
+{% block auths_card_title %}
+    {% trans "Vérification" %}
+{% endblock auths_card_title %}
+
+{% block auths_card_subtitle %}
+    {% trans "Sécurisez votre compte" %}
+{% endblock auths_card_subtitle %}
+
+{% block content %}
+    <div class="text-center">
+        <div class="mb-4">
+            <i class="fa-solid fa-envelope-circle-check fa-3x text-primary mb-3"></i>
+            <h3 class="fw-bold mb-2">{% trans "Vérification envoyée !" %}</h3>
+        </div>
+        <p class="mb-3">
+            {% trans "Nous avons envoyé un email de vérification à votre adresse e-mail" %}
+        </p>
+
+        <ul class="list-group">
+            <li class="list-group-item"><i class="fa-solid fa-link text-primary me-1"></i>
+                {% trans "Cliquez sur le lien dans l'email pour finaliser votre inscription." %}</li>
+            <li class="list-group-item"><i class="fa-solid fa-inbox text-primary me-1"></i>
+                {% trans "Vérifiez votre dossier spam si vous ne trouvez pas l'email dans votre boîte de réception." %}</li>
+        </ul>
+
+    </div>
+{% endblock content %}

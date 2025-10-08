@@ -9,12 +9,11 @@
 
 
         <div class="mb-4">
-            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold small">Adresse e-mail</label>
+            <label for="email" class="form-label fw-semibold small">Adresse e-mail</label>
             <input
                 type="email"
-                name="{{ form.email.name }}"
-                id="{{ form.email.id_for_label }}"
-                value="{{ form.email.value|default_if_none:'' }}"
+                name="login"
+                id="email"
                 class="form-control {% if form.email.errors %} is-invalid{% endif %}"
                 placeholder="nom@entreprise.com"
                 autocomplete="email"
@@ -26,14 +25,13 @@
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold mb-0 small">Mot de passe</label>
-                <a href="#" class="small text-decoration-none">Mot de passe oublié ?</a>
+                <a href="{% url 'account_reset_password' %}" class="small text-decoration-none">Mot de passe oublié ?</a>
             </div>
             <input
                 type="password"
-                name="{{ form.password.name }}"
-                id="{{ form.password.id_for_label }}"
+                name="password"
+                id="password"
                 class="form-control{% if form.password.errors %} is-invalid{% endif %}"
-                placeholder="••••••••"
                 autocomplete="current-password"
                 required
             >

@@ -143,6 +143,8 @@ class Base(Configuration):
             },
             'SCOPE': ['profile', 'email'],
             'EMAIL_AUTHENTICATION': True,
+            "EMAIL_VERIFICATION": "none",
+
         }
     }
 
@@ -150,8 +152,17 @@ class Base(Configuration):
     ACCOUNT_SESSION_REMEMBER = True
     ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
     ACCOUNT_LOGIN_METHODS = {'email'}
+
+    # Account on get settings
     SOCIALACCOUNT_LOGIN_ON_GET = True
     ACCOUNT_LOGOUT_ON_GET = True
+    ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+
+
+    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+    ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+    ACCOUNT_CHANGE_EMAIL = True
+    ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
 
 
     # Internationalization
@@ -175,6 +186,7 @@ class Base(Configuration):
     ]
 
     # Misc
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # TODO: Change to SMTP backend
 
 
 

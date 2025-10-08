@@ -23,12 +23,18 @@
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between gap-3">
                                     <div>
-                                        {% block auths_card_title %}
-                                            <h2 class="h5 mb-0 text-white">{% trans "Connexion" %}</h2>
-                                        {% endblock auths_card_title %}
-                                        {% block auths_card_subtitle %}
-                                            <p class="mb-0 text-white-50 small mt-1">{% trans "Accédez à votre plateforme en toute tranquillité." %}</p>
-                                        {% endblock auths_card_subtitle %}
+
+                                        <h2 class="h5 mb-0 text-white">
+                                            {% block auths_card_title %}
+                                                {% trans "Connexion" %}
+                                            {% endblock auths_card_title %}
+                                        </h2>
+
+                                        <p class="mb-0 text-white-50 small mt-1">
+                                            {% block auths_card_subtitle %}
+                                                {% trans "Accédez à votre plateforme en toute tranquillité." %}
+                                            {% endblock auths_card_subtitle %}
+                                        </p>
                                     </div>
                                     <span class="d-none d-sm-inline-flex text-white-50 fs-4">
                                         <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>

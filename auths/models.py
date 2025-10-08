@@ -25,7 +25,21 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_active", True)
-        return self._create_user(email, password, **extra_fields)
+        superuser = self._create_user(email, password, **extra_fields)
+
+        try:
+            # Import locally to avoid import cycles during migrations.
+            from allauth.account.models import EmailAddress  # pylint: disable=import-error
+
+            EmailAddress.objects.update_or_create(
+                user=superuser,
+                email=superuser.email,
+                defaults={"verified": True, "primary": True},
+            )
+        except Exception as exc:  # pragma: no cover - defensive guard
+            raise ValueError("Failed to auto-verify the superuser email address.") from exc
+
+        return superuser
 
     def create_superuser(self, email: str, password: str | None = None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
