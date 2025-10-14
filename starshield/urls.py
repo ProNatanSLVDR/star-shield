@@ -6,15 +6,25 @@ from django.conf.urls.static import static
 from . import errorviews
 
 urlpatterns = [
+    # Django
     path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    path('', include(('apps.dashboard.urls', 'dashboard'), namespace='dashboard')),
     path('', include('django_components.urls')),
 
+    # Allauth
+    path('accounts/', include('allauth.urls')),
+
+    # Apps
+    path('', include(('apps.dashboard.urls', 'dashboard'))),
+    path('reviews/', include(('apps.reviews.urls', 'reviews'))),
+
+
+
+    # Errors
     path('error/404/', errorviews.error_404_preview, name='error_404_preview'),
     path('error/500/', errorviews.error_500_preview, name='error_500_preview'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+# Handlers
 handler404 = "starshield.errorviews.error_404"
 handler500 = "starshield.errorviews.error_500"
 

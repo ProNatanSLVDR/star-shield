@@ -189,20 +189,16 @@ class Base(Configuration):
         BASE_DIR / "static",
     ]
 
-    # Email
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # TODO: Change to SMTP backend
-
-
-
-
-    # Misc
-
+    # Google GMB
     GOOGLE_GMB_CLIENT_ID = os.getenv('GOOGLE_GMB_CLIENT_ID')
     GOOGLE_GMB_CLIENT_SECRET = os.getenv('GOOGLE_GMB_CLIENT_SECRET')
+    GOOGLE_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
 
 
 class Dev(Base):
     DEBUG = True
+
+    WEBSITE_URL = "localhost:8000"
 
     DATABASES = {
         'default': {
@@ -211,9 +207,14 @@ class Dev(Base):
         }
     }
 
+    # Email
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # TODO: Change to SMTP backend
+
+
 class Prod(Base):
     DEBUG = False
 
+    WEBSITE_URL = os.getenv('WEBSITE_URL')
 
     DATABASES = {
         'default': {

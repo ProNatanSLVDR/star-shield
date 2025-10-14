@@ -14,9 +14,12 @@ django_components==0.141.6
 djc_core_html_parser==1.0.2
 djhtml==3.0.9
 filelock==3.19.1
+google-api-core==2.25.2
+google-api-python-client==2.184.0
 google-auth==2.41.1
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.2
+googleapis-common-protos==1.70.0
 honcho==2.0.0
 httplib2==0.31.0
 idna==3.10
@@ -24,6 +27,8 @@ oauthlib==3.3.1
 packaging==25.0
 pipenv==2025.0.4
 platformdirs==4.4.0
+proto-plus==1.26.1
+protobuf==6.32.1
 psycopg==3.2.10
 psycopg-binary==3.2.10
 pyasn1==0.6.1
@@ -38,6 +43,7 @@ rsa==4.9.1
 setuptools==80.9.0
 sqlparse==0.5.3
 typing_extensions==4.15.0
+uritemplate==4.2.0
 urllib3==2.5.0
 uv==0.8.22
 virtualenv==20.34.0

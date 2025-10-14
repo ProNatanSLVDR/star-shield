@@ -55,27 +55,10 @@ class UserManager(BaseUserManager):
         if not password or not password.strip():
             raise ValueError("Superuser must have a password.")
 
-        try:
-            admin_entreprise, _ = Entreprise.objects.get_or_create(nom="admin")
-        except Exception as exc:
-            raise ValueError("Failed to ensure the admin entreprise exists.") from exc
-
-        extra_fields["entreprise"] = admin_entreprise
-
         return self._create_user(email, password, **extra_fields)
 
 
-class Entreprise(models.Model):
-    nom = models.CharField(max_length=100)
-
-    created_on = models.DateField(auto_now_add=True)
-    modified_on = models.DateField(auto_now=True)
-
-    def __str__(self) -> str:
-        return self.nom
-
 class User(AbstractBaseUser, PermissionsMixin):
-    entreprise = models.ForeignKey(Entreprise, on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
 
     # Infos Personnelles
