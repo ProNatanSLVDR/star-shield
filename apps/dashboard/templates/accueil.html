@@ -1,77 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% block dashboard_content %}
-    <div class="p-4">
-        <div class="d-flex flex-column gap-4">
-            {% if not credentials %}
-                <section class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h2 class="h4 mb-3">Connecter votre compte Google My Business</h2>
-                        <p class="text-muted mb-4">
-                            Associez votre compte Google pour synchroniser automatiquement vos établissements et gérer vos avis.
-                        </p>
-                        <div class="d-flex gap-2">
-                            <a class="btn btn-primary" href="{% url 'auths:google_gmb_start' %}">
-                                <i class="fa-brands fa-google"></i>
-                                <span class="ps-2">Connecter mon compte</span>
-                            </a>
-                        </div>
-                    </div>
-                </section>
-            {% else %}
-                <section class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                            <div>
-                                <h2 class="h4 mb-1">Compte Google My Business connecté</h2>
-                                <p class="text-muted mb-0">
-                                    Dernière mise à jour : {{ credentials.updated_at|date:"d/m/Y H:i" }}
-                                </p>
-                            </div>
-                            <form action="{% url 'dashboard:refresh_etablissements' %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-primary">
-                                    <i class="fa-solid fa-rotate"></i>
-                                    <span class="ps-2">Rafraîchir les établissements</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </section>
 
-                <section class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h3 class="h5 mb-3">Établissements synchronisés</h3>
-
-                        {% if etablissements %}
-                            <div class="table-responsive">
-                                <table class="table align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th scope="col">Nom</th>
-                                            <th scope="col">Identifiant Google</th>
-                                            <th scope="col" class="text-end">Dernière mise à jour</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for etablissement in etablissements %}
-                                            <tr>
-                                                <td class="fw-semibold">{{ etablissement.name }}</td>
-                                                <td class="text-muted">{{ etablissement.google_business_manager_account_id }}</td>
-                                                <td class="text-end">{{ etablissement.updated_at|date:"d/m/Y H:i" }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% else %}
-                            <p class="text-muted">Aucun établissement n'a encore été synchronisé.</p>
-                        {% endif %}
-                    </div>
-                </section>
-            {% endif %}
-        </div>
-    </div>
 {% endblock %}
 
 

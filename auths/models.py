@@ -91,7 +91,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # Google GMB
 class GoogleCredentials(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="google_credentials")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="google_credential")
 
     is_valid = models.BooleanField(default=False)
 
@@ -130,23 +130,104 @@ class GoogleCredentials(models.Model):
 
         return creds
 
-    def get_gmb_accounts(self):
-        service = build('mybusinessbusinessinformation', 'v1', credentials=self.get_valid_credentials())
-        response = service.accounts().locations().list().execute()
-        return response
+    def create_etablissement_from_location(self, account_id, location_id):
+        """
+        Crée ou met à jour un seul établissement à partir d'un location_id Google My Business.
+        """
+        creds = self.get_valid_credentials()
+        if not creds:
+            return False
+
+        # Services API
+        locations_service = build("mybusinessbusinessinformation", "v1", credentials=creds)
+
+        try:
+            # Récupération des informations de la location
+            location = locations_service.locations().get(
+                name=location_id,
+                readMask="name,title,metadata,websiteUri"
+            ).execute()
+
+            metadata = location.get("metadata", {})
+            
+            # Création ou mise à jour de l'établissement
+            etablissement, created = Etablissement.objects.update_or_create(
+                google_credential=self,
+                location_id=location["name"],
+                account_id=account_id,
+                defaults={
+                    "title": location.get("title"),
+                    "website_uri": location.get("websiteUri"),
+                    "maps_uri": metadata.get("mapsUri"),
+                    "new_reviews_uri": metadata.get("newReviewsUri"),
+                },
+            )
+
+            return etablissement
+
+        except Exception as e:
+            # Gestion d'erreur simple (peut être remplacée par du logging)
+            print(f"Erreur lors de la création de l'établissement pour {location_id}: {e}")
+            return None
+
+    def list_available_locations(self):
+        creds = self.get_valid_credentials()
+        if not creds:
+            return False
+
+        accounts_service = build("mybusinessaccountmanagement", "v1", credentials=creds)
+        locations_service = build("mybusinessbusinessinformation", "v1", credentials=creds)
+
+        available_locations = []
+        
+        accounts = accounts_service.accounts().list().execute()
+        for account in accounts.get("accounts", []):
+
+            next_page_token = None
+            while True:
+                # Récupération des locations
+                locations = locations_service.accounts().locations().list(
+                    parent=account["name"],
+                    readMask="name,title",
+                    pageToken=next_page_token
+                ).execute()
+
+                available_locations.extend(locations.get("locations", []))
+
+                next_page_token = locations.get("nextPageToken")
+                if not next_page_token:
+                    break
+
+        for location in available_locations:
+            location["account_id"] = account["name"]
+            if Etablissement.objects.filter(location_id=location["name"], account_id=account["name"]).exists():
+                location["exists"] = True
+            else:
+                location["exists"] = False
+        
+        return available_locations
+
 
 
 
 # Etablissement
 class Etablissement(models.Model):
-    name = models.CharField(max_length=255)
+    google_credential = models.ForeignKey("GoogleCredentials", on_delete=models.CASCADE, related_name="etablissements")
 
-    # Google GMB
-    google_credentials = models.ForeignKey("GoogleCredentials", on_delete=models.CASCADE, related_name="etablissements")
-    google_business_manager_account_id = models.CharField(max_length=255)
+    location_id = models.CharField(max_length=255)
+    account_id = models.CharField(max_length=255)
 
+    title = models.CharField(max_length=255)
+    website_uri = models.URLField(max_length=255, blank=True, null=True)
+    maps_uri = models.URLField(max_length=255, blank=True, null=True)
+    new_reviews_uri = models.URLField(max_length=255, blank=True, null=True)
+
+    # access
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
+
+
+    # settings
     review_threshold = models.PositiveSmallIntegerField(
         default=4,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
@@ -157,14 +238,9 @@ class Etablissement(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.title
 
     def get_public_identifier(self) -> str:
         """Return the best available identifier for public URLs."""
         return self.slug or str(self.uuid)
-
-    def get_google_review_url(self) -> str:
-        """Temporary stub for the Google review URL."""
-        # TODO: Replace with actual Google review URL fetched from the connected GMB account.
-        return "https://maps.google.com"
 

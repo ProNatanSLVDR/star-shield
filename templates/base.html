@@ -14,6 +14,18 @@
         <script defer src="{% static 'icons/solid.min.js' %}"></script>
         <script defer src="{% static 'icons/fontawesome.min.js' %}"></script>
 
+        <div data-toast-container class="position-fixed bottom-0 end-0 p-4 d-flex flex-column gap-3 align-items-end" style="width: 400px; z-index: 1100;">
+            <div data-toast-template class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 100%;">
+                <div class="toast-header">
+                    <strong class="me-auto fs-5" data-toast-title></strong>
+                    <small class="fs-6" data-toast-time></small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div data-toast-body class="toast-body fs-6"></div>
+            </div>
+        </div>
+        <script src="{% static 'custom/toasts.js' %}"></script>
+
     </head>
 
     <body class="h-100 min-vh-100">
@@ -25,4 +37,43 @@
 
     <script src="{% static 'htmx.min.js' %}"></script>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                // Initialize all tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl, {
+                    delay: { show: 100, hide: 100 }
+                });
+            });
+
+                // Handle messages for regular requests
+            {% if messages and not request.htmx %}
+                {% for message in messages %}
+                    createToast({
+                        message: '{{ message.message }}',
+                        tags: '{{ message.tags }}'
+                    });
+                {% endfor %}
+            {% endif %}
+
+                // Handle messages from X-Messages header for HTMX requests
+            htmx.on("htmx:afterRequest", (e) => {
+                const messages = e.detail.xhr.getResponseHeader("X-Messages");
+                if (messages) {
+                    JSON.parse(messages).forEach(createToast);
+                }
+            });
+
+            htmx.on("close-modal", (e) => {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modalEl => {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) {
+                        modal.hide();
+                    }
+                });
+            })
+        });
+    </script>
 </html>

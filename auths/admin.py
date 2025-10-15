@@ -36,7 +36,6 @@ class GoogleCredentialsAdmin(admin.ModelAdmin):
 
 @admin.register(Etablissement)
 class EtablissementAdmin(admin.ModelAdmin):
-    list_display = ("name", "google_business_manager_account_id", "slug", "uuid", "review_threshold")
-    search_fields = ("name", "google_business_manager_account_id", "slug", "uuid")
+    list_display = ("title", "slug", "uuid", "review_threshold")
+    search_fields = ("title", "slug", "uuid")
     list_filter = ("created_at", "updated_at")
-    prepopulated_fields = {"slug": ("name",)}

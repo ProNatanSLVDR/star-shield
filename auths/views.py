@@ -76,7 +76,7 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
 
     credentials = flow.credentials
 
-    google_credentials, _ = GoogleCredentials.objects.update_or_create(
+    google_credential, _ = GoogleCredentials.objects.update_or_create(
         user=request.user,
         client_id=credentials.client_id,
         defaults={
@@ -91,7 +91,7 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
     request.session.pop("state", None)
 
     messages.success(request, _("Compte Google My Business connecté avec succès."))
-    if google_credentials:
-        if google_credentials.etablissements.all().count() == 0:
+    if google_credential:
+        if google_credential.etablissements.all().count() == 0:
             return redirect(reverse("dashboard:accueil"))
     return redirect(reverse("dashboard:accueil"))

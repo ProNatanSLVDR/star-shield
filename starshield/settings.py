@@ -69,6 +69,7 @@ class Base(Configuration):
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         "django_htmx.middleware.HtmxMiddleware",
         "allauth.account.middleware.AccountMiddleware",
+        "starshield.middleware.CustomMessageMiddleware",
     ]
 
     ROOT_URLCONF = 'starshield.urls'
