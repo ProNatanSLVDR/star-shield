@@ -1,13 +1,16 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
-from django.shortcuts import redirect, render
-from django.urls import reverse
-from google_auth_oauthlib.flow import Flow
 import logging
 from urllib.parse import urljoin
 
-from .models import GoogleCredentials
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.translation import gettext as _
+from google_auth_oauthlib.flow import Flow
+
+from .forms import FeedbackForm
+from .models import Etablissement, GoogleCredentials, Review
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +50,11 @@ def google_auth_start(request: HttpRequest) -> HttpResponse:
 
 
 def google_auth_callback(request: HttpRequest) -> HttpResponse:
-    redirect_uri = f"http://{settings.WEBSITE_URL}{reverse("reviews:google_auth_callback")}"
+    protocol = "https"
+    if settings.DEBUG:
+        protocol = "http"
+
+    redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse("reviews:google_auth_callback")}"
     state = request.session.get("state")
 
     if not state:
@@ -84,3 +91,59 @@ def google_auth_callback(request: HttpRequest) -> HttpResponse:
     request.session.pop("state", None)
 
     return redirect(reverse("dashboard:accueil"))
+
+
+def _get_etablissement_or_404(identifier: str) -> Etablissement:
+    if not identifier:
+        raise Http404(_("Identifiant manquant"))
+
+    try:
+        return Etablissement.objects.get(slug=identifier)
+    except Etablissement.DoesNotExist:
+        pass
+
+    try:
+        return Etablissement.objects.get(uuid=identifier)
+    except (Etablissement.DoesNotExist, ValueError):
+        raise Http404(_("Établissement introuvable"))
+
+
+def feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
+    etablissement = _get_etablissement_or_404(identifier)
+
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            rating = form.cleaned_data["rating"]
+            comment = form.cleaned_data.get("comment", "")
+
+            review = Review.objects.create(
+                etablissement=etablissement,
+                rating=rating,
+                comment=comment,
+            )
+
+            if rating >= etablissement.review_threshold:
+                return redirect(etablissement.get_google_review_url())
+
+            request.session["feedback_review_id"] = review.id
+            return redirect("reviews:feedback_thanks", identifier=identifier)
+    else:
+        form = FeedbackForm()
+
+    context = {
+        "etablissement": etablissement,
+        "form": form,
+    }
+    return render(request, "reviews/feedback_form.html", context)
+
+
+def feedback_thanks_view(request: HttpRequest, identifier: str) -> HttpResponse:
+    etablissement = _get_etablissement_or_404(identifier)
+
+    review_id = request.session.pop("feedback_review_id", None)
+    context = {
+        "etablissement": etablissement,
+        "review_id": review_id,
+    }
+    return render(request, "reviews/feedback_thanks.html", context)
