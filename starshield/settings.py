@@ -37,7 +37,6 @@ class Base(Configuration):
 
         'django_htmx',
         'django_components',
-        'tailwind',
     ]
 
     CUSTOM_APPS = [
