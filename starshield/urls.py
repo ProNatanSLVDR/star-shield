@@ -10,8 +10,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('django_components.urls')),
 
-    # Allauth
+    # auths
     path('accounts/', include('allauth.urls')),
+    path('auths/', include('auths.urls')),
 
     # Apps
     path('', include(('apps.dashboard.urls', 'dashboard'))),

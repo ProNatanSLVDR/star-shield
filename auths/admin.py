@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from .models import User
+from .models import User, GoogleCredentials, Etablissement
 from django.contrib import admin
 from allauth.account.decorators import secure_admin_login
 
@@ -23,3 +23,20 @@ class UserAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('created_at', 'updated_at')
 
+
+
+
+
+@admin.register(GoogleCredentials)
+class GoogleCredentialsAdmin(admin.ModelAdmin):
+    list_display = ("user", "is_valid", "created_at", "updated_at")
+    search_fields = ("user__email",)
+    list_filter = ("is_valid", "created_at")
+
+
+@admin.register(Etablissement)
+class EtablissementAdmin(admin.ModelAdmin):
+    list_display = ("name", "google_business_manager_account_id", "slug", "uuid", "review_threshold")
+    search_fields = ("name", "google_business_manager_account_id", "slug", "uuid")
+    list_filter = ("created_at", "updated_at")
+    prepopulated_fields = {"slug": ("name",)}

@@ -1,21 +1,6 @@
 from django.contrib import admin
 
-from .models import Etablissement, GoogleCredentials, Review
-
-# Register your models here.
-@admin.register(GoogleCredentials)
-class GoogleCredentialsAdmin(admin.ModelAdmin):
-    list_display = ("user", "is_valid", "created_at", "updated_at")
-    search_fields = ("user__email",)
-    list_filter = ("is_valid", "created_at")
-
-
-@admin.register(Etablissement)
-class EtablissementAdmin(admin.ModelAdmin):
-    list_display = ("name", "google_business_manager_account_id", "slug", "uuid", "review_threshold")
-    search_fields = ("name", "google_business_manager_account_id", "slug", "uuid")
-    list_filter = ("created_at", "updated_at")
-    prepopulated_fields = {"slug": ("name",)}
+from .models import Review
 
 
 @admin.register(Review)
