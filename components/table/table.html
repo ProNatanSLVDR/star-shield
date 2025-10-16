@@ -82,11 +82,10 @@
                                             {% for button in cell.buttons %}
                                                 {% component "button"
                                                 text=button.text
-                                                type=button.type
-                                                class_name=button.class_name
+                                                classes=button.classes
                                                 disabled=button.disabled
                                                 icon=button.icon
-                                                kwargs=button.kwargs
+                                                extra_kwargs=button.extra_kwargs
                                                 /%}
                                             {% endfor %}
                                         </div>

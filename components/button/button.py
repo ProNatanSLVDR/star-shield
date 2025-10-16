@@ -10,6 +10,17 @@ class Button(Component):
         icon: str
         text: str
         href: str
+        disabled: bool
+        default_hx_modal: bool
+        modal_close: bool
+        extra_kwargs: dict
+
+    class Defaults(NamedTuple):
+        default_hx_modal: bool = False
+        modal_close: bool = False
+        href: str = None
+        disabled: bool = False
+
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         return {
@@ -17,4 +28,7 @@ class Button(Component):
             "icon": kwargs.icon,
             "text": kwargs.text,
             "href": kwargs.href,
+            "extra_kwargs": kwargs.extra_kwargs,
+            "default_hx_modal": kwargs.default_hx_modal,
+            "modal_close": kwargs.modal_close,
         }

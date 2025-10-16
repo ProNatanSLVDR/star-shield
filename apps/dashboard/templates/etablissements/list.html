@@ -1,42 +1,10 @@
 {% extends "dashboard_base.html" %}
 
 {% block dashboard_content %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Vos établissements liés</h2>
-        <form method="post" action="{% url 'dashboard:etablissements:refresh' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-outline-primary">
-                <i class="fa-solid fa-arrows-rotate"></i> Rafraîchir
-            </button>
-        </form>
-    </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Établissement</th>
-                    <th>Email gestionnaire</th>
-                    <th>Date de liaison</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for etablissement in etablissements %}
-                    <tr>
-                        <td>
-                            <div class="fw-semibold">{{ etablissement.title }}</div>
-                            <small class="text-muted">{{ etablissement.location_id }}</small>
-                        </td>
-                        <td>{{ etablissement.google_credential.user.get_full_name|default:etablissement.google_credential.user.email }}</td>
-                        <td>{{ etablissement.google_credential.user.email }}</td>
-                        <td>{{ etablissement.google_credential.created_at|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">Aucun établissement lié trouvé.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div hx-get="{% url 'dashboard:etablissements:list_partial' %}"
+         hx-trigger="load, etablissements-updated from:body"
+         hx-swap="morph:innerHTML"
+         id="etablissementsTable">
     </div>
 {% endblock %}

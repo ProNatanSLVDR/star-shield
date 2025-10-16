@@ -1,5 +1,9 @@
 {% if href %}
-    <a href=" {% slot href %} {% endslot %} " class="btn {{classes}}">
+    <a href=" {% slot href %} {% endslot %} " class="btn {{classes}} {% if disabled %}disabled{% endif %}"
+       {% for key, value in extra_kwargs.items %}
+           {{ key }}="{{ value }}"
+       {% endfor %}
+    >
         {% if icon %}
             <i class="{{icon}}"></i>
         {% endif %}
@@ -8,7 +12,19 @@
         {% endif %}
     </a>
 {% else %}
-    <button class="btn {{classes}}">
+    <button class="btn {{classes}} {% if disabled %}disabled{% endif %}"
+            {% for key, value in extra_kwargs.items %}
+                {{ key }}="{{ value }}"
+            {% endfor %}
+            {% if modal_hx_default %}
+                hx-target="#dynamicModal .modal-content"
+                data-bs-toggle="modal"
+                data-bs-target="#dynamicModal"
+            {% endif %}
+            {% if modal_close %}
+                data-bs-dismiss="modal"
+            {% endif %}
+    >
         {% if icon %}
             <i class="{{icon}}"></i>
         {% endif %}

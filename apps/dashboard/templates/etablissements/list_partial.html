@@ -1,0 +1,21 @@
+{% component
+"table"
+headers=etablissements_table.headers
+rows=etablissements_table.rows
+title="Liste de vos établissements"
+%}
+
+{% fill actions %}
+    {% component "button"
+    text="Importer un établissement"
+    classes="btn-primary"
+    icon="fa-solid fa-plus"
+    default_hx_modal=True
+    extra_kwargs={
+    "hx-get": "{% url 'dashboard:etablissements:import_partial' %}",
+    "id": "btn-import-etablissement"
+    }
+    / %}
+{% endfill %}
+
+{% endcomponent %}
