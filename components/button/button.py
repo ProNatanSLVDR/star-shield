@@ -1,4 +1,5 @@
-from django_components import Component, register
+from typing_extensions import Dict, Any
+from django_components import Component, Default, register
 from typing import NamedTuple
 
 @register("button")
@@ -13,13 +14,14 @@ class Button(Component):
         disabled: bool
         default_hx_modal: bool
         modal_close: bool
-        extra_kwargs: dict
+        extra_kwargs: Dict[str, Any]
 
-    class Defaults(NamedTuple):
+    class Defaults:
         default_hx_modal: bool = False
         modal_close: bool = False
         href: str = None
         disabled: bool = False
+        extra_kwargs = Default(dict)
 
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
