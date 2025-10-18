@@ -1,12 +1,12 @@
 {% load static %}
 
-{% if searchable %}
-    <div class="rounded-3 bg-white p-3 mb-3">
-        <input type="text" class="form-control" id="tableSearch" placeholder="Rechercher">
-    </div>
-{% endif %}
+<div class="rounded-3 bg-white p-3" data-table-container>
+    {% if searchable %}
+        <div class="rounded-3 bg-white mb-3">
+            <input type="text" class="form-control table-search-input" placeholder="Rechercher">
+        </div>
+    {% endif %}
 
-<div class="rounded-3 bg-white p-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="mb-0">
             {{ title }} :
@@ -24,14 +24,14 @@
                 </p>
             </div>
         {% else %}
-            <table class="table table-bordered table-striped rounded-3 border align-middle overflow-hidden p-0 m-0">
+            <table class="table table-bordered table-striped rounded-3 border align-middle overflow-hidden p-0 m-0" data-table>
                 <thead>
                     <tr>
                         {% for header in headers %}
-                            <th scope="col"
+                            <th scope="col" data-column-index="{{ forloop.counter0 }}"
                                 class="{% if header.orderable %}sortable {% endif %}{% if header.centered %}text-center{% endif %}"
-                                {% if header.orderable %}data-key="{{ header.key }}"{% endif %}
-                                {% if header.searchable %}data-searchable="true"{% endif %}>
+                                {% if header.orderable %}data-sortable{% endif %}
+                                {% if header.searchable %}data-searchable{% endif %}>
                                 <div class="d-flex align-items-center {% if header.centered %}justify-content-center{% endif %}">
                                     <div class="flex-grow-1 {% if header.centered %}text-center{% endif %}">
                                         {% if header.icon %}
@@ -49,49 +49,51 @@
                 </thead>
                 <tbody>
                     {% for row in rows %}
-                        <tr
-                            {% if row.modal_link and not row.has_buttons %}
+                        <tr {% if row.modal_link and not row.has_buttons %}
                                 class="clickable-row"
                                 hx-get="{{ row.modal_link }}"
                                 hx-target="#dynamicModal .modal-content"
                                 hx-trigger="click"
                                 data-bs-toggle="modal"
                                 data-bs-target="#dynamicModal"
-                            {% endif %}
-                        >
+                            {% endif %}>
                             {% for cell in row.cells %}
-                                <td {% if cell.tooltip %}data-bs-toggle="tooltip" data-bs-placement="top" title="{{ cell.tooltip }}"{% endif %}
+                                <td data-column-index="{{ forloop.counter0 }}"
+                                    {% if cell.tooltip %}data-bs-toggle="tooltip" data-bs-placement="top" title="{{ cell.tooltip }}"{% endif %}
                                     {% if cell.sort_value %}data-sort-value="{{ cell.sort_value }}"{% endif %}
-                                    {% if cell.centered == True %}class="text-center"{% endif %}>
-                                    {% if cell.type == 'badge' %}
-                                        <span class="badge bg-{{ cell.variant }} {% if cell.variant == 'warning' %}text-dark{% endif %}">
+                                    {% if cell.centered %}class="text-center"{% endif %}>
+
+                                    {% if cell.type == "badge" %}
+                                        <span class="badge bg-{{ cell.variant }} {% if cell.variant == "warning" %}text-dark{% endif %}">
                                             {{ cell.value }}
                                         </span>
-                                    {% elif cell.type == 'html' %}
-                                        <div class="d-flex gap-2
-                                                    {% if cell.centered == True %}justify-content-center
-                                                    {% elif cell.centered == 'evenly' %}justify-content-evenly w-100
-                                                    {% endif %}">
+
+                                    {% elif cell.type == "html" %}
+                                        <div class="d-flex {% if cell.centered == True %}justify-content-center{% elif cell.centered == "evenly" %}justify-content-evenly w-100{% endif %} gap-2">
                                             {{ cell.value|safe }}
                                         </div>
-                                    {% elif cell.type == 'buttons' %}
-                                        <div class="d-flex gap-2
-                                                    {% if cell.centered == True %}justify-content-center
-                                                    {% elif cell.centered == 'evenly' %}justify-content-evenly w-100
-                                                    {% endif %}">
+
+                                    {% elif cell.type == "buttons" %}
+                                        <div class="d-flex {% if cell.centered == True %}justify-content-center{% elif cell.centered == "evenly" %}justify-content-evenly w-100{% endif %} gap-2">
                                             {% for button in cell.buttons %}
                                                 {% component "button"
                                                 text=button.text
                                                 classes=button.classes
-                                                disabled=button.disabled
                                                 icon=button.icon
+                                                href=button.href
                                                 extra_kwargs=button.extra_kwargs
                                                 /%}
                                             {% endfor %}
                                         </div>
+
                                     {% else %}
                                         {% if cell.popover_if_long and cell.is_long %}
-                                            <a href="javascript:void(0)" class="text-decoration-underline text-primary text-nowrap" data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="top" data-bs-title="Détails" data-bs-content="{{ cell.value }}">{{ cell.value|truncatechars:cell.popover_threshold }} <i class="fa-solid fa-eye ms-1"></i></a>
+                                            <a href="javascript:void(0)" class="text-decoration-underline text-primary text-nowrap"
+                                               data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="top"
+                                               data-bs-title="Détails" data-bs-content="{{ cell.value }}">
+                                                {{ cell.value|truncatechars:cell.popover_threshold }}
+                                                <i class="fa-solid fa-eye ms-1"></i>
+                                            </a>
                                         {% else %}
                                             {{ cell.value }}
                                         {% endif %}
@@ -102,7 +104,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <div id="noSearchResults" class="border-top py-5 text-center" style="display: none;">
+            <div class="table-no-search-results border-top py-5 text-center" style="display: none;">
                 <p class="mb-0">
                     <i class="fa-solid fa-face-frown pe-1"></i> La recherche n'a pas trouvé de résultat.
                 </p>
@@ -117,7 +119,7 @@
 
 <!-- Dynamic Modal -->
 <div class="modal fade" id="dynamicModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-{{ modal_size|default:'xl' }} modal-dialog-centered">
+    <div class="modal-dialog modal-{{ modal_size|default:"xl" }} modal-dialog-centered">
         <div class="modal-content h-100">
             <!-- Content will be loaded here by HTMX -->
         </div>
@@ -126,7 +128,7 @@
 
 <!-- Secondary Dynamic Modal for deeper flows -->
 <div class="modal fade" id="dynamicModal2" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-{{ modal_size|default:'xl' }} modal-dialog-centered">
+    <div class="modal-dialog modal-{{ modal_size|default:"xl" }} modal-dialog-centered">
         <div class="modal-content h-100">
             <!-- Content will be loaded here by HTMX -->
         </div>
@@ -134,170 +136,243 @@
 </div>
 
 <style>
-    .sortable {
+    [data-table-container] .sortable {
         cursor: pointer;
         user-select: none;
     }
-    .sortable:hover {
+    [data-table-container] .sortable:hover {
         background-color: #f5f5f5;
     }
-    .sort-icon {
+    [data-table-container] .sort-icon {
         opacity: 0.5;
+        transition: opacity 0.2s ease;
     }
-    .sort-asc .sort-icon {
+    [data-table-container] .sort-asc .sort-icon {
         content: "↑";
         opacity: 1;
     }
-    .sort-desc .sort-icon {
+    [data-table-container] .sort-desc .sort-icon {
         content: "↓";
         opacity: 1;
     }
-    .clickable-row {
+    [data-table-container] .clickable-row {
         cursor: pointer;
     }
-    .clickable-row:hover {
+    [data-table-container] .clickable-row:hover {
         background-color: #f8f9fa;
     }
 </style>
 
 <script>
-    function initializeTableFunctionality() {
-        // Initialize tooltips & popovers if Bootstrap is available
-        if (typeof window !== 'undefined' && typeof window.bootstrap !== 'undefined') {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
+    /**
+     * TableManager: Handles table functionality (search, sort, tooltips, popovers)
+     * Scoped per table instance to avoid conflicts
+     */
+    class TableManager {
+        constructor(containerElement) {
+            this.container = containerElement;
+            this.table = containerElement.querySelector('[data-table]');
+            this.searchInput = containerElement.querySelector('.table-search-input');
+            this.noResultsDiv = containerElement.querySelector('.table-no-search-results');
 
-            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-            popoverTriggerList.map(function (popoverTriggerEl) {
-                return new bootstrap.Popover(popoverTriggerEl);
+            if (!this.table) return;
+
+            this.sortState = {
+                key: null,
+                direction: 'asc'
+            };
+
+            this.init();
+        }
+
+        /**
+         * Initialize all table features
+         */
+        init() {
+            this.initBootstrapComponents();
+            this.attachSortListeners();
+            this.attachSearchListener();
+        }
+
+        /**
+         * Initialize Bootstrap tooltips and popovers for this table
+         */
+        initBootstrapComponents() {
+            if (typeof window === 'undefined' || typeof window.bootstrap === 'undefined') {
+                return;
+            }
+
+            // Initialize tooltips
+            const tooltipElements = this.container.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipElements.forEach(el => new bootstrap.Tooltip(el));
+
+            // Initialize popovers
+            const popoverElements = this.container.querySelectorAll('[data-bs-toggle="popover"]');
+            popoverElements.forEach(el => new bootstrap.Popover(el));
+        }
+
+        /**
+         * Attach click listeners to sortable headers
+         */
+        attachSortListeners() {
+            const headers = this.table.querySelectorAll('th[data-sortable]');
+
+            headers.forEach(header => {
+                header.addEventListener('click', () => this.handleSort(header));
             });
         }
 
-        // Search functionality
-        const searchInput = document.getElementById('tableSearch');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const searchText = this.value.toLowerCase().trim();
-                const table = document.querySelector('.table');
-                const rows = table.querySelectorAll('tbody tr');
-                const noResultsDiv = document.getElementById('noSearchResults');
-                const headers = Array.from(table.querySelectorAll('th')).map(th => ({
-                    index: Array.from(th.parentElement.children).indexOf(th),
-                    searchable: th.hasAttribute('data-searchable')
-                }));
+        /**
+         * Handle column sorting
+         */
+        handleSort(header) {
+            const columnIndex = parseInt(header.dataset.columnIndex, 10);
+            const tbody = this.table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
 
-                let visibleRows = 0;
-                rows.forEach(row => {
-                    if (!searchText) {
-                        row.style.display = '';
-                        visibleRows++;
-                        return;
-                    }
+            // Update sort direction
+            if (this.sortState.key === columnIndex) {
+                this.sortState.direction = this.sortState.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortState.key = columnIndex;
+                this.sortState.direction = 'asc';
+            }
 
-                    const cells = row.querySelectorAll('td');
-                    let showRow = false;
+            // Update visual indicators
+            this.updateSortIndicators(header);
 
-                    cells.forEach((cell, index) => {
-                        if (headers[index].searchable) {
-                            const cellText = cell.textContent.toLowerCase().trim();
-                            if (cellText.includes(searchText)) {
-                                showRow = true;
-                            }
+            // Sort and reorder rows
+            rows.sort((a, b) => this.compareRows(a, b, columnIndex));
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        /**
+         * Update sort direction indicators
+         */
+        updateSortIndicators(activeHeader) {
+            const allHeaders = this.table.querySelectorAll('th[data-sortable]');
+
+            allHeaders.forEach(h => {
+                h.classList.remove('sort-asc', 'sort-desc');
+                const icon = h.querySelector('.sort-icon');
+                if (icon) icon.textContent = '↕';
+            });
+
+            activeHeader.classList.add(`sort-${this.sortState.direction}`);
+            const icon = activeHeader.querySelector('.sort-icon');
+            if (icon) {
+                icon.textContent = this.sortState.direction === 'asc' ? '↑' : '↓';
+            }
+        }
+
+        /**
+         * Compare two row cells for sorting
+         */
+        compareRows(rowA, rowB, columnIndex) {
+            const cellA = rowA.children[columnIndex];
+            const cellB = rowB.children[columnIndex];
+
+            if (!cellA || !cellB) return 0;
+
+            // Use sort_value attribute if available
+            const sortValueA = cellA.dataset.sortValue;
+            const sortValueB = cellB.dataset.sortValue;
+
+            if (sortValueA !== undefined && sortValueB !== undefined) {
+                const numA = parseFloat(sortValueA);
+                const numB = parseFloat(sortValueB);
+                return this.sortState.direction === 'asc' ? numA - numB : numB - numA;
+            }
+
+            // Fallback to text content
+            const textA = cellA.textContent.trim();
+            const textB = cellB.textContent.trim();
+
+            // Try numeric comparison
+            const numA = parseFloat(textA);
+            const numB = parseFloat(textB);
+
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return this.sortState.direction === 'asc' ? numA - numB : numB - numA;
+            }
+
+            // Fall back to string comparison
+            return this.sortState.direction === 'asc'
+                ? textA.localeCompare(textB)
+                : textB.localeCompare(textA);
+        }
+
+        /**
+         * Attach search input listener
+         */
+        attachSearchListener() {
+            if (!this.searchInput) return;
+
+            this.searchInput.addEventListener('input', () => this.handleSearch());
+        }
+
+        /**
+         * Handle table search/filter
+         */
+        handleSearch() {
+            const searchText = this.searchInput.value.toLowerCase().trim();
+            const rows = this.table.querySelectorAll('tbody tr');
+            const searchableHeaders = Array.from(this.table.querySelectorAll('th[data-searchable]'));
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                if (!searchText) {
+                    row.style.display = '';
+                    visibleCount++;
+                    return;
+                }
+
+                let matches = false;
+
+                row.querySelectorAll('td').forEach((cell, index) => {
+                    // Check if this column is searchable
+                    const columnHeader = this.table.querySelector(`th[data-column-index="${index}"]`);
+                    if (columnHeader && columnHeader.hasAttribute('data-searchable')) {
+                        if (cell.textContent.toLowerCase().includes(searchText)) {
+                            matches = true;
                         }
-                    });
-
-                    row.style.display = showRow ? '' : 'none';
-                    if (showRow) visibleRows++;
+                    }
                 });
 
-                // Show/hide no results message
-                if (searchText && visibleRows === 0) {
-                    noResultsDiv.style.display = 'block';
-                } else {
-                    noResultsDiv.style.display = 'none';
-                }
+                row.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
             });
+
+            // Show/hide no results message
+            if (searchText && visibleCount === 0) {
+                this.noResultsDiv.style.display = 'block';
+            } else {
+                this.noResultsDiv.style.display = 'none';
+            }
         }
+    }
 
-        // Sorting functionality
-        const table = document.querySelector('.table');
-        const headers = table.querySelectorAll('th.sortable');
-        let currentSort = {
-            key: null,
-            direction: 'asc'
-        };
-
-        headers.forEach(header => {
-            header.addEventListener('click', () => {
-                const key = header.dataset.key;
-                const tbody = table.querySelector('tbody');
-                const rows = Array.from(tbody.querySelectorAll('tr'));
-                const index = Array.from(header.parentElement.children).indexOf(header);
-
-                // Update sort direction
-                if (currentSort.key === key) {
-                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-                } else {
-                    currentSort.key = key;
-                    currentSort.direction = 'asc';
-                }
-
-                // Update sort indicators
-                headers.forEach(h => {
-                    h.classList.remove('sort-asc', 'sort-desc');
-                    h.querySelector('.sort-icon').textContent = '↕';
-                });
-                header.classList.add(`sort-${currentSort.direction}`);
-                header.querySelector('.sort-icon').textContent = currentSort.direction === 'asc' ? '↑' : '↓';
-
-                // Sort rows
-                rows.sort((a, b) => {
-                    const aCell = a.children[index];
-                    const bCell = b.children[index];
-
-                    // Check if cells have sort_value data attribute
-                    const aSortValue = aCell.dataset.sortValue;
-                    const bSortValue = bCell.dataset.sortValue;
-
-                    if (aSortValue !== undefined && bSortValue !== undefined) {
-                        // Compare using sort_value
-                        const aNum = parseFloat(aSortValue);
-                        const bNum = parseFloat(bSortValue);
-                        return currentSort.direction === 'asc' ? aNum - bNum : bNum - aNum;
-                    }
-
-                    // Fallback to text content comparison
-                    const aValue = aCell.textContent.trim();
-                    const bValue = bCell.textContent.trim();
-
-                    // Try to compare as numbers if possible
-                    const aNum = parseFloat(aValue);
-                    const bNum = parseFloat(bValue);
-                    if (!isNaN(aNum) && !isNaN(bNum)) {
-                        return currentSort.direction === 'asc' ? aNum - bNum : bNum - aNum;
-                    }
-
-                    // Otherwise compare as strings
-                    return currentSort.direction === 'asc'
-                        ? aValue.localeCompare(bValue)
-                        : bValue.localeCompare(aValue);
-                });
-
-                // Reorder rows in the DOM
-                rows.forEach(row => tbody.appendChild(row));
-            });
+    /**
+     * Initialize tables when DOM is ready
+     */
+    function initializeTables() {
+        document.querySelectorAll('[data-table-container]').forEach(container => {
+            new TableManager(container);
         });
     }
 
-    // Initialize table functionality when the page loads
-    document.addEventListener('DOMContentLoaded', initializeTableFunctionality);
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeTables);
+    } else {
+        initializeTables();
+    }
 
-    // Initialize table functionality after HTMX content swaps
+    // Reinitialize after HTMX swaps
     document.body.addEventListener('htmx:afterSwap', function(evt) {
-        if (evt.detail.target.querySelector('.table')) {
-            initializeTableFunctionality();
+        if (evt.detail.target.querySelector('[data-table-container]')) {
+            initializeTables();
         }
     });
 </script>

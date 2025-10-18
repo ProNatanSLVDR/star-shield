@@ -10,10 +10,9 @@ title="Liste de vos établissements"
     text="Importer un établissement"
     classes="btn-primary"
     icon="fa-solid fa-plus"
-    default_hx_modal=True
     extra_kwargs={
+    "default_hx_modal": True,
     "hx-get": "{% url 'dashboard:etablissements:import_partial' %}",
-    "id": "btn-import-etablissement"
     }
     / %}
 {% endfill %}

@@ -16,7 +16,7 @@
             {% for key, value in extra_kwargs.items %}
                 {{ key }}="{{ value }}"
             {% endfor %}
-            {% if modal_hx_default %}
+            {% if default_hx_modal %}
                 hx-target="#dynamicModal .modal-content"
                 data-bs-toggle="modal"
                 data-bs-target="#dynamicModal"

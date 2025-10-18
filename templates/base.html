@@ -28,7 +28,7 @@
 
     </head>
 
-    <body class="h-100 min-vh-100">
+    <body class="h-100 min-vh-100" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 
         {% block body %}
         {% endblock body %}
@@ -77,4 +77,6 @@
             })
         });
     </script>
+
+    {% include "confirmation_modal.html" %}
 </html>

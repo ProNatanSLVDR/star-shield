@@ -1,0 +1,47 @@
+<!-- Delete Confirmation Modal -->
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="fa-solid fa-trash pe-2"></i>
+        Supprimer l'établissement
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div class="alert alert-danger" role="alert">
+        <i class="fa-solid fa-exclamation-triangle pe-2"></i>
+        <strong>Attention !</strong> Cette action est irréversible.
+    </div>
+
+    <p class="mb-3">
+        Êtes-vous sûr de vouloir supprimer l'établissement <strong>{{ etablissement.title }}</strong> ?
+    </p>
+
+    <p class="mb-0 text-muted small">
+        <i class="fa-solid fa-info-circle pe-1"></i>
+        Toutes les données associées à cet établissement seront supprimées.
+    </p>
+</div>
+
+<div class="modal-footer">
+    {% component "button"
+    text="Supprimer"
+    classes="btn-danger"
+    icon="fa-solid fa-trash"
+    extra_kwargs={
+    "hx-post": "{% url 'dashboard:etablissements:delete' etablissement.id %}",
+    "hx-confirm": "Êtes-vous absolument certain de vouloir supprimer cet établissement ? Cette action ne peut pas être annulée.",
+    "hx-confirm-reopen": "false",
+    "hx-on": "htmx:afterRequest: closeModal()"
+    }
+    /%}
+</div>
+
+<script>
+    function closeModal() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('dynamicModal'));
+        if (modal) {
+            modal.hide();
+        }
+    }
+</script>

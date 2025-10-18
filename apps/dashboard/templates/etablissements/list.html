@@ -2,7 +2,7 @@
 
 {% block dashboard_content %}
 
-    <div hx-get="{% url 'dashboard:etablissements:list_partial' %}"
+    <div hx-get="{% url 'dashboard:etablissements:list' %}"
          hx-trigger="load, etablissements-updated from:body"
          hx-swap="morph:innerHTML"
          id="etablissementsTable">
