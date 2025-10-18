@@ -62,42 +62,46 @@ def list_etablissements_view(request: HttpRequest) -> HttpResponse:
 
 
 @google_gmb_connected_required
+@require_http_methods(["GET", "POST"])
 def import_etablissement_partial_view(request: HttpRequest) -> HttpResponse:
-    available_locations = request.user.google_credential.list_available_locations()
 
-    request.session["available_locations"] = available_locations
+    context = {}
+    hx_triggers = {}
 
-    context = {
-        "available_locations": available_locations,
-    }
-    return render(request, "etablissements/add.html")
+    if request.method == "GET":
+        available_locations = request.user.google_credential.list_available_locations()
+        request.session["available_locations"] = available_locations
+        context["available_locations"] = available_locations
+
+    if request.method == "POST":
+        hx_triggers["etablissements-updated"] = True
+        hx_triggers["close-modal"] = True
+        print(request.POST)
+
+    return starshield_render(request, "etablissements/add_partial.html", context=context, hx_triggers=hx_triggers)
 
 @google_gmb_connected_required
 @require_http_methods(["GET", "POST"])
 def delete_etablissement_partial_view(request: HttpRequest, id: int) -> HttpResponse:
     """
-    Pour supprimer un etablissement, 
+    Pour supprimer un etablissement
+    Double confirmation la suppression (modal + hx-confirm)
     """
-
-    hx_triggers = {}
-    try:
-        etablissement = Etablissement.objects.get(id=id, google_credential=request.user.google_credential)
-    except Etablissement.DoesNotExist:
+    hx_triggers = {
+        "etablissements-updated": True,
+        "close-modal": True
+    }
+    # on essaye de récupérer l'établissement
+    etablissement = Etablissement.objects.filter(id=id, google_credential=request.user.google_credential).first()
+    if not etablissement:
         messages.error(request, "Établissement non trouvé.")
-        return redirect('dashboard:etablissements:list')
-
+        return starshield_render(request, "etablissements/delete_confirmation.html", hx_triggers=hx_triggers)
+    
     if request.method == "POST":
         etablissement_title = etablissement.title
         etablissement.delete()
         messages.success(request, f"L'établissement {etablissement_title} a été supprimé.")
-        
-        hx_triggers["etablissements-updated"] = True
-        hx_triggers["close-modal"] = True
-        
-    
+        return starshield_render(request, "etablissements/delete_confirmation.html", hx_triggers=hx_triggers)
 
-    # GET request
-    context = {
-        "etablissement": etablissement,
-    }
-    return starshield_render(request, "etablissements/delete_confirmation.html", context=context, hx_triggers=hx_triggers)
+
+    return starshield_render(request, "etablissements/delete_confirmation.html", page_name="etablissements")

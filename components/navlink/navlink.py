@@ -11,11 +11,11 @@ class Navlink(Component):
         icon: str
         text: str
         page_name: Optional[str] = None
-        active: Optional[str] = None
+        current_page: Optional[str] = None
 
     class Defaults:
         page_name: Optional[str] = None
-        active: Optional[str] = None
+        current_page: Optional[str] = None
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         if not kwargs.link:
@@ -26,5 +26,5 @@ class Navlink(Component):
             "icon": kwargs.icon,
             "text": kwargs.text,
             "page_name": kwargs.page_name,
-            "active": kwargs.active,
+            "current_page": kwargs.current_page,
         }

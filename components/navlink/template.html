@@ -1,5 +1,5 @@
-<li class="nav-item px-1">
-    <a href="{% url link %}" class="nav-link {% if active == page_name %}active{% endif %} px-1">
+<li class="nav-item">
+    <a href="{% url link %}" class="nav-link {% if current_page == page_name %}active{% endif %} px-3">
         <i class="{{icon}} pe-1"></i>
         {{text}}
     </a>
