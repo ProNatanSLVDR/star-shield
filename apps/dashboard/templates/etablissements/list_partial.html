@@ -3,6 +3,7 @@
 headers=etablissements_table.headers
 rows=etablissements_table.rows
 title="Liste de vos établissements"
+modal_size="lg"
 %}
 
 {% fill actions %}
@@ -11,7 +12,7 @@ title="Liste de vos établissements"
     classes="btn-primary"
     icon="fa-solid fa-plus"
     extra_kwargs={
-    "default_hx_modal": True,
+    "hx_modal_toggle": True,
     "hx-get": "{% url 'dashboard:etablissements:import_partial' %}",
     }
     / %}

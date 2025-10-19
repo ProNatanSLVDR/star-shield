@@ -22,8 +22,10 @@ class Button(Component):
         extra_kwargs = kwargs.extra_kwargs.copy()
 
         # pop the extra_kwargs keys that are not needed
-        default_hx_modal = extra_kwargs.pop("default_hx_modal", None)
+        hx_modal_toggle = extra_kwargs.pop("hx_modal_toggle", None)
+        hx_modal_target = extra_kwargs.pop("hx_modal_target", None)
         modal_close = extra_kwargs.pop("modal_close", None)
+        
         disabled = extra_kwargs.pop("disabled", None)
 
         return {
@@ -32,8 +34,13 @@ class Button(Component):
             "text": kwargs.text,
             "href": kwargs.href,
             "extra_kwargs": extra_kwargs,
-            # custom kwargs
-            "default_hx_modal": default_hx_modal,
-            "modal_close": modal_close,
+
+
+            
             "disabled": disabled,
+
+            # Modals
+            "hx_modal_toggle": hx_modal_toggle,
+            "hx_modal_target": hx_modal_target,
+            "modal_close": modal_close,
         }

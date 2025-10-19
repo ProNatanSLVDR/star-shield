@@ -159,7 +159,7 @@ class GoogleCredentials(models.Model):
                     "title": location.get("title"),
                     "website_uri": location.get("websiteUri"),
                     "maps_uri": metadata.get("mapsUri"),
-                    "new_reviews_uri": metadata.get("newReviewsUri"),
+                    "new_reviews_uri": f"https://search.google.com/local/writereview?placeid={metadata.get('placeId')}",
                 },
             )
 

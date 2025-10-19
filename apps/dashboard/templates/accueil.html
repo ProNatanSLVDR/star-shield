@@ -1,7 +1,184 @@
 {% extends "dashboard_base.html" %}
 
 {% block dashboard_content %}
+    <div class="p-5 d-flex flex-column h-100">
+    <!-- Hero Section -->
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="display-4 fw-bold text-body-emphasis mb-2">
+                        Bienvenue, <span class="text-primary">{{ request.user.first_name|default:"cher utilisateur" }}</span>
+                    </h1>
+                    <p class="lead text-muted">Gérez votre image et protégez votre réputation en ligne avec StarShield</p>
+                </div>
+                <div class="text-primary opacity-10" style="font-size: 8rem;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+            </div>
+        </div>
 
+    <!-- Quick Stats Section -->
+        <div class="row g-3 mb-5">
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <p class="text-muted small mb-1">Établissements</p>
+                                <h2 class="fw-bold text-body-emphasis mb-0">0</h2>
+                            </div>
+                            <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
+                                <i class="fa-solid fa-building text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <p class="text-muted small mb-1">Avis Récents</p>
+                                <h2 class="fw-bold text-body-emphasis mb-0">0</h2>
+                            </div>
+                            <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
+                                <i class="fa-solid fa-star text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <p class="text-muted small mb-1">Note Moyenne</p>
+                                <h2 class="fw-bold text-body-emphasis mb-0">-</h2>
+                            </div>
+                            <div class="p-3 rounded-3" style="background: rgba(255, 193, 7, 0.1);">
+                                <i class="fa-solid fa-chart-line text-warning" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <p class="text-muted small mb-1">Statut Protection</p>
+                                <h2 class="fw-bold text-success mb-0">Actif</h2>
+                            </div>
+                            <div class="p-3 rounded-3" style="background: rgba(25, 135, 84, 0.1);">
+                                <i class="fa-solid fa-shield-check text-success" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Action Section -->
+        <div class="row g-3 flex-grow-1">
+        <!-- Get Started Card -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
+                                <i class="fa-solid fa-rocket text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0 ms-3">Premiers Pas</h5>
+                        </div>
+                        <p class="text-muted mb-4">Commencez à protéger votre réputation en ligne en ajoutant vos premiers établissements.</p>
+                        <a href="{% url 'dashboard:etablissements:list' %}" class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Ajouter un établissement</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Features Card -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-2 rounded-3" style="background: rgba(111, 66, 193, 0.1);">
+                                <i class="fa-solid fa-wand-magic-sparkles" style="color: #6f42c1; font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0 ms-3">Fonctionnalités</h5>
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="fa-solid fa-check-circle text-success me-2"></i>
+                                <span>Surveillance automatique des avis</span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="fa-solid fa-check-circle text-success me-2"></i>
+                                <span>Analyse de votre réputation</span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="fa-solid fa-check-circle text-success me-2"></i>
+                                <span>Gestion centralisée</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Info Section -->
+        <div class="mt-5 p-4 bg-light rounded-4 border">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h5 class="mb-2 fw-bold">Besoin d'aide pour démarrer ?</h5>
+                    <p class="text-muted mb-0">Notre équipe est disponible pour répondre à vos questions et vous guider dans la configuration de vos établissements.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#helpModal">
+                        <i class="fa-solid fa-question-circle me-2"></i>
+                        Besoin d'aide ?
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Help Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Contactez le Support</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Notre équipe est prête à vous aider. Vous pouvez nous contacter via :</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fa-solid fa-envelope text-primary me-2"></i>
+                            <a href="mailto:support@starshield.com" class="text-decoration-none">support@starshield.com</a>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fa-solid fa-phone text-primary me-2"></i>
+                            <a href="tel:+33123456789" class="text-decoration-none">+33 1 23 45 67 89</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .transition:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+        }
+    </style>
 {% endblock %}
 
 

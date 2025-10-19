@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="fr" class="h-100 min-vh-100">
+<html lang="fr" class="h-100">
     <head>
         <title>StarShield</title>
         <meta charset="UTF-8">
@@ -28,7 +28,7 @@
 
     </head>
 
-    <body class="h-100 min-vh-100" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+    <body class="h-100" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 
         {% block body %}
         {% endblock body %}

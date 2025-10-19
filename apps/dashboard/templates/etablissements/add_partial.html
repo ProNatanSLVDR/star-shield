@@ -1,0 +1,141 @@
+<!-- Import Etablissements Modal -->
+<div class="modal-header border-bottom-0 pb-0">
+    <h5 class="modal-title fw-bold text-dark">
+        <i class="fa-solid fa-plus pe-3 text-primary"></i>
+        Importer des établissements
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form method="POST" id="import-form">
+    {% csrf_token %}
+
+    <div class="modal-body px-4 py-4">
+        {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+                <i class="fa-solid fa-exclamation-circle pe-3 fs-5"></i>
+                <div>
+                    {% for error in form.non_field_errors %}
+                        <div class="mb-2">{{ error }}</div>
+                    {% endfor %}
+                    {% if form.errors.locations %}
+                        {% for error in form.errors.locations %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+
+        {% if available_locations %}
+            <div class="mb-3">
+                <p class="">Sélectionnez les établissements à importer:</p>
+            </div>
+            <div class="table-responsive rounded-3 border border-light-subtle">
+                <table class="table table-hover table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="border-bottom">
+                            <th></th>
+                            <th class="fw-semibold text-dark">
+                                <i class="fa-solid fa-store pe-2 text-primary"></i>Établissement
+                            </th>
+                            <th style="width: 120px;" class="text-center fw-semibold text-dark">
+                                <i class="fa-solid fa-check-circle pe-2 text-success"></i>Statut
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for location in available_locations %}
+                            <tr class="border-bottom-1" style="cursor: pointer;">
+                                <td class="ps-3">
+                                    {% if not location.exists %}
+                                        <input type="checkbox" class="form-check-input location-checkbox"
+                                               name="locations"
+                                               value="{{ location.name }}"
+                                               data-location-id="{{ location.name }}"
+                                               data-account-id="{{ location.account_id }}">
+                                    {% else %}
+                                        <input type="checkbox" class="form-check-input" disabled>
+                                    {% endif %}
+                                </td>
+                                <td class="ps-2">
+                                    <div class="fw-6 text-dark mb-1">{{ location.title }}</div>
+                                    <small class="text-muted d-block">{{ location.name }}</small>
+                                </td>
+                                <td class="text-center pe-3">
+                                    {% if location.exists %}
+                                        <span class="badge bg-success bg-opacity-10 text-success fw-semibold">
+                                            <i class="fa-solid fa-check-circle pe-2"></i>Importé
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary fw-semibold">
+                                            <i class="fa-solid fa-circle pe-2"></i>Nouveau
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if available_locations|length == 0 %}
+                <div class="alert alert-info alert-dismissible fade show d-flex align-items-center mt-3" role="alert">
+                    <i class="fa-solid fa-info-circle pe-3 fs-5"></i>
+                    <div>Aucun établissement à importer pour le moment.</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center" role="alert">
+                <i class="fa-solid fa-exclamation-triangle pe-3 fs-5"></i>
+                <div>Impossible de récupérer vos établissements Google. Veuillez réessayer.</div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="modal-footer">
+        {% if available_locations %}
+            {% component "button"
+            text="Importer"
+            classes="btn-primary fw-semibold"
+            icon="fa-solid fa-download"
+            extra_kwargs={
+            "hx-post": "{% url 'dashboard:etablissements:import_partial' %}",
+            "hx_modal_target": True,
+            }
+            /%}
+        {% else %}
+            {% component "button"
+            text="Fermer"
+            classes="btn-secondary fw-semibold"
+            icon="fa-solid fa-times"
+            extra_kwargs={
+            "data-bs-dismiss": "modal",
+            }
+            /%}
+        {% endif %}
+    </div>
+</form>
+
+<script>
+
+    document.querySelectorAll('.table tbody tr').forEach(function(row) {
+        row.addEventListener('click', function(e) {
+
+            var checkbox = row.querySelector('input[type="checkbox"]');
+
+            if (!checkbox || checkbox.disabled ||
+                e.target === checkbox ||
+                e.target.tagName === 'BUTTON' ||
+                e.target.closest('label')) {
+                    return;
+                }
+
+            checkbox.checked = !checkbox.checked;
+        // Optionally, trigger change event if some logic needs it
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    });
+</script>

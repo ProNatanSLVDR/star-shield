@@ -8,18 +8,14 @@
 </div>
 
 <div class="modal-body">
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-danger mb-3" role="alert">
         <i class="fa-solid fa-exclamation-triangle pe-2"></i>
-        <strong>Attention !</strong> Cette action est irréversible.
+        <strong>Attention !</strong>
+        Toutes les données associées à cet établissement seront supprimées définitivement.
     </div>
 
-    <p class="mb-3">
-        Êtes-vous sûr de vouloir supprimer l'établissement <strong>{{ etablissement.title }}</strong> ?
-    </p>
-
-    <p class="mb-0 text-muted small">
-        <i class="fa-solid fa-info-circle pe-1"></i>
-        Toutes les données associées à cet établissement seront supprimées.
+    <p class="mb-3 text-center">
+        Êtes-vous sûr de vouloir supprimer l'établissement <strong>{{ etablissement_title }}</strong> ?
     </p>
 </div>
 
@@ -29,19 +25,9 @@
     classes="btn-danger"
     icon="fa-solid fa-trash"
     extra_kwargs={
-    "hx-post": "{% url 'dashboard:etablissements:delete' etablissement.id %}",
+    "hx-post": "{{ delete_url }}",
     "hx-confirm": "Êtes-vous absolument certain de vouloir supprimer cet établissement ? Cette action ne peut pas être annulée.",
-    "hx-confirm-reopen": "false",
-    "hx-on": "htmx:afterRequest: closeModal()"
     }
     /%}
 </div>
 
-<script>
-    function closeModal() {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('dynamicModal'));
-        if (modal) {
-            modal.hide();
-        }
-    }
-</script>
