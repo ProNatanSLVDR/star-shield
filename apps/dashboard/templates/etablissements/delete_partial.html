@@ -2,7 +2,7 @@
 <div class="modal-header">
     <h5 class="modal-title">
         <i class="fa-solid fa-trash pe-2"></i>
-        Supprimer l'établissement
+        Supprimer l'établissement <strong>{{ etablissement_title }}</strong>
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
@@ -13,10 +13,6 @@
         <strong>Attention !</strong>
         Toutes les données associées à cet établissement seront supprimées définitivement.
     </div>
-
-    <p class="mb-3 text-center">
-        Êtes-vous sûr de vouloir supprimer l'établissement <strong>{{ etablissement_title }}</strong> ?
-    </p>
 </div>
 
 <div class="modal-footer">

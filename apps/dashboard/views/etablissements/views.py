@@ -100,7 +100,7 @@ def import_etablissement_partial(request):
     return starshield_render(request, "etablissements/add_partial.html", context=context, hx_triggers=hx_triggers)
 
 @google_gmb_connected_required
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def delete_etablissement_confirmation_partial(request, id):
     """
     Pour supprimer un etablissement
@@ -131,3 +131,16 @@ def delete_etablissement_confirmation_partial(request, id):
         hx_triggers["close-modal"] = True
 
     return starshield_render(request, "etablissements/delete_partial.html", context=context, hx_triggers=hx_triggers)
+
+
+@google_gmb_connected_required
+def select_etablissement(request, id):
+    etablissement = Etablissement.objects.filter(id=id, google_credential=request.user.google_credential).first()
+
+    if etablissement:
+        request.session["selected_etablissement"] = etablissement.id
+        return redirect("dashboard:reviews:list")
+    else:
+        messages.error(request, "Établissement non trouvé.")
+        return redirect("dashboard:etablissements:list")
+

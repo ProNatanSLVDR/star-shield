@@ -30,3 +30,15 @@ class CustomMessageMiddleware(MiddlewareMixin):
             response.headers["X-Messages"] = json.dumps(messages)
 
         return response
+
+
+class EtablissementMiddleware(MiddlewareMixin):
+    """
+    Middleware that adds the selected etablissement to the request
+    """
+
+    def __call__(self, request):
+        etablissement = request.session.get("selected_etablissement")
+        if etablissement:
+            request.etablissement = etablissement
+        return self.get_response(request)
