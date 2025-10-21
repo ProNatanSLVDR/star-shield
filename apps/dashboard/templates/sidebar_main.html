@@ -16,6 +16,12 @@
 
     <hr>
 
+    <div hx-get="{% url 'dashboard:etablissements:selector_partial' %}"
+         hx-trigger="load"
+         hx-swap="innerHTML"
+         id="etablissementSelector">
+    </div>
+
     {% component "navlink"
     link="dashboard:etablissements:list"
     icon="fa-solid fa-pen-to-square"

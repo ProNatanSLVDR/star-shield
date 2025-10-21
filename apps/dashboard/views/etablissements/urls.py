@@ -8,4 +8,8 @@ urlpatterns = [
     path('import/', views.import_etablissement_partial, name='import_partial'),
     path('delete/<int:id>/', views.delete_etablissement_confirmation_partial, name='delete_partial'),
 
+
+    # Selection d'un établissement
+    path('select/<int:id>/', views.select_etablissement, name='select'),
+    path('selector-partial/', views.etablissement_selector_partial, name='selector_partial'),
 ]

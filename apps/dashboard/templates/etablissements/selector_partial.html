@@ -1,0 +1,15 @@
+{% if user_etablissements|length > 1 %}
+    <div class="mb-3">
+        <form method="get">
+            <select class="form-select form-select-sm" name="etablissement_id" onchange="window.location.href='{% url 'dashboard:etablissements:select' 0 %}'.replace('/0/', '/' + this.value + '/');">
+                <option value="">-- Sélectionner un établissement --</option>
+                {% for etablissement in user_etablissements %}
+                    <option value="{{ etablissement.id }}" {% if etablissement.id == selected_etablissement_id %}selected{% endif %}>
+                        {{ etablissement.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <hr>
+{% endif %}

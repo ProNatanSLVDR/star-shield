@@ -144,3 +144,20 @@ def select_etablissement(request, id):
         messages.error(request, "Établissement non trouvé.")
         return redirect("dashboard:etablissements:list")
 
+
+@google_gmb_connected_required
+def etablissement_selector_partial(request):
+    """
+    Returns the établissement selector partial for the sidebar.
+    Only loaded on demand via HTMX.
+    """
+    etablissements = request.user.google_credential.etablissements.all()
+    selected_etablissement_id = request.session.get("selected_etablissement", None)
+    
+    context = {
+        "user_etablissements": etablissements,
+        "selected_etablissement_id": selected_etablissement_id,
+    }
+    
+    return starshield_render(request, "etablissements/selector_partial.html", context=context)
+
