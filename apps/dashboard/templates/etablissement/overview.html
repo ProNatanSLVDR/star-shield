@@ -1,6 +1,124 @@
 {% extends "dashboard_base.html" %}
+{% load component_tags %}
 
 {% block dashboard_content %}
+    <div class="p-4">
+    <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1">{{ etablissement.title }}</h1>
+                <p class="text-muted mb-0">Aperçu des avis et statistiques</p>
+            </div>
 
+        <!-- Period Filter -->
+            <div class="btn-group" role="group">
+                <a href="?period=7" class="btn btn-outline-primary {% if period == '7' %}active{% endif %}">7 jours</a>
+                <a href="?period=30" class="btn btn-outline-primary {% if period == '30' %}active{% endif %}">30 jours</a>
+                <a href="?period=90" class="btn btn-outline-primary {% if period == '90' %}active{% endif %}">90 jours</a>
+                <a href="?period=all" class="btn btn-outline-primary {% if period == 'all' %}active{% endif %}">Tout</a>
+            </div>
+        </div>
 
-{% endblock %}
+    <!-- Key Metrics Cards -->
+        <div class="row mb-4">
+        <!-- Average Rating -->
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            {% component "star_rating" input_id="avg-rating" initial_rating=avg_rating readonly=True  /%}
+                        </div>
+                        <h4 class="mb-1">{{ avg_rating }}</h4>
+                        <p class="text-muted mb-0">Note moyenne</p>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Total Reviews -->
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            <i class="fa-solid fa-comments text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h4 class="mb-1">{{ total_reviews }}</h4>
+                        <p class="text-muted mb-0">Total avis</p>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Internal Reviews -->
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            <i class="fa-solid fa-shield-halved text-secondary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h4 class="mb-1">{{ internal_count }}</h4>
+                        <p class="text-muted mb-0">Avis internes</p>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Google Reviews -->
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            <i class="fa-brands fa-google text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h4 class="mb-1">{{ google_count }}</h4>
+                        <p class="text-muted mb-0">Avis Google</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Rating Distribution -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="mb-0">Distribution des notes</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for rating, count in rating_distribution.items %}
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="me-3" style="width: 60px;">
+                                    <span class="fw-semibold">{{ rating }}★</span>
+                                </div>
+                                <div class="flex-grow-1 me-3">
+                                    <div class="progress" style="height: 20px;">
+                                        {% if total_reviews > 0 %}
+                                            {% widthratio count total_reviews 100 as percentage %}
+                                            <div class="progress-bar bg-warning" role="progressbar"
+                                                 style="width: {{ percentage }}%">
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-muted" style="width: 50px; text-align: right;">
+                                    {{ count }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Recent Reviews -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="mb-0">Avis récents</h5>
+                    </div>
+                    <div class="card-body p-0">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock dashboard_content %}

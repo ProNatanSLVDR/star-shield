@@ -34,6 +34,7 @@ def feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
                 etablissement=etablissement,
                 rating=rating,
                 comment=comment,
+                source='internal',
             )
 
             if rating >= etablissement.review_threshold:
