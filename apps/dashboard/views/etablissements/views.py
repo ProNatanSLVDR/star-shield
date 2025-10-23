@@ -139,7 +139,7 @@ def select_etablissement(request, id):
 
     if etablissement:
         request.session["selected_etablissement"] = etablissement.id
-        return redirect("dashboard:reviews:list")
+        return redirect("dashboard:etablissement:overview")
     else:
         messages.error(request, "Établissement non trouvé.")
         return redirect("dashboard:etablissements:list")
