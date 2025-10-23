@@ -247,12 +247,17 @@ class Etablissement(models.Model):
 
 class RatingHistory(models.Model):
     etablissement = models.ForeignKey(Etablissement, on_delete=models.CASCADE, related_name='rating_history')
+
     rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    
     total_reviews = models.PositiveIntegerField(default=0)
-    google_rating = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+
+    google_rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)], null=True, blank=True)
     google_review_count = models.PositiveIntegerField(null=True, blank=True)
-    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
-        return f"Rating {self.rating}★ for {self.etablissement.title} on {self.recorded_at.strftime('%Y-%m-%d')}"
+        return f"Rating {self.rating}★ for {self.etablissement.title} on {self.created_at.strftime('%Y-%m-%d')}"
 
