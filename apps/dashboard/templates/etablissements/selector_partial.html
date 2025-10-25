@@ -1,41 +1,12 @@
-{% if user_etablissements|length > 1 %}
-    <div class="px-3 mb-3">
-        <small class="text-muted text-uppercase">Établissement</small>
-        <div class="dropdown w-100 mt-2">
-            <button class="w-100 border-0 bg-light p-2 rounded-3 d-flex align-items-center gap-3 text-start" type="button" data-bs-toggle="dropdown" data-bs-strategy="fixed" aria-expanded="false">
-                <div>
-                    <div class="rounded-circle bg-primary-subtle text-primary text-center d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                        <i class="fa-solid fa-building"></i>
-                    </div>
-                </div>
-                <span class="flex-grow-1 d-flex flex-column overflow-hidden"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
-                      title="{% if selected_etablissement %}{{ selected_etablissement.title }}{% endif %}">
-                    <span class="fw-bold text-truncate">
-                        {% if selected_etablissement %}
-                            {{ selected_etablissement.title }}
-                        {% else %}
-                            Sélectionner...
-                        {% endif %}
-                    </span>
-                </span>
-                <span class="text-muted"><i class="fa-solid fa-chevron-down"></i></span>
-            </button>
-            <ul class="dropdown-menu w-100 shadow border rounded-4 py-2">
-                {% for etablissement in user_etablissements %}
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2 {% if selected_etablissement and etablissement.id == selected_etablissement.id %}active{% endif %}"
-                           href="{% url 'dashboard:etablissements:select' etablissement.id %}"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="right"
-                           title="{{ etablissement.title }}">
-                            <span class="text-truncate">{{ etablissement.title }}</span>
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    <hr>
-{% endif %}
+
+
+{% component
+"table"
+headers=etablissements_table.headers
+rows=etablissements_table.rows
+title="Liste de vos établissements"
+modal_size="lg"
+%}
+
+
+{% endcomponent %}

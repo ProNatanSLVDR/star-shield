@@ -1,0 +1,24 @@
+<div class="modal fade" id="{{ modal_id }}" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-{{ size }} modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% slot title %}Titre de la modal{% endslot %}
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Fermer"></button>
+            </div>
+            <div id="{{ modal_id }}-inner-content">
+                <div class="modal-body">
+                    {% slot body %}{% endslot %}
+                </div>
+                <div class="modal-footer">
+                    {% slot footer %}{% endslot %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

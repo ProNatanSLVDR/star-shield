@@ -19,9 +19,9 @@ def list_etablissements_view(request):
 
     # Prepare table headers
     headers = [
-        {'label': 'Titre', 'key': 'title', 'searchable': True, 'orderable': True},
-        {'label': 'Website', 'key': 'website_uri', 'orderable': False},
-        {'label': 'Créé', 'key': 'created_at', 'orderable': True, 'centered': True},
+        {'label': 'Nom de l\'établissement', 'key': 'title', 'searchable': True, 'orderable': True},
+        {'label': 'Site web', 'key': 'website_uri', 'orderable': False},
+        {'label': 'Date de création', 'key': 'created_at', 'orderable': True, 'centered': True},
         {'label': 'Actions', 'key': 'actions', 'centered': True},
     ]
 
@@ -152,11 +152,43 @@ def etablissement_selector_partial(request):
     Only loaded on demand via HTMX.
     """
     etablissements = request.user.google_credential.etablissements.all()
-    selected_etablissement_id = request.session.get("selected_etablissement", None)
-    
+
+    # Prepare table headers
+    headers = [
+        {'label': 'Nom de l\'établissement', 'key': 'title', 'searchable': True, 'orderable': True},
+        {'label': 'Actions', 'key': 'actions', 'centered': True},
+    ]
+
+    # Prepare table rows
+    rows = []
+    for etablissement in etablissements:
+        select_button = {
+            "text": "Sélectionner",
+            "icon": "fa-solid fa-check",
+            "classes": "btn-sm btn-primary",
+            "extra_kwargs": {
+                "href": reverse('dashboard:etablissements:select', args=[etablissement.id]),
+            }
+        }
+        
+        row = {
+            'title': etablissement.title,
+            'website_uri': etablissement.website_uri or 'N/A',
+            'created_at': etablissement.created_at.strftime('%d/%m/%Y') if etablissement.created_at else 'N/A',
+            'actions': {
+                'type': 'buttons',
+                'buttons': [select_button],
+                'centered': True,
+            }
+        }
+        rows.append(row)
+
+    # Prepare context with table data
     context = {
-        "user_etablissements": etablissements,
-        "selected_etablissement_id": selected_etablissement_id,
+        "etablissements_table": {
+            "headers": headers,
+            "rows": rows,
+        }
     }
     
     return starshield_render(request, "etablissements/selector_partial.html", context=context)

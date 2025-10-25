@@ -1,6 +1,7 @@
 from django.contrib.messages import get_messages
 from django.utils.deprecation import MiddlewareMixin
 import json
+from auths.models import Etablissement
 
 
 class CustomMessageMiddleware(MiddlewareMixin):
@@ -40,5 +41,5 @@ class EtablissementMiddleware(MiddlewareMixin):
     def __call__(self, request):
         etablissement = request.session.get("selected_etablissement")
         if etablissement:
-            request.etablissement = etablissement
+            request.etablissement = Etablissement.objects.get(id=etablissement)
         return self.get_response(request)

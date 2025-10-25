@@ -76,7 +76,7 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
 
     credentials = flow.credentials
 
-    google_credential, _ = GoogleCredentials.objects.update_or_create(
+    google_credential, created = GoogleCredentials.objects.update_or_create(
         user=request.user,
         client_id=credentials.client_id,
         defaults={
@@ -85,6 +85,7 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
             "token_uri": credentials.token_uri,
             "client_secret": credentials.client_secret,
             "scopes": " ".join(credentials.scopes),
+            "is_valid": True,
         },
     )
 

@@ -70,6 +70,7 @@ class Base(Configuration):
         "django_htmx.middleware.HtmxMiddleware",
         "allauth.account.middleware.AccountMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
+        "starshield.middleware.EtablissementMiddleware",
     ]
 
     ROOT_URLCONF = 'starshield.urls'

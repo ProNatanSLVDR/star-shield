@@ -1,5 +1,5 @@
-{% if href %}
-    <a href=" {% slot href %} {% endslot %} " class="btn {{classes}} {% if disabled %}disabled{% endif %}"
+{% if extra_kwargs.href %}
+    <a href=" {{ extra_kwargs.href }} " class="btn {{classes}} {% if disabled %}disabled{% endif %}"
        {% for key, value in extra_kwargs.items %}
            {{ key }}="{{ value }}"
        {% endfor %}

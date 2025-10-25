@@ -32,11 +32,8 @@ class Button(Component):
             "classes": kwargs.classes,
             "icon": kwargs.icon,
             "text": kwargs.text,
-            "href": kwargs.href,
             "extra_kwargs": extra_kwargs,
 
-
-            
             "disabled": disabled,
 
             # Modals

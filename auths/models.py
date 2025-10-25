@@ -180,7 +180,12 @@ class GoogleCredentials(models.Model):
 
         available_locations = []
         
-        accounts = accounts_service.accounts().list().execute()
+        try:
+            accounts = accounts_service.accounts().list().execute()
+        except Exception:
+            # If we can't list accounts, return empty
+            return []
+            
         for account in accounts.get("accounts", []):
 
             next_page_token = None
@@ -243,6 +248,71 @@ class Etablissement(models.Model):
     def get_public_identifier(self) -> str:
         """Return the best available identifier for public URLs."""
         return self.slug or str(self.uuid)
+
+
+
+    def update_reviews(self):
+        """Populate reviews from Google My Business until finding an already existing review."""
+        from apps.reviews.models import Review
+        
+        creds = self.google_credential.get_valid_credentials()
+        if not creds:
+            return False
+
+        try:
+            service = build("mybusiness", "v4", credentials=creds)
+        except Exception as e:
+            print(f"Error building reviews service for {self.title}: {e}")
+            return False
+
+
+        count_added = 0
+        next_page_token = None
+        found_existing = False
+
+        while not found_existing:
+            try:
+                reviews_data = service.accounts().locations().reviews().list(
+                    name=self.location_id,
+                    pageSize=100,
+                    pageToken=next_page_token
+                ).execute()
+            except Exception as e:
+                print(f"Error fetching reviews for {self.title}: {e}")
+                break
+
+            reviews = reviews_data.get("reviews", [])
+            
+            for review in reviews:
+                # Create unique identifier to check if review already exists
+                review_comment = review.get("comment", "")
+                review_rating = review.get("rating")
+
+                # Try to get or create review
+                try:
+                    review_obj, created = Review.objects.get_or_create(
+                        etablissement=self,
+                        comment=review_comment,
+                        rating=review_rating,
+                        source='google'
+                    )
+                    
+                    if created:
+                        count_added += 1
+                    else:
+                        # Found an existing review, stop here
+                        found_existing = True
+                        break
+                except Exception as e:
+                    print(f"Error creating review: {e}")
+                    continue
+
+            # Check for next page
+            next_page_token = reviews_data.get("nextPageToken")
+            if not next_page_token or found_existing:
+                break
+
+        return count_added
 
 
 class RatingHistory(models.Model):

@@ -17,10 +17,51 @@
     <hr>
 
     <div hx-get="{% url 'dashboard:etablissements:selector_partial' %}"
-         hx-trigger="load"
+         hx-trigger="click"
+         hx-target="#etablissementSelectorModal-inner-content"
          hx-swap="innerHTML"
-         id="etablissementSelector">
+         data-bs-toggle="modal"
+         data-bs-target="#etablissementSelectorModal"
+         class="d-flex flex-column border border-primary-subtle border-2 rounded-3 overflow-hidden"
+         style="cursor: pointer;">
+        <div class="d-flex align-items-center bg-primary p-2 px-3 fw-bold text-white">
+
+            <div class="rounded-circle bg-white text-primary text-center d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                <i class="fa-solid fa-building"></i>
+            </div>
+            <span class="ms-3 flex-grow-1">
+                Établissement
+            </span>
+
+        </div>
+        <div class="p-2 text-center">
+            {% if request.etablissement %}
+                {{ request.etablissement }}
+            {% else %}
+                Aucun
+            {% endif %}
+        </div>
+
+        {% component "empty_modal"
+        modal_id="etablissementSelectorModal"
+        size="lg"
+        %}
+        {% fill title %}
+            Sélectionnez un établissement
+        {% endfill %}
+        {% endcomponent %}
     </div>
+
+    <hr>
+
+    {% component "navlink"
+    link="dashboard:etablissement:overview"
+    icon="fa-solid fa-chart-line"
+    text="Vue d'ensemble"
+    page_name="etablissement"
+    current_page=current_page / %}
+
+
 
     {% component "navlink"
     link="dashboard:etablissements:list"
