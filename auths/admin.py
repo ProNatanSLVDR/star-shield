@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from .models import User, GoogleCredentials, Etablissement
+from .models import User, GoogleCredentials, Etablissement, RatingHistory
 from django.contrib import admin
 from allauth.account.decorators import secure_admin_login
 
@@ -39,3 +39,10 @@ class EtablissementAdmin(admin.ModelAdmin):
     list_display = ("title", "slug", "uuid", "review_threshold")
     search_fields = ("title", "slug", "uuid")
     list_filter = ("created_at", "updated_at")
+
+
+@admin.register(RatingHistory)
+class RatingHistoryAdmin(admin.ModelAdmin):
+    list_display = ("etablissement", "rating", "total_reviews", "created_at")
+    search_fields = ("etablissement__title",)
+    list_filter = ("created_at",)  

@@ -75,7 +75,7 @@ class Base(Configuration):
 
     ROOT_URLCONF = 'starshield.urls'
 
-
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 
     TEMPLATES = [
         {

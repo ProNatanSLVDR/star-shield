@@ -9,7 +9,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
-
+from apps.reviews.utils import google_stars_to_number
 
 class UserManager(BaseUserManager):
     def _create_user(self, email: str, password: str | None, **extra_fields):
@@ -130,16 +130,46 @@ class GoogleCredentials(models.Model):
 
         return creds
 
+
+    def get_reviews_service(self):
+
+        try:
+            reviews_service = build(
+                "mybusiness", 
+                "v4", 
+                static_discovery=False,
+                discoveryServiceUrl='https://developers.google.com/my-business/samples/mybusiness_google_rest_v4p9.json',
+                credentials=self.get_valid_credentials()
+            )
+            return reviews_service
+        except Exception as e:
+            print(f"Error building reviews service: {e}")
+            return False
+
+    def get_locations_service(self):
+        try:
+            locations_service = build("mybusinessbusinessinformation", "v1", credentials=self.get_valid_credentials())
+            return locations_service
+        except Exception as e:
+            print(f"Error building locations service: {e}")
+            return False
+
+    def get_accounts_service(self):
+        try:
+            accounts_service = build("mybusinessaccountmanagement", "v1", credentials=self.get_valid_credentials())
+            return accounts_service
+        except Exception as e:
+            print(f"Error building accounts service: {e}")
+            return False
+
+
     def create_etablissement_from_location(self, account_id, location_id):
         """
         Crée ou met à jour un seul établissement à partir d'un location_id Google My Business.
         """
-        creds = self.get_valid_credentials()
-        if not creds:
-            return False
 
         # Services API
-        locations_service = build("mybusinessbusinessinformation", "v1", credentials=creds)
+        locations_service = self.get_locations_service()
 
         try:
             # Récupération des informations de la location
@@ -171,12 +201,8 @@ class GoogleCredentials(models.Model):
             return None
 
     def list_available_locations(self):
-        creds = self.get_valid_credentials()
-        if not creds:
-            return False
-
-        accounts_service = build("mybusinessaccountmanagement", "v1", credentials=creds)
-        locations_service = build("mybusinessbusinessinformation", "v1", credentials=creds)
+        accounts_service = self.get_accounts_service()
+        locations_service = self.get_locations_service()
 
         available_locations = []
         
@@ -245,85 +271,87 @@ class Etablissement(models.Model):
     def __str__(self):
         return self.title
 
-    def get_public_identifier(self) -> str:
-        """Return the best available identifier for public URLs."""
-        return self.slug or str(self.uuid)
 
+    def update_data(self, force_import=False):
 
-
-    def update_reviews(self):
-        """Populate reviews from Google My Business until finding an already existing review."""
         from apps.reviews.models import Review
-        
-        creds = self.google_credential.get_valid_credentials()
-        if not creds:
-            return False
 
-        try:
-            service = build("mybusiness", "v4", credentials=creds)
-        except Exception as e:
-            print(f"Error building reviews service for {self.title}: {e}")
-            return False
+        reviews_service = self.google_credential.get_reviews_service()
 
+        print("start updating data for", self.title)
 
-        count_added = 0
+        continue_import = True
+        import_count = 0
         next_page_token = None
-        found_existing = False
+        first_iteration = True
 
-        while not found_existing:
+        # si force_import est True, on importe toutes les reviews, même si elles existent déjà
+        # sinon, on importe uniquement les reviews qui n'existent pas encore
+        while continue_import is True:
+
+            # récupération des reviews
             try:
-                reviews_data = service.accounts().locations().reviews().list(
-                    name=self.location_id,
+                reviews_data = reviews_service.accounts().locations().reviews().list(
+                    parent=f"{self.account_id}/{self.location_id}",
                     pageSize=100,
                     pageToken=next_page_token
                 ).execute()
             except Exception as e:
                 print(f"Error fetching reviews for {self.title}: {e}")
                 break
-
-            reviews = reviews_data.get("reviews", [])
             
-            for review in reviews:
-                # Create unique identifier to check if review already exists
-                review_comment = review.get("comment", "")
-                review_rating = review.get("rating")
+            # on crée l'historique des notes la première fois
+            if first_iteration:
+                first_iteration = False
 
-                # Try to get or create review
+                RatingHistory.objects.create(
+                    etablissement=self,
+                    rating=reviews_data.get("averageRating", 0),
+                    total_reviews=reviews_data.get("totalReviewCount", 0),
+                )
+
+            # on importe les reviews
+            reviews = reviews_data.get("reviews", [])
+            for review in reviews:
+
+                # on importe la review
                 try:
-                    review_obj, created = Review.objects.get_or_create(
+                    new_review, created = Review.objects.update_or_create(
                         etablissement=self,
-                        comment=review_comment,
-                        rating=review_rating,
-                        source='google'
+                        source='google',
+                        google_review_id=review.get("reviewId"),
+
+                        # les infos suivantes n'identifient pas un review unique, on les met à jour si elles changent
+                        defaults={
+                            'comment': review.get("comment", ""),
+                            'rating': google_stars_to_number(review.get("starRating")),
+                            'google_reviewer_data': review.get("reviewer"),
+                            'writen_at': review.get("createTime"),
+                        },
                     )
-                    
-                    if created:
-                        count_added += 1
-                    else:
-                        # Found an existing review, stop here
-                        found_existing = True
-                        break
+                    import_count += 1
+                    print(f"imported {import_count} reviews")
+
+                    # condition pour stopper l'importation
+                    if force_import is False:
+                        if created is False:
+                            continue_import = False
+                            break
                 except Exception as e:
                     print(f"Error creating review: {e}")
                     continue
 
-            # Check for next page
-            next_page_token = reviews_data.get("nextPageToken")
-            if not next_page_token or found_existing:
+            # Check si y'a une page suivante
+            next_page_token = reviews_data.get("nextPageToken", None)
+            if next_page_token is None or continue_import is False:
                 break
-
-        return count_added
 
 
 class RatingHistory(models.Model):
     etablissement = models.ForeignKey(Etablissement, on_delete=models.CASCADE, related_name='rating_history')
 
     rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)])
-    
     total_reviews = models.PositiveIntegerField(default=0)
-
-    google_rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)], null=True, blank=True)
-    google_review_count = models.PositiveIntegerField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     

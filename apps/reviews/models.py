@@ -18,6 +18,10 @@ class Review(models.Model):
     comment = models.TextField(blank=True)
     source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='internal')
 
+    google_review_id = models.CharField(max_length=255, blank=True, null=True)
+    google_reviewer_data = models.JSONField(blank=True, null=True)
+
+    writen_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

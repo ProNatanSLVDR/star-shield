@@ -8,13 +8,14 @@ from apps.reviews.models import Review
 from apps.dashboard.render import starshield_render
 from starshield.decorators import google_gmb_connected_required, selected_etablissement_required
 
+from googleapiclient.discovery import build
+
 
 @google_gmb_connected_required
 @selected_etablissement_required
 def overview_view(request):
 
-
-    request.etablissement.update_reviews()
+    request.etablissement.update_data(force_import=True)
     
 
     context = {

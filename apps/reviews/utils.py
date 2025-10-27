@@ -42,4 +42,23 @@ def calcul_objectif(noteactu: float, nb_notes: int, objectif: float) -> float:
 
     return results
 
-calcul_objectif(noteactu=3.2, nb_notes=12, objectif=4.7)
+#calcul_objectif(noteactu=3.2, nb_notes=12, objectif=4.7)
+
+
+def google_stars_to_number(stars: str) -> int:
+    """
+    convertit les étoiles Google en nombre
+    """
+
+    if stars == "ONE":
+        return 1
+    elif stars == "TWO":
+        return 2
+    elif stars == "THREE":
+        return 3
+    elif stars == "FOUR":
+        return 4
+    elif stars == "FIVE":
+        return 5
+    else:
+        return 0
