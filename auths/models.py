@@ -277,42 +277,62 @@ class Etablissement(models.Model):
         from apps.reviews.models import Review
 
         reviews_service = self.google_credential.get_reviews_service()
+        if reviews_service is False:
+            print(f"Unable to initialize reviews service for {self.title}")
+            return
+
+        parent_path = f"{self.account_id}/{self.location_id}"
+
+        try:
+            stats_response = reviews_service.accounts().locations().reviews().list(
+                parent=parent_path,
+                pageSize=1
+            ).execute()
+        except Exception as e:
+            print(f"Error fetching review stats for {self.title}: {e}")
+            return
+
+        try:
+            RatingHistory.objects.create(
+                etablissement=self,
+                rating=stats_response.get("averageRating", 0),
+                total_reviews=stats_response.get("totalReviewCount", 0),
+            )
+        except Exception as e:
+            print(f"Error recording rating history for {self.title}: {e}")
+            return
 
         print("start updating data for", self.title)
 
         continue_import = True
         import_count = 0
         next_page_token = None
-        first_iteration = True
 
         # si force_import est True, on importe toutes les reviews, même si elles existent déjà
         # sinon, on importe uniquement les reviews qui n'existent pas encore
         while continue_import is True:
 
-            # récupération des reviews
             try:
-                reviews_data = reviews_service.accounts().locations().reviews().list(
-                    parent=f"{self.account_id}/{self.location_id}",
-                    pageSize=100,
-                    pageToken=next_page_token
+                reviews_data = reviews_service.accounts().locations().batchGetReviews(
+                    name=self.account_id,
+                    body={
+                        "locationNames": [parent_path],
+                        "pageSize": 1000,
+                        "pageToken": next_page_token,
+                    },
                 ).execute()
             except Exception as e:
                 print(f"Error fetching reviews for {self.title}: {e}")
                 break
-            
-            # on crée l'historique des notes la première fois
-            if first_iteration:
-                first_iteration = False
 
-                RatingHistory.objects.create(
-                    etablissement=self,
-                    rating=reviews_data.get("averageRating", 0),
-                    total_reviews=reviews_data.get("totalReviewCount", 0),
-                )
+            location_reviews = reviews_data.get("locationReviews", [])
+            if not location_reviews:
+                break
 
-            # on importe les reviews
-            reviews = reviews_data.get("reviews", [])
-            for review in reviews:
+            for location_review in location_reviews:
+                review = location_review.get("review")
+                if review is None:
+                    continue
 
                 # on importe la review
                 try:
@@ -333,10 +353,9 @@ class Etablissement(models.Model):
                     print(f"imported {import_count} reviews")
 
                     # condition pour stopper l'importation
-                    if force_import is False:
-                        if created is False:
-                            continue_import = False
-                            break
+                    if force_import is False and created is False:
+                        continue_import = False
+                        break
                 except Exception as e:
                     print(f"Error creating review: {e}")
                     continue
