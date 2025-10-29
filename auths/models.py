@@ -313,13 +313,10 @@ class Etablissement(models.Model):
         while continue_import is True:
 
             try:
-                reviews_data = reviews_service.accounts().locations().batchGetReviews(
-                    name=self.account_id,
-                    body={
-                        "locationNames": [parent_path],
-                        "pageSize": 1000,
-                        "pageToken": next_page_token,
-                    },
+                reviews_data = reviews_service.accounts().locations().reviews().list(
+                    parent=f"{self.account_id}/{self.location_id}",
+                    pageSize=50,
+                    pageToken=next_page_token
                 ).execute()
             except Exception as e:
                 print(f"Error fetching reviews for {self.title}: {e}")
