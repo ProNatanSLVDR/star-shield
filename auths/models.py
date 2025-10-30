@@ -2,7 +2,10 @@ from __future__ import annotations
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 import uuid
+import logging
 from google.oauth2.credentials import Credentials
 from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
@@ -10,6 +13,8 @@ from googleapiclient.discovery import build
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from frontend.reviews.utils import google_stars_to_number
+
+logger = logging.getLogger(__name__)
 
 
 class UserManager(BaseUserManager):
@@ -283,6 +288,7 @@ class Etablissement(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_reviews_update = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -400,3 +406,35 @@ class RatingHistory(models.Model):
 
     def __str__(self):
         return f"Rating {self.rating}★ for {self.etablissement.title} on {self.created_at.strftime('%Y-%m-%d')}"
+
+
+@receiver(post_save, sender=Etablissement)
+def trigger_review_fetch_on_creation(sender, instance, created, **kwargs):
+    """
+    Signal handler to trigger full review fetch when a new Etablissement is created.
+    """
+    if created:
+        try:
+            # Import here to avoid circular dependency
+            from tasks_api.services.cloud_tasks import enqueue_review_fetch_task
+            
+            task_name = enqueue_review_fetch_task(
+                etablissement_id=instance.id,
+                task_type="fetch-all",
+            )
+            if task_name:
+                logger.info(
+                    f"Enqueued full review fetch task for newly created Etablissement {instance.id}"
+                )
+            else:
+                logger.warning(
+                    f"Failed to enqueue review fetch task for Etablissement {instance.id}"
+                )
+        except ImportError:
+            # tasks_api might not be available in all environments (e.g., migrations)
+            logger.debug("tasks_api not available, skipping task enqueue")
+        except Exception as e:
+            logger.error(
+                f"Error enqueueing review fetch task for Etablissement {instance.id}: {e}",
+                exc_info=True,
+            )

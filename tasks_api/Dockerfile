@@ -6,6 +6,8 @@ WORKDIR /app
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=tasks_api.settings
+ENV DJANGO_CONFIGURATION=Prod
 
 # install dependencies
 RUN pip install --upgrade pip
@@ -15,4 +17,9 @@ RUN pip install -r requirements.txt
 # copy project
 COPY . .
 
-#RUN python prod.manage.py collectstatic --noinput
+# Expose port for API service (different from main web app)
+EXPOSE 8001
+
+# Run WSGI server for API
+CMD ["gunicorn", "tasks_api.wsgi:application", "--bind", "0.0.0.0:8001", "--workers", "2"]
+
