@@ -9,7 +9,8 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
-from apps.reviews.utils import google_stars_to_number
+from frontend.reviews.utils import google_stars_to_number
+
 
 class UserManager(BaseUserManager):
     def _create_user(self, email: str, password: str | None, **extra_fields):
@@ -43,7 +44,9 @@ class UserManager(BaseUserManager):
                 defaults={"verified": True, "primary": True},
             )
         except Exception as exc:  # pragma: no cover - defensive guard
-            raise ValueError("Failed to auto-verify the superuser email address.") from exc
+            raise ValueError(
+                "Failed to auto-verify the superuser email address."
+            ) from exc
 
         return superuser
 
@@ -88,10 +91,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-
 # Google GMB
 class GoogleCredentials(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="google_credential")
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="google_credential"
+    )
 
     is_valid = models.BooleanField(default=False)
 
@@ -104,7 +108,6 @@ class GoogleCredentials(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     def get_valid_credentials(self) -> Credentials:
         creds = Credentials(
@@ -130,16 +133,14 @@ class GoogleCredentials(models.Model):
 
         return creds
 
-
     def get_reviews_service(self):
-
         try:
             reviews_service = build(
-                "mybusiness", 
-                "v4", 
+                "mybusiness",
+                "v4",
                 static_discovery=False,
-                discoveryServiceUrl='https://developers.google.com/my-business/samples/mybusiness_google_rest_v4p9.json',
-                credentials=self.get_valid_credentials()
+                discoveryServiceUrl="https://developers.google.com/my-business/samples/mybusiness_google_rest_v4p9.json",
+                credentials=self.get_valid_credentials(),
             )
             return reviews_service
         except Exception as e:
@@ -148,7 +149,11 @@ class GoogleCredentials(models.Model):
 
     def get_locations_service(self):
         try:
-            locations_service = build("mybusinessbusinessinformation", "v1", credentials=self.get_valid_credentials())
+            locations_service = build(
+                "mybusinessbusinessinformation",
+                "v1",
+                credentials=self.get_valid_credentials(),
+            )
             return locations_service
         except Exception as e:
             print(f"Error building locations service: {e}")
@@ -156,12 +161,15 @@ class GoogleCredentials(models.Model):
 
     def get_accounts_service(self):
         try:
-            accounts_service = build("mybusinessaccountmanagement", "v1", credentials=self.get_valid_credentials())
+            accounts_service = build(
+                "mybusinessaccountmanagement",
+                "v1",
+                credentials=self.get_valid_credentials(),
+            )
             return accounts_service
         except Exception as e:
             print(f"Error building accounts service: {e}")
             return False
-
 
     def create_etablissement_from_location(self, account_id, location_id):
         """
@@ -173,13 +181,14 @@ class GoogleCredentials(models.Model):
 
         try:
             # Récupération des informations de la location
-            location = locations_service.locations().get(
-                name=location_id,
-                readMask="name,title,metadata,websiteUri"
-            ).execute()
+            location = (
+                locations_service.locations()
+                .get(name=location_id, readMask="name,title,metadata,websiteUri")
+                .execute()
+            )
 
             metadata = location.get("metadata", {})
-            
+
             # Création ou mise à jour de l'établissement
             etablissement, created = Etablissement.objects.update_or_create(
                 google_credential=self,
@@ -197,7 +206,9 @@ class GoogleCredentials(models.Model):
 
         except Exception as e:
             # Gestion d'erreur simple (peut être remplacée par du logging)
-            print(f"Erreur lors de la création de l'établissement pour {location_id}: {e}")
+            print(
+                f"Erreur lors de la création de l'établissement pour {location_id}: {e}"
+            )
             return None
 
     def list_available_locations(self):
@@ -205,23 +216,27 @@ class GoogleCredentials(models.Model):
         locations_service = self.get_locations_service()
 
         available_locations = []
-        
+
         try:
             accounts = accounts_service.accounts().list().execute()
         except Exception:
             # If we can't list accounts, return empty
             return []
-            
-        for account in accounts.get("accounts", []):
 
+        for account in accounts.get("accounts", []):
             next_page_token = None
             while True:
                 # Récupération des locations
-                locations = locations_service.accounts().locations().list(
-                    parent=account["name"],
-                    readMask="name,title",
-                    pageToken=next_page_token
-                ).execute()
+                locations = (
+                    locations_service.accounts()
+                    .locations()
+                    .list(
+                        parent=account["name"],
+                        readMask="name,title",
+                        pageToken=next_page_token,
+                    )
+                    .execute()
+                )
 
                 available_locations.extend(locations.get("locations", []))
 
@@ -231,19 +246,21 @@ class GoogleCredentials(models.Model):
 
         for location in available_locations:
             location["account_id"] = account["name"]
-            if Etablissement.objects.filter(location_id=location["name"], account_id=account["name"]).exists():
+            if Etablissement.objects.filter(
+                location_id=location["name"], account_id=account["name"]
+            ).exists():
                 location["exists"] = True
             else:
                 location["exists"] = False
-        
+
         return available_locations
-
-
 
 
 # Etablissement
 class Etablissement(models.Model):
-    google_credential = models.ForeignKey("GoogleCredentials", on_delete=models.CASCADE, related_name="etablissements")
+    google_credential = models.ForeignKey(
+        "GoogleCredentials", on_delete=models.CASCADE, related_name="etablissements"
+    )
 
     location_id = models.CharField(max_length=255)
     account_id = models.CharField(max_length=255)
@@ -257,12 +274,11 @@ class Etablissement(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
 
-
     # settings
     review_threshold = models.PositiveSmallIntegerField(
         default=4,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
-        help_text="Minimum rating that triggers a Google review redirect."
+        help_text="Minimum rating that triggers a Google review redirect.",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -271,10 +287,8 @@ class Etablissement(models.Model):
     def __str__(self):
         return self.title
 
-
     def update_data(self, force_import=False):
-
-        from apps.reviews.models import Review
+        from frontend.reviews.models import Review
 
         reviews_service = self.google_credential.get_reviews_service()
         if reviews_service is False:
@@ -284,10 +298,13 @@ class Etablissement(models.Model):
         parent_path = f"{self.account_id}/{self.location_id}"
 
         try:
-            stats_response = reviews_service.accounts().locations().reviews().list(
-                parent=parent_path,
-                pageSize=1
-            ).execute()
+            stats_response = (
+                reviews_service.accounts()
+                .locations()
+                .reviews()
+                .list(parent=parent_path, pageSize=1)
+                .execute()
+            )
         except Exception as e:
             print(f"Error fetching review stats for {self.title}: {e}")
             return
@@ -311,13 +328,18 @@ class Etablissement(models.Model):
         # si force_import est True, on importe toutes les reviews, même si elles existent déjà
         # sinon, on importe uniquement les reviews qui n'existent pas encore
         while continue_import is True:
-
             try:
-                reviews_data = reviews_service.accounts().locations().reviews().list(
-                    parent=f"{self.account_id}/{self.location_id}",
-                    pageSize=50,
-                    pageToken=next_page_token
-                ).execute()
+                reviews_data = (
+                    reviews_service.accounts()
+                    .locations()
+                    .reviews()
+                    .list(
+                        parent=f"{self.account_id}/{self.location_id}",
+                        pageSize=50,
+                        pageToken=next_page_token,
+                    )
+                    .execute()
+                )
             except Exception as e:
                 print(f"Error fetching reviews for {self.title}: {e}")
                 break
@@ -335,15 +357,14 @@ class Etablissement(models.Model):
                 try:
                     new_review, created = Review.objects.update_or_create(
                         etablissement=self,
-                        source='google',
+                        source="google",
                         google_review_id=review.get("reviewId"),
-
                         # les infos suivantes n'identifient pas un review unique, on les met à jour si elles changent
                         defaults={
-                            'comment': review.get("comment", ""),
-                            'rating': google_stars_to_number(review.get("starRating")),
-                            'google_reviewer_data': review.get("reviewer"),
-                            'writen_at': review.get("createTime"),
+                            "comment": review.get("comment", ""),
+                            "rating": google_stars_to_number(review.get("starRating")),
+                            "google_reviewer_data": review.get("reviewer"),
+                            "writen_at": review.get("createTime"),
                         },
                     )
                     import_count += 1
@@ -364,14 +385,18 @@ class Etablissement(models.Model):
 
 
 class RatingHistory(models.Model):
-    etablissement = models.ForeignKey(Etablissement, on_delete=models.CASCADE, related_name='rating_history')
+    etablissement = models.ForeignKey(
+        Etablissement, on_delete=models.CASCADE, related_name="rating_history"
+    )
 
-    rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    rating = models.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+    )
     total_reviews = models.PositiveIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    
 
     def __str__(self):
         return f"Rating {self.rating}★ for {self.etablissement.title} on {self.created_at.strftime('%Y-%m-%d')}"
-

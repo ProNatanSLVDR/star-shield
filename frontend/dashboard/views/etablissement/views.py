@@ -4,9 +4,12 @@ from django.db.models import Avg, Q
 from django.utils import timezone
 from datetime import timedelta
 from auths.models import Etablissement
-from apps.reviews.models import Review
-from apps.dashboard.render import starshield_render
-from starshield.decorators import google_gmb_connected_required, selected_etablissement_required
+from frontend.reviews.models import Review
+from frontend.dashboard.render import starshield_render
+from starshield.decorators import (
+    google_gmb_connected_required,
+    selected_etablissement_required,
+)
 
 from googleapiclient.discovery import build
 
@@ -14,17 +17,15 @@ from googleapiclient.discovery import build
 @google_gmb_connected_required
 @selected_etablissement_required
 def overview_view(request):
-
     request.etablissement.update_data(force_import=True)
-    
 
     context = {
         "etablissement": request.etablissement,
     }
-    
-    return starshield_render(request, "etablissement/overview.html", context=context, page_name="etablissement")
 
-
-
-
-
+    return starshield_render(
+        request,
+        "etablissement/overview.html",
+        context=context,
+        page_name="etablissement",
+    )

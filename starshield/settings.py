@@ -18,85 +18,83 @@ from django_components import ComponentsSettings
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 class Base(Configuration):
     # Quick-start development settings - unsuitable for production
     # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
     # SECURITY
-    SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-    ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split(',')
-
+    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
 
     # Application definition
 
     THIRD_PARTY_APPS = [
-        'allauth',
-        'allauth.account',
-        'allauth.socialaccount',
-        'allauth.socialaccount.providers.google',
-
-        'django_htmx',
-        'django_components',
+        "allauth",
+        "allauth.account",
+        "allauth.socialaccount",
+        "allauth.socialaccount.providers.google",
+        "django_htmx",
+        "django_components",
     ]
 
     CUSTOM_APPS = [
-        'auths',
-        'apps.dashboard',
-        'apps.reviews',
-        'apps.roulette',
+        "auths",
+        "frontend.dashboard",
+        "frontend.reviews",
+        "frontend.roulette",
     ]
 
     INSTALLED_APPS = [
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
         *THIRD_PARTY_APPS,
         *CUSTOM_APPS,
     ]
 
     MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.auth.middleware.LoginRequiredMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.auth.middleware.LoginRequiredMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
         "allauth.account.middleware.AccountMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
         "starshield.middleware.EtablissementMiddleware",
     ]
 
-    ROOT_URLCONF = 'starshield.urls'
+    ROOT_URLCONF = "starshield.urls"
 
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 
     TEMPLATES = [
         {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [BASE_DIR / "templates"],
-            'OPTIONS': {
-                'context_processors': [
-                    'django.template.context_processors.request',
-                    'django.contrib.auth.context_processors.auth',
-                    'django.contrib.messages.context_processors.messages',
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "DIRS": [BASE_DIR / "templates"],
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.request",
+                    "django.contrib.auth.context_processors.auth",
+                    "django.contrib.messages.context_processors.messages",
                 ],
-                'builtins': [
-                    'django_components.templatetags.component_tags',
+                "builtins": [
+                    "django_components.templatetags.component_tags",
                 ],
-                'loaders': [
+                "loaders": [
                     (
-                        'django.template.loaders.cached.Loader',
+                        "django.template.loaders.cached.Loader",
                         [
-                            'django.template.loaders.filesystem.Loader',
-                            'django.template.loaders.app_directories.Loader',
-                            'django_components.template_loader.Loader',
+                            "django.template.loaders.filesystem.Loader",
+                            "django.template.loaders.app_directories.Loader",
+                            "django_components.template_loader.Loader",
                         ],
                     ),
                 ],
@@ -108,51 +106,57 @@ class Base(Configuration):
         dirs=[BASE_DIR / "components"],
     )
 
-    WSGI_APPLICATION = 'starshield.wsgi.application'
-
+    WSGI_APPLICATION = "starshield.wsgi.application"
 
     # Database
     # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-    DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+    DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
     # Auths
 
     AUTH_PASSWORD_VALIDATORS = [
-        {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
-        {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
-        {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
-        {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
+        {
+            "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        },
+        {
+            "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        },
+        {
+            "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        },
+        {
+            "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        },
     ]
 
-    AUTH_USER_MODEL = 'auths.User'
+    AUTH_USER_MODEL = "auths.User"
     AUTHENTICATION_BACKENDS = [
-        'django.contrib.auth.backends.ModelBackend',
-        'allauth.account.auth_backends.AuthenticationBackend',
+        "django.contrib.auth.backends.ModelBackend",
+        "allauth.account.auth_backends.AuthenticationBackend",
     ]
-    
-    LOGIN_REDIRECT_URL = 'dashboard:accueil'
-    LOGOUT_REDIRECT_URL = 'account_login'
-    LOGIN_URL = 'account_login'
+
+    LOGIN_REDIRECT_URL = "dashboard:accueil"
+    LOGOUT_REDIRECT_URL = "account_login"
+    LOGIN_URL = "account_login"
     LOGIN_EXEMPT_PATHS = ()
 
     SOCIALACCOUNT_PROVIDERS = {
-        'google': {
-            'APP': {
-                'client_id': os.getenv('GOOGLE_LOGIN_CLIENT_ID', ''),
-                'secret': os.getenv('GOOGLE_LOGIN_CLIENT_SECRET', ''),
-                'key': ''
+        "google": {
+            "APP": {
+                "client_id": os.getenv("GOOGLE_LOGIN_CLIENT_ID", ""),
+                "secret": os.getenv("GOOGLE_LOGIN_CLIENT_SECRET", ""),
+                "key": "",
             },
-            'SCOPE': ['profile', 'email'],
-            'EMAIL_AUTHENTICATION': True,
+            "SCOPE": ["profile", "email"],
+            "EMAIL_AUTHENTICATION": True,
             "EMAIL_VERIFICATION": "none",
-
         }
     }
 
     ACCOUNT_USER_MODEL_USERNAME_FIELD = None
     ACCOUNT_SESSION_REMEMBER = True
-    ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-    ACCOUNT_LOGIN_METHODS = {'email'}
+    ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+    ACCOUNT_LOGIN_METHODS = {"email"}
 
     # Account on get settings
     SOCIALACCOUNT_LOGIN_ON_GET = True
@@ -169,30 +173,28 @@ class Base(Configuration):
     # Account email verification by code instead of link
     ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
 
-
     # Internationalization
     # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-    LANGUAGE_CODE = 'fr-fr'
-    TIME_ZONE = 'Europe/Paris'
+    LANGUAGE_CODE = "fr-fr"
+    TIME_ZONE = "Europe/Paris"
     USE_I18N = True
     USE_TZ = True
 
-
     # URLS
-    STATIC_URL = 'static/'
+    STATIC_URL = "static/"
     STATICFILES_FINDERS = [
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-        'django_components.finders.ComponentsFileSystemFinder',
+        "django.contrib.staticfiles.finders.FileSystemFinder",
+        "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+        "django_components.finders.ComponentsFileSystemFinder",
     ]
     STATICFILES_DIRS = [
         BASE_DIR / "static",
     ]
 
     # Google GMB
-    GOOGLE_GMB_CLIENT_ID = os.getenv('GOOGLE_GMB_CLIENT_ID')
-    GOOGLE_GMB_CLIENT_SECRET = os.getenv('GOOGLE_GMB_CLIENT_SECRET')
+    GOOGLE_GMB_CLIENT_ID = os.getenv("GOOGLE_GMB_CLIENT_ID")
+    GOOGLE_GMB_CLIENT_SECRET = os.getenv("GOOGLE_GMB_CLIENT_SECRET")
     GOOGLE_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
 
 
@@ -202,29 +204,30 @@ class Dev(Base):
     WEBSITE_URL = "localhost:8000"
 
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
     # Email
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # TODO: Change to SMTP backend
+    EMAIL_BACKEND = (
+        "django.core.mail.backends.console.EmailBackend"  # TODO: Change to SMTP backend
+    )
 
 
 class Prod(Base):
     DEBUG = False
 
-    WEBSITE_URL = os.getenv('WEBSITE_URL')
+    WEBSITE_URL = os.getenv("WEBSITE_URL")
 
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB'),
-            'USER': os.getenv('POSTGRES_USER'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-            'HOST': 'db',
-            'PORT': os.getenv('POSTGRES_PORT'),
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": "db",
+            "PORT": os.getenv("POSTGRES_PORT"),
         }
     }
-
