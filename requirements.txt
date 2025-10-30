@@ -11,6 +11,7 @@ django-allauth==65.11.2
 django-configurations==2.5.1
 django-htmx==1.26.0
 django-ninja==1.1.0
+django-storages[google]==1.14.4
 django-tailwind==4.2.0
 django_components==0.141.6
 djc_core_html_parser==1.0.2
@@ -21,6 +22,7 @@ google-api-python-client==2.184.0
 google-auth==2.41.1
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.2
+google-cloud-storage==2.18.2
 google-cloud-tasks==2.20.1
 googleapis-common-protos==1.70.0
 honcho==2.0.0
@@ -38,6 +40,7 @@ pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycparser==2.23
 PyJWT==2.10.1
+Pillow==11.0.0
 pyparsing==3.2.5
 qrcode==8.2
 requests==2.32.5

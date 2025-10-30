@@ -10,21 +10,28 @@ admin.site.login = secure_admin_login(admin.site.login)
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'is_active')
-    list_filter = ('is_staff', 'is_superuser', 'is_active')
-    search_fields = ('email', 'first_name', 'last_name')
-    ordering = ('email',)
+    list_display = (
+        "email",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "is_superuser",
+        "is_active",
+    )
+    list_filter = ("is_staff", "is_superuser", "is_active")
+    search_fields = ("email", "first_name", "last_name")
+    ordering = ("email",)
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name')}),
-        (_('Permissions'), {'fields': ('is_staff', 'is_superuser', 'is_active')}),
-        (_('Important dates'), {'fields': ('last_login', 'created_at', 'updated_at')}),
+        (None, {"fields": ("email", "password")}),
+        (
+            _("Personal info"),
+            {"fields": ("first_name", "last_name", "profile_picture")},
+        ),
+        (_("Permissions"), {"fields": ("is_staff", "is_superuser", "is_active")}),
+        (_("Important dates"), {"fields": ("last_login", "created_at", "updated_at")}),
     )
-    readonly_fields = ('created_at', 'updated_at')
-
-
-
+    readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(GoogleCredentials)
@@ -45,4 +52,4 @@ class EtablissementAdmin(admin.ModelAdmin):
 class RatingHistoryAdmin(admin.ModelAdmin):
     list_display = ("etablissement", "rating", "total_reviews", "created_at")
     search_fields = ("etablissement__title",)
-    list_filter = ("created_at",)  
+    list_filter = ("created_at",)

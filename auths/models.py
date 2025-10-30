@@ -2,7 +2,7 @@ from __future__ import annotations
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 import uuid
 import logging
@@ -78,6 +78,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Infos Personnelles
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
+    profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
 
     # Misc
     is_active = models.BooleanField(default=True)
@@ -406,6 +407,31 @@ class RatingHistory(models.Model):
 
     def __str__(self):
         return f"Rating {self.rating}★ for {self.etablissement.title} on {self.created_at.strftime('%Y-%m-%d')}"
+
+
+@receiver(pre_save, sender=User)
+def delete_old_profile_picture(sender, instance, **kwargs):
+    """
+    Signal handler to delete old profile picture from GCP Storage when user uploads a new one.
+    """
+    if instance.pk:
+        try:
+            old_instance = User.objects.get(pk=instance.pk)
+            if old_instance.profile_picture and old_instance.profile_picture != instance.profile_picture:
+                if old_instance.profile_picture.name:
+                    try:
+                        old_instance.profile_picture.delete(save=False)
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to delete old profile picture for user {instance.pk}: {e}"
+                        )
+        except User.DoesNotExist:
+            pass
+        except Exception as e:
+            logger.error(
+                f"Error deleting old profile picture for user {instance.pk}: {e}",
+                exc_info=True,
+            )
 
 
 @receiver(post_save, sender=Etablissement)

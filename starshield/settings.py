@@ -192,6 +192,15 @@ class Base(Configuration):
         BASE_DIR / "static",
     ]
 
+    # Google Cloud Storage
+    GS_BUCKET_NAME = os.getenv("GCP_STORAGE_BUCKET_NAME", "")
+    GS_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
+    if GS_BUCKET_NAME:
+        DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+        MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
+    else:
+        MEDIA_URL = "/media/"
+
     # Google GMB
     GOOGLE_GMB_CLIENT_ID = os.getenv("GOOGLE_GMB_CLIENT_ID")
     GOOGLE_GMB_CLIENT_SECRET = os.getenv("GOOGLE_GMB_CLIENT_SECRET")
