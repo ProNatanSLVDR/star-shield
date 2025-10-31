@@ -43,6 +43,7 @@ class Base(Configuration):
         "frontend.dashboard",
         "frontend.reviews",
         "frontend.roulette",
+        "tasks_api",
     ]
 
     INSTALLED_APPS = [

@@ -27,10 +27,8 @@
                                 {% endif %}
 
                                 <div class="mb-4 text-center">
-                                    <p class="mb-3 fw-semibold">{% trans "Quelle note souhaitez-vous attribuer ?" %}</p>
-                                    {% with current_rating=form.data.rating|default:form.initial.rating %}
-                                        {% component "star_rating" input_id="id_rating" initial_rating=current_rating readonly=False %}{% endcomponent %}
-                                    {% endwith %}
+                                    <p class="mb-3 fw-semibold">{% trans "Quelle note souhaitez-vous attribuer ?" %}</p>
+                                    {% component "star_rating" input_id="id_rating" initial_rating=current_rating readonly=False %}{% endcomponent %}
                                     {% if form.errors.rating %}
                                         <div class="invalid-feedback d-block">
                                             {% for error in form.errors.rating %}
