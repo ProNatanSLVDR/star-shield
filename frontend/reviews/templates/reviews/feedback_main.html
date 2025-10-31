@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load component_tags %}
+{% load i18n %}
+
+{% block body %}
+    <section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="text-center mb-5">
+                                <span class="badge bg-primary bg-gradient text-uppercase fw-semibold mb-3 d-inline-block">{{ etablissement.name }}</span>
+                                <h1 class="h4 mb-2">{% trans "Partagez votre expérience" %}</h1>
+                                <p class="text-muted small mb-0">{% trans "Votre avis nous aide à offrir un meilleur service." %}</p>
+                            </div>
+
+                            <div class="d-flex justify-content-center ">
+                                {% for rating_redirect in rating_array %}
+                                    {% if rating_redirect == False %}
+                                        <div data-rating="{{ forloop.counter }}" class="text-light">
+                                            <i class="fa-solid fa-star fa-2xl"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-light">
+                                            <a class="text-reset" data-rating="{{ forloop.counter }}" href="{{ etablissement.new_reviews_uri }}">
+                                                <i class="fa-solid fa-star fa-2xl"></i>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <p class="text-muted text-center mt-4 mb-0 small">
+                        Copyright Starshield
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+      // Really simple: highlight stars on click, using data-rating
+        document.addEventListener("DOMContentLoaded", function () {
+            const stars = document.querySelectorAll('[data-rating]');
+            stars.forEach(function(star) {
+                star.addEventListener("click", function() {
+                    stars.forEach(function(s) {
+                        if (s.getAttribute('data-rating') <= star.getAttribute('data-rating')) {
+                            s.classList.add('text-warning');
+                            s.classList.remove('text-light');
+                        } else {
+                            s.classList.remove('text-warning');
+                            s.classList.add('text-light');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+{% endblock body %}
+

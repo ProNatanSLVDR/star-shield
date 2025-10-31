@@ -6,7 +6,9 @@ from django.utils.translation import gettext as _
 
 from .forms import FeedbackForm
 from auths.models import Etablissement
-from .models import Review
+from .models import Review, ReviewAnalytics
+from .utils import get_etablissement_by_identifier
+
 
 logger = logging.getLogger(__name__)
 
@@ -15,69 +17,60 @@ def feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
     if not identifier:
         return HttpResponseNotFound()
 
-    try:
-        etablissement = Etablissement.objects.get(slug=identifier)
-    except Etablissement.DoesNotExist:
-        try:
-            etablissement = Etablissement.objects.get(uuid=identifier)
-        except (Etablissement.DoesNotExist, ValueError):
-            return HttpResponseNotFound()
+    etablissement = get_etablissement_by_identifier(identifier)
+    if not etablissement:
+        return HttpResponseNotFound()
 
-    if request.method == "POST":
-        form = FeedbackForm(request.POST)
-        if form.is_valid():
-            rating = form.cleaned_data["rating"]
-            comment = form.cleaned_data.get("comment", "")
+    ReviewAnalytics.objects.create(
+        etablissement=etablissement,
+        type="review_page_consulted",
+    )
 
-            try:
-                review = Review.objects.create(
-                    etablissement=etablissement,
-                    rating=rating,
-                    comment=comment,
-                    source="internal",
-                )
+    # pour chaque étoile, on ajoute True si l'étoile est >= au seuil de redirection, False sinon
+    # permet de savoir si on redirige vers la page de feedback ou vers la page de redirection Google
+    rating_array = []
+    for i in range(1, 6):
+        if i >= etablissement.review_threshold:
+            rating_array.append(True)
+        else:
+            rating_array.append(False)
 
-                if rating >= etablissement.review_threshold:
-                    if etablissement.new_reviews_uri:
-                        return redirect(etablissement.new_reviews_uri)
-                    else:
-                        logger.warning(
-                            f"No Google review URL configured for {etablissement.title}"
-                        )
-
-                request.session["feedback_review_id"] = review.id
-                return redirect("reviews:feedback_thanks", identifier=identifier)
-            except Exception as e:
-                logger.error(
-                    f"Error creating review for {etablissement.title}: {e}",
-                    exc_info=True,
-                )
-                form.add_error(
-                    None,
-                    _(
-                        "Une erreur s'est produite lors de l'envoi de votre avis. Veuillez réessayer."
-                    ),
-                )
-    else:
-        form = FeedbackForm()
-
-    # Get current rating value safely for template
-    current_rating = None
-    if request.method == "POST":
-        current_rating = request.POST.get("rating")
-        if current_rating:
-            try:
-                current_rating = int(current_rating)
-            except (ValueError, TypeError):
-                current_rating = None
+    print(rating_array)
 
     context = {
         "etablissement": etablissement,
-        "form": form,
-        "current_rating": current_rating,
+        "rating_array": rating_array,
     }
-    return render(request, "reviews/feedback_form.html", context)
+    return render(request, "reviews/feedback_main.html", context)
+
+
+def external_feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
+    etablissement = get_etablissement_by_identifier(identifier)
+    if not etablissement:
+        return HttpResponseNotFound()
+
+    ReviewAnalytics.objects.create(
+        etablissement=etablissement,
+        type="external_feedback",
+    )
+    return redirect(etablissement.new_reviews_uri)
+
+
+def internal_feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
+    etablissement = get_etablissement_by_identifier(identifier)
+    if not etablissement:
+        return HttpResponseNotFound()
+
+    ReviewAnalytics.objects.create(
+        etablissement=etablissement,
+        type="internal_feedback",
+    )
+    return render(request, "reviews/feedback_thanks.html")
 
 
 def feedback_thanks_view(request: HttpRequest, identifier: str) -> HttpResponse:
+    etablissement = get_etablissement_by_identifier(identifier)
+    if not etablissement:
+        return HttpResponseNotFound()
+
     return render(request, "reviews/feedback_thanks.html")

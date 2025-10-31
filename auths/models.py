@@ -12,7 +12,6 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
-from frontend.reviews.utils import google_stars_to_number
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Infos Personnelles
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
-    profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
+    profile_picture = models.ImageField(
+        upload_to="profile_pictures/", blank=True, null=True
+    )
 
     # Misc
     is_active = models.BooleanField(default=True)
@@ -294,102 +295,6 @@ class Etablissement(models.Model):
     def __str__(self):
         return self.title
 
-    def update_data(self, force_import=False):
-        from frontend.reviews.models import Review
-
-        reviews_service = self.google_credential.get_reviews_service()
-        if reviews_service is False:
-            print(f"Unable to initialize reviews service for {self.title}")
-            return
-
-        parent_path = f"{self.account_id}/{self.location_id}"
-
-        try:
-            stats_response = (
-                reviews_service.accounts()
-                .locations()
-                .reviews()
-                .list(parent=parent_path, pageSize=1)
-                .execute()
-            )
-        except Exception as e:
-            print(f"Error fetching review stats for {self.title}: {e}")
-            return
-
-        try:
-            RatingHistory.objects.create(
-                etablissement=self,
-                rating=stats_response.get("averageRating", 0),
-                total_reviews=stats_response.get("totalReviewCount", 0),
-            )
-        except Exception as e:
-            print(f"Error recording rating history for {self.title}: {e}")
-            return
-
-        print("start updating data for", self.title)
-
-        continue_import = True
-        import_count = 0
-        next_page_token = None
-
-        # si force_import est True, on importe toutes les reviews, même si elles existent déjà
-        # sinon, on importe uniquement les reviews qui n'existent pas encore
-        while continue_import is True:
-            try:
-                reviews_data = (
-                    reviews_service.accounts()
-                    .locations()
-                    .reviews()
-                    .list(
-                        parent=f"{self.account_id}/{self.location_id}",
-                        pageSize=50,
-                        pageToken=next_page_token,
-                    )
-                    .execute()
-                )
-            except Exception as e:
-                print(f"Error fetching reviews for {self.title}: {e}")
-                break
-
-            location_reviews = reviews_data.get("locationReviews", [])
-            if not location_reviews:
-                break
-
-            for location_review in location_reviews:
-                review = location_review.get("review")
-                if review is None:
-                    continue
-
-                # on importe la review
-                try:
-                    new_review, created = Review.objects.update_or_create(
-                        etablissement=self,
-                        source="google",
-                        google_review_id=review.get("reviewId"),
-                        # les infos suivantes n'identifient pas un review unique, on les met à jour si elles changent
-                        defaults={
-                            "comment": review.get("comment", ""),
-                            "rating": google_stars_to_number(review.get("starRating")),
-                            "google_reviewer_data": review.get("reviewer"),
-                            "writen_at": review.get("createTime"),
-                        },
-                    )
-                    import_count += 1
-                    print(f"imported {import_count} reviews")
-
-                    # condition pour stopper l'importation
-                    if force_import is False and created is False:
-                        continue_import = False
-                        break
-                except Exception as e:
-                    print(f"Error creating review: {e}")
-                    continue
-
-            # Check si y'a une page suivante
-            next_page_token = reviews_data.get("nextPageToken", None)
-            if next_page_token is None or continue_import is False:
-                break
-
 
 class RatingHistory(models.Model):
     etablissement = models.ForeignKey(
@@ -417,7 +322,10 @@ def delete_old_profile_picture(sender, instance, **kwargs):
     if instance.pk:
         try:
             old_instance = User.objects.get(pk=instance.pk)
-            if old_instance.profile_picture and old_instance.profile_picture != instance.profile_picture:
+            if (
+                old_instance.profile_picture
+                and old_instance.profile_picture != instance.profile_picture
+            ):
                 if old_instance.profile_picture.name:
                     try:
                         old_instance.profile_picture.delete(save=False)
@@ -443,7 +351,7 @@ def trigger_review_fetch_on_creation(sender, instance, created, **kwargs):
         try:
             # Import here to avoid circular dependency
             from tasks_api.services.cloud_tasks import enqueue_review_fetch_task
-            
+
             task_name = enqueue_review_fetch_task(
                 etablissement_id=instance.id,
                 task_type="fetch-all",
