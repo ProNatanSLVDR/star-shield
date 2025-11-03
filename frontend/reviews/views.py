@@ -44,7 +44,9 @@ def feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
     return render(request, "reviews/feedback_main.html", context)
 
 
-def external_feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
+def external_feedback_view(
+    request: HttpRequest, identifier: str, rating: int
+) -> HttpResponse:
     etablissement = get_etablissement_by_identifier(identifier)
     if not etablissement:
         return HttpResponseNotFound()

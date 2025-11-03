@@ -19,12 +19,12 @@
                                 {% for rating_redirect in rating_array %}
                                     {% if rating_redirect == False %}
                                         <div data-rating="{{ forloop.counter }}" class="text-light">
-                                            <i class="fa-solid fa-star fa-2xl"></i>
+                                            <i class="star fa-solid fa-star fa-2xl"></i>
                                         </div>
                                     {% else %}
                                         <div class="text-light">
                                             <a class="text-reset" data-rating="{{ forloop.counter }}" href="{{ etablissement.new_reviews_uri }}">
-                                                <i class="fa-solid fa-star fa-2xl"></i>
+                                                <i class="star fa-solid fa-star fa-2xl"></i>
                                             </a>
                                         </div>
                                     {% endif %}
