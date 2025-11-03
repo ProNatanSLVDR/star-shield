@@ -2,11 +2,8 @@ import logging
 
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect, render
-from django.utils.translation import gettext as _
-
-from .forms import FeedbackForm
-from auths.models import Etablissement
-from .models import Review, ReviewAnalytics
+from .models import ReviewAnalytics
+from django.urls import reverse
 from .utils import get_etablissement_by_identifier
 
 
@@ -35,18 +32,20 @@ def feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
         else:
             rating_array.append(False)
 
-    print(rating_array)
-
     context = {
         "etablissement": etablissement,
         "rating_array": rating_array,
+        "internal_feedback_url": request.build_absolute_uri(
+            reverse("reviews:internal_feedback", args=[identifier])
+        ),
+        "external_feedback_url": request.build_absolute_uri(
+            reverse("reviews:external_feedback", args=[identifier])
+        ),
     }
     return render(request, "reviews/feedback_main.html", context)
 
 
-def external_feedback_view(
-    request: HttpRequest, identifier: str, rating: int
-) -> HttpResponse:
+def external_feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
     etablissement = get_etablissement_by_identifier(identifier)
     if not etablissement:
         return HttpResponseNotFound()

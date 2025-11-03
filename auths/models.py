@@ -282,10 +282,22 @@ class Etablissement(models.Model):
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
 
     # settings
+
     review_threshold = models.PositiveSmallIntegerField(
         default=4,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
-        help_text="Minimum rating that triggers a Google review redirect.",
+        help_text="Note minimale pour redirection Google.",
+    )
+    review_page_label = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Nom pour l'établissement sur la page de feedback.",
+    )
+    review_page_text = models.CharField(
+        max_length=255,
+        default="Votre avis nous aide à offrir un meilleur service !",
+        help_text="Texte à afficher sur la page de feedback.",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

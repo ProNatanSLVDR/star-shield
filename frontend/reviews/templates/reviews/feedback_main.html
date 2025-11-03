@@ -7,35 +7,73 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-6 col-md-8">
-                    <div class="card shadow-sm border-0 rounded-4">
-                        <div class="card-body p-4 p-md-5">
+                    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                        <div class="position-relative px-4 px-lg-5 py-4 bg-primary bg-gradient text-white">
+                            <div class="position-absolute top-0 end-0 translate-middle opacity-25 d-none d-sm-block">
+                                <span class="d-inline-flex border border-light border-2 rounded-circle p-3"></span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between gap-3 position-relative">
+                                <div>
+                                    <h2 class="h4 mb-1 text-white fw-bold">
+                                        {% trans "Partagez votre expérience" %}
+                                    </h2>
+                                    <p class="mb-0 text-white-50 small">
+                                        {% trans "Votre avis compte !" %}
+                                    </p>
+                                </div>
+                                <span class="d-none d-sm-inline-flex text-white-50 fs-3">
+                                    <i class="fa-solid fa-star" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body px-5 pb-4">
                             <div class="text-center mb-5">
-                                <span class="badge bg-primary bg-gradient text-uppercase fw-semibold mb-3 d-inline-block">{{ etablissement.name }}</span>
-                                <h1 class="h4 mb-2">{% trans "Partagez votre expérience" %}</h1>
-                                <p class="text-muted small mb-0">{% trans "Votre avis nous aide à offrir un meilleur service." %}</p>
-                            </div>
+                                <h1>
+                                    <span class="badge rounded-pill mb-3 etablissement-badge fw-bold  fs-4">
+                                        <i class="fa-solid fa-building" aria-hidden="true"></i>
+                                        <span class="etablissement-name">
 
-                            <div class="d-flex justify-content-center ">
-                                {% for rating_redirect in rating_array %}
-                                    {% if rating_redirect == False %}
-                                        <div data-rating="{{ forloop.counter }}" class="text-light">
-                                            <i class="star fa-solid fa-star fa-2xl"></i>
-                                        </div>
-                                    {% else %}
-                                        <div class="text-light">
-                                            <a class="text-reset" data-rating="{{ forloop.counter }}" href="{{ etablissement.new_reviews_uri }}">
-                                                <i class="star fa-solid fa-star fa-2xl"></i>
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
+                                            {% if etablissement.review_page_label %}
+                                                {{ etablissement.review_page_label }}
+                                            {% else %}
+                                                {{ etablissement.title }}
+                                            {% endif %}
+                                        </span>
+                                    </span>
+                                </h1>
+                                <h3 class="h5 fw-bold mb-2 text-body-emphasis">{{ etablissement.review_page_text }}</h3>
 
+                                <p class="text-muted mb-4 small">{% trans "Cliquez sur une étoile pour évaluer votre expérience" %}</p>
+
+                                <div class="d-flex justify-content-center align-items-center gap-3 stars-wrapper">
+                                    {% for rating_redirect in rating_array %}
+                                        {% if rating_redirect == False %}
+                                            <h4 class="text-light star-container">
+                                                <a class="text-reset"
+                                                   data-rating="{{ forloop.counter }}"
+                                                   href="{{ internal_feedback_url }}">
+                                                    <i class="star fa-solid fa-star fa-2xl"></i>
+                                                </a>
+                                            </h4>
+                                        {% else %}
+                                            <h4 class="text-light star-container">
+                                                <a class="text-reset"
+                                                   data-rating="{{ forloop.counter }}"
+                                                   href="{{ external_feedback_url }}">
+                                                    <i class="star fa-solid fa-star fa-2xl"></i>
+                                                </a>
+                                            </h4>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+
+
+                            </div>
                         </div>
                     </div>
 
-                    <p class="text-muted text-center mt-4 mb-0 small">
-                        Copyright Starshield
+                    <p class="text-muted text-center mt-4 mb-0 small opacity-75">
+                        {% trans "Proposé par Starshield" %}
                     </p>
                 </div>
             </div>
@@ -43,8 +81,76 @@
     </section>
 
     <style>
+        .etablissement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.65rem 1.35rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: #0b5ed7;
+            background: rgba(13, 110, 253, 0.1);
+            border: 1px solid rgba(13, 110, 253, 0.28);
+            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.12);
+            transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .etablissement-badge:hover {
+            transform: translateY(-2px);
+            background: rgba(13, 110, 253, 0.18);
+            color: #084298;
+            box-shadow: 0 14px 34px rgba(13, 110, 253, 0.18);
+        }
+
+        .etablissement-badge i {
+            font-size: 1.05rem;
+            color: inherit;
+        }
+
+        .etablissement-badge .etablissement-name {
+            display: inline-block;
+            white-space: normal;
+            text-transform: none;
+        }
+
+        @keyframes starPulse {
+            0%, 100% {
+                transform: scale(1);
+                color:#e3e9ed;
+            }
+            50% {
+                transform: scale(1.08);
+                color: #ffc107;
+            }
+        }
+
+        .star-container {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .star-container:hover {
+            transform: scale(1.15);
+        }
+
+        .star {
+            animation: starPulse 2s ease-in-out infinite;
+            transition: color 0.2s ease, transform 0.2s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .stars-wrapper:hover .star {
+            animation: none;
+        }
+
         .star-hover {
-            color: #ffeb3b !important; /* Light yellow */
+            color: #ffc107 !important; /* Bootstrap warning/gold color */
+            transform: scale(1.1);
+        }
+
+        .text-warning {
+            color: #ffc107 !important; /* Consistent gold color */
         }
     </style>
     <script>
