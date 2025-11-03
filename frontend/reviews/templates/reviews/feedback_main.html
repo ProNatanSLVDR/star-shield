@@ -42,11 +42,18 @@
         </div>
     </section>
 
+    <style>
+        .star-hover {
+            color: #ffeb3b !important; /* Light yellow */
+        }
+    </style>
     <script>
       // Really simple: highlight stars on click, using data-rating
         document.addEventListener("DOMContentLoaded", function () {
             const stars = document.querySelectorAll('[data-rating]');
             stars.forEach(function(star) {
+
+                // Click effect: highlight stars on click
                 star.addEventListener("click", function() {
                     stars.forEach(function(s) {
                         if (s.getAttribute('data-rating') <= star.getAttribute('data-rating')) {
@@ -56,6 +63,21 @@
                             s.classList.remove('text-warning');
                             s.classList.add('text-light');
                         }
+                    });
+                });
+
+                // Hover effect: highlight stars on hover
+                star.addEventListener("mouseenter", function() {
+                    stars.forEach(function(s) {
+                        if (s.getAttribute('data-rating') <= star.getAttribute('data-rating')) {
+                            s.classList.add('star-hover');
+                        }
+                    });
+                });
+
+                star.addEventListener("mouseleave", function() {
+                    stars.forEach(function(s) {
+                        s.classList.remove('star-hover');
                     });
                 });
             });
