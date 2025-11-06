@@ -4,88 +4,93 @@
 {% block dashboard_content %}
     <div class="p-5 d-flex flex-column h-100">
         <!-- Header Section -->
-        <div class="mb-4">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                    <h1 class="display-5 fw-bold text-body-emphasis mb-2">
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="flex-grow-1">
+                    <h1 class="display-4 fw-bold text-body-emphasis mb-3">
                         {{ etablissement.title }}
                     </h1>
-                    <p class="lead text-muted">Vue d'ensemble de votre établissement</p>
+                    <p class="lead text-muted mb-0">Vue d'ensemble de votre établissement</p>
                 </div>
-                <div class="text-primary opacity-10" style="font-size: 6rem;">
+                <div class="text-primary opacity-10 d-none d-md-block" style="font-size: 8rem;">
                     <i class="fa-solid fa-chart-line"></i>
                 </div>
             </div>
         </div>
 
         <!-- Key Performance Metrics Cards -->
-        <div class="mb-4">
-            <h5 class="fw-bold mb-3">
-                <i class="fa-solid fa-chart-pie text-primary me-2"></i>
-                Statistiques Principales
-            </h5>
-            <div class="row g-3">
+        <div class="mb-5">
+            <div class="d-flex align-items-center mb-4">
+                <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
+                    <i class="fa-solid fa-chart-pie text-primary" style="font-size: 1.25rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-0">Statistiques Principales</h5>
+            </div>
+            <div class="row g-4">
                 <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition">
-                        <div class="card-body">
+                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
                             <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <p class="text-muted small mb-1">Total des Avis</p>
-                                    <h2 class="fw-bold text-body-emphasis mb-0">{{ total_reviews }}</h2>
-                                    <small class="text-muted">Tous types confondus</small>
+                                <div class="flex-grow-1 pe-3">
+                                    <p class="text-muted small mb-2 fw-medium lh-sm">Note Actuelle</p>
+                                    {% if latest_rating_history %}
+                                        <h2 class="fw-bold text-success mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ latest_rating_history.rating|floatformat:1 }}★</h2>
+                                        <small class="text-muted d-block">Note Google actuelle</small>
+                                    {% else %}
+                                        <h2 class="fw-bold text-body-emphasis mb-2" style="font-size: 2.5rem; line-height: 1.1;">-</h2>
+                                        <small class="text-muted d-block">Aucune donnée disponible</small>
+                                    {% endif %}
                                 </div>
-                                <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
-                                    <i class="fa-solid fa-star text-primary" style="font-size: 1.5rem;"></i>
+                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(25, 135, 84, 0.15);">
+                                    <i class="fa-solid fa-star text-success" style="font-size: 1.75rem;"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition">
-                        <div class="card-body">
+                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
                             <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <p class="text-muted small mb-1">Note Moyenne</p>
-                                    <h2 class="fw-bold text-body-emphasis mb-0">
-                                        {% if avg_rating %}{{ avg_rating|floatformat:1 }}★{% else %}-{% endif %}
-                                    </h2>
-                                    <small class="text-muted">Sur tous les avis</small>
+                                <div class="flex-grow-1 pe-3">
+                                    <p class="text-muted small mb-2 fw-medium lh-sm">Consultations Page</p>
+                                    <h2 class="fw-bold text-body-emphasis mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ review_page_consultations }}</h2>
+                                    <small class="text-muted d-block">Consultations de la page d'avis</small>
                                 </div>
-                                <div class="p-3 rounded-3" style="background: rgba(255, 193, 7, 0.1);">
-                                    <i class="fa-solid fa-chart-line text-warning" style="font-size: 1.5rem;"></i>
+                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(13, 110, 253, 0.15);">
+                                    <i class="fa-solid fa-eye text-primary" style="font-size: 1.75rem;"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition">
-                        <div class="card-body">
+                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
                             <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <p class="text-muted small mb-1">Avis Redirigés</p>
-                                    <h2 class="fw-bold text-success mb-0">{{ positive_reviews_count }}</h2>
-                                    <small class="text-muted">≥ {{ etablissement.review_threshold }}★ → Google</small>
+                                <div class="flex-grow-1 pe-3">
+                                    <p class="text-muted small mb-2 fw-medium lh-sm">Taux de Redirection</p>
+                                    <h2 class="fw-bold text-body-emphasis mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ redirection_rate }}%</h2>
+                                    <small class="text-muted d-block">Pourcentage d'avis envoyés à Google</small>
                                 </div>
-                                <div class="p-3 rounded-3" style="background: rgba(25, 135, 84, 0.1);">
-                                    <i class="fa-solid fa-arrow-up text-success" style="font-size: 1.5rem;"></i>
+                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(13, 110, 253, 0.15);">
+                                    <i class="fa-solid fa-arrow-right text-primary" style="font-size: 1.75rem;"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition">
-                        <div class="card-body">
+                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
                             <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <p class="text-muted small mb-1">Feedback Privé</p>
-                                    <h2 class="fw-bold text-warning mb-0">{{ private_feedback_count }}</h2>
-                                    <small class="text-muted">&lt; {{ etablissement.review_threshold }}★ → Interne</small>
+                                <div class="flex-grow-1 pe-3">
+                                    <p class="text-muted small mb-2 fw-medium lh-sm">Feedback Privé</p>
+                                    <h2 class="fw-bold text-warning mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ private_feedback_count }}</h2>
+                                    <small class="text-muted d-block">&lt; {{ etablissement.review_threshold }}★ → Interne</small>
                                 </div>
-                                <div class="p-3 rounded-3" style="background: rgba(255, 193, 7, 0.1);">
-                                    <i class="fa-solid fa-lock text-warning" style="font-size: 1.5rem;"></i>
+                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(255, 193, 7, 0.15);">
+                                    <i class="fa-solid fa-lock text-warning" style="font-size: 1.75rem;"></i>
                                 </div>
                             </div>
                         </div>
@@ -95,186 +100,60 @@
         </div>
 
         <!-- Secondary Metrics Row -->
-        <div class="mb-4">
-            <h5 class="fw-bold mb-3">
-                <i class="fa-solid fa-gauge text-primary me-2"></i>
-                Métriques Complémentaires
-            </h5>
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <p class="text-muted small mb-1">Taux de Redirection</p>
-                                    <h3 class="fw-bold text-body-emphasis mb-0">{{ redirection_rate }}%</h3>
-                                    <small class="text-muted">Pourcentage d'avis envoyés à Google</small>
-                                </div>
-                                <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
-                                    <i class="fa-solid fa-arrow-right text-primary" style="font-size: 1.5rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="mb-5">
+            <div class="d-flex align-items-center mb-4">
+                <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
+                    <i class="fa-solid fa-gauge text-primary" style="font-size: 1.25rem;"></i>
                 </div>
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <p class="text-muted small mb-1">Activité Récente</p>
-                                    <h3 class="fw-bold text-body-emphasis mb-0">{{ recent_7_days }}</h3>
-                                    <small class="text-muted">7 derniers jours ({{ recent_30_days }} sur 30j)</small>
-                                </div>
-                                <div class="p-3 rounded-3" style="background: rgba(111, 66, 193, 0.1);">
-                                    <i class="fa-solid fa-clock" style="color: #6f42c1; font-size: 1.5rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <p class="text-muted small mb-1">Seuil de Protection</p>
-                                    <h3 class="fw-bold text-body-emphasis mb-0">{{ etablissement.review_threshold }}★</h3>
-                                    <small class="text-muted">Note minimale pour redirection Google</small>
-                                </div>
-                                <div class="p-3 rounded-3" style="background: rgba(220, 53, 69, 0.1);">
-                                    <i class="fa-solid fa-sliders text-danger" style="font-size: 1.5rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <h5 class="fw-bold mb-0">Métriques Complémentaires</h5>
             </div>
-        </div>
-
-        <!-- Main Content Row -->
-        <div class="row g-4 mb-4">
-            <!-- Review Distribution Chart -->
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent border-0 pb-2">
-                        <h5 class="card-title mb-1">
-                            <i class="fa-solid fa-chart-bar text-primary me-2"></i>
-                            Répartition par Note
-                        </h5>
-                        <p class="text-muted small mb-0">
-                            Distribution des avis selon leur note, avec distinction entre avis publics (Google) et privés (interne)
-                        </p>
-                    </div>
-                    <div class="card-body">
-                        {% if total_reviews > 0 %}
-                            <div class="d-flex flex-column gap-3">
-                                {% for rating, data in review_distribution.items %}
-                                    <div>
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="fw-bold fs-5">{{ rating }}★</span>
-                                                <span class="text-muted">({{ data.total }} avis{% if data.total != 1 %}s{% endif %})</span>
-                                            </div>
-                                            {% if data.total > 0 %}
-                                                <div class="d-flex gap-2">
-                                                    {% if data.internal > 0 %}
-                                                        <span class="badge bg-warning text-dark">
-                                                            <i class="fa-solid fa-lock me-1"></i>{{ data.internal }} privé{{ data.internal|pluralize }}
-                                                        </span>
-                                                    {% endif %}
-                                                    {% if data.google > 0 %}
-                                                        <span class="badge bg-success">
-                                                            <i class="fa-brands fa-google me-1"></i>{{ data.google }} public{{ data.google|pluralize }}
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="progress" style="height: 28px;">
-                                            {% if data.total > 0 %}
-                                                {% widthratio data.total total_reviews 100 as percentage %}
-                                                <div class="progress-bar bg-primary d-flex align-items-center justify-content-center fw-bold"
-                                                     role="progressbar"
-                                                     style="width: {{ percentage }}%">
-                                                    {{ data.total }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endfor %}
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div class="flex-grow-1 pe-3">
+                                    <p class="text-muted small mb-2 fw-medium lh-sm">Activité Récente</p>
+                                    <h3 class="fw-bold text-body-emphasis mb-2" style="font-size: 2rem; line-height: 1.1;">{{ recent_7_days }}</h3>
+                                    <small class="text-muted d-block">7 derniers jours ({{ recent_30_days }} sur 30j)</small>
+                                </div>
+                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(111, 66, 193, 0.15);">
+                                    <i class="fa-solid fa-clock" style="color: #6f42c1; font-size: 1.75rem;"></i>
+                                </div>
                             </div>
-                        {% else %}
-                            <div class="text-center text-muted py-5">
-                                <i class="fa-solid fa-inbox fa-3x mb-3 opacity-50"></i>
-                                <p class="mb-1">Aucun avis pour le moment</p>
-                                <small>Les avis collectés apparaîtront ici</small>
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Rating Trends -->
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent border-0 pb-2">
-                        <h5 class="card-title mb-1">
-                            <i class="fa-solid fa-trending-up text-primary me-2"></i>
-                            Note Google Actuelle
-                        </h5>
-                        <p class="text-muted small mb-0">
-                            Note moyenne actuelle sur Google et évolution par rapport à la dernière synchronisation
-                        </p>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div class="flex-grow-1 pe-3">
+                                    <p class="text-muted small mb-2 fw-medium lh-sm">Seuil de Protection</p>
+                                    <h3 class="fw-bold text-body-emphasis mb-2" style="font-size: 2rem; line-height: 1.1;">{{ etablissement.review_threshold }}★</h3>
+                                    <small class="text-muted d-block">Note minimale pour redirection Google</small>
+                                </div>
+                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(220, 53, 69, 0.15);">
+                                    <i class="fa-solid fa-sliders text-danger" style="font-size: 1.75rem;"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        {% if latest_rating_history %}
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div>
-                                        <h2 class="fw-bold mb-0">{{ latest_rating_history.rating|floatformat:1 }}★</h2>
-                                        <small class="text-muted">
-                                            Basé sur {{ latest_rating_history.total_reviews }} avis{% if latest_rating_history.total_reviews != 1 %}s{% endif %} Google
-                                        </small>
-                                    </div>
-                                    {% if rating_trend %}
-                                        <div>
-                                            {% if rating_trend == 'improving' %}
-                                                <span class="badge bg-success fs-6 p-2">
-                                                    <i class="fa-solid fa-arrow-up me-1"></i>En amélioration
-                                                </span>
-                                            {% elif rating_trend == 'declining' %}
-                                                <span class="badge bg-danger fs-6 p-2">
-                                                    <i class="fa-solid fa-arrow-down me-1"></i>En baisse
-                                                </span>
-                                            {% else %}
-                                                <span class="badge bg-secondary fs-6 p-2">
-                                                    <i class="fa-solid fa-minus me-1"></i>Stable
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div class="flex-grow-1 pe-3">
+                                    <p class="text-muted small mb-2 fw-medium lh-sm">Total des Avis</p>
+                                    <h3 class="fw-bold text-body-emphasis mb-2" style="font-size: 2rem; line-height: 1.1;">{{ total_reviews }}</h3>
+                                    <small class="text-muted d-block">Tous types confondus</small>
                                 </div>
-                                <div class="progress mb-3" style="height: 35px;">
-                                    {% widthratio latest_rating_history.rating 5 100 as rating_percentage %}
-                                    <div class="progress-bar bg-success d-flex align-items-center justify-content-center fw-bold fs-5"
-                                         role="progressbar"
-                                         style="width: {{ rating_percentage }}%">
-                                        {{ latest_rating_history.rating|floatformat:1 }}★ / 5★
-                                    </div>
+                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(13, 110, 253, 0.15);">
+                                    <i class="fa-solid fa-star text-primary" style="font-size: 1.75rem;"></i>
                                 </div>
-                                <small class="text-muted">
-                                    <i class="fa-solid fa-clock me-1"></i>
-                                    Dernière mise à jour : {{ latest_rating_history.created_at|date:"d/m/Y à H:i" }}
-                                </small>
                             </div>
-                        {% else %}
-                            <div class="text-center text-muted py-5">
-                                <i class="fa-solid fa-chart-line fa-3x mb-3 opacity-50"></i>
-                                <p class="mb-1">Aucune donnée d'historique disponible</p>
-                                <small>Les données seront disponibles après la première synchronisation avec Google</small>
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -285,28 +164,30 @@
             <!-- Recent Reviews -->
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent border-0 pb-2 d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="card-title mb-1">
-                                <i class="fa-solid fa-comments text-primary me-2"></i>
-                                Avis Récents
-                            </h5>
-                            <p class="text-muted small mb-0">Les 5 derniers avis collectés via votre QR code ou importés depuis Google</p>
+                    <div class="card-header bg-transparent border-0 pb-3 pt-4 px-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
+                                    <i class="fa-solid fa-comments text-primary" style="font-size: 1.25rem;"></i>
+                                </div>
+                                <h5 class="card-title mb-0 fw-bold">Avis Récents</h5>
+                            </div>
+                            <p class="text-muted small mb-0 ms-5">Les 5 derniers avis collectés via votre QR code ou importés depuis Google</p>
                         </div>
                         {% if total_reviews > 0 %}
-                            <a href="#" class="btn btn-sm btn-outline-primary">
-                                Voir tout
+                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">
+                                <i class="fa-solid fa-arrow-right me-1"></i>Voir tout
                             </a>
                         {% endif %}
                     </div>
-                    <div class="card-body">
+                    <div class="card-body pt-0 px-4 pb-4">
                         {% if recent_reviews %}
                             <div class="list-group list-group-flush">
                                 {% for review in recent_reviews|slice:":5" %}
-                                    <div class="list-group-item border-0 px-0 py-3">
+                                    <div class="list-group-item border-0 px-0 py-3 {% if not forloop.last %}border-bottom{% endif %}">
                                         <div class="d-flex align-items-start gap-3">
                                             <div class="flex-grow-1">
-                                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                                <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
                                                     <div class="d-flex align-items-center">
                                                         {% for i in "12345"|make_list %}
                                                             {% if forloop.counter <= review.rating %}
@@ -316,21 +197,21 @@
                                                             {% endif %}
                                                         {% endfor %}
                                                     </div>
-                                                    <span class="badge {% if review.source == 'google' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                                    <span class="badge {% if review.source == 'google' %}bg-success{% else %}bg-warning text-dark{% endif %} rounded-pill px-3 py-1">
                                                         {% if review.source == 'google' %}
                                                             <i class="fa-brands fa-google me-1"></i>Google (Public)
                                                         {% else %}
                                                             <i class="fa-solid fa-lock me-1"></i>Interne (Privé)
                                                         {% endif %}
                                                     </span>
-                                                    <small class="text-muted">
-                                                        <i class="fa-solid fa-calendar me-1"></i>
+                                                    <small class="text-muted d-flex align-items-center">
+                                                        <i class="fa-solid fa-calendar me-2"></i>
                                                         {{ review.created_at|date:"d/m/Y à H:i" }}
                                                     </small>
                                                 </div>
                                                 {% if review.comment %}
-                                                    <p class="mb-0 text-muted">
-                                                        "{{ review.comment|truncatewords:25 }}"
+                                                    <p class="mb-0 text-body lh-base">
+                                                        "{{ review.comment|truncatewords:30 }}"
                                                     </p>
                                                 {% else %}
                                                     <p class="mb-0 text-muted fst-italic small">Aucun commentaire fourni</p>
@@ -338,16 +219,15 @@
                                             </div>
                                         </div>
                                     </div>
-                                    {% if not forloop.last %}
-                                        <hr class="my-0">
-                                    {% endif %}
                                 {% endfor %}
                             </div>
                         {% else %}
                             <div class="text-center text-muted py-5">
-                                <i class="fa-solid fa-inbox fa-3x mb-3 opacity-50"></i>
-                                <p class="mb-1">Aucun avis récent</p>
-                                <small>Commencez à collecter des avis en partageant votre QR code</small>
+                                <div class="mb-4">
+                                    <i class="fa-solid fa-inbox" style="font-size: 4rem; opacity: 0.3;"></i>
+                                </div>
+                                <h6 class="fw-bold mb-2">Aucun avis récent</h6>
+                                <p class="mb-0 small">Commencez à collecter des avis en partageant votre QR code</p>
                             </div>
                         {% endif %}
                     </div>
@@ -357,53 +237,70 @@
             <!-- Quick Actions -->
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent border-0 pb-2">
-                        <h5 class="card-title mb-1">
-                            <i class="fa-solid fa-bolt text-primary me-2"></i>
-                            Actions Rapides
-                        </h5>
-                        <p class="text-muted small mb-0">Outils et liens utiles pour gérer votre établissement</p>
+                    <div class="card-header bg-transparent border-0 pb-3 pt-4 px-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
+                                <i class="fa-solid fa-bolt text-primary" style="font-size: 1.25rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0 fw-bold">Actions Rapides</h5>
+                        </div>
+                        <p class="text-muted small mb-0 ms-5">Outils et liens utiles pour gérer votre établissement</p>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body pt-0 px-4 pb-4">
                         <!-- QR Code Section -->
                         <div class="mb-4 pb-4 border-bottom">
-                            <h6 class="fw-bold mb-2">
-                                <i class="fa-solid fa-qrcode text-primary me-2"></i>
-                                QR Code de Collecte
-                            </h6>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="p-2 rounded-3 me-2" style="background: rgba(13, 110, 253, 0.1);">
+                                    <i class="fa-solid fa-qrcode text-primary"></i>
+                                </div>
+                                <h6 class="fw-bold mb-0">QR Code de Collecte</h6>
+                            </div>
                             <p class="text-muted small mb-3">
                                 Partagez ce QR code avec vos clients pour collecter leurs avis. Les avis positifs seront automatiquement redirigés vers Google.
                             </p>
                             <div class="text-center mb-3">
-                                <div class="d-inline-block p-3 bg-light rounded-3 border">
+                                <div class="d-inline-block p-4 bg-light rounded-4 border">
                                     {{ qr_code_svg|safe }}
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-outline-primary w-100"
-                                    onclick="navigator.clipboard.writeText('{{ feedback_url }}').then(() => alert('Lien copié !'))">
+                            <button class="btn btn-sm btn-outline-primary w-100 rounded-pill"
+                                    onclick="navigator.clipboard.writeText('{{ feedback_url }}').then(() => {
+                                        const btn = event.target;
+                                        const originalText = btn.innerHTML;
+                                        btn.innerHTML = '<i class=\'fa-solid fa-check me-2\'></i>Lien copié !';
+                                        btn.classList.add('btn-success');
+                                        btn.classList.remove('btn-outline-primary');
+                                        setTimeout(() => {
+                                            btn.innerHTML = originalText;
+                                            btn.classList.remove('btn-success');
+                                            btn.classList.add('btn-outline-primary');
+                                        }, 2000);
+                                    })">
                                 <i class="fa-solid fa-copy me-2"></i>Copier le lien
                             </button>
                         </div>
 
                         <!-- Quick Links -->
                         <div class="mb-4 pb-4 border-bottom">
-                            <h6 class="fw-bold mb-3">
-                                <i class="fa-solid fa-link text-primary me-2"></i>
-                                Liens Utiles
-                            </h6>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="p-2 rounded-3 me-2" style="background: rgba(13, 110, 253, 0.1);">
+                                    <i class="fa-solid fa-link text-primary"></i>
+                                </div>
+                                <h6 class="fw-bold mb-0">Liens Utiles</h6>
+                            </div>
                             <div class="d-flex flex-column gap-2">
                                 {% if etablissement.new_reviews_uri %}
-                                    <a href="{{ etablissement.new_reviews_uri }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <a href="{{ etablissement.new_reviews_uri }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill">
                                         <i class="fa-brands fa-google me-2"></i>Voir les avis Google
                                     </a>
                                 {% endif %}
                                 {% if etablissement.maps_uri %}
-                                    <a href="{{ etablissement.maps_uri }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <a href="{{ etablissement.maps_uri }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill">
                                         <i class="fa-solid fa-map-location-dot me-2"></i>Voir sur Google Maps
                                     </a>
                                 {% endif %}
                                 {% if etablissement.website_uri %}
-                                    <a href="{{ etablissement.website_uri }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <a href="{{ etablissement.website_uri }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill">
                                         <i class="fa-solid fa-globe me-2"></i>Site Web
                                     </a>
                                 {% endif %}
@@ -412,25 +309,27 @@
 
                         <!-- Key Information -->
                         <div>
-                            <h6 class="fw-bold mb-3">
-                                <i class="fa-solid fa-info-circle text-primary me-2"></i>
-                                Informations Clés
-                            </h6>
-                            <div class="d-flex flex-column gap-3 small">
-                                <div>
-                                    <div class="d-flex justify-content-between align-items-start mb-1">
-                                        <span class="text-muted">Seuil de redirection:</span>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="p-2 rounded-3 me-2" style="background: rgba(13, 110, 253, 0.1);">
+                                    <i class="fa-solid fa-info-circle text-primary"></i>
+                                </div>
+                                <h6 class="fw-bold mb-0">Informations Clés</h6>
+                            </div>
+                            <div class="d-flex flex-column gap-3">
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="text-muted small">Seuil de redirection:</span>
                                         <span class="fw-bold">{{ etablissement.review_threshold }}★</span>
                                     </div>
                                     <small class="text-muted d-block">Avis ≥ {{ etablissement.review_threshold }}★ → Google</small>
                                 </div>
-                                <div>
-                                    <div class="d-flex justify-content-between align-items-start mb-1">
-                                        <span class="text-muted">Dernière synchronisation:</span>
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="text-muted small">Dernière synchronisation:</span>
                                         {% if etablissement.last_reviews_update %}
-                                            <span>{{ etablissement.last_reviews_update|date:"d/m/Y H:i" }}</span>
+                                            <span class="fw-bold">{{ etablissement.last_reviews_update|date:"d/m/Y H:i" }}</span>
                                         {% else %}
-                                            <span class="text-muted">Jamais</span>
+                                            <span class="text-muted small">Jamais</span>
                                         {% endif %}
                                     </div>
                                     <small class="text-muted d-block">Synchronisation automatique avec Google</small>
@@ -444,10 +343,25 @@
     </div>
 
     <style>
+        .transition {
+            transition: all 0.3s ease;
+        }
+        
         .transition:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
         }
 
+        .card {
+            border-radius: 12px;
+        }
+
+        .progress {
+            border-radius: 50px;
+        }
+
+        .badge {
+            font-weight: 500;
+        }
     </style>
 {% endblock dashboard_content %}

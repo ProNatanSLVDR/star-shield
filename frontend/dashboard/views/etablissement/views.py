@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.urls import reverse
 from datetime import timedelta
 from auths.models import Etablissement, RatingHistory
-from frontend.reviews.models import Review
+from frontend.reviews.models import Review, ReviewAnalytics
 from frontend.dashboard.render import starshield_render
 from starshield.decorators import (
     google_gmb_connected_required,
@@ -19,6 +19,9 @@ def overview_view(request):
 
     # Get all reviews for this establishment
     all_reviews = Review.objects.filter(etablissement=etablissement)
+    
+    # Get only internal reviews (not imported from Google)
+    internal_reviews = all_reviews.filter(source="internal")
 
     # Total reviews count
     total_reviews = all_reviews.count()
@@ -26,20 +29,27 @@ def overview_view(request):
     # Average rating
     avg_rating = all_reviews.aggregate(avg=Avg("rating"))["avg"] or 0
 
-    # Positive reviews (rating >= threshold) - these would be redirected to Google
-    positive_reviews_count = all_reviews.filter(
+    # Positive reviews (internal reviews with rating >= threshold) - these would be redirected to Google
+    positive_reviews_count = internal_reviews.filter(
         rating__gte=etablissement.review_threshold
     ).count()
 
-    # Private feedback (rating < threshold) - these stay internal
-    private_feedback_count = all_reviews.filter(
+    # Private feedback (internal reviews with rating < threshold) - these stay internal
+    private_feedback_count = internal_reviews.filter(
         rating__lt=etablissement.review_threshold
     ).count()
 
-    # Redirection rate (percentage)
+    # Redirection rate (percentage of internal reviews that are redirected)
+    total_internal_reviews = internal_reviews.count()
     redirection_rate = (
-        (positive_reviews_count / total_reviews * 100) if total_reviews > 0 else 0
+        (positive_reviews_count / total_internal_reviews * 100) if total_internal_reviews > 0 else 0
     )
+
+    # Review page consultations count
+    review_page_consultations = ReviewAnalytics.objects.filter(
+        etablissement=etablissement,
+        type="review_page_consulted"
+    ).count()
 
     # Recent activity - reviews in last 7 and 30 days
     now = timezone.now()
@@ -105,6 +115,7 @@ def overview_view(request):
         "positive_reviews_count": positive_reviews_count,
         "private_feedback_count": private_feedback_count,
         "redirection_rate": round(redirection_rate, 1),
+        "review_page_consultations": review_page_consultations,
         "recent_7_days": recent_7_days,
         "recent_30_days": recent_30_days,
         "review_distribution": review_distribution,
