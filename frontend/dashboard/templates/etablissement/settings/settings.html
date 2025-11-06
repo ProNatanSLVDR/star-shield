@@ -2,7 +2,7 @@
 {% load component_tags %}
 
 {% block dashboard_content %}
-    <div class="d-flex flex-column h-100" style="padding: 1.5rem;">
+    <div class="d-flex flex-column h-100 p-3">
         <!-- Header Section -->
         <div class="mb-3 flex-shrink-0">
             <h2 class="fw-bold text-body-emphasis mb-1">
@@ -141,26 +141,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .card {
-            border-radius: 12px;
-        }
-
-        .form-control, .form-select {
-            border-radius: 8px;
-        }
-
-        .btn {
-            border-radius: 50px;
-        }
-
-        #{{ form.review_threshold.id_for_label }} {
-            font-size: 1.1rem;
-            padding: 0.75rem;
-            font-weight: 600;
-        }
-    </style>
     <script>
         // Update the star display when threshold changes
         document.addEventListener('DOMContentLoaded', function() {
