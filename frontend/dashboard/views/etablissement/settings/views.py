@@ -29,6 +29,12 @@ def settings_view(request):
             # Update etablissement settings
             etablissement.review_threshold = int(form.cleaned_data["review_threshold"])
 
+            # Handle target_rating - empty string becomes None
+            target_rating = form.cleaned_data.get("target_rating")
+            etablissement.target_rating = (
+                target_rating if target_rating is not None else None
+            )
+
             # Handle review_page_label - empty string becomes None
             review_page_label = form.cleaned_data.get("review_page_label", "").strip()
             etablissement.review_page_label = (
@@ -52,6 +58,9 @@ def settings_view(request):
         form = EtablissementSettingsForm(
             initial={
                 "review_threshold": str(etablissement.review_threshold),
+                "target_rating": str(etablissement.target_rating)
+                if etablissement.target_rating
+                else "",
                 "review_page_label": etablissement.review_page_label or "",
                 "review_page_text": etablissement.review_page_text or "",
             }

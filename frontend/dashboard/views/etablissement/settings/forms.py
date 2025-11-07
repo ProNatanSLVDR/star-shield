@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class EtablissementSettingsForm(forms.Form):
@@ -8,6 +9,17 @@ class EtablissementSettingsForm(forms.Form):
         help_text="Note minimale pour redirection Google.",
         label="Seuil de redirection",
         widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    target_rating = forms.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        required=False,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        help_text="Note cible que vous souhaitez atteindre à l'avenir.",
+        label="Note cible",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "0.1", "min": "0", "max": "5"}
+        ),
     )
     review_page_label = forms.CharField(
         max_length=255,
@@ -23,4 +35,3 @@ class EtablissementSettingsForm(forms.Form):
         label="Texte de la page de feedback",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
-

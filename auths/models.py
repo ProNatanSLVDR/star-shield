@@ -288,6 +288,14 @@ class Etablissement(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         help_text="Note minimale pour redirection Google.",
     )
+    target_rating = models.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        help_text="Note cible que vous souhaitez atteindre à l'avenir.",
+    )
     review_page_label = models.CharField(
         max_length=255,
         blank=True,
