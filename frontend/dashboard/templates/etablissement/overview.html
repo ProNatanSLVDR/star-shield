@@ -1,367 +1,329 @@
 {% extends "dashboard_base.html" %}
-{% load component_tags %}
+{% load static %}
 
 {% block dashboard_content %}
-    <div class="p-5 d-flex flex-column h-100">
-        <!-- Header Section -->
-        <div class="mb-5">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <div class="flex-grow-1">
-                    <h1 class="display-4 fw-bold text-body-emphasis mb-3">
-                        {{ etablissement.title }}
-                    </h1>
-                    <p class="lead text-muted mb-0">Vue d'ensemble de votre établissement</p>
-                </div>
-                <div class="text-primary opacity-10 d-none d-md-block" style="font-size: 8rem;">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
-            </div>
-        </div>
+    <div class="w-100 d-flex flex-column" style="min-height: 100%;">
 
-        <!-- Key Performance Metrics Cards -->
-        <div class="mb-5">
-            <div class="d-flex align-items-center mb-4">
-                <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
-                    <i class="fa-solid fa-chart-pie text-primary" style="font-size: 1.25rem;"></i>
-                </div>
-                <h5 class="fw-bold mb-0">Statistiques Principales</h5>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div class="flex-grow-1 pe-3">
-                                    <p class="text-muted small mb-2 fw-medium lh-sm">Note Actuelle</p>
-                                    {% if latest_rating_history %}
-                                        <h2 class="fw-bold text-success mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ latest_rating_history.rating|floatformat:1 }}★</h2>
-                                        <small class="text-muted d-block">Note Google actuelle</small>
-                                    {% else %}
-                                        <h2 class="fw-bold text-body-emphasis mb-2" style="font-size: 2.5rem; line-height: 1.1;">-</h2>
-                                        <small class="text-muted d-block">Aucune donnée disponible</small>
-                                    {% endif %}
-                                </div>
-                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(25, 135, 84, 0.15);">
-                                    <i class="fa-solid fa-star text-success" style="font-size: 1.75rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div class="flex-grow-1 pe-3">
-                                    <p class="text-muted small mb-2 fw-medium lh-sm">Consultations Page</p>
-                                    <h2 class="fw-bold text-body-emphasis mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ review_page_consultations }}</h2>
-                                    <small class="text-muted d-block">Consultations de la page d'avis</small>
-                                </div>
-                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(13, 110, 253, 0.15);">
-                                    <i class="fa-solid fa-eye text-primary" style="font-size: 1.75rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div class="flex-grow-1 pe-3">
-                                    <p class="text-muted small mb-2 fw-medium lh-sm">Taux de Redirection</p>
-                                    <h2 class="fw-bold text-body-emphasis mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ redirection_rate }}%</h2>
-                                    <small class="text-muted d-block">Pourcentage d'avis envoyés à Google</small>
-                                </div>
-                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(13, 110, 253, 0.15);">
-                                    <i class="fa-solid fa-arrow-right text-primary" style="font-size: 1.75rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div class="flex-grow-1 pe-3">
-                                    <p class="text-muted small mb-2 fw-medium lh-sm">Feedback Privé</p>
-                                    <h2 class="fw-bold text-warning mb-2" style="font-size: 2.5rem; line-height: 1.1;">{{ private_feedback_count }}</h2>
-                                    <small class="text-muted d-block">&lt; {{ etablissement.review_threshold }}★ → Interne</small>
-                                </div>
-                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(255, 193, 7, 0.15);">
-                                    <i class="fa-solid fa-lock text-warning" style="font-size: 1.75rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div style="min-height: 10%;" class="rounded-4 border bg-white shadow-sm p-3 d-flex flex-column justify-content-between">
 
-        <!-- Secondary Metrics Row -->
-        <div class="mb-5">
-            <div class="d-flex align-items-center mb-4">
-                <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
-                    <i class="fa-solid fa-gauge text-primary" style="font-size: 1.25rem;"></i>
+            <div class="row g-2 align-items-center h-100">
+                <div class="col-12 col-lg-7">
+                    <h1 class="h5 fw-bold text-body-emphasis mb-1">{{ etablissement.title }}</h1>
+                    <p class="text-muted mb-0 small">Surveillez votre réputation, partagez les avis positifs et traitez les retours sensibles avant leur publication.</p>
                 </div>
-                <h5 class="fw-bold mb-0">Métriques Complémentaires</h5>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div class="flex-grow-1 pe-3">
-                                    <p class="text-muted small mb-2 fw-medium lh-sm">Activité Récente</p>
-                                    <h3 class="fw-bold text-body-emphasis mb-2" style="font-size: 2rem; line-height: 1.1;">{{ recent_7_days }}</h3>
-                                    <small class="text-muted d-block">7 derniers jours ({{ recent_30_days }} sur 30j)</small>
-                                </div>
-                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(111, 66, 193, 0.15);">
-                                    <i class="fa-solid fa-clock" style="color: #6f42c1; font-size: 1.75rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div class="flex-grow-1 pe-3">
-                                    <p class="text-muted small mb-2 fw-medium lh-sm">Seuil de Protection</p>
-                                    <h3 class="fw-bold text-body-emphasis mb-2" style="font-size: 2rem; line-height: 1.1;">{{ etablissement.review_threshold }}★</h3>
-                                    <small class="text-muted d-block">Note minimale pour redirection Google</small>
-                                </div>
-                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(220, 53, 69, 0.15);">
-                                    <i class="fa-solid fa-sliders text-danger" style="font-size: 1.75rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 transition" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div class="flex-grow-1 pe-3">
-                                    <p class="text-muted small mb-2 fw-medium lh-sm">Total des Avis</p>
-                                    <h3 class="fw-bold text-body-emphasis mb-2" style="font-size: 2rem; line-height: 1.1;">{{ total_reviews }}</h3>
-                                    <small class="text-muted d-block">Tous types confondus</small>
-                                </div>
-                                <div class="p-3 rounded-4 flex-shrink-0" style="background: rgba(13, 110, 253, 0.15);">
-                                    <i class="fa-solid fa-star text-primary" style="font-size: 1.75rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Recent Reviews and Quick Actions Row -->
-        <div class="row g-4 mb-4">
-            <!-- Recent Reviews -->
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent border-0 pb-3 pt-4 px-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
-                                    <i class="fa-solid fa-comments text-primary" style="font-size: 1.25rem;"></i>
-                                </div>
-                                <h5 class="card-title mb-0 fw-bold">Avis Récents</h5>
-                            </div>
-                            <p class="text-muted small mb-0 ms-5">Les 5 derniers avis collectés via votre QR code ou importés depuis Google</p>
-                        </div>
-                        {% if total_reviews > 0 %}
-                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">
-                                <i class="fa-solid fa-arrow-right me-1"></i>Voir tout
+                <div class="col-12 col-lg-5">
+                    <div class="d-flex flex-column flex-lg-row flex-wrap gap-2 justify-content-lg-end align-items-lg-end">
+                        {% if etablissement.new_reviews_uri %}
+                            <a href="{{ etablissement.new_reviews_uri }}" target="_blank" rel="noopener" class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                                <i class="fa-solid fa-star"></i>
+                                <span>Collecter des avis</span>
+                            </a>
+                        {% endif %}
+                        {% if etablissement.maps_uri %}
+                            <a href="{{ etablissement.maps_uri }}" target="_blank" rel="noopener" class="btn btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>Google Maps</span>
+                            </a>
+                        {% endif %}
+                        {% if etablissement.website_uri %}
+                            <a href="{{ etablissement.website_uri }}" target="_blank" rel="noopener" class="btn btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                                <i class="fa-solid fa-globe"></i>
+                                <span>Site web</span>
                             </a>
                         {% endif %}
                     </div>
-                    <div class="card-body pt-0 px-4 pb-4">
-                        {% if recent_reviews %}
-                            <div class="list-group list-group-flush">
-                                {% for review in recent_reviews|slice:":5" %}
-                                    <div class="list-group-item border-0 px-0 py-3 {% if not forloop.last %}border-bottom{% endif %}">
-                                        <div class="d-flex align-items-start gap-3">
-                                            <div class="flex-grow-1">
-                                                <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
-                                                    <div class="d-flex align-items-center">
-                                                        {% for i in "12345"|make_list %}
-                                                            {% if forloop.counter <= review.rating %}
-                                                                <i class="fa-solid fa-star text-warning"></i>
-                                                            {% else %}
-                                                                <i class="fa-regular fa-star text-muted"></i>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </div>
-                                                    <span class="badge {% if review.source == 'google' %}bg-success{% else %}bg-warning text-dark{% endif %} rounded-pill px-3 py-1">
-                                                        {% if review.source == 'google' %}
-                                                            <i class="fa-brands fa-google me-1"></i>Google (Public)
-                                                        {% else %}
-                                                            <i class="fa-solid fa-lock me-1"></i>Interne (Privé)
-                                                        {% endif %}
-                                                    </span>
-                                                    <small class="text-muted d-flex align-items-center">
-                                                        <i class="fa-solid fa-calendar me-2"></i>
-                                                        {{ review.created_at|date:"d/m/Y à H:i" }}
-                                                    </small>
-                                                </div>
-                                                {% if review.comment %}
-                                                    <p class="mb-0 text-body lh-base">
-                                                        "{{ review.comment|truncatewords:30 }}"
-                                                    </p>
-                                                {% else %}
-                                                    <p class="mb-0 text-muted fst-italic small">Aucun commentaire fourni</p>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center text-muted py-5">
-                                <div class="mb-4">
-                                    <i class="fa-solid fa-inbox" style="font-size: 4rem; opacity: 0.3;"></i>
-                                </div>
-                                <h6 class="fw-bold mb-2">Aucun avis récent</h6>
-                                <p class="mb-0 small">Commencez à collecter des avis en partageant votre QR code</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-transparent border-0 pb-3 pt-4 px-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="p-2 rounded-3 me-3" style="background: rgba(13, 110, 253, 0.1);">
-                                <i class="fa-solid fa-bolt text-primary" style="font-size: 1.25rem;"></i>
-                            </div>
-                            <h5 class="card-title mb-0 fw-bold">Actions Rapides</h5>
-                        </div>
-                        <p class="text-muted small mb-0 ms-5">Outils et liens utiles pour gérer votre établissement</p>
-                    </div>
-                    <div class="card-body pt-0 px-4 pb-4">
-                        <!-- QR Code Section -->
-                        <div class="mb-4 pb-4 border-bottom">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="p-2 rounded-3 me-2" style="background: rgba(13, 110, 253, 0.1);">
-                                    <i class="fa-solid fa-qrcode text-primary"></i>
-                                </div>
-                                <h6 class="fw-bold mb-0">QR Code de Collecte</h6>
-                            </div>
-                            <p class="text-muted small mb-3">
-                                Partagez ce QR code avec vos clients pour collecter leurs avis. Les avis positifs seront automatiquement redirigés vers Google.
-                            </p>
-                            <div class="text-center mb-3">
-                                <div class="d-inline-block p-4 bg-light rounded-4 border">
-                                    {{ qr_code_svg|safe }}
-                                </div>
-                            </div>
-                            <button class="btn btn-sm btn-outline-primary w-100 rounded-pill"
-                                    onclick="navigator.clipboard.writeText('{{ feedback_url }}').then(() => {
-                                             const btn = event.target;
-                                             const originalText = btn.innerHTML;
-                                             btn.innerHTML = '<i class=\'fa-solid fa-check me-2\'></i>Lien copié !';
-                                             btn.classList.add('btn-success');
-                                             btn.classList.remove('btn-outline-primary');
-                                             setTimeout(() => {
-                                             btn.innerHTML = originalText;
-                                             btn.classList.remove('btn-success');
-                                             btn.classList.add('btn-outline-primary');
-                                             }, 2000);
-                                             })">
-                                <i class="fa-solid fa-copy me-2"></i>Copier le lien
-                            </button>
-                        </div>
-
-                        <!-- Quick Links -->
-                        <div class="mb-4 pb-4 border-bottom">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="p-2 rounded-3 me-2" style="background: rgba(13, 110, 253, 0.1);">
-                                    <i class="fa-solid fa-link text-primary"></i>
-                                </div>
-                                <h6 class="fw-bold mb-0">Liens Utiles</h6>
-                            </div>
-                            <div class="d-flex flex-column gap-2">
-                                {% if etablissement.new_reviews_uri %}
-                                    <a href="{{ etablissement.new_reviews_uri }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill">
-                                        <i class="fa-brands fa-google me-2"></i>Voir les avis Google
-                                    </a>
-                                {% endif %}
-                                {% if etablissement.maps_uri %}
-                                    <a href="{{ etablissement.maps_uri }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill">
-                                        <i class="fa-solid fa-map-location-dot me-2"></i>Voir sur Google Maps
-                                    </a>
-                                {% endif %}
-                                {% if etablissement.website_uri %}
-                                    <a href="{{ etablissement.website_uri }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill">
-                                        <i class="fa-solid fa-globe me-2"></i>Site Web
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Key Information -->
-                        <div>
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="p-2 rounded-3 me-2" style="background: rgba(13, 110, 253, 0.1);">
-                                    <i class="fa-solid fa-info-circle text-primary"></i>
-                                </div>
-                                <h6 class="fw-bold mb-0">Informations Clés</h6>
-                            </div>
-                            <div class="d-flex flex-column gap-3">
-                                <div class="p-3 bg-light rounded-3">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="text-muted small">Seuil de redirection:</span>
-                                        <span class="fw-bold">{{ etablissement.review_threshold }}★</span>
-                                    </div>
-                                    <small class="text-muted d-block">Avis ≥ {{ etablissement.review_threshold }}★ → Google</small>
-                                </div>
-                                <div class="p-3 bg-light rounded-3">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="text-muted small">Dernière synchronisation:</span>
-                                        {% if etablissement.last_reviews_update %}
-                                            <span class="fw-bold">{{ etablissement.last_reviews_update|date:"d/m/Y H:i" }}</span>
-                                        {% else %}
-                                            <span class="text-muted small">Jamais</span>
-                                        {% endif %}
-                                    </div>
-                                    <small class="text-muted d-block">Synchronisation automatique avec Google</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
+
+        <div style="min-height: 50%;" class="rounded-4 border bg-white shadow-sm p-3 mt-3 row g-0">
+
+            <div class="col-12 col-xl-7 p-2">
+                <div class="bg-body-tertiary rounded-4 p-2 p-md-3 h-100 d-flex align-items-center">
+                    <canvas id="ratingHistoryChart" class="w-100 h-100"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-5 p-2 px-3">
+                <div class="row row-cols-1 row-cols-xl-2">
+
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Note actuelle</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {{ current_rating|floatformat:1|default_if_none:"—" }}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-gauge-high"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Visites QR Code</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {{ qr_page_visits|default_if_none:"0" }}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Redirigés internes</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {{ reviews_kept_private|default_if_none:"0" }}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-lock"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Redirigés vers Google</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {{ reviews_redirected_google|default_if_none:"0" }}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Avis internes</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {{ internal_reviews_count|default_if_none:"0" }}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-inbox"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Avis Google</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {{ google_reviews_count|default_if_none:"0" }}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-brands fa-google"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Total avis</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {{ total_reviews|default_if_none:"0" }}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-star"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col p-1">
+                        <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Dernière mise à jour</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {% if last_review_update %}
+                                        {{ last_review_update|timesince|truncatechars:15 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <div style="min-height: 30%;">
+
+        </div>
     </div>
 
-    <style>
-        .transition {
-            transition: all 0.3s ease;
-        }
+    <script src="{% static 'chartjs.min.js' %}"></script>
+    <script>
+        (function() {
+            const canvas = document.getElementById('ratingHistoryChart');
+            if (!canvas) {
+                return;
+            }
 
-        .transition:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
-        }
+            let parsedPayload;
+            try {
+                parsedPayload = JSON.parse('{{ chart_payload_json|escapejs }}');
+            } catch (error) {
+                console.error('Unable to parse rating history payload', error);
+                return;
+            }
 
-        .card {
-            border-radius: 12px;
-        }
+            if (!parsedPayload || (!parsedPayload.history.length && !parsedPayload.goal.length)) {
+                const context = canvas.getContext('2d');
+                if (!context) {
+                    return;
+                }
+                context.font = '14px "Inter", system-ui';
+                context.fillStyle = '#6c757d';
+                context.textAlign = 'center';
+                context.fillText('Les données de note apparaîtront dès la première synchronisation.', canvas.width / 2, canvas.height / 2);
+                return;
+            }
 
-        .progress {
-            border-radius: 50px;
-        }
+            const historyMap = {};
+            parsedPayload.history.forEach(function(point) {
+                historyMap[point.date] = point.rating;
+            });
 
-        .badge {
-            font-weight: 500;
-        }
-    </style>
+            const goalMap = {};
+            parsedPayload.goal.forEach(function(point) {
+                goalMap[point.date] = point.rating;
+            });
+
+            const labelsSet = new Set();
+            parsedPayload.history.forEach(function(point) {
+                labelsSet.add(point.date);
+            });
+            parsedPayload.goal.forEach(function(point) {
+                labelsSet.add(point.date);
+            });
+
+            const labels = Array.from(labelsSet).sort();
+
+            const historyData = labels.map(function(date) {
+                return historyMap[date] ?? null;
+            });
+
+            const formatLabel = function(isoDate) {
+                const parsed = new Date(isoDate + 'T00:00:00');
+                if (Number.isNaN(parsed.getTime())) {
+                    return isoDate;
+                }
+                return parsed.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+            };
+
+            const datasets = [
+                {
+                    label: 'Note moyenne',
+                    data: historyData,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.08)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    spanGaps: true,
+                }
+            ];
+
+            if (parsedPayload.goal.length) {
+                const goalData = labels.map(function(date) {
+                    return goalMap[date] ?? null;
+                });
+                datasets.push({
+                    label: 'Objectif à 6 mois',
+                    data: goalData,
+                    borderColor: '#6c757d',
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: false,
+                });
+            }
+
+            new window.Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels.map(formatLabel),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 5,
+                            ticks: {
+                                stepSize: 0.5,
+                            },
+                            grid: {
+                                color: 'rgba(108, 117, 125, 0.15)',
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: true,
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    if (!context.length) {
+                                        return '';
+                                    }
+                                    const label = labels[context[0].dataIndex];
+                                    return formatLabel(label);
+                                },
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + (context.formattedValue || '—') + ' ★';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
 {% endblock dashboard_content %}

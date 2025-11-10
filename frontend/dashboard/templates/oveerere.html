@@ -1,0 +1,227 @@
+<div class="rounded-4 border bg-white shadow-sm position-relative overflow-hidden flex-shrink-0" style="height: 20%;">
+    <div class="p-3 p-lg-4 position-relative h-100 d-flex flex-column justify-content-center">
+
+    <!-- Main Content Row -->
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-lg-7">
+                <h1 class="h5 fw-bold text-body-emphasis mb-1">{{ etablissement.title }}</h1>
+                <p class="text-muted mb-0 small">Surveillez votre réputation, partagez les avis positifs et traitez les retours sensibles avant leur publication.</p>
+            </div>
+
+
+
+            <div class="col-12 col-lg-5">
+                <div class="d-flex flex-column flex-lg-row flex-wrap gap-2 justify-content-lg-end align-items-lg-end">
+                    {% if etablissement.new_reviews_uri %}
+                        <a href="{{ etablissement.new_reviews_uri }}" target="_blank" rel="noopener" class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-star"></i>
+                            <span>Collecter des avis</span>
+                        </a>
+                    {% endif %}
+                    {% if etablissement.maps_uri %}
+                        <a href="{{ etablissement.maps_uri }}" target="_blank" rel="noopener" class="btn btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Google Maps</span>
+                        </a>
+                    {% endif %}
+                    {% if etablissement.website_uri %}
+                        <a href="{{ etablissement.website_uri }}" target="_blank" rel="noopener" class="btn btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-globe"></i>
+                            <span>Site web</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 mt-2" style="height: 40%;">
+    <div class="card-body">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+            <div>
+                <h2 class="h6 fw-semibold mb-0">Historique des notes</h2>
+                {% if last_rating_update %}
+                    <p class="text-muted mb-0 small">Dernière mise à jour le {{ last_rating_update|date:"d F Y" }}</p>
+                {% else %}
+                    <p class="text-muted mb-0 small">Les premières données apparaîtront ici dès que disponibles.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row g-3 align-items-stretch flex-grow-1">
+            <div class="col-12 col-xl-7 d-flex flex-column">
+                <div class="bg-body-tertiary rounded-4 p-2 p-md-3 h-100 d-flex align-items-center">
+                    <canvas id="ratingHistoryChart" class="w-100 h-100"></canvas>
+                </div>
+            </div>
+            <div class="col-12 col-xl-5 d-flex flex-column">
+                <div class="d-flex flex-column gap-1 h-100">
+                    <div class="rounded-4 border bg-white shadow-sm p-3 flex-grow-1 d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Note actuelle</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {% if current_rating is not None %}
+                                        {{ current_rating|floatformat:1 }}
+                                    {% elif average_rating is not None %}
+                                        {{ average_rating|floatformat:1 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                <i class="fa-solid fa-gauge-high"></i>
+                            </span>
+                        </div>
+                        {% if rating_change is not None %}
+                            {% if rating_change > 0 %}
+                                <p class="text-success mt-2 mb-0 small">+{{ rating_change|floatformat:2 }} pts vs dernière mise à jour</p>
+                            {% elif rating_change < 0 %}
+                                <p class="text-danger mt-2 mb-0 small">{{ rating_change|floatformat:2 }} pts vs dernière mise à jour</p>
+                            {% else %}
+                                <p class="text-muted mt-2 mb-0 small">Stable depuis la dernière mise à jour</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted mt-2 mb-0 small">Aucune tendance pour le moment</p>
+                        {% endif %}
+                    </div>
+                    <div class="rounded-4 border bg-white shadow-sm p-3 flex-grow-1 d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Avis cumulés</p>
+                                <h2 class="h4 fw-semibold mb-0">{{ total_reviews }}</h2>
+                            </div>
+                            <span class="rounded-circle bg-success-subtle text-success d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                <i class="fa-solid fa-message"></i>
+                            </span>
+                        </div>
+                        <p class="text-muted mt-2 mb-0 small">{{ recent_reviews_count }} avis sur les 30 derniers jours</p>
+                    </div>
+                    <div class="rounded-4 border bg-white shadow-sm p-3 flex-grow-1 d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Part d'avis positifs</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {% if positive_reviews_percentage is not None %}
+                                        {{ positive_reviews_percentage|floatformat:1 }}<span class="fs-6">%</span>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <span class="rounded-circle bg-warning-subtle text-warning d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                <i class="fa-solid fa-face-smile"></i>
+                            </span>
+                        </div>
+                        {% if total_reviews > 0 %}
+                            <p class="text-muted mt-2 mb-0 small">Avis notés 4★ et plus</p>
+                        {% else %}
+                            <p class="text-muted mt-2 mb-0 small">En attente de premiers avis</p>
+                        {% endif %}
+                    </div>
+                    <div class="rounded-4 border bg-white shadow-sm p-3 flex-grow-1 d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-1">Objectif de note</p>
+                                <h2 class="h4 fw-semibold mb-0">
+                                    {% if goal_rating is not None %}
+                                        {{ goal_rating|floatformat:1 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <span class="rounded-circle bg-info-subtle text-info d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                <i class="fa-solid fa-flag"></i>
+                            </span>
+                        </div>
+                        {% if goal_rating is not None and goal_gap is not None %}
+                            {% if goal_gap > 0 %}
+                                <p class="text-muted mt-2 mb-0 small">Encore {{ goal_gap|floatformat:2 }} pts à gagner</p>
+                            {% elif goal_gap < 0 %}
+                                <p class="text-success mt-2 mb-0 small">Objectif dépassé de {{ goal_gap_abs|floatformat:2 }} pts</p>
+                            {% else %}
+                                <p class="text-success mt-2 mb-0 small">Objectif atteint</p>
+                            {% endif %}
+                        {% elif goal_rating is not None %}
+                            <p class="text-muted mt-2 mb-0 small">Définissez vos actions pour l'atteindre</p>
+                        {% else %}
+                            <p class="text-muted mt-2 mb-0 small">Aucun objectif défini pour l'instant</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-2 mt-2" style="height: 4% !important;">
+    <div class="col-12 col-xl-6 d-flex flex-column" style="min-height: 0;">
+        <div class="card shadow-sm border-0 rounded-4 h-100 d-flex flex-column">
+            <div class="card-body p-3 d-flex flex-column h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-shrink-0">
+                    <h2 class="h6 fw-semibold mb-0">Répartition des notes</h2>
+                    <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ total_reviews }} avis</span>
+                </div>
+                {% if rating_distribution %}
+                    <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-center" style="min-height: 0;">
+                        {% for item in rating_distribution %}
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold small">{{ item.rating }}★</span>
+                                    <span class="text-muted small">{{ item.count }} avis</span>
+                                </div>
+                                <div class="progress rounded-pill" style="height: 8px;">
+                                    {% if total_reviews > 0 %}
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio item.count total_reviews 100 %}%" aria-valuenow="{{ item.count }}" aria-valuemin="0" aria-valuemax="{{ total_reviews }}"></div>
+                                    {% else %}
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0"></div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0 small">Aucunes données pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-6 d-flex flex-column" style="min-height: 0;">
+        <div class="card shadow-sm border-0 rounded-4 h-100 d-flex flex-column">
+            <div class="card-body p-3 d-flex flex-column h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-shrink-0">
+                    <h2 class="h6 fw-semibold mb-0">Origine des avis</h2>
+                    <span class="badge rounded-pill bg-success-subtle text-success-emphasis">Canaux</span>
+                </div>
+                <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-center" style="min-height: 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;"><i class="fa-brands fa-google"></i></span>
+                            <span class="fw-semibold small">Avis Google</span>
+                        </div>
+                        <span class="text-muted small">{{ google_reviews_count }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;"><i class="fa-solid fa-building"></i></span>
+                            <span class="fw-semibold small">Collecte interne</span>
+                        </div>
+                        <span class="text-muted small">{{ internal_reviews_count }}</span>
+                    </div>
+                    {% if other_reviews_count > 0 %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="rounded-circle bg-info text-white d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;"><i class="fa-solid fa-share-nodes"></i></span>
+                                <span class="fw-semibold small">Autres sources</span>
+                            </div>
+                            <span class="text-muted small">{{ other_reviews_count }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <p class="text-muted small mt-2 mb-0 flex-shrink-0">Gardez un équilibre entre collectes internes et avis Google pour renforcer votre crédibilité.</p>
+            </div>
+        </div>
+    </div>
+</div>
