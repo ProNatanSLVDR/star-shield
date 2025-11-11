@@ -82,15 +82,10 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-grow-1 p-3 overflow-auto h-100">
-            <div class=" p-2 w-100" style="min-height: 100%;">
-                <div>
-                    {% block dashboard_header %}
-                    {% endblock dashboard_header %}
-                </div>
-                {% block dashboard_content %}
-                {% endblock dashboard_content %}
-            </div>
+        <main class="d-flex flex-column flex-grow-1 p-3 h-100">
+            {% block dashboard_content %}
+            {% endblock dashboard_content %}
+
         </main>
     </div>
 {% endblock body %}

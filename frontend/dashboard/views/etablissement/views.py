@@ -66,6 +66,7 @@ def overview_view(request):
         ]
 
     reviews_queryset = Review.objects.filter(etablissement=etablissement)
+    ordered_reviews = reviews_queryset.order_by("-created_at")
 
     average_rating = reviews_queryset.aggregate(avg=Avg("rating"))["avg"]
     if average_rating is not None:
@@ -136,10 +137,11 @@ def overview_view(request):
         conversion_rate = round((total_reviews / qr_page_visits) * 100, 1)
 
     # Last review update time
+    latest_reviews = list(ordered_reviews[:5])
+
     last_review_update = None
-    last_review = reviews_queryset.order_by("-created_at").first()
-    if last_review:
-        last_review_update = last_review.created_at
+    if latest_reviews:
+        last_review_update = latest_reviews[0].created_at
 
     chart_payload = {
         "history": rating_history_points,
@@ -170,7 +172,7 @@ def overview_view(request):
         "reviews_kept_private": reviews_kept_private,
         "conversion_rate": conversion_rate,
         "last_review_update": last_review_update,
-        "google_reviews_count": google_reviews_count,
+        "latest_reviews": latest_reviews,
     }
 
     return starshield_render(

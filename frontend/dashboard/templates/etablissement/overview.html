@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block dashboard_content %}
-    <div class="w-100 d-flex flex-column" style="min-height: 100%;">
 
-        <div style="min-height: 10%;" class="rounded-4 border bg-white shadow-sm p-3 d-flex flex-column justify-content-between">
+    <div style="min-height: 15%;" class="w-100 pb-3">
+        <div class="rounded-4 border bg-white shadow-sm p-3 h-100 d-flex flex-column justify-content-between">
 
             <div class="row g-2 align-items-center h-100">
                 <div class="col-12 col-lg-7">
@@ -36,8 +36,9 @@
                 </div>
             </div>
         </div>
-
-        <div style="min-height: 50%;" class="rounded-4 border bg-white shadow-sm p-3 mt-3 row g-0">
+    </div>
+    <div style="min-height: 50%;" class="w-100 pb-3">
+        <div class="rounded-4 border bg-white shadow-sm p-3 row g-0 h-100">
 
             <div class="col-12 col-xl-7 p-2">
                 <div class="bg-body-tertiary rounded-4 p-2 p-md-3 h-100 d-flex align-items-center">
@@ -167,7 +168,7 @@
                                 <p class="text-muted text-uppercase small mb-1">Dernière mise à jour</p>
                                 <h2 class="h4 fw-semibold mb-0">
                                     {% if last_review_update %}
-                                        {{ last_review_update|timesince|truncatechars:15 }}
+                                        {{ last_review_update|timesince|truncatechars:10 }}
                                     {% else %}
                                         —
                                     {% endif %}
@@ -185,10 +186,28 @@
             </div>
 
         </div>
-        <div style="min-height: 30%;">
+    </div>
+    <div style="min-height: 35%;" class="w-100">
+        <div class="rounded-4 border bg-white shadow-sm p-3 row g-0 h-100">
+
+            <div class="col-12 col-xl-7 p-2 h-100">
+                a
+            </div>
+
+            <div class="col-12 col-xl-5 p-2 px-3 h-100">
+                a
+            </div>
 
         </div>
     </div>
+
+
+
+
+
+
+
+
 
     <script src="{% static 'chartjs.min.js' %}"></script>
     <script>
