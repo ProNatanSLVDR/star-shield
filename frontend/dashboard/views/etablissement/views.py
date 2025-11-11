@@ -1,4 +1,3 @@
-from django.db.models import Avg, Count
 from django.utils import timezone
 from datetime import timedelta
 import json
@@ -31,13 +30,6 @@ def overview_view(request):
     current_rating = (
         rating_history_points[-1]["rating"] if rating_history_points else None
     )
-    current_reviews_total = (
-        rating_history_points[-1]["total_reviews"] if rating_history_points else 0
-    )
-
-    last_rating_update = None
-    if rating_history_points:
-        last_rating_update = rating_history_qs.last().created_at
 
     goal_rating = None
     if etablissement.target_rating is not None:
@@ -45,7 +37,11 @@ def overview_view(request):
 
     goal_projection_points: list[dict] = []
     if goal_rating is not None:
-        origin_date = last_rating_update or timezone.now()
+        origin_date = (
+            rating_history_qs.last().created_at
+            if rating_history_points
+            else timezone.now()
+        )
 
         start_rating = goal_rating
         if current_rating is not None and rating_history_points:
@@ -68,60 +64,26 @@ def overview_view(request):
     reviews_queryset = Review.objects.filter(etablissement=etablissement)
     ordered_reviews = reviews_queryset.order_by("-created_at")
 
-    average_rating = reviews_queryset.aggregate(avg=Avg("rating"))["avg"]
-    if average_rating is not None:
-        average_rating = float(average_rating)
-
     total_reviews = reviews_queryset.count()
-    thirty_days_ago = timezone.now() - timedelta(days=30)
-    recent_reviews_count = reviews_queryset.filter(
-        created_at__gte=thirty_days_ago
-    ).count()
 
-    rating_change = None
-    if len(rating_history_points) >= 2:
-        latest_rating = rating_history_points[-1]["rating"]
-        previous_rating = rating_history_points[-2]["rating"]
-        rating_change = round(latest_rating - previous_rating, 2)
+    google_reviews_count = reviews_queryset.filter(source="google").count()
+    internal_reviews_count = reviews_queryset.filter(source="internal").count()
 
-    goal_gap = None
-    goal_gap_abs = None
-    if goal_rating is not None and current_rating is not None:
-        goal_gap = round(goal_rating - current_rating, 2)
-    if goal_gap is not None:
-        goal_gap_abs = abs(goal_gap)
-
-    source_breakdown = {
-        row["source"]: row["total"]
-        for row in reviews_queryset.values("source").annotate(total=Count("id"))
-    }
-
-    google_reviews_count = source_breakdown.get("google", 0)
-    internal_reviews_count = source_breakdown.get("internal", 0)
-    other_reviews_count = total_reviews - google_reviews_count - internal_reviews_count
-    if other_reviews_count < 0:
-        other_reviews_count = 0
-
-    rating_distribution_raw = {
-        row["rating"]: row["total"]
-        for row in reviews_queryset.values("rating").annotate(total=Count("id"))
-    }
-    rating_distribution = []
+    rating_distribution: list[dict] = []
     for star in range(5, 0, -1):
         rating_distribution.append(
             {
-                "rating": star,
-                "count": rating_distribution_raw.get(star, 0),
+                "rating": str(star),
+                "count": reviews_queryset.filter(rating=star).count(),
+                "google_count": reviews_queryset.filter(
+                    rating=star, source="google"
+                ).count(),
+                "internal_count": reviews_queryset.filter(
+                    rating=star, source="internal"
+                ).count(),
             }
         )
-
-    positive_reviews_percentage = None
-    if total_reviews > 0:
-        positive_reviews_count = reviews_queryset.filter(rating__gte=4).count()
-        positive_reviews_percentage = round(
-            (positive_reviews_count / total_reviews) * 100,
-            1,
-        )
+    print(rating_distribution)
 
     # Analytics stats from ReviewAnalytics
     analytics_queryset = ReviewAnalytics.objects.filter(etablissement=etablissement)
@@ -131,13 +93,8 @@ def overview_view(request):
     ).count()
     reviews_kept_private = analytics_queryset.filter(type="internal_feedback").count()
 
-    # Conversion rate: percentage of QR visits that resulted in reviews
-    conversion_rate = None
-    if qr_page_visits > 0:
-        conversion_rate = round((total_reviews / qr_page_visits) * 100, 1)
-
     # Last review update time
-    latest_reviews = list(ordered_reviews[:5])
+    latest_reviews: list[Review] = list[Review](ordered_reviews[:5])
 
     last_review_update = None
     if latest_reviews:
@@ -152,25 +109,13 @@ def overview_view(request):
         "etablissement": etablissement,
         "chart_payload_json": json.dumps(chart_payload),
         "current_rating": current_rating,
-        "current_reviews_total": current_reviews_total,
-        "average_rating": average_rating,
         "total_reviews": total_reviews,
-        "recent_reviews_count": recent_reviews_count,
-        "rating_change": rating_change,
-        "goal_rating": goal_rating,
-        "goal_gap": goal_gap,
-        "goal_gap_abs": goal_gap_abs,
-        "source_breakdown": source_breakdown,
         "google_reviews_count": google_reviews_count,
         "internal_reviews_count": internal_reviews_count,
-        "other_reviews_count": other_reviews_count,
         "rating_distribution": rating_distribution,
-        "positive_reviews_percentage": positive_reviews_percentage,
-        "last_rating_update": last_rating_update,
         "qr_page_visits": qr_page_visits,
         "reviews_redirected_google": reviews_redirected_google,
         "reviews_kept_private": reviews_kept_private,
-        "conversion_rate": conversion_rate,
         "last_review_update": last_review_update,
         "latest_reviews": latest_reviews,
     }

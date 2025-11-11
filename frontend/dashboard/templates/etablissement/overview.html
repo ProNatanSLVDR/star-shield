@@ -4,7 +4,7 @@
 {% block dashboard_content %}
 
     <div style="min-height: 15%;" class="w-100 pb-3">
-        <div class="rounded-4 border bg-white shadow-sm p-3 h-100 d-flex flex-column justify-content-between">
+        <div class="rounded-4 border bg-white shadow-sm p-3 h-100">
 
             <div class="row g-2 align-items-center h-100">
                 <div class="col-12 col-lg-7">
@@ -13,9 +13,9 @@
                 </div>
 
                 <div class="col-12 col-lg-5">
-                    <div class="d-flex flex-column flex-lg-row flex-wrap gap-2 justify-content-lg-end align-items-lg-end">
+                    <div class="d-flex flex-column flex-lg-row flex-wrap gap-2 justify-content-lg-end align-items-lg-center">
                         {% if etablissement.new_reviews_uri %}
-                            <a href="{{ etablissement.new_reviews_uri }}" target="_blank" rel="noopener" class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                            <a href="{{ etablissement.get }}" target="_blank" rel="noopener" class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
                                 <i class="fa-solid fa-star"></i>
                                 <span>Collecter des avis</span>
                             </a>
@@ -204,14 +204,16 @@
                                         <span class="fw-semibold small">{{ item.rating }}★</span>
                                         <span class="text-muted small">{{ item.count }} avis</span>
                                     </div>
-                                    <div class="progress rounded-pill" style="height: 8px;">
-                                        {% if total_reviews > 0 %}
-                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio item.count total_reviews 100 %}%" aria-valuenow="{{ item.count }}" aria-valuemin="0" aria-valuemax="{{ total_reviews }}"></div>
-                                        {% else %}
-                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0"></div>
-                                        {% endif %}
+                                    <div class="progress-stacked" style="height: 8px;">
+                                        <div class="progress" role="progressbar" style="width: {% widthratio item.google_count total_reviews 100 %}%">
+                                            <div class="progress-bar bg-success"></div>
+                                        </div>
+                                        <div class="progress" role="progressbar" style="width: {% widthratio item.internal_count total_reviews 100 %}%">
+                                            <div class="progress-bar bg-danger"></div>
+                                        </div>
                                     </div>
                                 </div>
+
                             {% endfor %}
                         </div>
                     {% else %}

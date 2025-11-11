@@ -360,35 +360,3 @@ def delete_old_profile_picture(sender, instance, **kwargs):
                 f"Error deleting old profile picture for user {instance.pk}: {e}",
                 exc_info=True,
             )
-
-
-@receiver(post_save, sender=Etablissement)
-def trigger_review_fetch_on_creation(sender, instance, created, **kwargs):
-    """
-    Signal handler to trigger full review fetch when a new Etablissement is created.
-    """
-    if created:
-        try:
-            # Import here to avoid circular dependency
-            from tasks_api.services.cloud_tasks import enqueue_review_fetch_task
-
-            task_name = enqueue_review_fetch_task(
-                etablissement_id=instance.id,
-                task_type="fetch-all",
-            )
-            if task_name:
-                logger.info(
-                    f"Enqueued full review fetch task for newly created Etablissement {instance.id}"
-                )
-            else:
-                logger.warning(
-                    f"Failed to enqueue review fetch task for Etablissement {instance.id}"
-                )
-        except ImportError:
-            # tasks_api might not be available in all environments (e.g., migrations)
-            logger.debug("tasks_api not available, skipping task enqueue")
-        except Exception as e:
-            logger.error(
-                f"Error enqueueing review fetch task for Etablissement {instance.id}: {e}",
-                exc_info=True,
-            )
