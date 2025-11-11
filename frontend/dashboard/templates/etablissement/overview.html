@@ -14,12 +14,11 @@
 
                 <div class="col-12 col-lg-5">
                     <div class="d-flex flex-column flex-lg-row flex-wrap gap-2 justify-content-lg-end align-items-lg-center">
-                        {% if etablissement.new_reviews_uri %}
-                            <a href="{{ etablissement.get }}" target="_blank" rel="noopener" class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
-                                <i class="fa-solid fa-star"></i>
-                                <span>Collecter des avis</span>
-                            </a>
-                        {% endif %}
+
+                        <a href="{{ starshield_feedback_url }}" target="_blank" rel="noopener" class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-star"></i>
+                            <span>Collecter des avis</span>
+                        </a>
                         {% if etablissement.maps_uri %}
                             <a href="{{ etablissement.maps_uri }}" target="_blank" rel="noopener" class="btn btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
                                 <i class="fa-solid fa-location-dot"></i>
@@ -69,7 +68,7 @@
                     <div class="col p-1">
                         <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
                             <div>
-                                <p class="text-muted text-uppercase small mb-1">Visites QR Code</p>
+                                <p class="text-muted text-uppercase small mb-1">Visites du QR Code</p>
                                 <h2 class="h4 fw-semibold mb-0">
                                     {{ qr_page_visits|default_if_none:"0" }}
                                 </h2>
@@ -85,7 +84,7 @@
                     <div class="col p-1">
                         <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
                             <div>
-                                <p class="text-muted text-uppercase small mb-1">Redirigés internes</p>
+                                <p class="text-muted text-uppercase small mb-1">Redirections internes</p>
                                 <h2 class="h4 fw-semibold mb-0">
                                     {{ reviews_kept_private|default_if_none:"0" }}
                                 </h2>
@@ -101,7 +100,7 @@
                     <div class="col p-1">
                         <div class="d-flex justify-content-between align-items-start border rounded-4 p-3 shadow-sm">
                             <div>
-                                <p class="text-muted text-uppercase small mb-1">Redirigés vers Google</p>
+                                <p class="text-muted text-uppercase small mb-1">Redirections Google</p>
                                 <h2 class="h4 fw-semibold mb-0">
                                     {{ reviews_redirected_google|default_if_none:"0" }}
                                 </h2>
@@ -204,13 +203,19 @@
                                         <span class="fw-semibold small">{{ item.rating }}★</span>
                                         <span class="text-muted small">{{ item.count }} avis</span>
                                     </div>
+                                    {% widthratio item.google_count total_reviews 100 as google_percentage %}
+                                    {% widthratio item.internal_count total_reviews 100 as internal_percentage %}
                                     <div class="progress-stacked" style="height: 8px;">
-                                        <div class="progress" role="progressbar" style="width: {% widthratio item.google_count total_reviews 100 %}%">
-                                            <div class="progress-bar bg-success"></div>
-                                        </div>
-                                        <div class="progress" role="progressbar" style="width: {% widthratio item.internal_count total_reviews 100 %}%">
-                                            <div class="progress-bar bg-danger"></div>
-                                        </div>
+                                        {% if item.google_count > 0 %}
+                                            <div class="progress" role="progressbar" style="min-width: 1%; width: {{ google_percentage }}%">
+                                                <div class="progress-bar bg-success" data-bs-toggle="tooltip" data-bs-title="{{ item.google_count }} avis Google"></div>
+                                            </div>
+                                        {% endif %}
+                                        {% if item.internal_count > 0 %}
+                                            <div class="progress" role="progressbar" style="min-width: 1%; width: {{ internal_percentage }}%">
+                                                <div class="progress-bar bg-danger" data-bs-toggle="tooltip" data-bs-title="{{ item.internal_count }} avis internes"></div>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
 

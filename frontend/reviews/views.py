@@ -119,4 +119,8 @@ def feedback_thanks_view(request: HttpRequest, identifier: str) -> HttpResponse:
     if not etablissement:
         return HttpResponseNotFound()
 
-    return render(request, "reviews/feedback_thanks.html")
+    return render(
+        request,
+        "reviews/feedback_thanks.html",
+        context={"etablissement": etablissement},
+    )

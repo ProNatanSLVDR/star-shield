@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 import json
@@ -83,7 +84,6 @@ def overview_view(request):
                 ).count(),
             }
         )
-    print(rating_distribution)
 
     # Analytics stats from ReviewAnalytics
     analytics_queryset = ReviewAnalytics.objects.filter(etablissement=etablissement)
@@ -118,6 +118,9 @@ def overview_view(request):
         "reviews_kept_private": reviews_kept_private,
         "last_review_update": last_review_update,
         "latest_reviews": latest_reviews,
+        "starshield_feedback_url": reverse(
+            "reviews:feedback", args=[etablissement.uuid]
+        ),
     }
 
     return starshield_render(
