@@ -190,12 +190,86 @@
     <div style="min-height: 35%;" class="w-100">
         <div class="rounded-4 border bg-white shadow-sm p-3 row g-0 h-100">
 
-            <div class="col-12 col-xl-7 p-2 h-100">
-                a
+            <div class="col-12 col-xl-5 p-2 h-100">
+                <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                        <h3 class="h6 fw-semibold mb-0">Répartition des notes</h3>
+                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ total_reviews }} avis</span>
+                    </div>
+                    {% if rating_distribution %}
+                        <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-center" style="min-height: 0;">
+                            {% for item in rating_distribution %}
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-semibold small">{{ item.rating }}★</span>
+                                        <span class="text-muted small">{{ item.count }} avis</span>
+                                    </div>
+                                    <div class="progress rounded-pill" style="height: 8px;">
+                                        {% if total_reviews > 0 %}
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio item.count total_reviews 100 %}%" aria-valuenow="{{ item.count }}" aria-valuemin="0" aria-valuemax="{{ total_reviews }}"></div>
+                                        {% else %}
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0"></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                            <p class="text-muted mb-0 small">Aucunes données pour le moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="col-12 col-xl-5 p-2 px-3 h-100">
-                a
+            <div class="col-12 col-xl-7 p-2 px-3 h-100">
+                <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                        <h3 class="h6 fw-semibold mb-0">Avis récents</h3>
+                    </div>
+                    {% if latest_reviews %}
+                        <div class="d-flex flex-column gap-2 flex-grow-1" style="min-height: 0; overflow-y: auto;">
+                            {% for review in latest_reviews %}
+                                <div class="border rounded-3 p-2 bg-white">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <div class="d-flex align-items-center gap-1">
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i class="fa-solid fa-star text-warning" style="font-size: 0.75rem;"></i>
+                                                {% else %}
+                                                    <i class="fa-solid fa-star" style="font-size: 0.75rem; color: #e3e9ed;"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.65rem;">
+                                            {% if review.source == 'google' %}
+                                                <i class="fa-brands fa-google"></i> Google
+                                            {% else %}
+                                                <i class="fa-solid fa-lock"></i> Interne
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% if review.comment %}
+                                        <p class="mb-1 small text-body-secondary" style="font-size: 0.8rem; line-height: 1.4;">
+                                            {{ review.comment|truncatewords:20 }}
+                                        </p>
+                                    {% else %}
+                                        <p class="mb-1 small text-muted" style="font-size: 0.75rem;">
+                                            Aucun commentaire
+                                        </p>
+                                    {% endif %}
+                                    <p class="mb-0 small text-muted" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-clock"></i> {{ review.created_at|timesince }}
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                            <p class="text-muted mb-0 small">Aucun avis pour le moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
         </div>
