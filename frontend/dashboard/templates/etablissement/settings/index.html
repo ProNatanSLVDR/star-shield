@@ -1,5 +1,126 @@
 {% extends "dashboard_base.html" %}
+{% load i18n %}
 
 {% block dashboard_content %}
+    <div class="d-flex flex-column h-100">
+        <div class="mb-4">
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">Paramètres</h1>
+            <p class="text-muted mb-0 small">Gérez les paramètres généraux de votre établissement et configurez le comportement des avis.</p>
+        </div>
 
+        <div class="row g-4">
+            <!-- General Settings -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm border rounded-4 overflow-hidden">
+                    <div class="card-header bg-white border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0">Informations générales</h2>
+                    </div>
+                    <div class="card-body px-4 py-4">
+                        <form method="post" id="settingsForm">
+                            {% csrf_token %}
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-4">
+                                <label for="id_title" class="form-label fw-semibold">
+                                    Nom de l'établissement
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="id_title"
+                                       name="title"
+                                       value="{{ etablissement.title }}"
+                                       maxlength="255"
+                                       required>
+                                <div class="form-text">Nom de l'établissement.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_review_threshold" class="form-label fw-semibold">
+                                    Seuil de redirection
+                                </label>
+                                <select class="form-select"
+                                        id="id_review_threshold"
+                                        name="review_threshold"
+                                        required>
+                                    {% for value, label in form.review_threshold.field.choices %}
+                                        <option value="{{ value }}" {% if etablissement.review_threshold == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Note minimale pour redirection Google.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_target_rating" class="form-label fw-semibold">
+                                    Note cible
+                                </label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="id_target_rating"
+                                       name="target_rating"
+                                       value="{{ etablissement.target_rating|stringformat:'.2f' }}"
+                                       step="0.1"
+                                       min="0"
+                                       max="5">
+                                <div class="form-text">Note cible que vous souhaitez atteindre à l'avenir.</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-save me-2"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Cards -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm border rounded-4 overflow-hidden">
+                    <div class="card-header bg-white border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0">Paramètres avancés</h2>
+                    </div>
+                    <div class="card-body px-4 py-4">
+                        <div class="d-grid gap-3">
+                            <a href="{% url 'dashboard:etablissement:settings:reviews' %}"
+                               class="card text-decoration-none border rounded-3 p-3 hover-shadow">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3"
+                                         style="width: 48px; height: 48px;">
+                                        <i class="fa-solid fa-palette fa-lg"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="h6 fw-semibold mb-1 text-body-emphasis">Personnalisation des formulaires</h3>
+                                        <p class="text-muted mb-0 small">Personnalisez l'apparence de votre page de collecte d'avis.</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .hover-shadow {
+            transition: box-shadow 0.2s ease;
+        }
+        .hover-shadow:hover {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+        }
+    </style>
 {% endblock dashboard_content %}

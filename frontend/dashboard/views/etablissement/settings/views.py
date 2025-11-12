@@ -6,7 +6,7 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from .forms import ReviewSettingsForm
+from .forms import ReviewSettingsForm, EtablissementSettingsForm
 
 
 @google_gmb_connected_required
@@ -14,8 +14,28 @@ from .forms import ReviewSettingsForm
 def settings_view(request):
     etablissement = request.etablissement
 
+    if request.method == "POST":
+        form = EtablissementSettingsForm(request.POST)
+        if form.is_valid():
+            etablissement.title = form.cleaned_data["title"]
+            etablissement.review_threshold = int(form.cleaned_data["review_threshold"])
+            etablissement.target_rating = form.cleaned_data.get("target_rating")
+            etablissement.save()
+
+            messages.success(request, "Paramètres mis à jour avec succès.")
+            return redirect("dashboard:etablissement:settings:settings")
+    else:
+        form = EtablissementSettingsForm(
+            initial={
+                "title": etablissement.title,
+                "review_threshold": etablissement.review_threshold,
+                "target_rating": etablissement.target_rating,
+            }
+        )
+
     context = {
         "etablissement": etablissement,
+        "form": form,
     }
 
     return starshield_render(
@@ -35,20 +55,12 @@ def reviews_settings_view(request):
         form = ReviewSettingsForm(request.POST)
         if form.is_valid():
             etablissement.review_accent_color = form.cleaned_data["review_accent_color"]
-            etablissement.review_show_etablissement_pill = form.cleaned_data[
-                "review_show_etablissement_pill"
-            ]
-            etablissement.review_page_label = form.cleaned_data.get(
-                "review_page_label", ""
-            )
-            etablissement.review_page_text = form.cleaned_data.get(
-                "review_page_text", ""
-            )
+            etablissement.review_show_etablissement_pill = form.cleaned_data["review_show_etablissement_pill"]
+            etablissement.review_page_label = form.cleaned_data.get("review_page_label", "")
+            etablissement.review_page_text = form.cleaned_data.get("review_page_text", "")
             etablissement.save()
 
-            messages.success(
-                request, "Paramètres de la page de feedback mis à jour avec succès."
-            )
+            messages.success(request, "Paramètres de la page de feedback mis à jour avec succès.")
             return redirect("dashboard:etablissement:settings:reviews")
     else:
         form = ReviewSettingsForm(

@@ -48,9 +48,7 @@ class UserManager(BaseUserManager):
                 defaults={"verified": True, "primary": True},
             )
         except Exception as exc:  # pragma: no cover - defensive guard
-            raise ValueError(
-                "Failed to auto-verify the superuser email address."
-            ) from exc
+            raise ValueError("Failed to auto-verify the superuser email address.") from exc
 
         return superuser
 
@@ -77,9 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Infos Personnelles
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
-    profile_picture = models.ImageField(
-        upload_to="profile_pictures/", blank=True, null=True
-    )
+    profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
 
     # Misc
     is_active = models.BooleanField(default=True)
@@ -100,9 +96,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # Google GMB
 class GoogleCredentials(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="google_credential"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="google_credential")
 
     is_valid = models.BooleanField(default=False)
 
@@ -188,11 +182,7 @@ class GoogleCredentials(models.Model):
 
         try:
             # Récupération des informations de la location
-            location = (
-                locations_service.locations()
-                .get(name=location_id, readMask="name,title,metadata,websiteUri")
-                .execute()
-            )
+            location = locations_service.locations().get(name=location_id, readMask="name,title,metadata,websiteUri").execute()
 
             metadata = location.get("metadata", {})
 
@@ -213,9 +203,7 @@ class GoogleCredentials(models.Model):
 
         except Exception as e:
             # Gestion d'erreur simple (peut être remplacée par du logging)
-            print(
-                f"Erreur lors de la création de l'établissement pour {location_id}: {e}"
-            )
+            print(f"Erreur lors de la création de l'établissement pour {location_id}: {e}")
             return None
 
     def list_available_locations(self):
@@ -253,9 +241,7 @@ class GoogleCredentials(models.Model):
 
         for location in available_locations:
             location["account_id"] = account["name"]
-            if Etablissement.objects.filter(
-                location_id=location["name"], account_id=account["name"]
-            ).exists():
+            if Etablissement.objects.filter(location_id=location["name"], account_id=account["name"]).exists():
                 location["exists"] = True
             else:
                 location["exists"] = False
@@ -265,9 +251,7 @@ class GoogleCredentials(models.Model):
 
 # Etablissement
 class Etablissement(models.Model):
-    google_credential = models.ForeignKey(
-        "GoogleCredentials", on_delete=models.CASCADE, related_name="etablissements"
-    )
+    google_credential = models.ForeignKey("GoogleCredentials", on_delete=models.CASCADE, related_name="etablissements")
 
     location_id = models.CharField(max_length=255)
     account_id = models.CharField(max_length=255)
@@ -285,7 +269,7 @@ class Etablissement(models.Model):
 
     review_threshold = models.PositiveSmallIntegerField(
         default=4,
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        validators=[MinValueValidator(1), MaxValueValidator(4)],
         help_text="Note minimale pour redirection Google.",
     )
     target_rating = models.DecimalField(
@@ -326,9 +310,7 @@ class Etablissement(models.Model):
 
 
 class RatingHistory(models.Model):
-    etablissement = models.ForeignKey(
-        Etablissement, on_delete=models.CASCADE, related_name="rating_history"
-    )
+    etablissement = models.ForeignKey(Etablissement, on_delete=models.CASCADE, related_name="rating_history")
 
     rating = models.DecimalField(
         max_digits=3,
@@ -351,17 +333,12 @@ def delete_old_profile_picture(sender, instance, **kwargs):
     if instance.pk:
         try:
             old_instance = User.objects.get(pk=instance.pk)
-            if (
-                old_instance.profile_picture
-                and old_instance.profile_picture != instance.profile_picture
-            ):
+            if old_instance.profile_picture and old_instance.profile_picture != instance.profile_picture:
                 if old_instance.profile_picture.name:
                     try:
                         old_instance.profile_picture.delete(save=False)
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to delete old profile picture for user {instance.pk}: {e}"
-                        )
+                        logger.warning(f"Failed to delete old profile picture for user {instance.pk}: {e}")
         except User.DoesNotExist:
             pass
         except Exception as e:
