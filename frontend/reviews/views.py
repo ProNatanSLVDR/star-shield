@@ -36,10 +36,14 @@ def feedback_view(request, identifier=None):
 def external_feedback_view(request, identifier=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
-    ReviewAnalytics.objects.create(
-        etablissement=etablissement,
-        type="feedback_external",
-    )
+    analytics_key = f"feedback_external_{etablissement.id}"
+    if not get_valid_session_key(request, analytics_key):
+        ReviewAnalytics.objects.create(
+            etablissement=etablissement,
+            type="feedback_external",
+        )
+        set_valid_session_key(request, analytics_key, True)
+
     return redirect(etablissement.new_reviews_uri)
 
 
