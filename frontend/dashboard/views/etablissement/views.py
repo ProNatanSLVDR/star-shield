@@ -28,9 +28,7 @@ def overview_view(request):
             }
         )
 
-    current_rating = (
-        rating_history_points[-1]["rating"] if rating_history_points else None
-    )
+    current_rating = rating_history_points[-1]["rating"] if rating_history_points else None
 
     goal_rating = None
     if etablissement.target_rating is not None:
@@ -38,11 +36,7 @@ def overview_view(request):
 
     goal_projection_points: list[dict] = []
     if goal_rating is not None:
-        origin_date = (
-            rating_history_qs.last().created_at
-            if rating_history_points
-            else timezone.now()
-        )
+        origin_date = rating_history_qs.last().created_at if rating_history_points else timezone.now()
 
         start_rating = goal_rating
         if current_rating is not None and rating_history_points:
@@ -76,22 +70,16 @@ def overview_view(request):
             {
                 "rating": str(star),
                 "count": reviews_queryset.filter(rating=star).count(),
-                "google_count": reviews_queryset.filter(
-                    rating=star, source="google"
-                ).count(),
-                "internal_count": reviews_queryset.filter(
-                    rating=star, source="internal"
-                ).count(),
+                "google_count": reviews_queryset.filter(rating=star, source="google").count(),
+                "internal_count": reviews_queryset.filter(rating=star, source="internal").count(),
             }
         )
 
     # Analytics stats from ReviewAnalytics
     analytics_queryset = ReviewAnalytics.objects.filter(etablissement=etablissement)
-    qr_page_visits = analytics_queryset.filter(type="review_page_consulted").count()
-    reviews_redirected_google = analytics_queryset.filter(
-        type="external_feedback"
-    ).count()
-    reviews_kept_private = analytics_queryset.filter(type="internal_feedback").count()
+    qr_page_visits = analytics_queryset.filter(type="feedback_viewed").count()
+    reviews_redirected_google = analytics_queryset.filter(type="feedback_external").count()
+    reviews_kept_private = analytics_queryset.filter(type="feedback_internal_viewed").count()
 
     # Last review update time
     latest_reviews: list[Review] = list[Review](ordered_reviews[:5])
@@ -118,9 +106,7 @@ def overview_view(request):
         "reviews_kept_private": reviews_kept_private,
         "last_review_update": last_review_update,
         "latest_reviews": latest_reviews,
-        "starshield_feedback_url": reverse(
-            "reviews:feedback", args=[etablissement.uuid]
-        ),
+        "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
     }
 
     return starshield_render(
