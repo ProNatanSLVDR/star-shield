@@ -75,10 +75,8 @@ def internal_feedback_view(request, identifier=None):
             return redirect(reverse("reviews:feedback_thanks", args=[identifier]))
         else:
             prefilled_rating = form.data.get("rating")
-            try:
-                prefilled_rating = int(prefilled_rating) if prefilled_rating else None
-            except (ValueError, TypeError):
-                prefilled_rating = None
+            prefilled_rating = int(prefilled_rating) if prefilled_rating else None
+
     else:
         rating_param = request.GET.get("rating")
         initial_data = {}
