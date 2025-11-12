@@ -1,5 +1,6 @@
 from django.urls import reverse
 from auths.models import Etablissement
+from django.http import Http404
 
 
 def calcul_objectif(noteactu: float, nb_notes: int, objectif: float) -> float:
@@ -70,22 +71,25 @@ def google_stars_to_number(stars: str) -> int:
 
 
 def get_etablissement_by_identifier(identifier: str) -> Etablissement | None:
+    if not identifier:
+        raise Http404()
     try:
         etablissement = Etablissement.objects.get(slug=identifier)
     except Etablissement.DoesNotExist:
         try:
             etablissement = Etablissement.objects.get(uuid=identifier)
         except (Etablissement.DoesNotExist, ValueError):
-            return None
+            raise Http404()
     return etablissement
 
 
-def build_feedback_context(request, etablissement, identifier: str) -> dict:
+def build_feedback_context(
+    etablissement, identifier, mode="main", form=None, prefilled_rating=None
+) -> dict:
     """
     Build the context dictionary for the feedback page template.
 
     Args:
-        request: The HTTP request object
         etablissement: The Etablissement instance
         identifier: The identifier (UUID or slug) for building URLs
 
@@ -103,12 +107,15 @@ def build_feedback_context(request, etablissement, identifier: str) -> dict:
     context = {
         "etablissement": etablissement,
         "rating_array": rating_array,
-        "internal_feedback_url": request.build_absolute_uri(
-            reverse("reviews:internal_feedback", args=[identifier])
+        "internal_feedback_url": reverse(
+            "reviews:internal_feedback", args=[identifier]
         ),
-        "external_feedback_url": request.build_absolute_uri(
-            reverse("reviews:external_feedback", args=[identifier])
+        "external_feedback_url": reverse(
+            "reviews:external_feedback", args=[identifier]
         ),
+        "form": form,
+        "prefilled_rating": prefilled_rating,
+        "mode": mode,
     }
 
     return context

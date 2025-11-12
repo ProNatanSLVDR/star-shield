@@ -1,57 +1,54 @@
-{% extends "reviews/feedback_base.html" %}
 {% load i18n %}
 
-{% block main_content %}
+<form method="post" action="{{ feedback_context.internal_feedback_url }}">
+    {% csrf_token %}
 
-    <form method="post" action="{% url 'reviews:internal_feedback' identifier=identifier %}">
-        {% csrf_token %}
+    {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
 
-        {% if form.errors %}
-            <div class="alert alert-danger" role="alert">
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
+    {{ feedback_context.form.rating }}
+
+    {% if feedback_context.prefilled_rating %}
+        <div class="mb-4">
+            <label class="form-label fw-semibold">
+                {% trans "Votre note" %} :
+            </label>
+            <div class="form-control d-flex justify-content-center align-items-center gap-1 py-2">
+                {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= feedback_context.prefilled_rating %}
+                        <i class="fa-solid fa-star fa-2xl text-warning"></i>
+                    {% else %}
+                        <i class="fa-solid fa-star fa-2xl" style="color: #e3e9ed;"></i>
+                    {% endif %}
                 {% endfor %}
             </div>
-        {% endif %}
-
-        {{ form.rating }}
-
-        {% if prefilled_rating %}
-            <div class="mb-4">
-                <label class="form-label fw-semibold">
-                    {% trans "Votre note" %} :
-                </label>
-                <div class="form-control d-flex justify-content-center align-items-center gap-1 py-2">
-                    {% for i in "12345"|make_list %}
-                        {% if forloop.counter <= prefilled_rating %}
-                            <i class="fa-solid fa-star fa-2xl text-warning"></i>
-                        {% else %}
-                            <i class="fa-solid fa-star fa-2xl" style="color: #e3e9ed;"></i>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-
-        <div class="mb-4">
-            <label for="{{ form.comment.id_for_label }}" class="form-label fw-semibold">
-                {% trans "Commentaire" %} :
-            </label>
-            {{ form.comment }}
-            {% if form.comment.help_text %}
-                <div class="form-text">{{ form.comment.help_text }}</div>
-            {% endif %}
         </div>
+    {% endif %}
 
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fa-solid fa-paper-plane me-2"></i>
-                {% trans "Envoyer mon avis" %}
-            </button>
-        </div>
-    </form>
+    <div class="mb-4">
+        <label for="{{ feedback_context.form.comment.id_for_label }}" class="form-label fw-semibold">
+            {% trans "Commentaire" %} :
+        </label>
+        {{ feedback_context.form.comment }}
+        {% if feedback_context.form.comment.help_text %}
+            <div class="form-text">{{ feedback_context.form.comment.help_text }}</div>
+        {% endif %}
+    </div>
 
-{% endblock main_content %}
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-paper-plane me-2"></i>
+            {% trans "Envoyer mon avis" %}
+        </button>
+    </div>
+</form>
+
+
 

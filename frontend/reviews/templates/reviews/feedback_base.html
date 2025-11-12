@@ -2,8 +2,6 @@
 {% load i18n %}
 
 {% block body %}
-
-
     <section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
         <div class="container">
             <div class="row justify-content-center">
@@ -31,7 +29,7 @@
                         </div>
 
                     {# body #}
-                        <div class="card-body px-5 pb-4">
+                        <div class="card-body px-md-4 pb-4 py-md-4">
 
                         {# etablissement pill #}
                             {% if feedback_context.review_show_etablissement_pill == True %}
@@ -51,9 +49,13 @@
                                 </div>
                             {% endif %}
 
-                        {# main content #}
-                            {% block main_content %}
-                            {% endblock main_content %}
+                            {% if feedback_context.mode == "main" %}
+                                {% include "reviews/feedback_main.html" %}
+                            {% elif feedback_context.mode == "internal" %}
+                                {% include "reviews/feedback_internal.html" %}
+                            {% elif feedback_context.mode == "thanks" %}
+                                {% include "reviews/feedback_thanks.html" %}
+                            {% endif %}
 
                         </div>
                     </div>
