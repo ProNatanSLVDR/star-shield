@@ -1,161 +1,57 @@
-{% extends "base.html" %}
+{% extends "reviews/feedback_base.html" %}
 {% load i18n %}
 
-{% block body %}
-    <section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-6 col-md-8">
-                    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                        <div class="position-relative px-4 px-lg-5 py-4 bg-primary bg-gradient text-white">
-                            <div class="position-absolute top-0 end-0 translate-middle opacity-25 d-none d-sm-block">
-                                <span class="d-inline-flex border border-light border-2 rounded-circle p-3"></span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between gap-3 position-relative">
-                                <div>
-                                    <h2 class="h4 mb-1 text-white fw-bold">
-                                        {% trans "Partagez votre expérience" %}
-                                    </h2>
-                                    <p class="mb-0 text-white-50 small">
-                                        {% trans "Votre avis compte !" %}
-                                    </p>
-                                </div>
-                                <span class="d-none d-sm-inline-flex text-white-50 fs-3">
-                                    <i class="fa-solid fa-star" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="card-body px-5 pb-4">
-                            <div class="text-center mb-3 mt-3">
-                                <h1>
-                                    <span class="badge rounded-pill mb-3 etablissement-badge fw-bold fs-4">
-                                        <i class="fa-solid fa-building" aria-hidden="true"></i>
-                                        <span class="etablissement-name">
-                                            {% if etablissement.review_page_label %}
-                                                {{ etablissement.review_page_label }}
-                                            {% else %}
-                                                {{ etablissement.title }}
-                                            {% endif %}
-                                        </span>
-                                    </span>
-                                </h1>
-                            </div>
+{% block main_content %}
 
-                            <form method="post" action="{% url 'reviews:internal_feedback' identifier=identifier %}">
-                                {% csrf_token %}
+    <form method="post" action="{% url 'reviews:internal_feedback' identifier=identifier %}">
+        {% csrf_token %}
 
-                                {% if form.errors %}
-                                    <div class="alert alert-danger" role="alert">
-                                        {% for field, errors in form.errors.items %}
-                                            {% for error in errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+        {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
 
-                                {{ form.rating }}
+        {{ form.rating }}
 
-                                {% if prefilled_rating %}
-                                    <div class="mb-4">
-                                        <label class="form-label fw-semibold">
-                                            {% trans "Votre note" %} :
-                                        </label>
-                                        <div class="form-control d-flex justify-content-center align-items-center gap-1 py-2">
-                                            {% for i in "12345"|make_list %}
-                                                {% if forloop.counter <= prefilled_rating %}
-                                                    <i class="fa-solid fa-star fa-2xl text-warning"></i>
-                                                {% else %}
-                                                    <i class="fa-solid fa-star fa-2xl" style="color: #e3e9ed;"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <div class="mb-4">
-                                    <label for="{{ form.comment.id_for_label }}" class="form-label fw-semibold">
-                                        {% trans "Commentaire" %} :
-                                    </label>
-                                    {{ form.comment }}
-                                    {% if form.comment.help_text %}
-                                        <div class="form-text">{{ form.comment.help_text }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fa-solid fa-paper-plane me-2"></i>
-                                        {% trans "Envoyer mon avis" %}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <p class="text-muted text-center mt-4 mb-0 small opacity-75">
-                        {% trans "Proposé par Starshield" %}
-                    </p>
+        {% if prefilled_rating %}
+            <div class="mb-4">
+                <label class="form-label fw-semibold">
+                    {% trans "Votre note" %} :
+                </label>
+                <div class="form-control d-flex justify-content-center align-items-center gap-1 py-2">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= prefilled_rating %}
+                            <i class="fa-solid fa-star fa-2xl text-warning"></i>
+                        {% else %}
+                            <i class="fa-solid fa-star fa-2xl" style="color: #e3e9ed;"></i>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
+        {% endif %}
+
+        <div class="mb-4">
+            <label for="{{ form.comment.id_for_label }}" class="form-label fw-semibold">
+                {% trans "Commentaire" %} :
+            </label>
+            {{ form.comment }}
+            {% if form.comment.help_text %}
+                <div class="form-text">{{ form.comment.help_text }}</div>
+            {% endif %}
         </div>
-    </section>
 
-    <style>
-        .etablissement-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.65rem;
-            padding: 0.65rem 1.35rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            color: #0b5ed7;
-            background: rgba(13, 110, 253, 0.1);
-            border: 1px solid rgba(13, 110, 253, 0.28);
-            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.12);
-            transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-        }
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-paper-plane me-2"></i>
+                {% trans "Envoyer mon avis" %}
+            </button>
+        </div>
+    </form>
 
-        .etablissement-badge:hover {
-            transform: translateY(-2px);
-            background: rgba(13, 110, 253, 0.18);
-            color: #084298;
-            box-shadow: 0 14px 34px rgba(13, 110, 253, 0.18);
-        }
-
-        .etablissement-badge i {
-            font-size: 1.05rem;
-            color: inherit;
-        }
-
-        .etablissement-badge .etablissement-name {
-            display: inline-block;
-            white-space: normal;
-            text-transform: none;
-        }
-
-        .stars-display .fa-star {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-            transition: transform 0.2s ease;
-        }
-
-        .stars-display .fa-star.text-warning {
-            animation: starPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes starPulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        .text-warning {
-            color: #ffc107 !important;
-        }
-    </style>
-{% endblock body %}
+{% endblock main_content %}
 
