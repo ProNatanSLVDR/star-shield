@@ -1,0 +1,146 @@
+{% extends "dashboard_base.html" %}
+{% load i18n %}
+
+{% block dashboard_content %}
+    <div class="d-flex flex-column h-100">
+        <div class="mb-4">
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">Paramètres de la page de feedback</h1>
+            <p class="text-muted mb-0 small">Personnalisez l'apparence de votre page de collecte d'avis.</p>
+        </div>
+
+        <div class="row g-4 flex-grow-1" style="min-height: 0;">
+            <!-- Settings Form -->
+            <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
+                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column" style="min-height: 0;">
+                    <div class="card-header bg-white border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0">Configuration</h2>
+                    </div>
+                    <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
+                        <form method="post" id="reviewSettingsForm">
+                            {% csrf_token %}
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-4">
+                                <label for="review_accent_color" class="form-label fw-semibold">
+                                    Couleur d'accent
+                                </label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="color"
+                                           class="form-control"
+                                           id="review_accent_color"
+                                           name="review_accent_color"
+                                           value="{{ form.review_accent_color.value|default:etablissement.review_accent_color }}"
+                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                    <input type="text"
+                                           class="form-control"
+                                           id="accentColorText"
+                                           value="{{ form.review_accent_color.value|default:etablissement.review_accent_color }}"
+                                           pattern="^#[0-9A-Fa-f]{6}$"
+                                           placeholder="#0b5ed7"
+                                           style="max-width: 150px;">
+                                </div>
+                                <div class="form-text">Couleur d'accent pour la page de feedback (format hexadécimal, ex: #0b5ed7).</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           id="review_show_etablissement_pill"
+                                           name="review_show_etablissement_pill"
+                                           {% if form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="review_show_etablissement_pill">
+                                        Afficher le badge établissement
+                                    </label>
+                                </div>
+                                <div class="form-text">Afficher le badge avec le nom de l'établissement sur la page de feedback.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="review_page_label" class="form-label fw-semibold">
+                                    Nom sur la page de feedback
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="review_page_label"
+                                       name="review_page_label"
+                                       value="{{ form.review_page_label.value|default:etablissement.review_page_label }}"
+                                       maxlength="255">
+                                <div class="form-text">Nom pour l'établissement sur la page de feedback.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="review_page_text" class="form-label fw-semibold">
+                                    Texte de la page de feedback
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="review_page_text"
+                                       name="review_page_text"
+                                       value="{{ form.review_page_text.value|default:etablissement.review_page_text }}"
+                                       maxlength="255">
+                                <div class="form-text">Texte à afficher sur la page de feedback.</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-save me-2"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
+                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column" style="min-height: 0;">
+                    <div class="card-header bg-white border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0">Aperçu</h2>
+                    </div>
+                    <div class="card-body p-0 flex-grow-1" style="min-height: 0;">
+                        <iframe
+                            id="previewIframe"
+                            src="{{ preview_url }}"
+                            class="w-100 h-100 border-0"
+                            style="min-height: 600px;">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const colorInput = document.getElementById("review_accent_color");
+            const colorTextInput = document.getElementById("accentColorText");
+            const form = document.getElementById("reviewSettingsForm");
+
+            // Sync color picker with text input
+            if (colorInput && colorTextInput) {
+                colorInput.addEventListener("input", function() {
+                    colorTextInput.value = this.value;
+                });
+
+                colorTextInput.addEventListener("input", function() {
+                    const value = this.value;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                        colorInput.value = value;
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock dashboard_content %}
+

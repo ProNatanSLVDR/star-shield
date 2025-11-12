@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from .models import ReviewAnalytics, Review
 from .forms import FeedbackForm
-from .utils import get_etablissement_by_identifier
+from .utils import get_etablissement_by_identifier, build_feedback_context
 
 
 logger = logging.getLogger(__name__)
@@ -24,25 +24,7 @@ def feedback_view(request: HttpRequest, identifier: str) -> HttpResponse:
         type="review_page_consulted",
     )
 
-    # pour chaque étoile, on ajoute True si l'étoile est >= au seuil de redirection, False sinon
-    # permet de savoir si on redirige vers la page de feedback ou vers la page de redirection Google
-    rating_array = []
-    for i in range(1, 6):
-        if i >= etablissement.review_threshold:
-            rating_array.append(True)
-        else:
-            rating_array.append(False)
-
-    context = {
-        "etablissement": etablissement,
-        "rating_array": rating_array,
-        "internal_feedback_url": request.build_absolute_uri(
-            reverse("reviews:internal_feedback", args=[identifier])
-        ),
-        "external_feedback_url": request.build_absolute_uri(
-            reverse("reviews:external_feedback", args=[identifier])
-        ),
-    }
+    context = build_feedback_context(request, etablissement, identifier)
     return render(request, "reviews/feedback_main.html", context)
 
 

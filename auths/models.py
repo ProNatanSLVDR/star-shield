@@ -307,6 +307,15 @@ class Etablissement(models.Model):
         default="Votre avis nous aide à offrir un meilleur service !",
         help_text="Texte à afficher sur la page de feedback.",
     )
+    review_accent_color = models.CharField(
+        max_length=7,
+        default="#0b5ed7",
+        help_text="Couleur d'accent pour la page de feedback (format hexadécimal).",
+    )
+    review_show_etablissement_pill = models.BooleanField(
+        default=True,
+        help_text="Afficher ou masquer le badge avec le nom de l'établissement.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

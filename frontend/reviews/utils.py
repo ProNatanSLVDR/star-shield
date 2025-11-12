@@ -1,3 +1,4 @@
+from django.urls import reverse
 from auths.models import Etablissement
 
 
@@ -77,3 +78,37 @@ def get_etablissement_by_identifier(identifier: str) -> Etablissement | None:
         except (Etablissement.DoesNotExist, ValueError):
             return None
     return etablissement
+
+
+def build_feedback_context(request, etablissement, identifier: str) -> dict:
+    """
+    Build the context dictionary for the feedback page template.
+
+    Args:
+        request: The HTTP request object
+        etablissement: The Etablissement instance
+        identifier: The identifier (UUID or slug) for building URLs
+
+    Returns:
+        dict: Context dictionary with etablissement, rating_array, and URLs
+    """
+    # Build rating array (same logic as feedback_view)
+    rating_array = []
+    for i in range(1, 6):
+        if i >= etablissement.review_threshold:
+            rating_array.append(True)
+        else:
+            rating_array.append(False)
+
+    context = {
+        "etablissement": etablissement,
+        "rating_array": rating_array,
+        "internal_feedback_url": request.build_absolute_uri(
+            reverse("reviews:internal_feedback", args=[identifier])
+        ),
+        "external_feedback_url": request.build_absolute_uri(
+            reverse("reviews:external_feedback", args=[identifier])
+        ),
+    }
+
+    return context

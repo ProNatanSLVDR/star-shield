@@ -35,3 +35,21 @@ class EtablissementSettingsForm(forms.Form):
         label="Texte de la page de feedback",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
+
+
+class ReviewSettingsForm(forms.Form):
+    review_accent_color = forms.CharField(
+        max_length=7,
+        required=True,
+    )
+    review_show_etablissement_pill = forms.BooleanField(
+        required=False,
+    )
+    review_page_label = forms.CharField(
+        max_length=255,
+        required=False,
+    )
+    review_page_text = forms.CharField(
+        max_length=255,
+        required=False,
+    )
