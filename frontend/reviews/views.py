@@ -1,57 +1,62 @@
 import logging
-from datetime import timedelta
-from django.utils import timezone
-from django.http import Http404
+from django.contrib.admin.sites import login_not_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from .models import ReviewAnalytics, Review
 from .forms import FeedbackForm
-from .utils import get_etablissement_by_identifier, build_feedback_context
-from django.utils.dateparse import parse_datetime
+from .utils import (
+    get_etablissement_by_identifier,
+    build_feedback_context,
+    get_valid_session_key,
+    set_valid_session_key,
+)
 
 logger = logging.getLogger(__name__)
 
 
+@login_not_required
 def feedback_view(request, identifier=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
-    # create analytics if not already saved
-    # if its set and is older than 1 hour, create a new one
-    save_time_str = request.session.get("analytics_review_page_consulted_save_time")
-    save_time = parse_datetime(save_time_str) if save_time_str else None
-
-    if not save_time or save_time < timezone.now() - timedelta(minutes=5):
+    analytics_key = f"review_page_consulted_{etablissement.id}"
+    if not get_valid_session_key(request, analytics_key):
         ReviewAnalytics.objects.create(
             etablissement=etablissement,
-            type="review_page_consulted",
+            type="feedback_viewed",
         )
-        request.session["analytics_review_page_consulted_save_time"] = str(
-            timezone.now()
-        )
-        request.session.modified = True
+        set_valid_session_key(request, analytics_key, True)
 
     context = {
-        "feedback_context": build_feedback_context(
-            etablissement, identifier, mode="main"
-        ),
+        "feedback_context": build_feedback_context(etablissement, identifier, mode="main"),
     }
     return render(request, "reviews/feedback_base.html", context)
 
 
+@login_not_required
 def external_feedback_view(request, identifier=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
     ReviewAnalytics.objects.create(
         etablissement=etablissement,
-        type="external_feedback",
+        type="feedback_external",
     )
     return redirect(etablissement.new_reviews_uri)
 
 
+@login_not_required
 def internal_feedback_view(request, identifier=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
     prefilled_rating = None
+
+    # si la page de feedback interne n'a pas été consultée depuis plus de 5 minutes, on crée un objet ReviewAnalytics
+    analytics_key = f"internal_feedback_consulted_{etablissement.id}"
+    if not get_valid_session_key(request, analytics_key):
+        ReviewAnalytics.objects.create(
+            etablissement=etablissement,
+            type="feedback_internal_viewed",
+        )
+        set_valid_session_key(request, analytics_key, True)
 
     if request.method == "POST":
         form = FeedbackForm(request.POST)
@@ -59,18 +64,28 @@ def internal_feedback_view(request, identifier=None):
             rating = form.cleaned_data["rating"]
             comment = form.cleaned_data.get("comment", "")
 
-            Review.objects.create(
-                etablissement=etablissement,
-                rating=rating,
-                comment=comment,
-                source="internal",
-            )
+            # si le feedback interne n'a pas été soumis depuis plus de 5 minutes, on crée un objet Review
+            analytics_key = f"internal_feedback_{etablissement.id}"
+            valid_session_key = get_valid_session_key(request, analytics_key)
+            if not valid_session_key:
+                review_object = Review.objects.create(
+                    etablissement=etablissement,
+                    rating=rating,
+                    comment=comment,
+                    source="internal",
+                )
+                ReviewAnalytics.objects.create(
+                    etablissement=etablissement,
+                    type="feedback_internal_submitted",
+                )
+                set_valid_session_key(request, analytics_key, review_object.id)
 
-            ReviewAnalytics.objects.update_or_create(
-                etablissement=etablissement,
-                type="internal_feedback",
-                id=request.session["review_analytics_id"],
-            )
+            # si le feedback interne a déjà été soumis depuis plus de 5 minutes, on met à jour l'objet Review
+            else:
+                review_object = Review.objects.get(id=valid_session_key)
+                review_object.rating = rating
+                review_object.comment = comment
+                review_object.save()
 
             return redirect(reverse("reviews:feedback_thanks", args=[identifier]))
         else:
@@ -104,13 +119,12 @@ def internal_feedback_view(request, identifier=None):
     return render(request, "reviews/feedback_base.html", context)
 
 
+@login_not_required
 def feedback_thanks_view(request, identifier=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
     context = {
-        "feedback_context": build_feedback_context(
-            etablissement, identifier, mode="thanks"
-        ),
+        "feedback_context": build_feedback_context(etablissement, identifier, mode="thanks"),
     }
     return render(
         request,

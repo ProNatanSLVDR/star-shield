@@ -1,6 +1,10 @@
 from django.urls import reverse
 from auths.models import Etablissement
 from django.http import Http404
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from datetime import timedelta
+from .models import ReviewAnalytics
 
 
 def calcul_objectif(noteactu: float, nb_notes: int, objectif: float) -> float:
@@ -119,3 +123,28 @@ def build_feedback_context(
     }
 
     return context
+
+
+def get_valid_session_key(request, key: str, valid_minutes: int = 5) -> str | None:
+    key_time = request.session.get(f"{key}_save_time")
+    key_value = request.session.get(key)
+
+    save_time = parse_datetime(key_time) if key_time else None
+
+    is_valid = save_time and save_time > timezone.now() - timedelta(
+        minutes=valid_minutes
+    )
+    print(f"key_time: {key_time}")
+    print(f"key_value: {key_value}")
+    print(f"valid_minutes: {valid_minutes}")
+    print(f"is_valid: {is_valid}")
+    if is_valid:
+        return key_value
+
+    return None
+
+
+def set_valid_session_key(request, key: str, value: str) -> None:
+    request.session[f"{key}_save_time"] = str(timezone.now())
+    request.session[key] = value
+    request.session.modified = True

@@ -13,9 +13,7 @@ class Review(models.Model):
 
     etablissement = models.ForeignKey("auths.Etablissement", on_delete=models.CASCADE)
 
-    rating = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(blank=True)
     source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default="internal")
 
@@ -34,9 +32,14 @@ class ReviewAnalytics(models.Model):
     etablissement = models.ForeignKey(Etablissement, on_delete=models.CASCADE)
 
     TYPE_CHOICES = [
-        ("review_page_consulted", "Review Page Consulted"),
-        ("external_feedback", "External Feedback"),
-        ("internal_feedback", "Internal Feedback"),
+        ("feedback_viewed", "Feedback Viewed"),
+        #
+        # redirigé vers google
+        ("feedback_external", "External Feedback"),
+        #
+        # feedback interne
+        ("feedback_internal_viewed", "Internal Feedback Viewed"),
+        ("feedback_internal_submitted", "Internal Feedback Submitted"),  # a soumis un feedback interne
     ]
 
     type = models.CharField(max_length=255, choices=TYPE_CHOICES)
