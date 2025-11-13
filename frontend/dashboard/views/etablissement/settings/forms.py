@@ -24,7 +24,8 @@ class ReviewSettingsForm(forms.Form):
         max_length=7,
         required=True,
     )
-    review_show_etablissement_pill = forms.BooleanField(
+    review_show_etablissement_pill = forms.ChoiceField(
+        choices=[(True, "Oui"), (False, "Non")],
         required=False,
     )
     review_page_label = forms.CharField(

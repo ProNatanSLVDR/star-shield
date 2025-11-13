@@ -4,7 +4,10 @@
 {% block dashboard_content %}
     <div class="d-flex flex-column h-100">
         <div class="mb-4">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">Paramètres de la page de feedback</h1>
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                <i class="fa-solid fa-sliders me-2"></i>
+                Paramètres de la page de feedback
+            </h1>
             <p class="text-muted mb-0 small">Personnalisez l'apparence de votre page de collecte d'avis.</p>
         </div>
 
@@ -13,7 +16,10 @@
             <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
                 <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden" style="min-height: 0;">
                     <div class="card-header bg-white border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0">Configuration</h2>
+                        <h2 class="h6 fw-semibold mb-0">
+                            <i class="fa-solid fa-gear me-2"></i>
+                            Configuration
+                        </h2>
                     </div>
                     <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
                         <form method="post" id="reviewSettingsForm">
@@ -31,6 +37,7 @@
 
                             <div class="mb-4">
                                 <label for="review_accent_color" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-palette me-2"></i>
                                     Couleur d'accent
                                 </label>
                                 <div class="d-flex align-items-center gap-3">
@@ -52,21 +59,22 @@
                             </div>
 
                             <div class="mb-4">
-                                <div class="form-check">
-                                    <input type="checkbox"
-                                           class="form-check-input"
-                                           id="review_show_etablissement_pill"
-                                           name="review_show_etablissement_pill"
-                                           {% if form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}checked{% endif %}>
-                                    <label class="form-check-label fw-semibold" for="review_show_etablissement_pill">
-                                        Afficher le badge établissement
-                                    </label>
-                                </div>
+                                <label for="review_show_etablissement_pill" class="form-label fw-semibold d-block mb-2">
+                                    <i class="fa-solid fa-building me-2"></i>
+                                    Afficher le badge établissement
+                                </label>
+                                <select class="form-select"
+                                        id="review_show_etablissement_pill"
+                                        name="review_show_etablissement_pill">
+                                    <option value="True" {% if form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}selected{% endif %}>✓ Oui</option>
+                                    <option value="False" {% if not form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}selected{% endif %}>✗ Non</option>
+                                </select>
                                 <div class="form-text">Afficher le badge avec le nom de l'établissement sur la page de feedback.</div>
                             </div>
 
                             <div class="mb-4">
                                 <label for="review_page_label" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-signature me-2"></i>
                                     Nom sur la page de feedback
                                 </label>
                                 <input type="text"
@@ -81,6 +89,7 @@
 
                             <div class="mb-4">
                                 <label for="review_page_text" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-comment-dots me-2"></i>
                                     Texte de la page de feedback
                                 </label>
                                 <input type="text"
@@ -111,7 +120,10 @@
             <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
                 <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden" style="min-height: 0;">
                     <div class="card-header bg-white border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0">Aperçu</h2>
+                        <h2 class="h6 fw-semibold mb-0">
+                            <i class="fa-solid fa-eye me-2"></i>
+                            Aperçu
+                        </h2>
                     </div>
                     <div class="card-body p-0 flex-grow-1 overflow-auto" style="min-height: 0;">
                         <section class="h-100 d-flex align-items-center justify-content-center bg-light">
@@ -164,10 +176,10 @@
                         colorTextInput.value = defaultColor;
                     }
 
-                    // Reset checkbox to checked (true)
-                    const pillCheckbox = document.getElementById("review_show_etablissement_pill");
-                    if (pillCheckbox) {
-                        pillCheckbox.checked = true;
+                    // Reset select to "True" (Oui)
+                    const pillSelect = document.getElementById("review_show_etablissement_pill");
+                    if (pillSelect) {
+                        pillSelect.value = "True";
                     }
 
                     // Reset review_page_label to empty
