@@ -87,9 +87,7 @@ def get_etablissement_by_identifier(identifier: str) -> Etablissement | None:
     return etablissement
 
 
-def build_feedback_context(
-    etablissement, identifier, mode="main", form=None, prefilled_rating=None
-) -> dict:
+def build_feedback_context(etablissement, identifier, mode="main", form=None, prefilled_rating=None) -> dict:
     """
     Build the context dictionary for the feedback page template.
 
@@ -111,15 +109,13 @@ def build_feedback_context(
     context = {
         "etablissement": etablissement,
         "rating_array": rating_array,
-        "internal_feedback_url": reverse(
-            "reviews:internal_feedback", args=[identifier]
-        ),
-        "external_feedback_url": reverse(
-            "reviews:external_feedback", args=[identifier]
-        ),
+        "internal_feedback_url": reverse("reviews:internal_feedback", args=[identifier]),
+        "external_feedback_url": reverse("reviews:external_feedback", args=[identifier]),
         "form": form,
         "prefilled_rating": prefilled_rating,
         "mode": mode,
+        "review_show_etablissement_pill": etablissement.review_show_etablissement_pill,
+        "review_accent_color": etablissement.review_accent_color or "#0b5ed7",
     }
 
     return context
@@ -131,13 +127,7 @@ def get_valid_session_key(request, key: str, valid_minutes: int = 5) -> str | No
 
     save_time = parse_datetime(key_time) if key_time else None
 
-    is_valid = save_time and save_time > timezone.now() - timedelta(
-        minutes=valid_minutes
-    )
-    print(f"key_time: {key_time}")
-    print(f"key_value: {key_value}")
-    print(f"valid_minutes: {valid_minutes}")
-    print(f"is_valid: {is_valid}")
+    is_valid = save_time and save_time > timezone.now() - timedelta(minutes=valid_minutes)
     if is_valid:
         return key_value
 

@@ -74,7 +74,7 @@ def reviews_settings_view(request):
 
     # Build preview context for feedback template
     identifier = str(etablissement.uuid)
-    preview_context = build_feedback_context(request, etablissement, identifier)
+    preview_context = build_feedback_context(etablissement, identifier, mode="main")
 
     context = {
         "etablissement": etablissement,
