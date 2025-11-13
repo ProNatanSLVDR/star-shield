@@ -94,6 +94,20 @@
                     </div>
                     <div class="card-body px-4 py-4">
                         <div class="d-grid gap-3">
+                            <a href="{% url 'dashboard:etablissement:settings:calculator' %}"
+                               class="card text-decoration-none border rounded-3 p-3 hover-shadow">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center me-3"
+                                         style="width: 48px; height: 48px;">
+                                        <i class="fa-solid fa-calculator fa-lg"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="h6 fw-semibold mb-1 text-body-emphasis">Calculateur de seuil et objectif</h3>
+                                        <p class="text-muted mb-0 small">Trouvez le seuil de redirection et l'objectif de note optimaux.</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-muted"></i>
+                                </div>
+                            </a>
                             <a href="{% url 'dashboard:etablissement:settings:reviews' %}"
                                class="card text-decoration-none border rounded-3 p-3 hover-shadow">
                                 <div class="d-flex align-items-center">

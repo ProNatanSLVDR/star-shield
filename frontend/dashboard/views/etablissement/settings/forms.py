@@ -36,3 +36,16 @@ class ReviewSettingsForm(forms.Form):
         max_length=255,
         required=False,
     )
+
+
+class ThresholdObjectiveForm(forms.Form):
+    review_threshold = forms.ChoiceField(
+        choices=[(i, f"{i}★") for i in range(1, 5)],
+        required=True,
+    )
+    target_rating = forms.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        required=False,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+    )
