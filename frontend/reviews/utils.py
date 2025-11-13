@@ -115,7 +115,7 @@ def build_feedback_context(etablissement, identifier, mode="main", form=None, pr
         "prefilled_rating": prefilled_rating,
         "mode": mode,
         "review_show_etablissement_pill": etablissement.review_show_etablissement_pill,
-        "review_accent_color": etablissement.review_accent_color or "#0b5ed7",
+        "review_accent_color": etablissement.review_accent_color or "#0066ff",
     }
 
     return context

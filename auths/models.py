@@ -293,7 +293,7 @@ class Etablissement(models.Model):
     )
     review_accent_color = models.CharField(
         max_length=7,
-        default="#0b5ed7",
+        default="#0066ff",
         help_text="Couleur d'accent pour la page de feedback (format hexadécimal).",
     )
     review_show_etablissement_pill = models.BooleanField(

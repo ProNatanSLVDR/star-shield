@@ -45,10 +45,10 @@
                                            id="accentColorText"
                                            value="{{ form.review_accent_color.value|default:etablissement.review_accent_color }}"
                                            pattern="^#[0-9A-Fa-f]{6}$"
-                                           placeholder="#0b5ed7"
+                                           placeholder="#0066ff"
                                            style="max-width: 150px;">
                                 </div>
-                                <div class="form-text">Couleur d'accent pour la page de feedback (format hexadécimal, ex: #0b5ed7).</div>
+                                <div class="form-text">Couleur d'accent pour la page de feedback (format hexadécimal, ex: #0066ff).</div>
                             </div>
 
                             <div class="mb-4">
@@ -74,8 +74,9 @@
                                        id="review_page_label"
                                        name="review_page_label"
                                        value="{{ form.review_page_label.value|default:etablissement.review_page_label }}"
+                                       placeholder="{{ etablissement.title }}"
                                        maxlength="255">
-                                <div class="form-text">Nom pour l'établissement sur la page de feedback.</div>
+                                <div class="form-text">Nom pour l'établissement sur la page de feedback. Si laissé vide, le nom par défaut "{{ etablissement.title }}" sera utilisé.</div>
                             </div>
 
                             <div class="mb-4">
@@ -91,7 +92,11 @@
                                 <div class="form-text">Texte à afficher sur la page de feedback.</div>
                             </div>
 
-                            <div class="d-grid">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-secondary" id="resetToDefaultsBtn">
+                                    <i class="fa-solid fa-rotate-left me-2"></i>
+                                    Réinitialiser aux valeurs par défaut
+                                </button>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fa-solid fa-save me-2"></i>
                                     Enregistrer les modifications
@@ -123,6 +128,7 @@
             const colorInput = document.getElementById("review_accent_color");
             const colorTextInput = document.getElementById("accentColorText");
             const form = document.getElementById("reviewSettingsForm");
+            const resetBtn = document.getElementById("resetToDefaultsBtn");
 
             // Sync color picker with text input
             if (colorInput && colorTextInput) {
@@ -134,6 +140,38 @@
                     const value = this.value;
                     if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
                         colorInput.value = value;
+                    }
+                });
+            }
+
+            // Reset to defaults functionality
+            if (resetBtn) {
+                resetBtn.addEventListener("click", function() {
+                    // Reset accent color to default
+                    const defaultColor = "#0066ff";
+                    if (colorInput) {
+                        colorInput.value = defaultColor;
+                    }
+                    if (colorTextInput) {
+                        colorTextInput.value = defaultColor;
+                    }
+
+                    // Reset checkbox to checked (true)
+                    const pillCheckbox = document.getElementById("review_show_etablissement_pill");
+                    if (pillCheckbox) {
+                        pillCheckbox.checked = true;
+                    }
+
+                    // Reset review_page_label to empty
+                    const pageLabelInput = document.getElementById("review_page_label");
+                    if (pageLabelInput) {
+                        pageLabelInput.value = "";
+                    }
+
+                    // Reset review_page_text to default
+                    const pageTextInput = document.getElementById("review_page_text");
+                    if (pageTextInput) {
+                        pageTextInput.value = "Votre avis nous aide à offrir un meilleur service !";
                     }
                 });
             }
