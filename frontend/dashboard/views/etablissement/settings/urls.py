@@ -8,4 +8,3 @@ urlpatterns = [
     path("reviews/", views.reviews_settings_view, name="reviews"),
     path("calculator/", views.threshold_objective_calculator_view, name="calculator"),
 ]
-

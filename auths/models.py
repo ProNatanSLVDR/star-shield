@@ -269,7 +269,7 @@ class Etablissement(models.Model):
 
     review_threshold = models.PositiveSmallIntegerField(
         default=4,
-        validators=[MinValueValidator(1), MaxValueValidator(4)],
+        validators=[MinValueValidator(3), MaxValueValidator(5)],
         help_text="Note minimale pour redirection Google.",
     )
     target_rating = models.DecimalField(

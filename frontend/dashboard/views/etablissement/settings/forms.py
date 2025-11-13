@@ -8,7 +8,7 @@ class EtablissementSettingsForm(forms.Form):
         required=True,
     )
     review_threshold = forms.ChoiceField(
-        choices=[(i, f"{i}★") for i in range(1, 5)],
+        choices=[(i, f"{i}★") for i in range(3, 6)],
         required=True,
     )
     target_rating = forms.DecimalField(
@@ -40,7 +40,7 @@ class ReviewSettingsForm(forms.Form):
 
 class ThresholdObjectiveForm(forms.Form):
     review_threshold = forms.ChoiceField(
-        choices=[(i, f"{i}★") for i in range(1, 5)],
+        choices=[(i, f"{i}★") for i in range(3, 6)],
         required=True,
     )
     target_rating = forms.DecimalField(
