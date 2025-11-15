@@ -138,3 +138,67 @@ def set_valid_session_key(request, key: str, value: str) -> None:
     request.session[f"{key}_save_time"] = str(timezone.now())
     request.session[key] = value
     request.session.modified = True
+
+
+distribution_notes = {
+    5: {
+        5: 1,
+    },
+    4: {
+        5: 3 / 4,
+        4: 1 / 4,
+    },
+    3: {
+        5: 3 / 4,
+        4: 2 / 12,
+        3: 1 / 12,
+    },
+}
+
+
+def estimations(note_actuelle: float, nb_notes: int, objectif: float, notes_par_semaine) -> dict:
+    def moyenne(liste_notes: list[int]) -> float:
+        return sum(liste_notes) / len(liste_notes)
+
+    def generate_weekly_notes(threshold: int, notes_par_semaine: int) -> list[int]:
+        items = list(distribution_notes[threshold].items())
+        calculated_weekly_notes = []
+        remaining = notes_par_semaine
+
+        for i, (note, percentage) in enumerate(items):
+            if i == len(items) - 1:
+                count = remaining
+            else:
+                count = round(percentage * notes_par_semaine)
+                remaining -= count
+            calculated_weekly_notes.extend([note] * count)
+        return calculated_weekly_notes
+
+    test_array = [note_actuelle] * nb_notes
+
+    results = {
+        "at_threshold_3": None,
+        "at_threshold_4": None,
+        "at_threshold_5": None,
+    }
+
+    # on teste chaque seuil
+    for threshold in distribution_notes:
+        weekly_notes = generate_weekly_notes(threshold, notes_par_semaine)
+
+        # on copie le tableau de notes
+        new_test_array = test_array.copy()
+
+        # on fait 270 tours de boucle pour simuler 5 ans max
+        for i in range(270):
+            new_test_array.extend(weekly_notes)
+
+            if moyenne(new_test_array) >= objectif:
+                print(f"{i} semaines pour atteindre l'objectif, threshold: {threshold}")
+                results[f"at_threshold_{threshold}"] = i
+                break
+
+    return results
+
+
+print(estimations(note_actuelle=3.2, nb_notes=120, objectif=4.7, notes_par_semaine=20))

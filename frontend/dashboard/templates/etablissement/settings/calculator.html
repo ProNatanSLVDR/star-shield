@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block dashboard_content %}
-    <div class="d-flex flex-column h-100">
+    <div class="d-flex flex-column" style="height: 100vh;">
         <div class="mb-4">
             <h1 class="h4 fw-bold text-body-emphasis mb-1">
                 <i class="fa-solid fa-calculator me-2"></i>
@@ -20,8 +20,75 @@
             {% endfor %}
         {% endif %}
 
-        <div class="row g-4 flex-grow-1" style="min-height: 0;">
-            <!-- Settings Form -->
+
+
+        <div class="row g-3 flex-grow-1">
+                <!-- Left Column: Threshold Selection -->
+            <div class="col-lg-6 d-flex flex-column">
+                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden">
+                    <div class="card-header bg-white border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0">
+                            <i class="fa-solid fa-sliders me-2"></i>
+                            Sélection du seuil
+                        </h2>
+                    </div>
+                    <div class="card-body px-4 py-3 flex-grow-1 d-flex flex-column">
+
+
+                        <div class="row h-50">
+
+
+                            <div class="col-8">
+                                <div class="row h-100">
+                                    <div class="col-6">
+                                        {% for seuil in "54321"|make_list %}
+                                            <div class="d-flex align-items-center justify-content-center" style="height: 20%;">
+                                                <span class="text-muted me-2">Avis de</span>
+                                                {% for i in "12345"|make_list %}
+                                                    <i class="fa-solid fa-star {% if i > seuil %}text-muted{% else %}text-warning{% endif %} "></i>
+                                                {% endfor %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-6">
+                                        {% for seuil in "12345"|make_list %}
+                                            <div class="d-flex align-items-center justify-content-center" style="height: 20%;">
+                                                <i class="fa-solid fa-arrow-right-long"></i>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="row" style="height: 40%;">
+
+                                    <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden">
+                                        GOOGLE
+                                    </div>
+
+                                </div>
+
+                                <div class="row" style="height: 60%;">
+
+                                    <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden">
+                                        GOOGLE
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row h-50">
+                            b
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+                <!-- Right Column: Configuration -->
             <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
                 <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden" style="min-height: 0;">
                     <div class="card-header bg-white border-bottom px-4 py-3">
@@ -31,273 +98,14 @@
                         </h2>
                     </div>
                     <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
-                        <form method="post" id="calculatorForm">
-                            {% csrf_token %}
-
-                            {% if form.errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    {% for field, errors in form.errors.items %}
-                                        {% for error in errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            <div class="mb-4">
-                                <label for="id_review_threshold" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-sliders me-2"></i>
-                                    Seuil de redirection
-                                </label>
-                                <select class="form-select" id="id_review_threshold" name="review_threshold" required>
-                                    {% for value, label in form.review_threshold.field.choices %}
-                                        <option value="{{ value }}" {% if etablissement.review_threshold == value %}selected{% endif %}>
-                                            {{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <div class="form-text">Note minimale pour redirection Google. Seuls les avis avec une note supérieure ou égale au seuil seront publiés sur Google.</div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="id_target_rating" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-bullseye me-2"></i>
-                                    Note cible
-                                </label>
-                                <input type="number"
-                                       class="form-control"
-                                       id="id_target_rating"
-                                       name="target_rating"
-                                       value="{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:".2f" }}{% endif %}"
-                                       step="0.1"
-                                       min="0"
-                                       max="5"
-                                       placeholder="Ex: 4.5">
-                                <div class="form-text">Note cible que vous souhaitez atteindre à l'avenir (0.0 à 5.0).</div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="reviews_per_week" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-calendar-week me-2"></i>
-                                    Avis par semaine
-                                </label>
-                                <input type="number"
-                                       class="form-control"
-                                       id="reviews_per_week"
-                                       value="20"
-                                       min="1"
-                                       step="1">
-                                <div class="form-text">Nombre d'avis reçus par semaine (pour calculer les délais).</div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa-solid fa-save me-2"></i>
-                                    Enregistrer le seuil et l'objectif
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Calculations Panel -->
-            <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
-                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden" style="min-height: 0;">
-                    <div class="card-header bg-white border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0">
-                            <i class="fa-solid fa-chart-line me-2"></i>
-                            Calculs et résultats
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-4 flex-grow-1 overflow-auto" style="min-height: 0;">
-                        <!-- Current Statistics -->
-                        <div class="mb-4"
-                             data-current-rating="{% if current_rating is not None %}{{ current_rating }}{% endif %}"
-                             data-total-reviews="{{ total_reviews|default:0 }}">
-                            <h3 class="h6 fw-semibold mb-3">Statistiques actuelles</h3>
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center p-3 bg-light rounded-3">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3"
-                                             style="width: 40px; height: 40px;">
-                                            <i class="fa-solid fa-star"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-muted small">Note actuelle</div>
-                                            <div class="h5 fw-bold mb-0" id="currentRatingDisplay">
-                                                {% if current_rating %}{{ current_rating|stringformat:".2f" }}{% else %}N/A{% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center p-3 bg-light rounded-3">
-                                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center me-3"
-                                             style="width: 40px; height: 40px;">
-                                            <i class="fa-solid fa-comments"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-muted small">Total d'avis</div>
-                                            <div class="h5 fw-bold mb-0" id="totalReviewsDisplay">{{ total_reviews|default:0 }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Objective Results by Threshold -->
-                        <div>
-                            <h3 class="h6 fw-semibold mb-3">Avis nécessaires par seuil</h3>
-                            <div id="objectiveResults" class="mb-0">
-                                <div id="objectiveResultsContent">
-                                    <div class="small text-muted">Entrez une note cible pour voir les calculs</div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Get initial values from template via data attributes
-            const statsElement = document.querySelector('[data-current-rating]');
-            const currentRating = statsElement ? parseFloat(statsElement.getAttribute('data-current-rating')) || null : null;
-            const totalReviews = statsElement ? parseInt(statsElement.getAttribute('data-total-reviews')) || 0 : 0;
-            const thresholdSelect = document.getElementById("id_review_threshold");
-            const targetRatingInput = document.getElementById("id_target_rating");
-            const reviewsPerWeekInput = document.getElementById("reviews_per_week");
 
-            // Update calculations when values change
-            if (thresholdSelect) {
-                thresholdSelect.addEventListener("change", function() {
-                    calculateAll();
-                });
-            }
-
-            if (targetRatingInput) {
-                targetRatingInput.addEventListener("input", function() {
-                    calculateAll();
-                });
-            }
-
-            if (reviewsPerWeekInput) {
-                reviewsPerWeekInput.addEventListener("input", function() {
-                    calculateAll();
-                });
-            }
-
-            // Calculate all results
-            function calculateAll() {
-                calculateObjective();
-            }
-
-            // Calculate objective for each threshold
-            function calculateObjective() {
-                const targetRating = parseFloat(targetRatingInput.value);
-                const reviewsPerWeek = parseInt(reviewsPerWeekInput.value) || 20;
-
-                if (!targetRating || targetRating <= 0 || targetRating > 5) {
-                    document.getElementById("objectiveResultsContent").innerHTML =
-                        '<div class="small text-muted">Entrez une note cible valide (0.0 à 5.0)</div>';
-                    return;
-                }
-
-                if (!currentRating || totalReviews === 0) {
-                    document.getElementById("objectiveResultsContent").innerHTML =
-                        '<div class="small text-muted">Données insuffisantes pour calculer l\'objectif</div>';
-                    return;
-                }
-
-                if (targetRating <= currentRating) {
-                    document.getElementById("objectiveResultsContent").innerHTML =
-                        '<div class="alert alert-warning mb-0"><div class="small">La note cible doit être supérieure à la note actuelle (' + currentRating.toFixed(2) + ')</div></div>';
-                    return;
-                }
-
-                const resultsContent = document.getElementById("objectiveResultsContent");
-                let html = '';
-
-                // Calculate for each threshold (3★, 4★, 5★)
-                const thresholds = [3, 4, 5];
-
-                thresholds.forEach(threshold => {
-                    const thresholdResults = calculateForThreshold(currentRating, totalReviews, targetRating, threshold);
-
-                    if (thresholdResults.reviewsNeeded !== null) {
-                        const weeksNeeded = Math.ceil(thresholdResults.reviewsNeeded / reviewsPerWeek);
-                        const monthsNeeded = (weeksNeeded / 4).toFixed(1);
-
-                        html += `
-                            <div class="card border mb-3">
-                                <div class="card-body p-3">
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <h6 class="mb-0 fw-semibold">
-                                            <span class="badge bg-primary me-2">${threshold}★</span>
-                                            Seuil ${threshold}★
-                                        </h6>
-                                    </div>
-                                    <div class="small">
-                                        <div class="mb-1">
-                                            <strong>${thresholdResults.reviewsNeeded}</strong> avis de ${thresholdResults.ratingUsed}★ nécessaires
-                                        </div>
-                                        <div class="text-muted">
-                                            ~${weeksNeeded} semaine${weeksNeeded > 1 ? 's' : ''} (${monthsNeeded} mois) à ${reviewsPerWeek} avis/semaine
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-
-                if (html === '') {
-                    html = '<div class="alert alert-secondary mb-0"><div class="small text-muted">Aucun calcul disponible pour cette note cible</div></div>';
-                }
-
-                resultsContent.innerHTML = html;
-            }
-
-            // Calculate reviews needed for a specific threshold
-            function calculateForThreshold(noteactu, nb_notes, objectif, threshold) {
-                function moyenne(liste_notes) {
-                    if (liste_notes.length === 0) return 0;
-                    return liste_notes.reduce((a, b) => a + b, 0) / liste_notes.length;
-                }
-
-                // Find the best rating to use (highest rating >= threshold that can help reach objective)
-                // We want the highest rating that's >= threshold and > objectif
-                let bestRating = null;
-                for (let rating = 5; rating >= threshold; rating--) {
-                    if (rating > objectif) {
-                        bestRating = rating;
-                        break;
-                    }
-                }
-
-                if (bestRating === null) {
-                    return { reviewsNeeded: null, ratingUsed: null };
-                }
-
-                // Calculate how many reviews of bestRating are needed
-                const test_array = Array(nb_notes).fill(noteactu);
-                let nb_notes_to_add = 0;
-
-                while (moyenne(test_array) < objectif) {
-                    test_array.push(bestRating);
-                    nb_notes_to_add += 1;
-                }
-
-                return { reviewsNeeded: nb_notes_to_add, ratingUsed: bestRating };
-            }
-
-            // Initial calculations
-            if (targetRatingInput.value) {
-                calculateAll();
-            }
-        });
     </script>
 {% endblock dashboard_content %}
