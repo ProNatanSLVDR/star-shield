@@ -94,7 +94,7 @@ def reviews_settings_view(request):
 
 @google_gmb_connected_required
 @selected_etablissement_required
-def threshold_objective_calculator_view(request):
+def threshold_settings_view(request):
     etablissement = request.etablissement
 
     # Get current rating from RatingHistory (latest entry) or calculate from Review
