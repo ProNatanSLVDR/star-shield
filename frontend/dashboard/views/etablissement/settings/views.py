@@ -88,7 +88,7 @@ def reviews_settings_view(request):
         request,
         "etablissement/settings/reviews.html",
         context=context,
-        page_name="etablissement_settings_reviews",
+        page_name="etablissement_settings",
     )
 
 
@@ -114,7 +114,7 @@ def threshold_settings_view(request):
             etablissement.save()
 
             messages.success(request, "Seuil et objectif mis à jour avec succès.")
-            return redirect("dashboard:etablissement:settings:calculator")
+            return redirect("dashboard:etablissement:settings:threshold")
     else:
         form = ThresholdObjectiveForm(
             initial={
@@ -137,7 +137,7 @@ def threshold_settings_view(request):
 
     return starshield_render(
         request,
-        "etablissement/settings/calculator.html",
+        "etablissement/settings/threshold.html",
         context=context,
-        page_name="etablissement_settings_calculator",
+        page_name="etablissement_settings",
     )
