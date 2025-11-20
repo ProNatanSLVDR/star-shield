@@ -168,6 +168,26 @@
                     </div>
                     <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
 
+                        <div class="mb-4">
+                            <label for="id_notes_per_week" class="form-label fw-semibold">
+                                <i class="fa-solid fa-calendar-week me-2"></i>
+                                Notes par semaine
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="range"
+                                       class="form-range flex-grow-1"
+                                       id="id_notes_per_week"
+                                       value="20"
+                                       step="1"
+                                       min="5"
+                                       max="100">
+                                <div class="text-primary fw-bold d-flex align-items-center gap-1" style="min-width: 60px; justify-content: center;">
+                                    <span id="notes_per_week_display">20</span>
+                                </div>
+                            </div>
+                            <div class="form-text">Nombre d'avis reçus par semaine pour le calcul des estimations.</div>
+                        </div>
+
                         <div class="">
                             <h3 class="h6 fw-semibold mb-3">
                                 <i class="fa-solid fa-chart-bar me-2"></i>
@@ -176,7 +196,7 @@
                             <p class="text-muted small mb-3">
                                 Cette estimation permet de visualiser la distribution des notes selon le seuil de redirection actuel.
                             </p>
-                            <div style="height: 300px; position: relative;">
+                            <div style="height: 200px; position: relative;">
                                 <canvas id="distributionChart"></canvas>
                             </div>
                         </div>
@@ -217,7 +237,7 @@
             };
 
             // Chart configuration
-            function getChartOptions() {
+            function getChartOptions(notesPerWeek) {
                 return {
                     indexAxis: 'y',
                     responsive: true,
@@ -245,7 +265,9 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return context.formattedValue + '%';
+                                    const percentage = context.formattedValue;
+                                    const reviewCount = Math.round((parseFloat(percentage) / 100) * notesPerWeek);
+                                    return reviewCount + ' avis (' + percentage + '%)';
                                 }
                             }
                         },
@@ -290,20 +312,21 @@
                 };
             }
 
-            function createChart(canvas, threshold) {
+            function createChart(canvas, threshold, notesPerWeek) {
                 return new window.Chart(canvas, {
                     type: 'bar',
                     data: {
                         labels: STAR_LABELS,
                         datasets: [createChartDataset(threshold)]
                     },
-                    options: getChartOptions()
+                    options: getChartOptions(notesPerWeek)
                 });
             }
 
-            function updateDistributionChart(chart, threshold) {
+            function updateDistributionChart(chart, threshold, notesPerWeek) {
                 if (chart) {
                     chart.data.datasets[0] = createChartDataset(threshold);
+                    chart.options = getChartOptions(notesPerWeek);
                     chart.update();
                 }
             }
@@ -320,11 +343,38 @@
                 }
             }
 
+            function initializeNotesPerWeekSlider(distributionChart) {
+                const slider = document.getElementById('id_notes_per_week');
+                const display = document.getElementById('notes_per_week_display');
+
+                if (slider && display) {
+                    slider.addEventListener('input', function() {
+                        const notesPerWeek = parseInt(this.value, 10);
+                        display.textContent = notesPerWeek;
+
+                        if (distributionChart) {
+                            const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
+                            if (checkedRadio) {
+                                const threshold = parseThreshold(checkedRadio.value);
+                                updateDistributionChart(distributionChart, threshold, notesPerWeek);
+                            }
+                        }
+                    });
+                }
+            }
+
             // Main initialization
             function initialize() {
                 const radios = document.querySelectorAll('input[name="review_threshold"]');
                 const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
                 const canvas = document.getElementById('distributionChart');
+                const notesPerWeekSlider = document.getElementById('id_notes_per_week');
+
+                // Get initial notes per week value
+                let notesPerWeek = 20;
+                if (notesPerWeekSlider) {
+                    notesPerWeek = parseInt(notesPerWeekSlider.value, 10);
+                }
 
                 // Initialize threshold visualization
                 if (checkedRadio) {
@@ -337,7 +387,7 @@
                 if (canvas && window.Chart) {
                     if (checkedRadio) {
                         const initialThreshold = parseThreshold(checkedRadio.value);
-                        distributionChart = createChart(canvas, initialThreshold);
+                        distributionChart = createChart(canvas, initialThreshold, notesPerWeek);
                     }
                 }
 
@@ -346,14 +396,18 @@
                     radio.addEventListener('change', function() {
                         const threshold = parseThreshold(this.value);
                         updateCardHeights(threshold);
-                        if (distributionChart) {
-                            updateDistributionChart(distributionChart, threshold);
+                        if (distributionChart && notesPerWeekSlider) {
+                            const currentNotesPerWeek = parseInt(notesPerWeekSlider.value, 10);
+                            updateDistributionChart(distributionChart, threshold, currentNotesPerWeek);
                         }
                     });
                 });
 
                 // Initialize target rating slider
                 initializeTargetRatingSlider();
+
+                // Initialize notes per week slider
+                initializeNotesPerWeekSlider(distributionChart);
             }
 
             // Start when DOM is ready
