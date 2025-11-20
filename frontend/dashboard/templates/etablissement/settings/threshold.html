@@ -166,7 +166,7 @@
                             Estimations et prévisions
                         </h2>
                     </div>
-                    <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
+                    <div class="card-body px-4 py-4 d-flex flex-column flex-grow-1 overflow-auto">
 
                         <div class="mb-4">
                             <label for="id_notes_per_week" class="form-label fw-semibold">
@@ -178,7 +178,7 @@
                                        class="form-range flex-grow-1"
                                        id="id_notes_per_week"
                                        value="20"
-                                       step="1"
+                                       step="5"
                                        min="5"
                                        max="100">
                                 <div class="text-primary fw-bold d-flex align-items-center gap-1" style="min-width: 60px; justify-content: center;">
@@ -188,7 +188,7 @@
                             <div class="form-text">Nombre d'avis reçus par semaine pour le calcul des estimations.</div>
                         </div>
 
-                        <div class="">
+                        <div class="mb-4">
                             <h3 class="h6 fw-semibold mb-3">
                                 <i class="fa-solid fa-chart-bar me-2"></i>
                                 Estimation de la distribution des notes
@@ -198,6 +198,74 @@
                             </p>
                             <div style="height: 200px; position: relative;">
                                 <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-top d-flex flex-column flex-grow-1" style="min-height: 0;">
+                            <h3 class="h6 fw-semibold mb-3">
+                                <i class="fa-solid fa-clock me-2"></i>
+                                Estimation du temps pour atteindre l'objectif
+                            </h3>
+                            <div id="time-estimation-container" class="row g-3 flex-grow-1" style="min-height: 0;">
+                                <!-- Left Column: Calculation Inputs (Compact) -->
+                                <div class="col-md-4 d-flex flex-column">
+                                    <div class="small d-flex flex-column justify-content-center h-100">
+                                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                            <span class="text-muted">Note actuelle:</span>
+                                            <span class="fw-bold" id="current-rating-display">
+                                                {% if current_rating %}{{ current_rating|stringformat:'.2f' }}{% else %}N/A{% endif %}
+                                                <i class="fa-solid fa-star text-warning ms-1"></i>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                            <span class="text-muted">Objectif:</span>
+                                            <span class="fw-bold" id="target-rating-display">
+                                                {% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}
+                                                <i class="fa-solid fa-star text-primary ms-1"></i>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                            <span class="text-muted">Total avis:</span>
+                                            <span class="fw-bold" id="total-reviews-display">
+                                                {% if total_reviews %}{{ total_reviews }}{% else %}0{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Avis/semaine:</span>
+                                            <span class="fw-bold" id="notes-per-week-display">20</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Results -->
+                                <div class="col-md-8 d-flex flex-column">
+                                    <!-- Selected Threshold Estimation -->
+                                    <div class="card border-primary mb-3 flex-grow-1 d-flex flex-column" style="border-width: 2px;">
+                                        <div class="card-body p-3 d-flex flex-column justify-content-center">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="text-muted small mb-1">Seuil sélectionné</div>
+                                                    <div class="fw-bold text-primary" id="selected-threshold-label">-</div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="h4 fw-bold text-primary mb-0" id="selected-threshold-weeks">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Other Thresholds -->
+                                    <div class="text-muted small">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span id="other-threshold-1-label">-</span>
+                                            <span class="fw-semibold" id="other-threshold-1">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span id="other-threshold-2-label">-</span>
+                                            <span class="fw-semibold" id="other-threshold-2">-</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -218,11 +286,23 @@
             const THRESHOLD_MULTIPLIER = 20;
             const PERCENTAGE_MAX = 100;
             const MAX_RATING = 5;
+            const MAX_WEEKS = 270; // 5 years max
+
+            // Current rating and total reviews from backend
+            const CURRENT_RATING = {% if current_rating %}{{ current_rating|stringformat:'.2f' }}{% else %}null{% endif %};
+            const TOTAL_REVIEWS = {% if total_reviews %}{{ total_reviews }}{% else %}0{% endif %};
 
             const DISTRIBUTION_DATA = {
                 5: {5: 100.0, 4: 0.0, 3: 0.0, 2: 0.0, 1: 0.0},
                 4: {5: 75.0, 4: 25.0, 3: 0.0, 2: 0.0, 1: 0.0},
-                3: {5: 75.0, 4: 16.666666666666664, 3: 8.333333333333332, 2: 0.0, 1: 0.0}
+                3: {5: 75.0, 4: 16.6, 3: 8.3, 2: 0.0, 1: 0.0}
+            };
+
+            // Distribution notes matching utils.py
+            const DISTRIBUTION_NOTES = {
+                5: {5: 1},
+                4: {5: 3/4, 4: 1/4},
+                3: {5: 3/4, 4: 2/12, 3: 1/12}
             };
 
             const STAR_RATINGS = [5, 4, 3];
@@ -335,10 +415,20 @@
             function initializeTargetRatingSlider() {
                 const slider = document.getElementById('id_target_rating');
                 const display = document.getElementById('target_rating_display');
+                const targetRatingDisplay = document.getElementById('target-rating-display');
 
                 if (slider && display) {
+                    // Update display value while dragging
                     slider.addEventListener('input', function() {
-                        display.textContent = parseFloat(this.value).toFixed(1);
+                        const value = parseFloat(this.value).toFixed(1);
+                        display.textContent = value;
+                        if (targetRatingDisplay) {
+                            targetRatingDisplay.innerHTML = value + ' <i class="fa-solid fa-star text-primary ms-1"></i>';
+                        }
+                    });
+                    // Update time estimation only on release
+                    slider.addEventListener('change', function() {
+                        updateTimeEstimation();
                     });
                 }
             }
@@ -346,12 +436,20 @@
             function initializeNotesPerWeekSlider(distributionChart) {
                 const slider = document.getElementById('id_notes_per_week');
                 const display = document.getElementById('notes_per_week_display');
+                const notesPerWeekDisplay = document.getElementById('notes-per-week-display');
 
                 if (slider && display) {
+                    // Update display value while dragging
                     slider.addEventListener('input', function() {
                         const notesPerWeek = parseInt(this.value, 10);
                         display.textContent = notesPerWeek;
-
+                        if (notesPerWeekDisplay) {
+                            notesPerWeekDisplay.textContent = notesPerWeek;
+                        }
+                    });
+                    // Update chart and time estimation only on release
+                    slider.addEventListener('change', function() {
+                        const notesPerWeek = parseInt(this.value, 10);
                         if (distributionChart) {
                             const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
                             if (checkedRadio) {
@@ -359,8 +457,152 @@
                                 updateDistributionChart(distributionChart, threshold, notesPerWeek);
                             }
                         }
+                        updateTimeEstimation();
                     });
                 }
+            }
+
+            // Time estimation functions
+            function moyenne(listeNotes) {
+                if (listeNotes.length === 0) return 0;
+                return listeNotes.reduce((a, b) => a + b, 0) / listeNotes.length;
+            }
+
+            function generateWeeklyNotes(threshold, notesParSemaine) {
+                const distribution = DISTRIBUTION_NOTES[threshold];
+                if (!distribution) return [];
+
+                const items = Object.entries(distribution);
+                const calculatedWeeklyNotes = [];
+                let remaining = notesParSemaine;
+
+                for (let i = 0; i < items.length; i++) {
+                    const [note, percentage] = items[i];
+                    const noteValue = parseInt(note, 10);
+                    let count;
+
+                    if (i === items.length - 1) {
+                        count = remaining;
+                    } else {
+                        count = Math.round(percentage * notesParSemaine);
+                        remaining -= count;
+                    }
+                    calculatedWeeklyNotes.push(...Array(count).fill(noteValue));
+                }
+                return calculatedWeeklyNotes;
+            }
+
+            function estimations(noteActuelle, nbNotes, objectif, notesParSemaine) {
+                const testArray = Array(nbNotes).fill(noteActuelle);
+                const results = {
+                    at_threshold_3: null,
+                    at_threshold_4: null,
+                    at_threshold_5: null
+                };
+
+                // Test each threshold
+                for (const threshold of [3, 4, 5]) {
+                    const weeklyNotes = generateWeeklyNotes(threshold, notesParSemaine);
+                    const newTestArray = [...testArray];
+
+                    // Simulate up to 270 weeks (5 years max)
+                    for (let i = 0; i < MAX_WEEKS; i++) {
+                        newTestArray.push(...weeklyNotes);
+
+                        if (moyenne(newTestArray) >= objectif) {
+                            results[`at_threshold_${threshold}`] = i;
+                            break;
+                        }
+                    }
+                }
+
+                return results;
+            }
+
+            function formatWeeks(weeks) {
+                if (weeks === null) {
+                    return 'Plus de 5 ans';
+                }
+                if (weeks === 0) {
+                    return 'Déjà atteint';
+                }
+                if (weeks === 1) {
+                    return '1 semaine';
+                }
+                return weeks + ' semaines';
+            }
+
+            function updateTimeEstimation() {
+                const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
+                const targetRatingSlider = document.getElementById('id_target_rating');
+                const notesPerWeekSlider = document.getElementById('id_notes_per_week');
+
+                // Update current stats displays
+                if (CURRENT_RATING !== null) {
+                    document.getElementById('current-rating-display').innerHTML =
+                        CURRENT_RATING.toFixed(2) + ' <i class="fa-solid fa-star text-warning ms-1"></i>';
+                } else {
+                    document.getElementById('current-rating-display').textContent = 'N/A';
+                }
+
+                if (targetRatingSlider) {
+                    const targetRating = parseFloat(targetRatingSlider.value);
+                    document.getElementById('target-rating-display').innerHTML =
+                        targetRating.toFixed(1) + ' <i class="fa-solid fa-star text-primary ms-1"></i>';
+                }
+
+                document.getElementById('total-reviews-display').textContent = TOTAL_REVIEWS || '0';
+
+                if (notesPerWeekSlider) {
+                    const notesPerWeek = parseInt(notesPerWeekSlider.value, 10);
+                    document.getElementById('notes-per-week-display').textContent = notesPerWeek;
+                }
+
+                // Check if we have required data for estimation
+                if (CURRENT_RATING === null || TOTAL_REVIEWS === 0) {
+                    document.getElementById('selected-threshold-weeks').textContent = 'Données insuffisantes';
+                    document.getElementById('selected-threshold-label').textContent = '-';
+                    document.getElementById('other-threshold-1').textContent = '-';
+                    document.getElementById('other-threshold-1-label').textContent = '-';
+                    document.getElementById('other-threshold-2').textContent = '-';
+                    document.getElementById('other-threshold-2-label').textContent = '-';
+                    return;
+                }
+
+                if (!checkedRadio || !targetRatingSlider || !notesPerWeekSlider) {
+                    return;
+                }
+
+                const selectedThreshold = parseThreshold(checkedRadio.value);
+                const targetRating = parseFloat(targetRatingSlider.value);
+                const notesPerWeek = parseInt(notesPerWeekSlider.value, 10);
+
+                // Calculate estimations
+                const results = estimations(CURRENT_RATING, TOTAL_REVIEWS, targetRating, notesPerWeek);
+
+                // Display selected threshold prominently
+                const selectedWeeks = results[`at_threshold_${selectedThreshold}`];
+                document.getElementById('selected-threshold-weeks').textContent = formatWeeks(selectedWeeks);
+
+                // Display other thresholds as small info
+                const otherThresholds = [3, 4, 5].filter(t => t !== selectedThreshold);
+                const other1 = otherThresholds[1];
+                const other2 = otherThresholds[0];
+
+                const thresholdLabels = {
+                    3: 'Seuil 3★',
+                    4: 'Seuil 4★',
+                    5: 'Seuil 5★'
+                };
+
+                // Update selected threshold label
+                document.getElementById('selected-threshold-label').textContent = thresholdLabels[selectedThreshold];
+
+                // Update other thresholds
+                document.getElementById('other-threshold-1-label').textContent = thresholdLabels[other1];
+                document.getElementById('other-threshold-1').textContent = formatWeeks(results[`at_threshold_${other1}`]);
+                document.getElementById('other-threshold-2-label').textContent = thresholdLabels[other2];
+                document.getElementById('other-threshold-2').textContent = formatWeeks(results[`at_threshold_${other2}`]);
             }
 
             // Main initialization
@@ -400,6 +642,7 @@
                             const currentNotesPerWeek = parseInt(notesPerWeekSlider.value, 10);
                             updateDistributionChart(distributionChart, threshold, currentNotesPerWeek);
                         }
+                        updateTimeEstimation();
                     });
                 });
 
@@ -408,6 +651,9 @@
 
                 // Initialize notes per week slider
                 initializeNotesPerWeekSlider(distributionChart);
+
+                // Initialize time estimation
+                updateTimeEstimation();
             }
 
             // Start when DOM is ready
