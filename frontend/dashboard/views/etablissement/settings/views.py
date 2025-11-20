@@ -123,16 +123,11 @@ def threshold_settings_view(request):
             }
         )
 
-    card_height = round(((6 - etablissement.review_threshold) / 5) * 100)
-    card_height_reverse = 100 - card_height
-
     context = {
         "etablissement": etablissement,
         "form": form,
         "current_rating": current_rating,
         "total_reviews": total_reviews,
-        "card_height": card_height,
-        "card_height_reverse": card_height_reverse,
     }
 
     return starshield_render(
