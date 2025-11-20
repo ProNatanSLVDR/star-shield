@@ -123,7 +123,7 @@ def threshold_settings_view(request):
             }
         )
 
-    card_height = round((etablissement.review_threshold / 5) * 100)
+    card_height = round(((6 - etablissement.review_threshold) / 5) * 100)
     card_height_reverse = 100 - card_height
 
     context = {

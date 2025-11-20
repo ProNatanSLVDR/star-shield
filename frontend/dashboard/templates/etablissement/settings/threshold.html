@@ -34,13 +34,15 @@
                         </div>
 
                         <div class="row  position-relative" style="min-height: 350px;">
-                            <div class="position-absolute start-0 w-100 d-flex align-items-center" style="top: {{ card_height }}%; transform: translateY(-55%);">
-                                <div class="flex-grow-1 border-top border-2 border-primary"></div>
-                                <span class="badge bg-primary border border-primary" style="z-index:2;">
-                                    <i class="fa-solid fa-star-half-stroke"></i> Seuil Actuel
-                                </span>
-                                <div class="flex-grow-1 border-top border-2 border-primary"></div>
+                            <div id="threshold-line" class="position-absolute start-0 w-100" style="top: {{ card_height }}%; transform: translateY(-55%); transition: top 0.3s ease;">
+                                <div class="position-relative w-100">
+                                    <div class="border-bottom border-2 border-primary"></div>
+                                    <span class="badge bg-primary border border-primary position-absolute translate-middle" style="z-index:2; left: 40%;">
+                                        <i class="fa-solid fa-star-half-stroke"></i> Seuil Actuel
+                                    </span>
+                                </div>
                             </div>
+
 
                             <div class="col-4 h-100 d-flex flex-column">
 
@@ -60,34 +62,48 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="col-4 d-flex flex-column gap-2 h-100">
-                                <div class="d-flex flex-column justify-content-center align-items-center" style="flex: {{ card_height }};">
+                            <div class="col-2 d-flex flex-column h-100">
+                                <div id="arrow-top" class="d-flex flex-column justify-content-center align-items-center" style="height: {{ card_height }}%; transition: height 0.3s ease;">
                                     <i class="fa-solid fa-arrow-right-long fa-2x text-primary fa-beat"></i>
                                 </div>
-                                <div class="d-flex flex-column justify-content-center align-items-center" style="flex: {{ card_height_reverse }};">
+                                <div id="arrow-bottom" class="d-flex flex-column justify-content-center align-items-center" style="height: {{ card_height_reverse }}%; transition: height 0.3s ease;">
                                     <i class="fa-solid fa-arrow-right-long fa-2x text-primary fa-beat"></i>
                                 </div>
                             </div>
-                            <div class="col-4 d-flex flex-column gap-3 h-100">
-                                <div class="card border rounded-3 d-flex flex-column overflow-hidden bg-light" style="flex: {{ card_height }};">
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
-                                        <i class="fa-brands fa-google fa-2x mb-2 text-primary"></i>
-                                        <h6 class="fw-bold mb-1 small text-body">Google</h6>
-                                        <p class="mb-0 small text-center text-muted">Avis publics</p>
+                            <div class="col-6 h-100">
+                                <div id="card-top" style="height: {{ card_height }}%; transition: height 0.3s ease;" class="overflow-hidden py-2">
+                                    <div class="card border rounded-3 d-flex flex-column bg-light h-100">
+                                        <div class="card-body d-flex flex-column justify-content-center align-items-center p-1">
+                                            <i class="fa-brands fa-google fa-2x mb-2 text-primary"></i>
+                                            <p class="fw-bold mb-1 small text-body">Google</p>
+                                            <p class="mb-0 small text-center text-muted">Avis publics</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="card border rounded-3 d-flex flex-column overflow-hidden bg-light" style="flex: {{ card_height_reverse }};">
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
-                                        <i class="fa-solid fa-lock fa-2x mb-2 text-primary"></i>
-                                        <h6 class="fw-bold mb-1 small text-body">Interne</h6>
-                                        <p class="mb-0 small text-center text-muted">Avis privés</p>
+                                <div id="card-bottom" style="height: {{ card_height_reverse }}%; transition: height 0.3s ease;" class="overflow-hidden py-2">
+                                    <div class="card border rounded-3 d-flex flex-column overflow-hidden bg-light h-100">
+                                        <div class="card-body d-flex flex-column justify-content-center align-items-center p-1">
+                                            <i class="fa-solid fa-lock fa-2x mb-2 text-primary"></i>
+                                            <p class="fw-bold mb-1 small text-body">Interne</p>
+                                            <p class="mb-0 small text-center text-muted">Avis privés</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                         </div>
 
-
+                        <div class="mt-auto pt-4">
+                            <label class="form-label fw-semibold mb-3">Sélectionner le seuil</label>
+                            <div class="d-flex gap-2">
+                                {% for value, label in form.review_threshold.field.choices %}
+                                    <input type="radio" class="btn-check" name="review_threshold" id="threshold_{{ value }}" value="{{ value }}" {% if etablissement.review_threshold == value %}checked{% endif %} autocomplete="off">
+                                    <label class="btn btn-outline-primary flex-fill d-flex align-items-center justify-content-center py-3" for="threshold_{{ value }}" style="font-size: 1.1rem; font-weight: 600;">
+                                        {{ label }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -111,6 +127,29 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const radios = document.querySelectorAll('input[name="review_threshold"]');
+            const line = document.getElementById('threshold-line');
+            const arrowTop = document.getElementById('arrow-top');
+            const arrowBottom = document.getElementById('arrow-bottom');
+            const cardTop = document.getElementById('card-top');
+            const cardBottom = document.getElementById('card-bottom');
 
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const threshold = parseInt(this.value);
+                    const cardHeight = (6 - threshold) * 20;
+                    const cardHeightReverse = 100 - cardHeight;
+
+                    line.style.top = `${cardHeight}.3%`;
+
+                    // Update height values
+                    arrowTop.style.height = `${cardHeight}%`;
+                    arrowBottom.style.height = `${cardHeightReverse}%`;
+                    cardTop.style.height = `${cardHeight}%`;
+                    cardBottom.style.height = `${cardHeightReverse}%`;
+                });
+            });
+        });
     </script>
 {% endblock dashboard_content %}
