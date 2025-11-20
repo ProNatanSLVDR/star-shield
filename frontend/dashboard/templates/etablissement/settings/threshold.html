@@ -27,14 +27,6 @@
                     </div>
                     <div class="card-body px-4 py-3 flex-grow-1 d-flex flex-column">
 
-
-                        <div class="mb-3">
-                            <p class="text-muted small mb-0">
-                                <i class="fa-solid fa-info-circle me-1"></i>
-                                Visualisation du fonctionnement de la redirection des avis selon le seuil actuel
-                            </p>
-                        </div>
-
                         <div class="row  position-relative" style="min-height: 400px;">
                             <div id="threshold-line" class="position-absolute start-0 w-100" style="top: var(--card-height); transform: translateY(-55%); transition: top 0.3s ease;">
                                 <div class="position-relative w-100">
@@ -110,19 +102,57 @@
                             </div>
 
                         </div>
+                        <p class="text-muted small mb-2 mt-2">
+                            Cette visualisation représente le fonctionnement de la redirection des avis selon le seuil actuel.
+                        </p>
 
-                        <div class="mt-auto pt-4">
-                            <label class="form-label fw-semibold mb-3">Sélectionner le seuil</label>
-                            <div class="d-flex gap-2">
-                                {% for value, label in form.review_threshold.field.choices %}
-                                    <input type="radio" class="btn-check" name="review_threshold" id="threshold_{{ value }}" value="{{ value }}" {% if etablissement.review_threshold == value %}checked{% endif %} autocomplete="off">
-                                    <label class="btn btn-outline-primary flex-fill d-flex align-items-center justify-content-center py-3" for="threshold_{{ value }}" style="font-size: 1.1rem; font-weight: 600;">
-                                        {{ label }}
-                                    </label>
-                                {% endfor %}
+                        <form method="post" action="{% url 'dashboard:etablissement:settings:threshold' %}" class="mt-auto pt-4">
+                            {% csrf_token %}
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold mb-3">
+                                    <i class="fa-solid fa-sliders me-2"></i>
+                                    Sélectionner le seuil
+                                </label>
+                                <div class="d-flex gap-2">
+                                    {% for value, label in form.review_threshold.field.choices %}
+                                        <input type="radio" class="btn-check" name="review_threshold" id="threshold_{{ value }}" value="{{ value }}" {% if etablissement.review_threshold == value %}checked{% endif %} autocomplete="off">
+                                        <label class="btn btn-outline-primary flex-fill d-flex align-items-center justify-content-center py-3" for="threshold_{{ value }}" style="font-size: 1.1rem; font-weight: 600;">
+                                            {{ label }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
 
+                            <div class="mb-4">
+                                <label for="id_target_rating" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-bullseye me-2"></i>
+                                    Objectif
+                                </label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="range"
+                                           class="form-range flex-grow-1"
+                                           id="id_target_rating"
+                                           name="target_rating"
+                                           value="{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}"
+                                           step="0.1"
+                                           min="3.5"
+                                           max="4.9">
+                                    <div class="text-primary fw-bold d-flex align-items-center gap-1" style="min-width: 60px; justify-content: center;">
+                                        <span id="target_rating_display">{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}</span>
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="form-text">Note cible que vous souhaitez atteindre à l'avenir.</div>
+                            </div>
+
+                            <div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fa-solid fa-save me-2"></i>
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -160,129 +190,178 @@
 
     <script src="{% static 'chartjs.min.js' %}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const radios = document.querySelectorAll('input[name="review_threshold"]');
+        (function() {
+            'use strict';
+
+            // Constants
+            const THRESHOLD_BASE = 6;
+            const THRESHOLD_MULTIPLIER = 20;
+            const PERCENTAGE_MAX = 100;
+            const MAX_RATING = 5;
+
+            const DISTRIBUTION_DATA = {
+                5: {5: 100.0, 4: 0.0, 3: 0.0, 2: 0.0, 1: 0.0},
+                4: {5: 75.0, 4: 25.0, 3: 0.0, 2: 0.0, 1: 0.0},
+                3: {5: 75.0, 4: 16.666666666666664, 3: 8.333333333333332, 2: 0.0, 1: 0.0}
+            };
+
+            const STAR_RATINGS = [5, 4, 3];
+            const STAR_LABELS = STAR_RATINGS.map(rating => {
+                return rating + '★';
+            });
+
+            const CHART_COLORS = {
+                background: 'rgba(13, 110, 253, 0.8)',
+                border: 'rgba(13, 110, 253, 1)',
+                grid: 'rgba(108, 117, 125, 0.15)'
+            };
+
+            // Chart configuration
+            function getChartOptions() {
+                return {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: PERCENTAGE_MAX,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: {
+                                color: CHART_COLORS.grid
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.formattedValue + '%';
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                };
+            }
+
+            // Threshold functions
+            function parseThreshold(value) {
+                return parseInt(value, 10);
+            }
+
+            function calculateCardHeight(threshold) {
+                return (THRESHOLD_BASE - threshold) * THRESHOLD_MULTIPLIER;
+            }
 
             function updateCardHeights(threshold) {
-                const cardHeight = (6 - threshold) * 20;
-                const cardHeightReverse = 100 - cardHeight;
+                const cardHeight = calculateCardHeight(threshold);
+                const cardHeightReverse = PERCENTAGE_MAX - cardHeight;
 
-                // Update CSS variables - this will automatically update all elements using them
                 document.documentElement.style.setProperty('--card-height', `${cardHeight}%`);
                 document.documentElement.style.setProperty('--card-height-reverse', `${cardHeightReverse}%`);
             }
 
-            // Initialize CSS variables based on the currently selected threshold
-            const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
-            if (checkedRadio) {
-                updateCardHeights(parseInt(checkedRadio.value));
-            }
-
-            // Initialize distribution chart
-            const canvas = document.getElementById('distributionChart');
-            let distributionChart = null;
-
-            if (canvas) {
-                const distributionData = {
-                    5: {5: 100.0, 4: 0.0, 3: 0.0, 2: 0.0, 1: 0.0},
-                    4: {5: 75.0, 4: 25.0, 3: 0.0, 2: 0.0, 1: 0.0},
-                    3: {5: 75.0, 4: 16.666666666666664, 3: 8.333333333333332, 2: 0.0, 1: 0.0}
-                };
-
-                const starRatings = [5, 4, 3];
-                const starLabels = starRatings.map(rating => {
-                    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            // Chart functions
+            function createChartDataset(threshold) {
+                const data = STAR_RATINGS.map(rating => {
+                    return DISTRIBUTION_DATA[threshold] && DISTRIBUTION_DATA[threshold][rating]
+                        ? DISTRIBUTION_DATA[threshold][rating]
+                        : 0;
                 });
 
-                const backgroundColor = 'rgba(13, 110, 253, 0.8)';
-                const borderColor = 'rgba(13, 110, 253, 1)';
+                return {
+                    label: `Seuil ${threshold}`,
+                    data: data,
+                    backgroundColor: CHART_COLORS.background,
+                    borderColor: CHART_COLORS.border,
+                    borderWidth: 1
+                };
+            }
 
-                function updateDistributionChart(threshold) {
-                    const data = starRatings.map(rating => {
-                        return distributionData[threshold] && distributionData[threshold][rating]
-                            ? distributionData[threshold][rating]
-                            : 0;
+            function createChart(canvas, threshold) {
+                return new window.Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: STAR_LABELS,
+                        datasets: [createChartDataset(threshold)]
+                    },
+                    options: getChartOptions()
+                });
+            }
+
+            function updateDistributionChart(chart, threshold) {
+                if (chart) {
+                    chart.data.datasets[0] = createChartDataset(threshold);
+                    chart.update();
+                }
+            }
+
+            // Slider functions
+            function initializeTargetRatingSlider() {
+                const slider = document.getElementById('id_target_rating');
+                const display = document.getElementById('target_rating_display');
+
+                if (slider && display) {
+                    slider.addEventListener('input', function() {
+                        display.textContent = parseFloat(this.value).toFixed(1);
                     });
+                }
+            }
 
-                    const dataset = {
-                        label: `Seuil ${threshold}`,
-                        data: data,
-                        backgroundColor: backgroundColor,
-                        borderColor: borderColor,
-                        borderWidth: 1,
-                    };
+            // Main initialization
+            function initialize() {
+                const radios = document.querySelectorAll('input[name="review_threshold"]');
+                const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
+                const canvas = document.getElementById('distributionChart');
 
-                    if (distributionChart) {
-                        distributionChart.data.datasets[0] = dataset;
-                        distributionChart.update();
-                    } else {
-                        distributionChart = new window.Chart(canvas, {
-                            type: 'bar',
-                            data: {
-                                labels: starLabels,
-                                datasets: [dataset],
-                            },
-                            options: {
-                                indexAxis: 'y',
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    x: {
-                                        beginAtZero: true,
-                                        max: 100,
-                                        ticks: {
-                                            callback: function(value) {
-                                                return value + '%';
-                                            },
-                                        },
-                                        grid: {
-                                            color: 'rgba(108, 117, 125, 0.15)',
-                                        },
-                                    },
-                                    y: {
-                                        grid: {
-                                            display: false,
-                                        },
-                                    },
-                                },
-                                plugins: {
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return context.formattedValue + '%';
-                                            },
-                                        },
-                                    },
-                                    legend: {
-                                        display: true,
-                                        position: 'bottom',
-                                    },
-                                },
-                            },
-                        });
+                // Initialize threshold visualization
+                if (checkedRadio) {
+                    const initialThreshold = parseThreshold(checkedRadio.value);
+                    updateCardHeights(initialThreshold);
+                }
+
+                // Initialize chart if canvas exists
+                let distributionChart = null;
+                if (canvas && window.Chart) {
+                    if (checkedRadio) {
+                        const initialThreshold = parseThreshold(checkedRadio.value);
+                        distributionChart = createChart(canvas, initialThreshold);
                     }
                 }
 
-                // Initialize chart with currently selected threshold
-                if (checkedRadio) {
-                    updateDistributionChart(parseInt(checkedRadio.value));
-                }
+                // Setup threshold change handlers
+                radios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        const threshold = parseThreshold(this.value);
+                        updateCardHeights(threshold);
+                        if (distributionChart) {
+                            updateDistributionChart(distributionChart, threshold);
+                        }
+                    });
+                });
 
-                // Update chart when threshold changes
-                radios.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        updateCardHeights(parseInt(this.value));
-                        updateDistributionChart(parseInt(this.value));
-                    });
-                });
-            } else {
-                // If no chart canvas, still update card heights
-                radios.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        updateCardHeights(parseInt(this.value));
-                    });
-                });
+                // Initialize target rating slider
+                initializeTargetRatingSlider();
             }
-        });
+
+            // Start when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initialize);
+            } else {
+                initialize();
+            }
+        })();
     </script>
 {% endblock dashboard_content %}
