@@ -1,5 +1,6 @@
 {% extends "dashboard_base.html" %}
 {% load i18n %}
+{% load static %}
 
 {% block dashboard_content %}
 
@@ -21,7 +22,7 @@
                     <div class="card-header bg-white border-bottom px-4 py-3">
                         <h2 class="h6 fw-semibold mb-0">
                             <i class="fa-solid fa-sliders me-2"></i>
-                            Sélection du seuil
+                            Paramètres de seuil et objectif
                         </h2>
                     </div>
                     <div class="card-body px-4 py-3 flex-grow-1 d-flex flex-column">
@@ -131,11 +132,25 @@
                 <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden" style="min-height: 0;">
                     <div class="card-header bg-white border-bottom px-4 py-3">
                         <h2 class="h6 fw-semibold mb-0">
-                            <i class="fa-solid fa-gear me-2"></i>
-                            Configuration
+                            <i class="fa-solid fa-calculator me-2"></i>
+                            Estimations et prévisions
                         </h2>
                     </div>
                     <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
+
+                        <div class="">
+                            <h3 class="h6 fw-semibold mb-3">
+                                <i class="fa-solid fa-chart-bar me-2"></i>
+                                Estimation de la distribution des notes
+                            </h3>
+                            <p class="text-muted small mb-3">
+                                Cette estimation permet de visualiser la distribution des notes selon le seuil de redirection actuel.
+                            </p>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -143,6 +158,7 @@
 
     </div>
 
+    <script src="{% static 'chartjs.min.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const radios = document.querySelectorAll('input[name="review_threshold"]');
@@ -162,11 +178,111 @@
                 updateCardHeights(parseInt(checkedRadio.value));
             }
 
-            radios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    updateCardHeights(parseInt(this.value));
+            // Initialize distribution chart
+            const canvas = document.getElementById('distributionChart');
+            let distributionChart = null;
+
+            if (canvas) {
+                const distributionData = {
+                    5: {5: 100.0, 4: 0.0, 3: 0.0, 2: 0.0, 1: 0.0},
+                    4: {5: 75.0, 4: 25.0, 3: 0.0, 2: 0.0, 1: 0.0},
+                    3: {5: 75.0, 4: 16.666666666666664, 3: 8.333333333333332, 2: 0.0, 1: 0.0}
+                };
+
+                const starRatings = [5, 4, 3];
+                const starLabels = starRatings.map(rating => {
+                    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
                 });
-            });
+
+                const backgroundColor = 'rgba(13, 110, 253, 0.8)';
+                const borderColor = 'rgba(13, 110, 253, 1)';
+
+                function updateDistributionChart(threshold) {
+                    const data = starRatings.map(rating => {
+                        return distributionData[threshold] && distributionData[threshold][rating]
+                            ? distributionData[threshold][rating]
+                            : 0;
+                    });
+
+                    const dataset = {
+                        label: `Seuil ${threshold}`,
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 1,
+                    };
+
+                    if (distributionChart) {
+                        distributionChart.data.datasets[0] = dataset;
+                        distributionChart.update();
+                    } else {
+                        distributionChart = new window.Chart(canvas, {
+                            type: 'bar',
+                            data: {
+                                labels: starLabels,
+                                datasets: [dataset],
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return value + '%';
+                                            },
+                                        },
+                                        grid: {
+                                            color: 'rgba(108, 117, 125, 0.15)',
+                                        },
+                                    },
+                                    y: {
+                                        grid: {
+                                            display: false,
+                                        },
+                                    },
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return context.formattedValue + '%';
+                                            },
+                                        },
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'bottom',
+                                    },
+                                },
+                            },
+                        });
+                    }
+                }
+
+                // Initialize chart with currently selected threshold
+                if (checkedRadio) {
+                    updateDistributionChart(parseInt(checkedRadio.value));
+                }
+
+                // Update chart when threshold changes
+                radios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        updateCardHeights(parseInt(this.value));
+                        updateDistributionChart(parseInt(this.value));
+                    });
+                });
+            } else {
+                // If no chart canvas, still update card heights
+                radios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        updateCardHeights(parseInt(this.value));
+                    });
+                });
+            }
         });
     </script>
 {% endblock dashboard_content %}

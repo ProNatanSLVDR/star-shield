@@ -2,8 +2,6 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from frontend.dashboard.render import starshield_render
 from frontend.reviews.utils import build_feedback_context
-from frontend.reviews.models import Review
-from auths.models import RatingHistory
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
