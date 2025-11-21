@@ -48,7 +48,7 @@ def settings_view(request):
 
 @google_gmb_connected_required
 @selected_etablissement_required
-def reviews_settings_view(request):
+def personalisation_settings_view(request):
     etablissement = request.etablissement
 
     if request.method == "POST":
@@ -60,7 +60,7 @@ def reviews_settings_view(request):
             etablissement.review_page_text = form.cleaned_data.get("review_page_text", "")
             etablissement.save()
 
-            messages.success(request, "Paramètres de la page de feedback mis à jour avec succès.")
+            messages.success(request, "Personalisation mise à jour avec succès.")
             return redirect("dashboard:etablissement:settings:reviews")
     else:
         form = ReviewSettingsForm(
@@ -86,7 +86,7 @@ def reviews_settings_view(request):
         request,
         "etablissement/settings/reviews.html",
         context=context,
-        page_name="etablissement_settings",
+        page_name="personalisation",
     )
 
 
@@ -132,5 +132,5 @@ def threshold_settings_view(request):
         request,
         "etablissement/settings/threshold.html",
         context=context,
-        page_name="etablissement_settings",
+        page_name="seuil_et_objectif",
     )

@@ -62,10 +62,17 @@
     current_page=current_page / %}
 
     {% component "navlink"
-    link="dashboard:etablissement:settings:settings"
-    icon="fa-solid fa-gear"
-    text="Paramètres"
-    page_name="etablissement_settings"
+    link="dashboard:etablissement:settings:threshold"
+    icon="fa-solid fa-calculator"
+    text="Seuil et Objectif"
+    page_name="seuil_et_objectif"
+    current_page=current_page / %}
+
+    {% component "navlink"
+    link="dashboard:etablissement:settings:reviews"
+    icon="fa-solid fa-palette"
+    text="Personalisation"
+    page_name="personalisation"
     current_page=current_page / %}
 
     {% component "navlink"
