@@ -1,5 +1,6 @@
 {% extends "dashboard_base.html" %}
 {% load static %}
+{% load filters %}
 
 {% block dashboard_content %}
 
@@ -158,37 +159,35 @@
 
                                 <!-- Review Content -->
                                 <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h6 class="mb-0 fw-semibold">
-                                                {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.displayName %}
-                                                    {{ review.google_reviewer_data.displayName }}
-                                                {% else %}
-                                                    Anonyme
-                                                {% endif %}
-                                            </h6>
-                                            <div class="d-flex align-items-center gap-1 mt-1">
-                                                {% for i in "12345"|make_list %}
-                                                    {% if forloop.counter <= review.rating %}
-                                                        <i class="fa-solid fa-star text-warning" style="font-size: 0.875rem;"></i>
-                                                    {% else %}
-                                                        <i class="fa-solid fa-star" style="font-size: 0.875rem; color: #e3e9ed;"></i>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.75rem;">
+                                    <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
+                                        <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
                                             {% if review.source == 'google' %}
-                                                <i class="fa-brands fa-google"></i> Google
+                                                <i class="fa-brands fa-google" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Google</span>
                                             {% else %}
-                                                <i class="fa-solid fa-lock"></i> Interne
+                                                <i class="fa-solid fa-lock" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Interne</span>
                                             {% endif %}
                                         </span>
+                                        <h6 class="mb-0 fw-semibold" style="font-size: 0.95rem;">
+                                            {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.displayName %}
+                                                {{ review.google_reviewer_data.displayName }}
+                                            {% else %}
+                                                Anonyme
+                                            {% endif %}
+                                        </h6>
+                                        <div class="d-flex align-items-center gap-0">
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i class="fa-solid fa-star text-warning" style="font-size: 0.75rem;"></i>
+                                                {% else %}
+                                                    <i class="fa-solid fa-star" style="font-size: 0.75rem; color: #e3e9ed;"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
                                     </div>
 
                                     {% if review.comment %}
                                         <p class="mb-2 text-body-secondary" style="line-height: 1.5;">
-                                            {{ review.comment }}
+                                            {{ review.comment|after_original }}
                                         </p>
                                     {% else %}
                                         <p class="mb-2 text-muted small">

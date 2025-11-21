@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
+from django.db.models import Q, Count, Case, When, IntegerField
 from datetime import timedelta, datetime
 import json
 from frontend.reviews.models import Review, ReviewAnalytics
@@ -204,14 +204,29 @@ def avis_view(request):
     except (ValueError, TypeError, PageNotAnInteger, EmptyPage):
         page_obj = paginator.page(1)
 
-    # Get filter counts for UI
-    total_reviews = Review.objects.filter(etablissement=etablissement).count()
-    google_reviews_count = Review.objects.filter(etablissement=etablissement, source="google").count()
-    internal_reviews_count = Review.objects.filter(etablissement=etablissement, source="internal").count()
+    # Get filter counts for UI - single query using aggregation
+    base_queryset = Review.objects.filter(etablissement=etablissement)
+    counts = base_queryset.aggregate(
+        total_reviews=Count("id"),
+        google_reviews_count=Count(Case(When(source="google", then=1), output_field=IntegerField())),
+        internal_reviews_count=Count(Case(When(source="internal", then=1), output_field=IntegerField())),
+        rating_1_count=Count(Case(When(rating=1, then=1), output_field=IntegerField())),
+        rating_2_count=Count(Case(When(rating=2, then=1), output_field=IntegerField())),
+        rating_3_count=Count(Case(When(rating=3, then=1), output_field=IntegerField())),
+        rating_4_count=Count(Case(When(rating=4, then=1), output_field=IntegerField())),
+        rating_5_count=Count(Case(When(rating=5, then=1), output_field=IntegerField())),
+    )
 
-    rating_counts = {}
-    for rating in range(1, 6):
-        rating_counts[rating] = Review.objects.filter(etablissement=etablissement, rating=rating).count()
+    total_reviews = counts["total_reviews"]
+    google_reviews_count = counts["google_reviews_count"]
+    internal_reviews_count = counts["internal_reviews_count"]
+    rating_counts = {
+        1: counts["rating_1_count"],
+        2: counts["rating_2_count"],
+        3: counts["rating_3_count"],
+        4: counts["rating_4_count"],
+        5: counts["rating_5_count"],
+    }
 
     context = {
         "etablissement": etablissement,
