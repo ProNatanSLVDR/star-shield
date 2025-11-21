@@ -1,6 +1,8 @@
 from django.urls import reverse
 from django.utils import timezone
-from datetime import timedelta
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+from datetime import timedelta, datetime
 import json
 from frontend.reviews.models import Review, ReviewAnalytics
 from frontend.dashboard.render import starshield_render
@@ -114,4 +116,105 @@ def overview_view(request):
         "etablissement/overview.html",
         context=context,
         page_name="etablissement",
+    )
+
+
+@google_gmb_connected_required
+@selected_etablissement_required
+def avis_view(request):
+    etablissement = request.etablissement
+
+    # Get query parameters
+    source_filter = request.GET.get("source", "all")
+    rating_filter = request.GET.get("rating", "all")
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    order_by = request.GET.get("order_by", "date")
+    order_dir = request.GET.get("order_dir", "desc")
+    page_number = request.GET.get("page", 1)
+
+    # Start with base queryset
+    reviews_queryset = Review.objects.filter(etablissement=etablissement)
+
+    # Apply source filter
+    if source_filter != "all":
+        reviews_queryset = reviews_queryset.filter(source=source_filter)
+
+    # Apply rating filter
+    if rating_filter != "all":
+        try:
+            rating_value = int(rating_filter)
+            if 1 <= rating_value <= 5:
+                reviews_queryset = reviews_queryset.filter(rating=rating_value)
+        except ValueError:
+            pass
+
+    # Apply date filter
+    if date_from:
+        try:
+            date_from_obj = datetime.strptime(date_from, "%Y-%m-%d").date()
+            date_from_dt = timezone.make_aware(datetime.combine(date_from_obj, datetime.min.time()))
+            reviews_queryset = reviews_queryset.filter(Q(writen_at__gte=date_from_dt) | (Q(writen_at__isnull=True) & Q(created_at__gte=date_from_dt)))
+        except ValueError:
+            pass
+
+    if date_to:
+        try:
+            date_to_obj = datetime.strptime(date_to, "%Y-%m-%d").date()
+            date_to_dt = timezone.make_aware(datetime.combine(date_to_obj, datetime.max.time()))
+            reviews_queryset = reviews_queryset.filter(Q(writen_at__lte=date_to_dt) | (Q(writen_at__isnull=True) & Q(created_at__lte=date_to_dt)))
+        except ValueError:
+            pass
+
+    # Apply sorting
+    if order_by == "rating":
+        if order_dir == "asc":
+            reviews_queryset = reviews_queryset.order_by("rating", "-writen_at", "-created_at")
+        else:
+            reviews_queryset = reviews_queryset.order_by("-rating", "-writen_at", "-created_at")
+    else:  # order_by == "date"
+        if order_dir == "asc":
+            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by("sort_date")
+        else:
+            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by("-sort_date")
+
+    # Pagination
+    paginator = Paginator(reviews_queryset, 20)
+    try:
+        page_number = int(page_number)
+        page_obj = paginator.page(page_number)
+    except (ValueError, TypeError, PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
+
+    # Get filter counts for UI
+    total_reviews = Review.objects.filter(etablissement=etablissement).count()
+    google_reviews_count = Review.objects.filter(etablissement=etablissement, source="google").count()
+    internal_reviews_count = Review.objects.filter(etablissement=etablissement, source="internal").count()
+
+    rating_counts = {}
+    for rating in range(1, 6):
+        rating_counts[rating] = Review.objects.filter(etablissement=etablissement, rating=rating).count()
+
+    context = {
+        "etablissement": etablissement,
+        "reviews": page_obj,
+        "total_reviews": total_reviews,
+        "google_reviews_count": google_reviews_count,
+        "internal_reviews_count": internal_reviews_count,
+        "rating_counts": rating_counts,
+        "filters": {
+            "source": source_filter,
+            "rating": rating_filter,
+            "date_from": date_from,
+            "date_to": date_to,
+            "order_by": order_by,
+            "order_dir": order_dir,
+        },
+    }
+
+    return starshield_render(
+        request,
+        "etablissement/avis.html",
+        context=context,
+        page_name="avis",
     )

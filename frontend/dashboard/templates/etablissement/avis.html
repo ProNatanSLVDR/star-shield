@@ -1,0 +1,315 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+
+    <div class="w-100 pb-3">
+        <div class="rounded-4 border bg-white shadow-sm p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-lg-7">
+                    <h1 class="h5 fw-bold text-body-emphasis mb-1">Avis</h1>
+                    <p class="text-muted mb-0 small">Consultez et filtrez tous les avis de votre établissement.</p>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="d-flex flex-column flex-lg-row flex-wrap gap-2 justify-content-lg-end align-items-lg-center">
+                        <div class="text-muted small">
+                            <i class="fa-solid fa-star"></i> {{ total_reviews }} avis au total
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="w-100 pb-3">
+        <div class="rounded-4 border bg-white shadow-sm p-3">
+            <form method="get" action="{% url 'dashboard:etablissement:avis' %}" id="filterForm">
+                <div class="row g-3">
+                    <!-- Source Filter Column -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label small fw-semibold mb-2 text-muted">Source</label>
+                        <div class="d-flex flex-column gap-1">
+                            <button type="button" class="btn btn-sm rounded-pill filter-source-btn {% if filters.source == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-source="all" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                                <i class="fa-solid fa-list"></i> Tous
+                            </button>
+                            <button type="button" class="btn btn-sm rounded-pill filter-source-btn {% if filters.source == 'google' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-source="google" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                                <i class="fa-brands fa-google"></i> Google ({{ google_reviews_count }})
+                            </button>
+                            <button type="button" class="btn btn-sm rounded-pill filter-source-btn {% if filters.source == 'internal' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-source="internal" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                                <i class="fa-solid fa-lock"></i> Internes ({{ internal_reviews_count }})
+                            </button>
+                        </div>
+                        <input type="hidden" name="source" id="sourceInput" value="{{ filters.source }}">
+                    </div>
+
+                    <!-- Rating Filter Column -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label small fw-semibold mb-2 text-muted">Note</label>
+                        <div class="d-flex flex-column gap-1">
+                            <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="all" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                                Toutes
+                            </button>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '5' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="5" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                    5<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.5 }})</span>
+                                </button>
+                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '4' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="4" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                    4<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.4 }})</span>
+                                </button>
+                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '3' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="3" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                    3<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.3 }})</span>
+                                </button>
+                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '2' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="2" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                    2<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.2 }})</span>
+                                </button>
+                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '1' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="1" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                    1<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.1 }})</span>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="{{ filters.rating }}">
+                    </div>
+
+                    <!-- Date Range Filter Column -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label small fw-semibold mb-2 text-muted">Période</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                                    <input type="date" class="form-control form-control-sm" name="date_from" id="dateFromInput" value="{{ filters.date_from }}">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                                    <input type="date" class="form-control form-control-sm" name="date_to" id="dateToInput" value="{{ filters.date_to }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sort Options Column -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label small fw-semibold mb-2 text-muted">Tri</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fa-solid fa-sort"></i></span>
+                                    <select class="form-select form-select-sm" name="order_by" id="orderByInput">
+                                        <option value="date" {% if filters.order_by == 'date' %}selected{% endif %}>Date</option>
+                                        <option value="rating" {% if filters.order_by == 'rating' %}selected{% endif %}>Note</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fa-solid fa-arrow-up-wide-short"></i></span>
+                                    <select class="form-select form-select-sm" name="order_dir" id="orderDirInput">
+                                        <option value="desc" {% if filters.order_dir == 'desc' %}selected{% endif %}>Décroissant</option>
+                                        <option value="asc" {% if filters.order_dir == 'asc' %}selected{% endif %}>Croissant</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preserve other filters when submitting -->
+                <input type="hidden" name="page" value="1">
+            </form>
+        </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="w-100 pb-3">
+        <div class="rounded-4 border bg-white shadow-sm p-3">
+            {% if reviews.paginator.count > 0 %}
+                <div class="d-flex flex-column gap-3">
+                    {% for review in reviews %}
+                        <div class="border rounded-3 p-3 bg-white">
+                            <div class="d-flex align-items-start gap-3">
+                                <!-- Profile Picture / Avatar -->
+                                <div class="flex-shrink-0">
+                                    {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.profilePhotoUri %}
+                                        <img src="{{ review.google_reviewer_data.profilePhotoUri }}"
+                                             alt="Profile"
+                                             class="rounded-circle"
+                                             style="width: 48px; height: 48px; object-fit: cover;"
+                                             onerror="this.onerror=null; this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; display: none;">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    {% elif review.source == 'google' %}
+                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary-subtle text-secondary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-user-secret"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Review Content -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-0 fw-semibold">
+                                                {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.displayName %}
+                                                    {{ review.google_reviewer_data.displayName }}
+                                                {% else %}
+                                                    Anonyme
+                                                {% endif %}
+                                            </h6>
+                                            <div class="d-flex align-items-center gap-1 mt-1">
+                                                {% for i in "12345"|make_list %}
+                                                    {% if forloop.counter <= review.rating %}
+                                                        <i class="fa-solid fa-star text-warning" style="font-size: 0.875rem;"></i>
+                                                    {% else %}
+                                                        <i class="fa-solid fa-star" style="font-size: 0.875rem; color: #e3e9ed;"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.75rem;">
+                                            {% if review.source == 'google' %}
+                                                <i class="fa-brands fa-google"></i> Google
+                                            {% else %}
+                                                <i class="fa-solid fa-lock"></i> Interne
+                                            {% endif %}
+                                        </span>
+                                    </div>
+
+                                    {% if review.comment %}
+                                        <p class="mb-2 text-body-secondary" style="line-height: 1.5;">
+                                            {{ review.comment }}
+                                        </p>
+                                    {% else %}
+                                        <p class="mb-2 text-muted small">
+                                            Aucun commentaire
+                                        </p>
+                                    {% endif %}
+
+                                    <p class="mb-0 small text-muted">
+                                        <i class="fa-solid fa-clock"></i>
+                                        {% if review.writen_at %}
+                                            {{ review.writen_at|date:"d F Y à H:i" }}
+                                        {% else %}
+                                            {{ review.created_at|date:"d F Y à H:i" }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if reviews.has_other_pages %}
+                    <nav aria-label="Pagination des avis" class="mt-4">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if reviews.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
+                                        <i class="fa-solid fa-chevron-left"></i> Précédent
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fa-solid fa-chevron-left"></i> Précédent</span>
+                                </li>
+                            {% endif %}
+
+                            {% for num in reviews.paginator.page_range %}
+                                {% if reviews.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > reviews.number|add:'-3' and num < reviews.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if reviews.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
+                                        Suivant <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Suivant <i class="fa-solid fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+                <!-- Results Info -->
+                <div class="text-center mt-3">
+                    <p class="text-muted small mb-0">
+                        Affichage de {{ reviews.start_index }} à {{ reviews.end_index }} sur {{ reviews.paginator.count }} avis
+                    </p>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-comments text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="text-muted mt-3 mb-0">Aucun avis trouvé avec les filtres sélectionnés.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Handle filter button clicks
+        document.addEventListener('DOMContentLoaded', function() {
+            // Source filter buttons
+            document.querySelectorAll('.filter-source-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-source-btn').forEach(b => {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-outline-secondary');
+                    });
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-primary');
+                    document.getElementById('sourceInput').value = this.dataset.source;
+                    document.getElementById('filterForm').submit();
+                });
+            });
+
+            // Rating filter buttons
+            document.querySelectorAll('.filter-rating-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-rating-btn').forEach(b => {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-outline-secondary');
+                    });
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-primary');
+                    document.getElementById('ratingInput').value = this.dataset.rating;
+                    document.getElementById('filterForm').submit();
+                });
+            });
+
+            // Date inputs and select changes
+            document.getElementById('dateFromInput').addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+            document.getElementById('dateToInput').addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+            document.getElementById('orderByInput').addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+            document.getElementById('orderDirInput').addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+        });
+    </script>
+
+{% endblock dashboard_content %}
+
