@@ -133,6 +133,24 @@ def avis_view(request):
     order_dir = request.GET.get("order_dir", "desc")
     page_number = request.GET.get("page", 1)
 
+    # Get oldest and newest review dates for default values
+    # Only set defaults if dates weren't explicitly provided in query params
+    all_reviews = Review.objects.filter(etablissement=etablissement)
+
+    if "date_from" not in request.GET:
+        oldest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("review_date").first()
+        if oldest_review:
+            review_date = oldest_review.writen_at or oldest_review.created_at
+            if review_date:
+                date_from = review_date.date().strftime("%Y-%m-%d")
+
+    if "date_to" not in request.GET:
+        newest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("-review_date").first()
+        if newest_review:
+            review_date = newest_review.writen_at or newest_review.created_at
+            if review_date:
+                date_to = review_date.date().strftime("%Y-%m-%d")
+
     # Start with base queryset
     reviews_queryset = Review.objects.filter(etablissement=etablissement)
 
