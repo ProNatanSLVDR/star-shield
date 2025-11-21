@@ -12,11 +12,10 @@ def after_original(value):
     """
     if not value:
         return value
-    
+
     if "(Original)" in value:
         parts = value.split("(Original)", 1)
         if len(parts) > 1:
             return parts[1].strip()
-    
-    return value
 
+    return value
