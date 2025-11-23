@@ -199,6 +199,3 @@ def estimations(note_actuelle: float, nb_notes: int, objectif: float, notes_par_
                 break
 
     return results
-
-
-print(estimations(note_actuelle=3.2, nb_notes=120, objectif=4.7, notes_par_semaine=20))

@@ -49,3 +49,22 @@ class ThresholdObjectiveForm(forms.Form):
         required=False,
         validators=[MinValueValidator(0), MaxValueValidator(5)],
     )
+
+
+class QRCodeSettingsForm(forms.Form):
+    qr_fill_color = forms.CharField(
+        max_length=7,
+        required=True,
+    )
+    qr_background_color = forms.CharField(
+        max_length=7,
+        required=True,
+    )
+    qr_style = forms.ChoiceField(
+        choices=[("square", "Carré"), ("rounded", "Arrondi")],
+        required=True,
+    )
+    qr_logo = forms.ImageField(
+        required=False,
+        help_text="Logo à afficher au centre du QR code.",
+    )

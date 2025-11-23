@@ -1,17 +1,103 @@
+import io
+
 import qrcode
-import qrcode.image.svg
+from PIL import Image, ImageDraw
+from qrcode.image.styles.moduledrawers import SquareModuleDrawer, GappedSquareModuleDrawer, RoundedModuleDrawer, CircleModuleDrawer
+from qrcode.image.styles.colormasks import SolidFillColorMask, RadialGradiantColorMask, SquareGradiantColorMask, HorizontalGradiantColorMask, VerticalGradiantColorMask
+from qrcode.image.styledpil import StyledPilImage
 
 
-def generate_qrcode(link: str, size: int = 30,):
+def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
+    """Convert hex color string to RGB tuple."""
+    hex_color = hex_color.lstrip("#")
+    return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
 
+
+def draw_rounded_rectangle(draw, bbox, radius, fill):
+    """Draw a rounded rectangle."""
+    left, top, right, bottom = bbox
+    draw.rectangle([left + radius, top, right - radius, bottom], fill=fill)
+    draw.rectangle([left, top + radius, right, bottom - radius], fill=fill)
+    draw.pieslice([left, top, left + 2 * radius, top + 2 * radius], 180, 270, fill=fill)
+    draw.pieslice([right - 2 * radius, top, right, top + 2 * radius], 270, 360, fill=fill)
+    draw.pieslice([left, bottom - 2 * radius, left + 2 * radius, bottom], 90, 180, fill=fill)
+    draw.pieslice([right - 2 * radius, bottom - 2 * radius, right, bottom], 0, 90, fill=fill)
+
+
+def generate_qrcode_png(
+    link: str,
+    fill_color: str = "#000000",
+    fill_color_secondary: str = "#000000",
+    background_color: str = "#FFFFFF",
+    style: str = "square",
+    color_mask: str = "solid",
+    logo_file=None,
+    box_size: int = 10,
+    border: int = 4,
+) -> bytes:
+    """
+    Generate a PNG QR code image with customization options.
+
+    Args:
+        link: The URL/data to encode in the QR code
+        fill_color: Hex color for QR code modules (default: "#000000")
+        background_color: Hex color for background (default: "#FFFFFF")
+        style: "square" or "rounded" (default: "square")
+        logo_file: Optional file-like object or path to logo image file
+        box_size: Size of each QR code module in pixels (default: 10)
+        border: Border size in modules (default: 4)
+
+    Returns:
+        bytes: PNG image data
+    """
+
+    color_f = hex_to_rgb(fill_color)
+    color_f_sec = hex_to_rgb(fill_color_secondary)
+    color_bg = hex_to_rgb(background_color)
+
+    module_drawer_map = {
+        "square": SquareModuleDrawer(),
+        "square_spaced": GappedSquareModuleDrawer(),
+        "rounded": RoundedModuleDrawer(),
+        "circle": CircleModuleDrawer(),
+    }
+
+    color_mask_map = {
+        "solid": SolidFillColorMask(back_color=color_bg, front_color=color_f),
+        "round_radial": RadialGradiantColorMask(back_color=color_bg, center_color=color_f_sec, edge_color=color_f),
+        "square_radial": SquareGradiantColorMask(back_color=color_bg, center_color=color_f_sec, edge_color=color_f),
+        "horizontal_gradiant": HorizontalGradiantColorMask(back_color=color_bg, left_color=color_f_sec, right_color=color_f),
+        "vertical_gradiant": VerticalGradiantColorMask(back_color=color_bg, top_color=color_f_sec, bottom_color=color_f),
+    }
+
+    # Create QR code
     qr = qrcode.QRCode(
         version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=size,
-        border=4,
-        image_factory=qrcode.image.svg.SvgPathFillImage,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,  # Higher error correction for logo
+        box_size=box_size,
+        border=border,
     )
     qr.add_data(link)
     qr.make(fit=True)
-    image = qr.make_image(fill_color="black", back_color="white")
-    return image.to_string(encoding='unicode')
+
+    # Create QR code with square modules first
+    img = qr.make_image(
+        embeded_image=logo_file if logo_file else None,
+        color_mask=color_mask_map[color_mask],
+        module_drawer=module_drawer_map[style],
+        image_factory=StyledPilImage,
+    )
+    img = img.convert("RGBA")
+
+    # Convert to RGB if no transparency needed
+    if img.mode == "RGBA" and not logo_file:
+        rgb_img = Image.new("RGB", img.size, color_bg)
+        rgb_img.paste(img, mask=img.split()[3] if img.mode == "RGBA" else None)
+        img = rgb_img
+
+    # Save to bytes
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format="PNG")
+    img_bytes.seek(0)
+
+    return img_bytes.getvalue()

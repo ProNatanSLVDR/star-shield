@@ -1,0 +1,298 @@
+{% extends "dashboard_base.html" %}
+{% load i18n %}
+
+{% block dashboard_content %}
+    <div class="d-flex flex-column h-100">
+        <div class="mb-4">
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                <i class="fa-solid fa-qrcode me-2"></i>
+                QR Code
+            </h1>
+            <p class="text-muted mb-0 small">Personnalisez et téléchargez votre QR code pour collecter des avis.</p>
+        </div>
+
+        <div class="row g-3 flex-grow-1">
+            <!-- Settings Form -->
+            <div class="col-lg-6 d-flex flex-column">
+                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden">
+                    <div class="card-header bg-white border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0">
+                            <i class="fa-solid fa-gear me-2"></i>
+                            Configuration
+                        </h2>
+                    </div>
+                    <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
+                        <form method="post" enctype="multipart/form-data" id="qrCodeSettingsForm">
+                            {% csrf_token %}
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-4">
+                                <label for="qr_fill_color" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-palette me-2"></i>
+                                    Couleur de remplissage
+                                </label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="color"
+                                           class="form-control"
+                                           id="qr_fill_color"
+                                           name="qr_fill_color"
+                                           value="{{ form.qr_fill_color.value|default:etablissement.qr_fill_color }}"
+                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                    <input type="text"
+                                           class="form-control"
+                                           id="fillColorText"
+                                           value="{{ form.qr_fill_color.value|default:etablissement.qr_fill_color }}"
+                                           pattern="^#[0-9A-Fa-f]{6}$"
+                                           placeholder="#000000"
+                                           style="max-width: 150px;">
+                                </div>
+                                <div class="form-text">Couleur des modules du QR code (format hexadécimal, ex: #000000).</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="qr_background_color" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-palette me-2"></i>
+                                    Couleur de fond
+                                </label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="color"
+                                           class="form-control"
+                                           id="qr_background_color"
+                                           name="qr_background_color"
+                                           value="{{ form.qr_background_color.value|default:etablissement.qr_background_color }}"
+                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                    <input type="text"
+                                           class="form-control"
+                                           id="backgroundColorText"
+                                           value="{{ form.qr_background_color.value|default:etablissement.qr_background_color }}"
+                                           pattern="^#[0-9A-Fa-f]{6}$"
+                                           placeholder="#FFFFFF"
+                                           style="max-width: 150px;">
+                                </div>
+                                <div class="form-text">Couleur de fond du QR code (format hexadécimal, ex: #FFFFFF).</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="qr_style" class="form-label fw-semibold d-block mb-2">
+                                    <i class="fa-solid fa-shapes me-2"></i>
+                                    Style
+                                </label>
+                                <select class="form-select"
+                                        id="qr_style"
+                                        name="qr_style">
+                                    <option value="square" {% if form.qr_style.value|default:etablissement.qr_style == "square" %}selected{% endif %}>Carré</option>
+                                    <option value="rounded" {% if form.qr_style.value|default:etablissement.qr_style == "rounded" %}selected{% endif %}>Arrondi</option>
+                                </select>
+                                <div class="form-text">Style des modules du QR code.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="qr_logo" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-image me-2"></i>
+                                    Logo
+                                </label>
+                                <div class="input-group">
+                                    <input type="file"
+                                           class="form-control"
+                                           id="qr_logo"
+                                           name="qr_logo"
+                                           accept="image/*">
+                                    {% if etablissement.qr_logo %}
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                id="deleteLogoBtn"
+                                                title="Supprimer le logo">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <div class="form-text">Logo à afficher au centre du QR code (optionnel).</div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-secondary" id="resetToDefaultsBtn">
+                                    <i class="fa-solid fa-rotate-left me-2"></i>
+                                    Réinitialiser aux valeurs par défaut
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-save me-2"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
+                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden" style="min-height: 0;">
+                    <div class="card-header bg-white border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0">
+                            <i class="fa-solid fa-eye me-2"></i>
+                            Aperçu
+                        </h2>
+                    </div>
+                    <div class="card-body p-4 flex-grow-1 overflow-auto d-flex align-items-center justify-content-center" style="min-height: 0;">
+                        <div class="text-center">
+                            <img id="qrCodePreview"
+                                 src="{{ qr_code_url }}"
+                                 alt="QR Code Preview"
+                                 class="img-fluid shadow-sm rounded"
+                                 style="max-width: 400px; max-height: 400px;">
+                            <div class="mt-3">
+                                <a href="{{ qr_code_url }}"
+                                   download="qr-code-{{ etablissement.title|slugify }}.png"
+                                   class="btn btn-primary">
+                                    <i class="fa-solid fa-download me-2"></i>
+                                    Télécharger le QR code
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const fillColorInput = document.getElementById("qr_fill_color");
+            const fillColorTextInput = document.getElementById("fillColorText");
+            const backgroundColorInput = document.getElementById("qr_background_color");
+            const backgroundColorTextInput = document.getElementById("backgroundColorText");
+            const styleSelect = document.getElementById("qr_style");
+            const form = document.getElementById("qrCodeSettingsForm");
+            const resetBtn = document.getElementById("resetToDefaultsBtn");
+            const qrCodePreview = document.getElementById("qrCodePreview");
+            const deleteLogoBtn = document.getElementById("deleteLogoBtn");
+
+            // Sync color pickers with text inputs
+            if (fillColorInput && fillColorTextInput) {
+                fillColorInput.addEventListener("input", function() {
+                    fillColorTextInput.value = this.value;
+                    updatePreview();
+                });
+
+                fillColorTextInput.addEventListener("input", function() {
+                    const value = this.value;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                        fillColorInput.value = value;
+                        updatePreview();
+                    }
+                });
+            }
+
+            if (backgroundColorInput && backgroundColorTextInput) {
+                backgroundColorInput.addEventListener("input", function() {
+                    backgroundColorTextInput.value = this.value;
+                    updatePreview();
+                });
+
+                backgroundColorTextInput.addEventListener("input", function() {
+                    const value = this.value;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                        backgroundColorInput.value = value;
+                        updatePreview();
+                    }
+                });
+            }
+
+            // Update preview when style changes
+            if (styleSelect) {
+                styleSelect.addEventListener("change", function() {
+                    updatePreview();
+                });
+            }
+
+            // Update preview function
+            function updatePreview() {
+                const fillColor = fillColorInput ? fillColorInput.value : "#000000";
+                const backgroundColor = backgroundColorInput ? backgroundColorInput.value : "#FFFFFF";
+                const style = styleSelect ? styleSelect.value : "square";
+
+                // Update preview with query parameters for real-time preview
+                const baseUrl = "{{ qr_code_url }}";
+                const params = new URLSearchParams({
+                    fill_color: fillColor,
+                    background_color: backgroundColor,
+                    style: style
+                });
+                qrCodePreview.src = baseUrl + "?" + params.toString();
+            }
+
+            // Reset to defaults functionality
+            if (resetBtn) {
+                resetBtn.addEventListener("click", function() {
+                    const defaultFillColor = "#000000";
+                    const defaultBackgroundColor = "#FFFFFF";
+
+                    if (fillColorInput) {
+                        fillColorInput.value = defaultFillColor;
+                    }
+                    if (fillColorTextInput) {
+                        fillColorTextInput.value = defaultFillColor;
+                    }
+                    if (backgroundColorInput) {
+                        backgroundColorInput.value = defaultBackgroundColor;
+                    }
+                    if (backgroundColorTextInput) {
+                        backgroundColorTextInput.value = defaultBackgroundColor;
+                    }
+                    if (styleSelect) {
+                        styleSelect.value = "square";
+                    }
+
+                    updatePreview();
+                });
+            }
+
+            // Update preview on form changes (for real-time preview)
+            if (form) {
+                form.addEventListener("input", function() {
+                    updatePreview();
+                });
+            }
+
+            // Handle logo delete button
+            if (deleteLogoBtn) {
+                deleteLogoBtn.addEventListener("click", function() {
+                    if (confirm("Êtes-vous sûr de vouloir supprimer le logo ?")) {
+                        // Create a hidden form to submit delete request
+                        const deleteForm = document.createElement("form");
+                        deleteForm.method = "POST";
+                        deleteForm.action = "{% url 'dashboard:etablissement:settings:qrcode' %}";
+
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                        if (csrfToken) {
+                            const csrfInput = document.createElement("input");
+                            csrfInput.type = "hidden";
+                            csrfInput.name = "csrfmiddlewaretoken";
+                            csrfInput.value = csrfToken.value;
+                            deleteForm.appendChild(csrfInput);
+                        }
+
+                        const deleteInput = document.createElement("input");
+                        deleteInput.type = "hidden";
+                        deleteInput.name = "delete_logo";
+                        deleteInput.value = "1";
+                        deleteForm.appendChild(deleteInput);
+
+                        document.body.appendChild(deleteForm);
+                        deleteForm.submit();
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock dashboard_content %}
+

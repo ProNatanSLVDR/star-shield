@@ -2,6 +2,7 @@ import logging
 from django.contrib.admin.sites import login_not_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.http import HttpResponse
 from .models import ReviewAnalytics, Review
 from .forms import FeedbackForm
 from .utils import (
@@ -10,6 +11,7 @@ from .utils import (
     get_valid_session_key,
     set_valid_session_key,
 )
+from utils.qrcodes import generate_qrcode_png
 
 logger = logging.getLogger(__name__)
 
@@ -135,3 +137,54 @@ def feedback_thanks_view(request, identifier=None):
         "reviews/feedback_base.html",
         context=context,
     )
+
+
+@login_not_required
+def qr_code_image_view(request, identifier=None):
+    """Generate and return QR code image as PNG."""
+    etablissement = get_etablissement_by_identifier(identifier)
+
+    # Build the feedback URL
+    feedback_url = request.build_absolute_uri(reverse("reviews:feedback", args=[identifier]))
+
+    # Get customization parameters from query string (for preview) or database
+    fill_color = request.GET.get("fill_color") or etablissement.qr_fill_color or "#000000"
+    background_color = request.GET.get("background_color") or etablissement.qr_background_color or "#FFFFFF"
+    style = request.GET.get("style") or etablissement.qr_style or "square"
+
+    # Get logo file if exists (using Django's .open() which works for both local and cloud storage)
+    logo_file = None
+    if etablissement.qr_logo:
+        try:
+            logo_file = etablissement.qr_logo.open()
+        except Exception as e:
+            logger.debug(f"Could not open QR logo file for etablissement {etablissement.id}: {e}")
+            logo_file = None
+
+    # Generate QR code PNG
+    try:
+        qr_image_bytes = generate_qrcode_png(
+            link=feedback_url,
+            fill_color=fill_color,
+            background_color=background_color,
+            style=style,
+            logo_file=logo_file,
+        )
+
+        response = HttpResponse(qr_image_bytes, content_type="image/png")
+        return response
+    except Exception as e:
+        logger.error(f"Error generating QR code for etablissement {etablissement.id}: {e}", exc_info=True)
+        # Return a simple error response or default QR code
+        try:
+            qr_image_bytes = generate_qrcode_png(
+                link=feedback_url,
+                fill_color="#000000",
+                background_color="#FFFFFF",
+                style="square",
+            )
+            response = HttpResponse(qr_image_bytes, content_type="image/png")
+            return response
+        except Exception:
+            # If even default fails, return 500
+            return HttpResponse("Error generating QR code", status=500)

@@ -301,6 +301,30 @@ class Etablissement(models.Model):
         help_text="Afficher ou masquer le badge avec le nom de l'établissement.",
     )
 
+    # QR code settings
+    qr_fill_color = models.CharField(
+        max_length=7,
+        default="#000000",
+        help_text="Couleur de remplissage du QR code (format hexadécimal).",
+    )
+    qr_background_color = models.CharField(
+        max_length=7,
+        default="#FFFFFF",
+        help_text="Couleur de fond du QR code (format hexadécimal).",
+    )
+    qr_style = models.CharField(
+        max_length=10,
+        choices=[("square", "Carré"), ("rounded", "Arrondi")],
+        default="square",
+        help_text="Style du QR code (carré ou arrondi).",
+    )
+    qr_logo = models.ImageField(
+        upload_to="qr_logos/",
+        blank=True,
+        null=True,
+        help_text="Logo à afficher au centre du QR code.",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_reviews_update = models.DateTimeField(blank=True, null=True)
@@ -344,5 +368,28 @@ def delete_old_profile_picture(sender, instance, **kwargs):
         except Exception as e:
             logger.error(
                 f"Error deleting old profile picture for user {instance.pk}: {e}",
+                exc_info=True,
+            )
+
+
+@receiver(pre_save, sender=Etablissement)
+def delete_old_qr_logo(sender, instance, **kwargs):
+    """
+    Signal handler to delete old QR logo from storage when a new one is uploaded.
+    """
+    if instance.pk:
+        try:
+            old_instance = Etablissement.objects.get(pk=instance.pk)
+            if old_instance.qr_logo and old_instance.qr_logo != instance.qr_logo:
+                if old_instance.qr_logo.name:
+                    try:
+                        old_instance.qr_logo.delete(save=False)
+                    except Exception as e:
+                        logger.warning(f"Failed to delete old QR logo for etablissement {instance.pk}: {e}")
+        except Etablissement.DoesNotExist:
+            pass
+        except Exception as e:
+            logger.error(
+                f"Error deleting old QR logo for etablissement {instance.pk}: {e}",
                 exc_info=True,
             )
