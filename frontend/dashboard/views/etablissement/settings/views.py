@@ -84,7 +84,7 @@ def personalisation_settings_view(request):
 
     return starshield_render(
         request,
-        "etablissement/settings/reviews.html",
+        "etablissement/settings/personalisation.html",
         context=context,
         page_name="personalisation",
     )
