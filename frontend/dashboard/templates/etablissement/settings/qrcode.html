@@ -36,78 +36,83 @@
                             {% endif %}
 
                             <div class="mb-4">
-                                <label for="qr_fill_color" class="form-label fw-semibold">
+                                <label class="form-label fw-semibold mb-3">
                                     <i class="fa-solid fa-palette me-2"></i>
-                                    Couleur de remplissage
+                                    Couleurs
                                 </label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="color"
-                                           class="form-control"
-                                           id="qr_fill_color"
-                                           name="qr_fill_color"
-                                           value="{{ form.qr_fill_color.value|default:etablissement.qr_fill_color }}"
-                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
-                                    <input type="text"
-                                           class="form-control"
-                                           id="fillColorText"
-                                           value="{{ form.qr_fill_color.value|default:etablissement.qr_fill_color }}"
-                                           pattern="^#[0-9A-Fa-f]{6}$"
-                                           placeholder="#000000"
-                                           style="max-width: 150px;">
-                                </div>
-                                <div class="form-text">Couleur des modules du QR code (format hexadécimal, ex: #000000).</div>
-                            </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="qr_fill_color" class="form-label fw-semibold small">
+                                            <i class="fa-solid fa-circle me-1"></i>
+                                            Primaire
+                                        </label>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <input type="color"
+                                                   class="form-control"
+                                                   id="qr_fill_color"
+                                                   name="qr_fill_color"
+                                                   value="{{ form.qr_fill_color.value|default:etablissement.qr_fill_color }}"
+                                                   style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="fillColorText"
+                                                   value="{{ form.qr_fill_color.value|default:etablissement.qr_fill_color }}"
+                                                   pattern="^#[0-9A-Fa-f]{6}$"
+                                                   placeholder="#000000"
+                                            >
+                                        </div>
+                                    </div>
 
-                            <div class="mb-4">
-                                <label for="qr_fill_color_secondary" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-palette me-2"></i>
-                                    Couleur secondaire
-                                </label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="color"
-                                           class="form-control"
-                                           id="qr_fill_color_secondary"
-                                           name="qr_fill_color_secondary"
-                                           value="{{ form.qr_fill_color_secondary.value|default:etablissement.qr_fill_color_secondary }}"
-                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
-                                    <input type="text"
-                                           class="form-control"
-                                           id="fillColorSecondaryText"
-                                           value="{{ form.qr_fill_color_secondary.value|default:etablissement.qr_fill_color_secondary }}"
-                                           pattern="^#[0-9A-Fa-f]{6}$"
-                                           placeholder="#000000"
-                                           style="max-width: 150px;">
-                                </div>
-                                <div class="form-text">Couleur secondaire pour les dégradés (format hexadécimal, ex: #000000).</div>
-                            </div>
+                                    <div class="col-md-4">
+                                        <label for="qr_fill_color_secondary" class="form-label fw-semibold small">
+                                            <i class="fa-solid fa-circle-half-stroke me-1"></i>
+                                            Secondaire
+                                        </label>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <input type="color"
+                                                   class="form-control"
+                                                   id="qr_fill_color_secondary"
+                                                   name="qr_fill_color_secondary"
+                                                   value="{{ form.qr_fill_color_secondary.value|default:etablissement.qr_fill_color_secondary }}"
+                                                   style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="fillColorSecondaryText"
+                                                   value="{{ form.qr_fill_color_secondary.value|default:etablissement.qr_fill_color_secondary }}"
+                                                   pattern="^#[0-9A-Fa-f]{6}$"
+                                                   placeholder="#000000"
+                                            >
+                                        </div>
+                                    </div>
 
-                            <div class="mb-4">
-                                <label for="qr_background_color" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-palette me-2"></i>
-                                    Couleur de fond
-                                </label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="color"
-                                           class="form-control"
-                                           id="qr_background_color"
-                                           name="qr_background_color"
-                                           value="{{ form.qr_background_color.value|default:etablissement.qr_background_color }}"
-                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
-                                    <input type="text"
-                                           class="form-control"
-                                           id="backgroundColorText"
-                                           value="{{ form.qr_background_color.value|default:etablissement.qr_background_color }}"
-                                           pattern="^#[0-9A-Fa-f]{6}$"
-                                           placeholder="#FFFFFF"
-                                           style="max-width: 150px;">
+                                    <div class="col-md-4">
+                                        <label for="qr_background_color" class="form-label fw-semibold small">
+                                            <i class="fa-solid fa-square me-1"></i>
+                                            Fond
+                                        </label>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <input type="color"
+                                                   class="form-control"
+                                                   id="qr_background_color"
+                                                   name="qr_background_color"
+                                                   value="{{ form.qr_background_color.value|default:etablissement.qr_background_color }}"
+                                                   style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="backgroundColorText"
+                                                   value="{{ form.qr_background_color.value|default:etablissement.qr_background_color }}"
+                                                   pattern="^#[0-9A-Fa-f]{6}$"
+                                                   placeholder="#FFFFFF"
+                                            >
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-text">Couleur de fond du QR code (format hexadécimal, ex: #FFFFFF).</div>
                             </div>
 
                             <div class="mb-4">
                                 <label for="qr_style" class="form-label fw-semibold d-block mb-2">
                                     <i class="fa-solid fa-shapes me-2"></i>
-                                    Style des modules
+                                    Style du QR code
                                 </label>
                                 <select class="form-select"
                                         id="qr_style"

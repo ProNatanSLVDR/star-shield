@@ -24,106 +24,155 @@
 
     <!-- Filters Section -->
     <div class="w-100 pb-3">
-        <div class="rounded-4 border bg-white shadow-sm p-3">
+        <div class="rounded-4 border bg-white shadow-sm p-4">
+            <!-- Active Filters Badges -->
+            {% if filters.source != 'all' or filters.rating != 'all' or filters.date_preset or filters.date_from or filters.date_to %}
+                <div class="mb-3 pb-3 border-bottom">
+                    <div class="d-flex flex-wrap align-items-center gap-2 justify-content-between">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="text-muted small fw-semibold">Filtres actifs:</span>
+                            {% if filters.source != 'all' %}
+                                <span class="badge bg-primary-subtle text-primary d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-filter"></i>
+                                    Source: {% if filters.source == 'google' %}<i class="fa-brands fa-google"></i> Google{% else %}<i class="fa-solid fa-lock"></i> Internes{% endif %}
+                                    <button type="button" class="btn-close btn-close-sm ms-1" style="font-size: 0.5rem;" onclick="clearFilter('source')"></button>
+                                </span>
+                            {% endif %}
+                            {% if filters.rating != 'all' %}
+                                <span class="badge bg-primary-subtle text-primary d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-filter"></i>
+                                    Note: {{ filters.rating }} <i class="fa-solid fa-star text-warning"></i>
+                                    <button type="button" class="btn-close btn-close-sm ms-1" style="font-size: 0.5rem;" onclick="clearFilter('rating')"></button>
+                                </span>
+                            {% endif %}
+                            {% if filters.date_preset or filters.date_from or filters.date_to %}
+                                <span class="badge bg-primary-subtle text-primary d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-filter"></i>
+                                    Période: {% if filters.date_preset %}{% if filters.date_preset == '7days' %}7 derniers jours{% elif filters.date_preset == '30days' %}30 derniers jours{% elif filters.date_preset == 'this_month' %}Ce mois{% elif filters.date_preset == '3months' %}3 derniers mois{% elif filters.date_preset == 'all_time' %}Tout le temps{% endif %}{% else %}{{ filters.date_from|default:"..." }} - {{ filters.date_to|default:"..." }}{% endif %}
+                                    <button type="button" class="btn-close btn-close-sm ms-1" style="font-size: 0.5rem;" onclick="clearFilter('date')"></button>
+                                </span>
+                            {% endif %}
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllFilters()">
+                            <i class="fa-solid fa-xmark"></i> Réinitialiser les filtres
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+
             <form method="get" action="{% url 'dashboard:etablissement:avis' %}" id="filterForm">
-                <div class="row g-3">
-                    <!-- Source Filter Column -->
+                <div class="row g-3 align-items-end">
+                    <!-- Source Filter -->
                     <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label small fw-semibold mb-2 text-muted">Source</label>
-                        <div class="d-flex flex-column gap-1">
-                            <button type="button" class="btn btn-sm rounded-pill filter-source-btn {% if filters.source == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-source="all" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
-                                <i class="fa-solid fa-list"></i> Tous
-                            </button>
-                            <button type="button" class="btn btn-sm rounded-pill filter-source-btn {% if filters.source == 'google' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-source="google" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
-                                <i class="fa-brands fa-google"></i> Google ({{ google_reviews_count }})
-                            </button>
-                            <button type="button" class="btn btn-sm rounded-pill filter-source-btn {% if filters.source == 'internal' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-source="internal" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
-                                <i class="fa-solid fa-lock"></i> Internes ({{ internal_reviews_count }})
-                            </button>
-                        </div>
-                        <input type="hidden" name="source" id="sourceInput" value="{{ filters.source }}">
-                    </div>
-
-                    <!-- Rating Filter Column -->
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label small fw-semibold mb-2 text-muted">Note</label>
-                        <div class="d-flex flex-column gap-1">
-                            <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="all" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
-                                Toutes
-                            </button>
-                            <div class="d-flex gap-1 flex-wrap">
-                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '5' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="5" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
-                                    5<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.5 }})</span>
-                                </button>
-                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '4' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="4" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
-                                    4<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.4 }})</span>
-                                </button>
-                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '3' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="3" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
-                                    3<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.3 }})</span>
-                                </button>
-                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '2' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="2" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
-                                    2<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.2 }})</span>
-                                </button>
-                                <button type="button" class="btn btn-sm rounded-pill filter-rating-btn {% if filters.rating == '1' %}btn-primary{% else %}btn-outline-secondary{% endif %}" data-rating="1" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
-                                    1<i class="fa-solid fa-star text-warning"></i> <span class="d-none d-md-inline">({{ rating_counts.1 }})</span>
-                                </button>
-                            </div>
-                        </div>
-                        <input type="hidden" name="rating" id="ratingInput" value="{{ filters.rating }}">
-                    </div>
-
-                    <!-- Date Range Filter Column -->
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label small fw-semibold mb-2 text-muted">Période</label>
-                        <div class="d-flex flex-column gap-2">
-                            <div>
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text">
-                                        <i class="fa-solid fa-backward-step"></i>
-                                    </span>
-                                    <input type="date" class="form-control form-control-sm" name="date_from" id="dateFromInput" value="{{ filters.date_from }}">
-                                </div>
-                            </div>
-                            <div>
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text">
-                                        <i class="fa-solid fa-forward-step"></i>
-                                    </span>
-                                    <input type="date" class="form-control form-control-sm" name="date_to" id="dateToInput" value="{{ filters.date_to }}">
-                                </div>
-                            </div>
+                        <label class="form-label small fw-semibold mb-2 text-muted">
+                            <i class="fa-solid fa-tag"></i> Source
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-filter"></i></span>
+                            <select class="form-select form-select-sm" name="source" id="sourceInput">
+                                <option value="all" {% if filters.source == 'all' %}selected{% endif %}>Toutes les sources ({{ total_reviews }})</option>
+                                <option value="google" {% if filters.source == 'google' %}selected{% endif %}>Google ({{ google_reviews_count }})</option>
+                                <option value="internal" {% if filters.source == 'internal' %}selected{% endif %}>Internes ({{ internal_reviews_count }})</option>
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Sort Options Column -->
+                    <!-- Rating Filter -->
                     <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label small fw-semibold mb-2 text-muted">Tri</label>
-                        <div class="d-flex flex-column gap-2">
-                            <div>
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text"><i class="fa-solid fa-sort"></i></span>
-                                    <select class="form-select form-select-sm" name="order_by" id="orderByInput">
-                                        <option value="date" {% if filters.order_by == 'date' %}selected{% endif %}>Date</option>
-                                        <option value="rating" {% if filters.order_by == 'rating' %}selected{% endif %}>Note</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text"><i class="fa-solid fa-arrow-up-wide-short"></i></span>
-                                    <select class="form-select form-select-sm" name="order_dir" id="orderDirInput">
-                                        <option value="desc" {% if filters.order_dir == 'desc' %}selected{% endif %}>Décroissant</option>
-                                        <option value="asc" {% if filters.order_dir == 'asc' %}selected{% endif %}>Croissant</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <label class="form-label small fw-semibold mb-2 text-muted">
+                            <i class="fa-solid fa-star"></i> Note
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-star text-warning"></i></span>
+                            <select class="form-select form-select-sm" name="rating" id="ratingInput">
+                                <option value="all" {% if filters.rating == 'all' %}selected{% endif %}>Toutes les notes</option>
+                                <option value="5" {% if filters.rating == '5' %}selected{% endif %}>5 étoiles ({{ rating_counts.5 }})</option>
+                                <option value="4" {% if filters.rating == '4' %}selected{% endif %}>4 étoiles ({{ rating_counts.4 }})</option>
+                                <option value="3" {% if filters.rating == '3' %}selected{% endif %}>3 étoiles ({{ rating_counts.3 }})</option>
+                                <option value="2" {% if filters.rating == '2' %}selected{% endif %}>2 étoiles ({{ rating_counts.2 }})</option>
+                                <option value="1" {% if filters.rating == '1' %}selected{% endif %}>1 étoile ({{ rating_counts.1 }})</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date Preset Filter -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label small fw-semibold mb-2 text-muted">
+                            <i class="fa-solid fa-calendar"></i> Période
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-clock"></i></span>
+                            <select class="form-select form-select-sm" name="date_preset" id="datePresetInput">
+                                <option value="" {% if not filters.date_preset %}selected{% endif %}>Période personnalisée</option>
+                                <option value="7days" {% if filters.date_preset == '7days' %}selected{% endif %}>7 derniers jours</option>
+                                <option value="30days" {% if filters.date_preset == '30days' %}selected{% endif %}>30 derniers jours</option>
+                                <option value="this_month" {% if filters.date_preset == 'this_month' %}selected{% endif %}>Ce mois</option>
+                                <option value="3months" {% if filters.date_preset == '3months' %}selected{% endif %}>3 derniers mois</option>
+                                <option value="all_time" {% if filters.date_preset == 'all_time' %}selected{% endif %}>Tout le temps</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sort Options -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label small fw-semibold mb-2 text-muted">
+                            <i class="fa-solid fa-sort"></i> Trier par
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-arrow-down-wide-short"></i></span>
+                            <select class="form-select form-select-sm" name="sort" id="sortInput">
+                                <option value="date_desc" {% if filters.order_by == 'date' and filters.order_dir == 'desc' %}selected{% endif %}>Date (Plus récent)</option>
+                                <option value="date_asc" {% if filters.order_by == 'date' and filters.order_dir == 'asc' %}selected{% endif %}>Date (Plus ancien)</option>
+                                <option value="rating_desc" {% if filters.order_by == 'rating' and filters.order_dir == 'desc' %}selected{% endif %}>Note (Plus élevée)</option>
+                                <option value="rating_asc" {% if filters.order_by == 'rating' and filters.order_dir == 'asc' %}selected{% endif %}>Note (Plus basse)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Preserve other filters when submitting -->
+                <!-- Hidden inputs for order_by and order_dir (populated by JavaScript) -->
+                <input type="hidden" name="order_by" id="orderByInput" value="{{ filters.order_by }}">
+                <input type="hidden" name="order_dir" id="orderDirInput" value="{{ filters.order_dir }}">
+                <input type="hidden" name="date_from" id="dateFromInput" value="{{ filters.date_from }}">
+                <input type="hidden" name="date_to" id="dateToInput" value="{{ filters.date_to }}">
                 <input type="hidden" name="page" value="1">
             </form>
+        </div>
+    </div>
+
+    <!-- Custom Date Modal -->
+    <div class="modal fade" id="customDateModal" tabindex="-1" aria-labelledby="customDateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customDateModalLabel">
+                        <i class="fa-solid fa-calendar-days"></i> Choisir une période personnalisée
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex flex-column gap-3">
+                        <div>
+                            <label class="form-label fw-semibold mb-2">
+                                <i class="fa-solid fa-backward-step"></i> Date de début
+                            </label>
+                            <input type="date" class="form-control" id="modalDateFromInput" value="{{ filters.date_from }}">
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold mb-2">
+                                <i class="fa-solid fa-forward-step"></i> Date de fin
+                            </label>
+                            <input type="date" class="form-control" id="modalDateToInput" value="{{ filters.date_to }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="applyCustomDates()">
+                        <i class="fa-solid fa-check"></i> Appliquer
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -131,6 +180,81 @@
     <div class="w-100 pb-3">
         <div class="rounded-4 border bg-white shadow-sm p-3">
             {% if reviews.paginator.count > 0 %}
+
+                <!-- Pagination -->
+                {% if reviews.has_other_pages %}
+                    <nav aria-label="Pagination des avis" class="mb-2">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <!-- First Button -->
+                            {% if reviews.number == 1 %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fa-solid fa-angles-left"></i> Premier</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page=1">
+                                        <i class="fa-solid fa-angles-left"></i> Premier
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <!-- Previous Button -->
+                            {% if reviews.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
+                                        <i class="fa-solid fa-chevron-left"></i> Précédent
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fa-solid fa-chevron-left"></i> Précédent</span>
+                                </li>
+                            {% endif %}
+
+                            <!-- Page Numbers: 3 before, current, 3 after -->
+                            {% for num in reviews.paginator.page_range %}
+                                {% if num >= reviews.number|add:'-2' and num <= reviews.number|add:'2' %}
+                                    {% if reviews.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- Next Button -->
+                            {% if reviews.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
+                                        Suivant <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Suivant <i class="fa-solid fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
+
+                            <!-- Last Button -->
+                            {% if reviews.number == reviews.paginator.num_pages %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Dernier <i class="fa-solid fa-angles-right"></i></span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.paginator.num_pages }}">
+                                        Dernier <i class="fa-solid fa-angles-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
                 <div class="d-flex flex-column gap-3">
                     {% for review in reviews %}
                         <div class="border rounded-3 p-3 bg-white">
@@ -211,11 +335,25 @@
 
                 <!-- Pagination -->
                 {% if reviews.has_other_pages %}
-                    <nav aria-label="Pagination des avis" class="mt-4">
-                        <ul class="pagination justify-content-center mb-0">
+                    <nav aria-label="Pagination des avis" class="mt-2">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <!-- First Button -->
+                            {% if reviews.number == 1 %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fa-solid fa-angles-left"></i> Premier</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page=1">
+                                        <i class="fa-solid fa-angles-left"></i> Premier
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <!-- Previous Button -->
                             {% if reviews.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
                                         <i class="fa-solid fa-chevron-left"></i> Précédent
                                     </a>
                                 </li>
@@ -225,21 +363,25 @@
                                 </li>
                             {% endif %}
 
+                            <!-- Page Numbers: 3 before, current, 3 after -->
                             {% for num in reviews.paginator.page_range %}
-                                {% if reviews.number == num %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ num }}</span>
-                                    </li>
-                                {% elif num > reviews.number|add:'-3' and num < reviews.number|add:'3' %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
-                                    </li>
+                                {% if num >= reviews.number|add:'-3' and num <= reviews.number|add:'3' %}
+                                    {% if reviews.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
                                 {% endif %}
                             {% endfor %}
 
+                            <!-- Next Button -->
                             {% if reviews.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
                                         Suivant <i class="fa-solid fa-chevron-right"></i>
                                     </a>
                                 </li>
@@ -248,12 +390,25 @@
                                     <span class="page-link">Suivant <i class="fa-solid fa-chevron-right"></i></span>
                                 </li>
                             {% endif %}
+
+                            <!-- Last Button -->
+                            {% if reviews.number == reviews.paginator.num_pages %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Dernier <i class="fa-solid fa-angles-right"></i></span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.paginator.num_pages }}">
+                                        Dernier <i class="fa-solid fa-angles-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
                         </ul>
                     </nav>
                 {% endif %}
 
                 <!-- Results Info -->
-                <div class="text-center mt-3">
+                <div class="text-center mt-2">
                     <p class="text-muted small mb-0">
                         Affichage de {{ reviews.start_index }} à {{ reviews.end_index }} sur {{ reviews.paginator.count }} avis
                     </p>
@@ -268,50 +423,119 @@
     </div>
 
     <script>
-        // Handle filter button clicks
         document.addEventListener('DOMContentLoaded', function() {
-            // Source filter buttons
-            document.querySelectorAll('.filter-source-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-source-btn').forEach(b => {
-                        b.classList.remove('btn-primary');
-                        b.classList.add('btn-outline-secondary');
-                    });
-                    this.classList.remove('btn-outline-secondary');
-                    this.classList.add('btn-primary');
-                    document.getElementById('sourceInput').value = this.dataset.source;
-                    document.getElementById('filterForm').submit();
-                });
+            const filterForm = document.getElementById('filterForm');
+            const sourceInput = document.getElementById('sourceInput');
+            const ratingInput = document.getElementById('ratingInput');
+            const datePresetInput = document.getElementById('datePresetInput');
+            const dateFromInput = document.getElementById('dateFromInput');
+            const dateToInput = document.getElementById('dateToInput');
+            const sortInput = document.getElementById('sortInput');
+            const orderByInput = document.getElementById('orderByInput');
+            const orderDirInput = document.getElementById('orderDirInput');
+            const customDateModal = new bootstrap.Modal(document.getElementById('customDateModal'));
+
+            // Handle sort dropdown change - split into order_by and order_dir
+            sortInput.addEventListener('change', function() {
+                const sortValue = this.value;
+                if (sortValue === 'date_desc') {
+                    orderByInput.value = 'date';
+                    orderDirInput.value = 'desc';
+                } else if (sortValue === 'date_asc') {
+                    orderByInput.value = 'date';
+                    orderDirInput.value = 'asc';
+                } else if (sortValue === 'rating_desc') {
+                    orderByInput.value = 'rating';
+                    orderDirInput.value = 'desc';
+                } else if (sortValue === 'rating_asc') {
+                    orderByInput.value = 'rating';
+                    orderDirInput.value = 'asc';
+                }
+                filterForm.submit();
             });
 
-            // Rating filter buttons
-            document.querySelectorAll('.filter-rating-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-rating-btn').forEach(b => {
-                        b.classList.remove('btn-primary');
-                        b.classList.add('btn-outline-secondary');
-                    });
-                    this.classList.remove('btn-outline-secondary');
-                    this.classList.add('btn-primary');
-                    document.getElementById('ratingInput').value = this.dataset.rating;
-                    document.getElementById('filterForm').submit();
-                });
+            // Handle date preset change
+            datePresetInput.addEventListener('change', function() {
+                if (this.value) {
+                    // Clear custom dates when preset is selected
+                    dateFromInput.value = '';
+                    dateToInput.value = '';
+                    dateFromInput.removeAttribute('name');
+                    dateToInput.removeAttribute('name');
+                    filterForm.submit();
+                } else {
+                    // When "Période personnalisée" is selected, open modal
+                    // Initialize modal inputs with current values
+                    document.getElementById('modalDateFromInput').value = dateFromInput.value || '';
+                    document.getElementById('modalDateToInput').value = dateToInput.value || '';
+                    customDateModal.show();
+                    // Don't submit yet, wait for modal confirmation
+                }
             });
 
-            // Date inputs and select changes
-            document.getElementById('dateFromInput').addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
+            // Handle source filter change
+            sourceInput.addEventListener('change', function() {
+                filterForm.submit();
             });
-            document.getElementById('dateToInput').addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
-            });
-            document.getElementById('orderByInput').addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
-            });
-            document.getElementById('orderDirInput').addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
+
+            // Handle rating filter change
+            ratingInput.addEventListener('change', function() {
+                filterForm.submit();
             });
         });
+
+        // Apply custom dates from modal
+        function applyCustomDates() {
+            const modalDateFrom = document.getElementById('modalDateFromInput');
+            const modalDateTo = document.getElementById('modalDateToInput');
+            const dateFromInput = document.getElementById('dateFromInput');
+            const dateToInput = document.getElementById('dateToInput');
+            const filterForm = document.getElementById('filterForm');
+            const customDateModal = bootstrap.Modal.getInstance(document.getElementById('customDateModal'));
+
+            // Set the values
+            dateFromInput.value = modalDateFrom.value;
+            dateToInput.value = modalDateTo.value;
+
+            // Ensure name attributes are set
+            dateFromInput.setAttribute('name', 'date_from');
+            dateToInput.setAttribute('name', 'date_to');
+
+            // Clear preset
+            document.getElementById('datePresetInput').value = '';
+
+            // Close modal and submit form
+            customDateModal.hide();
+            filterForm.submit();
+        }
+
+        // Clear individual filter
+        function clearFilter(filterType) {
+            const filterForm = document.getElementById('filterForm');
+
+            if (filterType === 'source') {
+                document.getElementById('sourceInput').value = 'all';
+            } else if (filterType === 'rating') {
+                document.getElementById('ratingInput').value = 'all';
+            } else if (filterType === 'date') {
+                const datePresetInput = document.getElementById('datePresetInput');
+                const dateFromInput = document.getElementById('dateFromInput');
+                const dateToInput = document.getElementById('dateToInput');
+
+                datePresetInput.value = '30days'; // Reset to default
+                dateFromInput.value = '';
+                dateToInput.value = '';
+                dateFromInput.removeAttribute('name');
+                dateToInput.removeAttribute('name');
+            }
+
+            filterForm.submit();
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            window.location.href = "{% url 'dashboard:etablissement:avis' %}";
+        }
     </script>
 
 {% endblock dashboard_content %}

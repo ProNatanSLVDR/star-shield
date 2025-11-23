@@ -127,29 +127,44 @@ def avis_view(request):
     # Get query parameters
     source_filter = request.GET.get("source", "all")
     rating_filter = request.GET.get("rating", "all")
+    date_preset = request.GET.get("date_preset", "30days")
     date_from = request.GET.get("date_from", "")
     date_to = request.GET.get("date_to", "")
     order_by = request.GET.get("order_by", "date")
     order_dir = request.GET.get("order_dir", "desc")
     page_number = request.GET.get("page", 1)
 
-    # Get oldest and newest review dates for default values
-    # Only set defaults if dates weren't explicitly provided in query params
-    all_reviews = Review.objects.filter(etablissement=etablissement)
-
-    if "date_from" not in request.GET:
-        oldest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("review_date").first()
-        if oldest_review:
-            review_date = oldest_review.writen_at or oldest_review.created_at
-            if review_date:
-                date_from = review_date.date().strftime("%Y-%m-%d")
-
-    if "date_to" not in request.GET:
-        newest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("-review_date").first()
-        if newest_review:
-            review_date = newest_review.writen_at or newest_review.created_at
-            if review_date:
-                date_to = review_date.date().strftime("%Y-%m-%d")
+    # Handle date presets
+    # If custom dates are provided, don't use preset
+    if date_from or date_to:
+        date_preset = ""
+    
+    if date_preset:
+        today = timezone.now().date()
+        if date_preset == "7days":
+            date_from = (today - timedelta(days=7)).strftime("%Y-%m-%d")
+            date_to = today.strftime("%Y-%m-%d")
+        elif date_preset == "30days":
+            date_from = (today - timedelta(days=30)).strftime("%Y-%m-%d")
+            date_to = today.strftime("%Y-%m-%d")
+        elif date_preset == "this_month":
+            date_from = today.replace(day=1).strftime("%Y-%m-%d")
+            date_to = today.strftime("%Y-%m-%d")
+        elif date_preset == "3months":
+            date_from = (today - timedelta(days=90)).strftime("%Y-%m-%d")
+            date_to = today.strftime("%Y-%m-%d")
+        elif date_preset == "all_time":
+            all_reviews = Review.objects.filter(etablissement=etablissement)
+            oldest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("review_date").first()
+            if oldest_review:
+                review_date = oldest_review.writen_at or oldest_review.created_at
+                if review_date:
+                    date_from = review_date.date().strftime("%Y-%m-%d")
+            newest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("-review_date").first()
+            if newest_review:
+                review_date = newest_review.writen_at or newest_review.created_at
+                if review_date:
+                    date_to = review_date.date().strftime("%Y-%m-%d")
 
     # Start with base queryset
     reviews_queryset = Review.objects.filter(etablissement=etablissement)
@@ -238,6 +253,7 @@ def avis_view(request):
         "filters": {
             "source": source_filter,
             "rating": rating_filter,
+            "date_preset": date_preset,
             "date_from": date_from,
             "date_to": date_to,
             "order_by": order_by,
