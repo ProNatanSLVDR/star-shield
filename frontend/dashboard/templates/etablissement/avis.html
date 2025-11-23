@@ -4,22 +4,12 @@
 
 {% block dashboard_content %}
 
-    <div class="w-100 pb-3">
-        <div class="rounded-4 border bg-white shadow-sm p-3">
-            <div class="row g-2 align-items-center">
-                <div class="col-12 col-lg-7">
-                    <h1 class="h5 fw-bold text-body-emphasis mb-1">Avis</h1>
-                    <p class="text-muted mb-0 small">Consultez et filtrez tous les avis de votre établissement.</p>
-                </div>
-                <div class="col-12 col-lg-5">
-                    <div class="d-flex flex-column flex-lg-row flex-wrap gap-2 justify-content-lg-end align-items-lg-center">
-                        <div class="text-muted small">
-                            <i class="fa-solid fa-star"></i> {{ total_reviews }} avis au total
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="mb-4">
+        <h1 class="h4 fw-bold text-body-emphasis mb-1">
+            <i class="fa-solid fa-comments me-2"></i>
+            Avis
+        </h1>
+        <p class="text-muted mb-0 small">Consultez et filtrez tous les avis de votre établissement.</p>
     </div>
 
     <!-- Filters Section -->
@@ -192,7 +182,7 @@
                                 </li>
                             {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page=1">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page=1">
                                         <i class="fa-solid fa-angles-left"></i> Premier
                                     </a>
                                 </li>
@@ -201,7 +191,7 @@
                             <!-- Previous Button -->
                             {% if reviews.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
                                         <i class="fa-solid fa-chevron-left"></i> Précédent
                                     </a>
                                 </li>
@@ -220,7 +210,7 @@
                                         </li>
                                     {% else %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
+                                            <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
                                         </li>
                                     {% endif %}
                                 {% endif %}
@@ -229,7 +219,7 @@
                             <!-- Next Button -->
                             {% if reviews.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
                                         Suivant <i class="fa-solid fa-chevron-right"></i>
                                     </a>
                                 </li>
@@ -246,7 +236,7 @@
                                 </li>
                             {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.paginator.num_pages }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.paginator.num_pages }}">
                                         Dernier <i class="fa-solid fa-angles-right"></i>
                                     </a>
                                 </li>
@@ -344,7 +334,7 @@
                                 </li>
                             {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page=1">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page=1">
                                         <i class="fa-solid fa-angles-left"></i> Premier
                                     </a>
                                 </li>
@@ -353,7 +343,7 @@
                             <!-- Previous Button -->
                             {% if reviews.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.previous_page_number }}">
                                         <i class="fa-solid fa-chevron-left"></i> Précédent
                                     </a>
                                 </li>
@@ -372,7 +362,7 @@
                                         </li>
                                     {% else %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
+                                            <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ num }}">{{ num }}</a>
                                         </li>
                                     {% endif %}
                                 {% endif %}
@@ -381,7 +371,7 @@
                             <!-- Next Button -->
                             {% if reviews.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.next_page_number }}">
                                         Suivant <i class="fa-solid fa-chevron-right"></i>
                                     </a>
                                 </li>
@@ -398,7 +388,7 @@
                                 </li>
                             {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.paginator.num_pages }}">
+                                    <a class="page-link" href="?source={{ filters.source }}&rating={{ filters.rating }}{% if filters.date_preset %}&date_preset={{ filters.date_preset }}{% else %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% endif %}&order_by={{ filters.order_by }}&order_dir={{ filters.order_dir }}&page={{ reviews.paginator.num_pages }}">
                                         Dernier <i class="fa-solid fa-angles-right"></i>
                                     </a>
                                 </li>
