@@ -149,8 +149,10 @@ def qr_code_image_view(request, identifier=None):
 
     # Get customization parameters from query string (for preview) or database
     fill_color = request.GET.get("fill_color") or etablissement.qr_fill_color or "#000000"
+    fill_color_secondary = request.GET.get("fill_color_secondary") or etablissement.qr_fill_color_secondary or "#000000"
     background_color = request.GET.get("background_color") or etablissement.qr_background_color or "#FFFFFF"
     style = request.GET.get("style") or etablissement.qr_style or "square"
+    color_mask = request.GET.get("color_mask") or etablissement.qr_color_mask or "solid"
 
     # Get logo file if exists (using Django's .open() which works for both local and cloud storage)
     logo_file = None
@@ -166,8 +168,10 @@ def qr_code_image_view(request, identifier=None):
         qr_image_bytes = generate_qrcode_png(
             link=feedback_url,
             fill_color=fill_color,
+            fill_color_secondary=fill_color_secondary,
             background_color=background_color,
             style=style,
+            color_mask=color_mask,
             logo_file=logo_file,
         )
 
@@ -180,8 +184,10 @@ def qr_code_image_view(request, identifier=None):
             qr_image_bytes = generate_qrcode_png(
                 link=feedback_url,
                 fill_color="#000000",
+                fill_color_secondary="#000000",
                 background_color="#FFFFFF",
                 style="square",
+                color_mask="solid",
             )
             response = HttpResponse(qr_image_bytes, content_type="image/png")
             return response

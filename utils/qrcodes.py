@@ -1,7 +1,7 @@
 import io
 
 import qrcode
-from PIL import Image, ImageDraw
+from PIL import Image
 from qrcode.image.styles.moduledrawers import SquareModuleDrawer, GappedSquareModuleDrawer, RoundedModuleDrawer, CircleModuleDrawer
 from qrcode.image.styles.colormasks import SolidFillColorMask, RadialGradiantColorMask, SquareGradiantColorMask, HorizontalGradiantColorMask, VerticalGradiantColorMask
 from qrcode.image.styledpil import StyledPilImage
@@ -11,17 +11,6 @@ def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     """Convert hex color string to RGB tuple."""
     hex_color = hex_color.lstrip("#")
     return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
-
-
-def draw_rounded_rectangle(draw, bbox, radius, fill):
-    """Draw a rounded rectangle."""
-    left, top, right, bottom = bbox
-    draw.rectangle([left + radius, top, right - radius, bottom], fill=fill)
-    draw.rectangle([left, top + radius, right, bottom - radius], fill=fill)
-    draw.pieslice([left, top, left + 2 * radius, top + 2 * radius], 180, 270, fill=fill)
-    draw.pieslice([right - 2 * radius, top, right, top + 2 * radius], 270, 360, fill=fill)
-    draw.pieslice([left, bottom - 2 * radius, left + 2 * radius, bottom], 90, 180, fill=fill)
-    draw.pieslice([right - 2 * radius, bottom - 2 * radius, right, bottom], 0, 90, fill=fill)
 
 
 def generate_qrcode_png(
@@ -82,18 +71,12 @@ def generate_qrcode_png(
 
     # Create QR code with square modules first
     img = qr.make_image(
-        embeded_image=logo_file if logo_file else None,
+        embeded_image=Image.open(logo_file) if logo_file else None,
         color_mask=color_mask_map[color_mask],
         module_drawer=module_drawer_map[style],
         image_factory=StyledPilImage,
     )
     img = img.convert("RGBA")
-
-    # Convert to RGB if no transparency needed
-    if img.mode == "RGBA" and not logo_file:
-        rgb_img = Image.new("RGB", img.size, color_bg)
-        rgb_img.paste(img, mask=img.split()[3] if img.mode == "RGBA" else None)
-        img = rgb_img
 
     # Save to bytes
     img_bytes = io.BytesIO()

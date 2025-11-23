@@ -1,5 +1,6 @@
 from django import forms
 from django.core.validators import MinValueValidator, MaxValueValidator
+from auths import choices
 
 
 class EtablissementSettingsForm(forms.Form):
@@ -56,12 +57,20 @@ class QRCodeSettingsForm(forms.Form):
         max_length=7,
         required=True,
     )
+    qr_fill_color_secondary = forms.CharField(
+        max_length=7,
+        required=True,
+    )
     qr_background_color = forms.CharField(
         max_length=7,
         required=True,
     )
     qr_style = forms.ChoiceField(
-        choices=[("square", "Carré"), ("rounded", "Arrondi")],
+        choices=choices.QR_STYLE_CHOICES,
+        required=True,
+    )
+    qr_color_mask = forms.ChoiceField(
+        choices=choices.QR_COLOR_MASK_CHOICES,
         required=True,
     )
     qr_logo = forms.ImageField(

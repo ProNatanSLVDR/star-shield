@@ -1,17 +1,20 @@
 from __future__ import annotations
+
+import logging
+import uuid
+
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
-import uuid
-import logging
-from google.oauth2.credentials import Credentials
 from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.utils.translation import gettext_lazy as _
+
+from . import choices
 
 logger = logging.getLogger(__name__)
 
@@ -307,16 +310,27 @@ class Etablissement(models.Model):
         default="#000000",
         help_text="Couleur de remplissage du QR code (format hexadécimal).",
     )
+    qr_fill_color_secondary = models.CharField(
+        max_length=7,
+        default="#000000",
+        help_text="Couleur secondaire pour les dégradés (format hexadécimal).",
+    )
     qr_background_color = models.CharField(
         max_length=7,
         default="#FFFFFF",
         help_text="Couleur de fond du QR code (format hexadécimal).",
     )
     qr_style = models.CharField(
-        max_length=10,
-        choices=[("square", "Carré"), ("rounded", "Arrondi")],
+        max_length=20,
+        choices=choices.QR_STYLE_CHOICES,
         default="square",
-        help_text="Style du QR code (carré ou arrondi).",
+        help_text="Style des modules du QR code.",
+    )
+    qr_color_mask = models.CharField(
+        max_length=20,
+        choices=choices.QR_COLOR_MASK_CHOICES,
+        default="solid",
+        help_text="Style de masque de couleur pour le QR code.",
     )
     qr_logo = models.ImageField(
         upload_to="qr_logos/",

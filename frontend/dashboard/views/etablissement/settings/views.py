@@ -156,8 +156,10 @@ def qr_code_settings_view(request):
         form = QRCodeSettingsForm(request.POST, request.FILES)
         if form.is_valid():
             etablissement.qr_fill_color = form.cleaned_data["qr_fill_color"]
+            etablissement.qr_fill_color_secondary = form.cleaned_data["qr_fill_color_secondary"]
             etablissement.qr_background_color = form.cleaned_data["qr_background_color"]
             etablissement.qr_style = form.cleaned_data["qr_style"]
+            etablissement.qr_color_mask = form.cleaned_data["qr_color_mask"]
 
             # Handle logo upload
             if "qr_logo" in request.FILES:
@@ -171,8 +173,10 @@ def qr_code_settings_view(request):
         form = QRCodeSettingsForm(
             initial={
                 "qr_fill_color": etablissement.qr_fill_color or "#000000",
+                "qr_fill_color_secondary": etablissement.qr_fill_color_secondary or "#000000",
                 "qr_background_color": etablissement.qr_background_color or "#FFFFFF",
                 "qr_style": etablissement.qr_style or "square",
+                "qr_color_mask": etablissement.qr_color_mask or "solid",
             }
         )
 

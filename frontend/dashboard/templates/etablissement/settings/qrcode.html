@@ -59,6 +59,29 @@
                             </div>
 
                             <div class="mb-4">
+                                <label for="qr_fill_color_secondary" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-palette me-2"></i>
+                                    Couleur secondaire
+                                </label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="color"
+                                           class="form-control"
+                                           id="qr_fill_color_secondary"
+                                           name="qr_fill_color_secondary"
+                                           value="{{ form.qr_fill_color_secondary.value|default:etablissement.qr_fill_color_secondary }}"
+                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                    <input type="text"
+                                           class="form-control"
+                                           id="fillColorSecondaryText"
+                                           value="{{ form.qr_fill_color_secondary.value|default:etablissement.qr_fill_color_secondary }}"
+                                           pattern="^#[0-9A-Fa-f]{6}$"
+                                           placeholder="#000000"
+                                           style="max-width: 150px;">
+                                </div>
+                                <div class="form-text">Couleur secondaire pour les dégradés (format hexadécimal, ex: #000000).</div>
+                            </div>
+
+                            <div class="mb-4">
                                 <label for="qr_background_color" class="form-label fw-semibold">
                                     <i class="fa-solid fa-palette me-2"></i>
                                     Couleur de fond
@@ -84,15 +107,34 @@
                             <div class="mb-4">
                                 <label for="qr_style" class="form-label fw-semibold d-block mb-2">
                                     <i class="fa-solid fa-shapes me-2"></i>
-                                    Style
+                                    Style des modules
                                 </label>
                                 <select class="form-select"
                                         id="qr_style"
                                         name="qr_style">
                                     <option value="square" {% if form.qr_style.value|default:etablissement.qr_style == "square" %}selected{% endif %}>Carré</option>
+                                    <option value="square_spaced" {% if form.qr_style.value|default:etablissement.qr_style == "square_spaced" %}selected{% endif %}>Carré espacé</option>
                                     <option value="rounded" {% if form.qr_style.value|default:etablissement.qr_style == "rounded" %}selected{% endif %}>Arrondi</option>
+                                    <option value="circle" {% if form.qr_style.value|default:etablissement.qr_style == "circle" %}selected{% endif %}>Cercle</option>
                                 </select>
                                 <div class="form-text">Style des modules du QR code.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="qr_color_mask" class="form-label fw-semibold d-block mb-2">
+                                    <i class="fa-solid fa-mask me-2"></i>
+                                    Style de couleur
+                                </label>
+                                <select class="form-select"
+                                        id="qr_color_mask"
+                                        name="qr_color_mask">
+                                    <option value="solid" {% if form.qr_color_mask.value|default:etablissement.qr_color_mask == "solid" %}selected{% endif %}>Solide</option>
+                                    <option value="round_radial" {% if form.qr_color_mask.value|default:etablissement.qr_color_mask == "round_radial" %}selected{% endif %}>Dégradé radial rond</option>
+                                    <option value="square_radial" {% if form.qr_color_mask.value|default:etablissement.qr_color_mask == "square_radial" %}selected{% endif %}>Dégradé radial carré</option>
+                                    <option value="horizontal_gradiant" {% if form.qr_color_mask.value|default:etablissement.qr_color_mask == "horizontal_gradiant" %}selected{% endif %}>Dégradé horizontal</option>
+                                    <option value="vertical_gradiant" {% if form.qr_color_mask.value|default:etablissement.qr_color_mask == "vertical_gradiant" %}selected{% endif %}>Dégradé vertical</option>
+                                </select>
+                                <div class="form-text">Style de masque de couleur pour le QR code.</div>
                             </div>
 
                             <div class="mb-4">
@@ -168,9 +210,12 @@
         document.addEventListener("DOMContentLoaded", function() {
             const fillColorInput = document.getElementById("qr_fill_color");
             const fillColorTextInput = document.getElementById("fillColorText");
+            const fillColorSecondaryInput = document.getElementById("qr_fill_color_secondary");
+            const fillColorSecondaryTextInput = document.getElementById("fillColorSecondaryText");
             const backgroundColorInput = document.getElementById("qr_background_color");
             const backgroundColorTextInput = document.getElementById("backgroundColorText");
             const styleSelect = document.getElementById("qr_style");
+            const colorMaskSelect = document.getElementById("qr_color_mask");
             const form = document.getElementById("qrCodeSettingsForm");
             const resetBtn = document.getElementById("resetToDefaultsBtn");
             const qrCodePreview = document.getElementById("qrCodePreview");
@@ -207,9 +252,30 @@
                 });
             }
 
-            // Update preview when style changes
+            if (fillColorSecondaryInput && fillColorSecondaryTextInput) {
+                fillColorSecondaryInput.addEventListener("input", function() {
+                    fillColorSecondaryTextInput.value = this.value;
+                    updatePreview();
+                });
+
+                fillColorSecondaryTextInput.addEventListener("input", function() {
+                    const value = this.value;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                        fillColorSecondaryInput.value = value;
+                        updatePreview();
+                    }
+                });
+            }
+
+            // Update preview when style or color mask changes
             if (styleSelect) {
                 styleSelect.addEventListener("change", function() {
+                    updatePreview();
+                });
+            }
+
+            if (colorMaskSelect) {
+                colorMaskSelect.addEventListener("change", function() {
                     updatePreview();
                 });
             }
@@ -217,15 +283,19 @@
             // Update preview function
             function updatePreview() {
                 const fillColor = fillColorInput ? fillColorInput.value : "#000000";
+                const fillColorSecondary = fillColorSecondaryInput ? fillColorSecondaryInput.value : "#000000";
                 const backgroundColor = backgroundColorInput ? backgroundColorInput.value : "#FFFFFF";
                 const style = styleSelect ? styleSelect.value : "square";
+                const colorMask = colorMaskSelect ? colorMaskSelect.value : "solid";
 
                 // Update preview with query parameters for real-time preview
                 const baseUrl = "{{ qr_code_url }}";
                 const params = new URLSearchParams({
                     fill_color: fillColor,
+                    fill_color_secondary: fillColorSecondary,
                     background_color: backgroundColor,
-                    style: style
+                    style: style,
+                    color_mask: colorMask
                 });
                 qrCodePreview.src = baseUrl + "?" + params.toString();
             }
@@ -234,6 +304,7 @@
             if (resetBtn) {
                 resetBtn.addEventListener("click", function() {
                     const defaultFillColor = "#000000";
+                    const defaultFillColorSecondary = "#000000";
                     const defaultBackgroundColor = "#FFFFFF";
 
                     if (fillColorInput) {
@@ -241,6 +312,12 @@
                     }
                     if (fillColorTextInput) {
                         fillColorTextInput.value = defaultFillColor;
+                    }
+                    if (fillColorSecondaryInput) {
+                        fillColorSecondaryInput.value = defaultFillColorSecondary;
+                    }
+                    if (fillColorSecondaryTextInput) {
+                        fillColorSecondaryTextInput.value = defaultFillColorSecondary;
                     }
                     if (backgroundColorInput) {
                         backgroundColorInput.value = defaultBackgroundColor;
@@ -250,6 +327,9 @@
                     }
                     if (styleSelect) {
                         styleSelect.value = "square";
+                    }
+                    if (colorMaskSelect) {
+                        colorMaskSelect.value = "solid";
                     }
 
                     updatePreview();
