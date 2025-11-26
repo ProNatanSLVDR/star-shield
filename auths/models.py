@@ -126,10 +126,10 @@ class GoogleCredentials(models.Model):
             try:
                 creds.refresh(Request())
             except RefreshError as e:
-                print("Token revoked:", e)
+                logger.error(f"Google OAuth token refresh failed for user {self.user_id}: {e}")
                 self.is_valid = False
                 self.save()
-                return False
+                raise
 
             self.token = creds.token
             self.refresh_token = creds.refresh_token or self.refresh_token
@@ -139,41 +139,53 @@ class GoogleCredentials(models.Model):
 
     def get_reviews_service(self):
         try:
+            credentials = self.get_valid_credentials()
             reviews_service = build(
                 "mybusiness",
                 "v4",
                 static_discovery=False,
                 discoveryServiceUrl="https://developers.google.com/my-business/samples/mybusiness_google_rest_v4p9.json",
-                credentials=self.get_valid_credentials(),
+                credentials=credentials,
             )
             return reviews_service
+        except RefreshError as e:
+            logger.error(f"Failed to get valid credentials for reviews service (user {self.user_id}): {e}")
+            return None
         except Exception as e:
-            print(f"Error building reviews service: {e}")
-            return False
+            logger.error(f"Error building reviews service for user {self.user_id}: {e}", exc_info=True)
+            return None
 
     def get_locations_service(self):
         try:
+            credentials = self.get_valid_credentials()
             locations_service = build(
                 "mybusinessbusinessinformation",
                 "v1",
-                credentials=self.get_valid_credentials(),
+                credentials=credentials,
             )
             return locations_service
+        except RefreshError as e:
+            logger.error(f"Failed to get valid credentials for locations service (user {self.user_id}): {e}")
+            return None
         except Exception as e:
-            print(f"Error building locations service: {e}")
-            return False
+            logger.error(f"Error building locations service for user {self.user_id}: {e}", exc_info=True)
+            return None
 
     def get_accounts_service(self):
         try:
+            credentials = self.get_valid_credentials()
             accounts_service = build(
                 "mybusinessaccountmanagement",
                 "v1",
-                credentials=self.get_valid_credentials(),
+                credentials=credentials,
             )
             return accounts_service
+        except RefreshError as e:
+            logger.error(f"Failed to get valid credentials for accounts service (user {self.user_id}): {e}")
+            return None
         except Exception as e:
-            print(f"Error building accounts service: {e}")
-            return False
+            logger.error(f"Error building accounts service for user {self.user_id}: {e}", exc_info=True)
+            return None
 
     def create_etablissement_from_location(self, account_id, location_id):
         """
@@ -182,6 +194,10 @@ class GoogleCredentials(models.Model):
 
         # Services API
         locations_service = self.get_locations_service()
+
+        if locations_service is None:
+            logger.error(f"Failed to initialize locations service for user {self.user_id}")
+            return None
 
         try:
             # Récupération des informations de la location
@@ -205,49 +221,51 @@ class GoogleCredentials(models.Model):
             return etablissement
 
         except Exception as e:
-            # Gestion d'erreur simple (peut être remplacée par du logging)
-            print(f"Erreur lors de la création de l'établissement pour {location_id}: {e}")
+            logger.error(f"Erreur lors de la création de l'établissement pour {location_id} (user {self.user_id}): {e}", exc_info=True)
             return None
 
     def list_available_locations(self):
         accounts_service = self.get_accounts_service()
         locations_service = self.get_locations_service()
 
-        available_locations = []
-
-        try:
-            accounts = accounts_service.accounts().list().execute()
-        except Exception:
-            # If we can't list accounts, return empty
+        if accounts_service is None or locations_service is None:
+            logger.error(f"Failed to initialize Google services for user {self.user_id}")
             return []
 
-        for account in accounts.get("accounts", []):
-            next_page_token = None
-            while True:
-                # Récupération des locations
-                locations = (
-                    locations_service.accounts()
-                    .locations()
-                    .list(
-                        parent=account["name"],
-                        readMask="name,title",
-                        pageToken=next_page_token,
+        available_locations = []
+        try:
+            accounts = accounts_service.accounts().list().execute()
+
+            for account in accounts.get("accounts", []):
+                next_page_token = None
+                while True:
+                    # Récupération des locations
+                    locations = (
+                        locations_service.accounts()
+                        .locations()
+                        .list(
+                            parent=account["name"],
+                            readMask="name,title",
+                            pageToken=next_page_token,
+                        )
+                        .execute()
                     )
-                    .execute()
-                )
 
-                available_locations.extend(locations.get("locations", []))
+                    available_locations.extend(locations.get("locations", []))
 
-                next_page_token = locations.get("nextPageToken")
-                if not next_page_token:
-                    break
+                    next_page_token = locations.get("nextPageToken")
+                    if not next_page_token:
+                        break
 
-        for location in available_locations:
-            location["account_id"] = account["name"]
-            if Etablissement.objects.filter(location_id=location["name"], account_id=account["name"]).exists():
-                location["exists"] = True
-            else:
-                location["exists"] = False
+            for location in available_locations:
+                location["account_id"] = account["name"]
+                if Etablissement.objects.filter(location_id=location["name"], account_id=account["name"]).exists():
+                    location["exists"] = True
+                else:
+                    location["exists"] = False
+        except Exception as e:
+            logger.error(f"Error fetching available locations for user {self.user_id}: {e}", exc_info=True)
+            return []
 
         return available_locations
 

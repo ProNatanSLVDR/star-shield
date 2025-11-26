@@ -25,7 +25,7 @@ def fetch_stats(etablissement_id: int) -> None:
         raise ValueError(f"Etablissement {etablissement_id} not found")
 
     reviews_service = etablissement.google_credential.get_reviews_service()
-    if reviews_service is False:
+    if reviews_service is None:
         error_msg = f"Unable to initialize reviews service for {etablissement.title}"
         logger.error(error_msg)
         raise RuntimeError(error_msg)
@@ -74,7 +74,7 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
         raise ValueError(f"Etablissement {etablissement_id} not found")
 
     reviews_service = etablissement.google_credential.get_reviews_service()
-    if reviews_service is False:
+    if reviews_service is None:
         error_msg = f"Unable to initialize reviews service for {etablissement.title}"
         logger.error(error_msg)
         raise RuntimeError(error_msg)

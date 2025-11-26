@@ -103,9 +103,9 @@ def import_etablissement_partial(request):
             hx_triggers["close-modal"] = True
     else:
         available_locations = request.user.google_credential.list_available_locations()
+        print(available_locations)
         request.session["available_locations"] = available_locations
         form = ImportEtablissementForm(available_locations=available_locations)
-
     context = {
         "form": form,
         "available_locations": available_locations,
