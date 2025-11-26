@@ -29,8 +29,7 @@
                                         <img src="{{ review.google_reviewer_data.profilePhotoUri }}"
                                              alt="Profile"
                                              class="rounded-circle"
-                                             style="width: 48px; height: 48px; object-fit: cover;"
-                                             onerror="this.onerror=null; this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                             style="width: 48px; height: 48px; object-fit: cover;"onerror="this.onerror=null; this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; display: none;">
                                             <i class="fa-solid fa-user"></i>
                                         </div>
@@ -47,21 +46,26 @@
 
                                 <!-- Review Content -->
                                 <div class="flex-grow-1">
-                                    <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
-                                        <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
-                                            {% if review.source == 'google' %}
-                                                <i class="fa-brands fa-google" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Google</span>
-                                            {% else %}
-                                                <i class="fa-solid fa-lock" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Interne</span>
-                                            {% endif %}
-                                        </span>
-                                        <h6 class="mb-0 fw-semibold" style="font-size: 0.95rem;">
-                                            {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.displayName %}
-                                                {{ review.google_reviewer_data.displayName }}
-                                            {% else %}
-                                                Anonyme
-                                            {% endif %}
-                                        </h6>
+                                    <div class="col mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0 fw-semibold" style="font-size: 0.95rem;">
+                                                {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.displayName %}
+                                                    {{ review.google_reviewer_data.displayName }}
+                                                {% else %}
+                                                    Anonyme
+                                                {% endif %}
+
+
+
+                                            </h6>
+                                            <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
+                                                {% if review.source == 'google' %}
+                                                    <i class="fa-brands fa-google" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Google</span>
+                                                {% else %}
+                                                    <i class="fa-solid fa-lock" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Interne</span>
+                                                {% endif %}
+                                            </span>
+                                        </div>
                                         <div class="d-flex align-items-center gap-0">
                                             {% for i in "12345"|make_list %}
                                                 {% if forloop.counter <= review.rating %}
@@ -185,11 +189,16 @@
     </div>
 
     <style>
-        .grid {
-            margin: 0 auto;
-        }
         .grid-sizer,
         .grid-item { width: 33.333%; }
+        @media (max-width: 768px) {
+            .grid-sizer,
+            .grid-item { width: 100%; }
+        }
+        @media (min-width: 769px) and (max-width: 992px) {
+            .grid-sizer,
+            .grid-item { width: 50%; }
+        }
     </style>
 
     <script src="{% static 'bootstrap/masonry.min.js' %}"></script>
