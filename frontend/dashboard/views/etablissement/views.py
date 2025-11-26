@@ -212,7 +212,7 @@ def avis_view(request):
             reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by("-sort_date")
 
     # Pagination
-    paginator = Paginator(reviews_queryset, 20)
+    paginator = Paginator(reviews_queryset, 50)
     try:
         page_number = int(page_number)
         page_obj = paginator.page(page_number)
