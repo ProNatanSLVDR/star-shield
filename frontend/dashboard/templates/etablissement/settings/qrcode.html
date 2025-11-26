@@ -260,6 +260,13 @@
             if (fillColorSecondaryInput && fillColorSecondaryTextInput) {
                 fillColorSecondaryInput.addEventListener("input", function() {
                     fillColorSecondaryTextInput.value = this.value;
+                    // Auto-switch to 2-color style if secondary color differs from primary
+                    if (colorMaskSelect && colorMaskSelect.value === "solid") {
+                        const primaryColor = fillColorInput ? fillColorInput.value : "#000000";
+                        if (this.value !== primaryColor) {
+                            colorMaskSelect.value = "square_radial";
+                        }
+                    }
                     updatePreview();
                 });
 
@@ -267,6 +274,13 @@
                     const value = this.value;
                     if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
                         fillColorSecondaryInput.value = value;
+                        // Auto-switch to 2-color style if secondary color differs from primary
+                        if (colorMaskSelect && colorMaskSelect.value === "solid") {
+                            const primaryColor = fillColorInput ? fillColorInput.value : "#000000";
+                            if (value !== primaryColor) {
+                                colorMaskSelect.value = "square_radial";
+                            }
+                        }
                         updatePreview();
                     }
                 });
