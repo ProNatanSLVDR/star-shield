@@ -29,7 +29,7 @@
                     <tr>
                         {% for header in headers %}
                             <th scope="col" data-column-index="{{ forloop.counter0 }}"
-                                class="{% if header.orderable %}sortable {% endif %}{% if header.centered %}text-center{% endif %}"
+                                class="text-bg-primary {% if header.orderable %}sortable {% endif %}{% if header.centered %}text-center{% endif %}"
                                 {% if header.orderable %}data-sortable{% endif %}
                                 {% if header.searchable %}data-searchable{% endif %}>
                                 <div class="d-flex align-items-center {% if header.centered %}justify-content-center{% endif %}">

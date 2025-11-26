@@ -12,9 +12,7 @@ from .forms import ImportEtablissementForm
 @google_gmb_connected_required
 def list_etablissements_view(request):
     if not request.htmx:
-        return starshield_render(
-            request, "etablissements/list.html", page_name="etablissements"
-        )
+        return starshield_render(request, "etablissements/list.html", page_name="etablissements")
 
     etablissements = request.user.google_credential.etablissements.all()
 
@@ -25,15 +23,17 @@ def list_etablissements_view(request):
             "key": "title",
             "searchable": True,
             "orderable": True,
+            "icon": "fa-solid fa-building",
         },
-        {"label": "Site web", "key": "website_uri", "orderable": False},
+        {"label": "Site web", "key": "website_uri", "orderable": False, "icon": "fa-solid fa-globe"},
         {
             "label": "Date de création",
             "key": "created_at",
             "orderable": True,
             "centered": True,
+            "icon": "fa-solid fa-calendar",
         },
-        {"label": "Actions", "key": "actions", "centered": True},
+        {"label": "Actions", "key": "actions", "centered": True, "icon": "fa-solid fa-gear"},
     ]
 
     # Prepare table rows
@@ -45,18 +45,14 @@ def list_etablissements_view(request):
             "classes": "btn-sm btn-danger",
             "extra_kwargs": {
                 "hx_modal_toggle": True,
-                "hx-get": reverse(
-                    "dashboard:etablissements:delete_partial", args=[etablissement.id]
-                ),
+                "hx-get": reverse("dashboard:etablissements:delete_partial", args=[etablissement.id]),
             },
         }
 
         row = {
             "title": etablissement.title,
             "website_uri": etablissement.website_uri or "N/A",
-            "created_at": etablissement.created_at.strftime("%d/%m/%Y")
-            if etablissement.created_at
-            else "N/A",
+            "created_at": etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A",
             "actions": {
                 "type": "buttons",
                 "buttons": [delete_button],
@@ -87,9 +83,7 @@ def import_etablissement_partial(request):
 
     if request.method == "POST":
         available_locations = request.session.get("available_locations", [])
-        form = ImportEtablissementForm(
-            request.POST, available_locations=available_locations
-        )
+        form = ImportEtablissementForm(request.POST, available_locations=available_locations)
 
         if form.is_valid():
             selected_locations = form.cleaned_data.get("locations", [])
@@ -102,9 +96,7 @@ def import_etablissement_partial(request):
             for location_name in selected_locations:
                 location = locations_dict.get(location_name)
                 if location:
-                    google_credential.create_etablissement_from_location(
-                        account_id=location["account_id"], location_id=location_name
-                    )
+                    google_credential.create_etablissement_from_location(account_id=location["account_id"], location_id=location_name)
 
             messages.success(request, "Établissements importés avec succès!")
             hx_triggers["etablissements-updated"] = True
@@ -135,9 +127,7 @@ def delete_etablissement_confirmation_partial(request, id):
     """
 
     # on essaye de récupérer l'établissement
-    etablissement = Etablissement.objects.filter(
-        id=id, google_credential=request.user.google_credential
-    ).first()
+    etablissement = Etablissement.objects.filter(id=id, google_credential=request.user.google_credential).first()
 
     hx_triggers = {}
     context = {
@@ -147,15 +137,11 @@ def delete_etablissement_confirmation_partial(request, id):
 
     if etablissement:
         context["etablissement_title"] = etablissement.title
-        context["delete_url"] = reverse(
-            "dashboard:etablissements:delete_partial", args=[etablissement.id]
-        )
+        context["delete_url"] = reverse("dashboard:etablissements:delete_partial", args=[etablissement.id])
 
         if request.method == "POST":
             etablissement.delete()
-            messages.success(
-                request, f"L'établissement {etablissement.title} a été supprimé."
-            )
+            messages.success(request, f"L'établissement {etablissement.title} a été supprimé.")
             hx_triggers["etablissements-updated"] = True
             hx_triggers["close-modal"] = True
     else:
@@ -173,9 +159,7 @@ def delete_etablissement_confirmation_partial(request, id):
 
 @google_gmb_connected_required
 def select_etablissement(request, id):
-    etablissement = Etablissement.objects.filter(
-        id=id, google_credential=request.user.google_credential
-    ).first()
+    etablissement = Etablissement.objects.filter(id=id, google_credential=request.user.google_credential).first()
 
     if etablissement:
         request.session["selected_etablissement"] = etablissement.id
@@ -212,18 +196,14 @@ def etablissement_selector_partial(request):
             "icon": "fa-solid fa-check",
             "classes": "btn-sm btn-primary",
             "extra_kwargs": {
-                "href": reverse(
-                    "dashboard:etablissements:select", args=[etablissement.id]
-                ),
+                "href": reverse("dashboard:etablissements:select", args=[etablissement.id]),
             },
         }
 
         row = {
             "title": etablissement.title,
             "website_uri": etablissement.website_uri or "N/A",
-            "created_at": etablissement.created_at.strftime("%d/%m/%Y")
-            if etablissement.created_at
-            else "N/A",
+            "created_at": etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A",
             "actions": {
                 "type": "buttons",
                 "buttons": [select_button],
@@ -240,6 +220,4 @@ def etablissement_selector_partial(request):
         }
     }
 
-    return starshield_render(
-        request, "etablissements/selector_partial.html", context=context
-    )
+    return starshield_render(request, "etablissements/selector_partial.html", context=context)
