@@ -138,7 +138,7 @@ def avis_view(request):
     # If custom dates are provided, don't use preset
     if date_from or date_to:
         date_preset = ""
-    
+
     if date_preset:
         today = timezone.now().date()
         if date_preset == "7days":

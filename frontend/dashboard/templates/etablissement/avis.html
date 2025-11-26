@@ -17,83 +17,54 @@
         <div class="rounded-4 border bg-white shadow-sm p-3">
             {% if reviews.paginator.count > 0 %}
 
-
-                <div class="grid">
-                    <div class="grid-sizer"></div>
+                <div class="row g-3" data-masonry='{"percentPosition": true }'>
                     {% for review in reviews %}
-                        <div class="grid-item border rounded-3 p-3 bg-white">
-                            <div class="d-flex align-items-start gap-3">
-                                <!-- Profile Picture / Avatar -->
-                                <div class="flex-shrink-0">
-                                    {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.profilePhotoUri %}
-                                        <img src="{{ review.google_reviewer_data.profilePhotoUri }}"
-                                             alt="Profile"
-                                             class="rounded-circle"
-                                             style="width: 48px; height: 48px; object-fit: cover;"onerror="this.onerror=null; this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; display: none;">
-                                            <i class="fa-solid fa-user"></i>
-                                        </div>
-                                    {% elif review.source == 'google' %}
-                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                            <i class="fa-solid fa-user"></i>
-                                        </div>
-                                    {% else %}
-                                        <div class="rounded-circle bg-secondary-subtle text-secondary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                            <i class="fa-solid fa-user-secret"></i>
-                                        </div>
-                                    {% endif %}
-                                </div>
+                        <div class="col-12 col-md-6 col-lg-4">
 
-                                <!-- Review Content -->
-                                <div class="flex-grow-1">
-                                    <div class="col mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="mb-0 fw-semibold" style="font-size: 0.95rem;">
-                                                {% if review.source == 'google' and review.google_reviewer_data and review.google_reviewer_data.displayName %}
-                                                    {{ review.google_reviewer_data.displayName }}
-                                                {% else %}
-                                                    Anonyme
-                                                {% endif %}
+                            <div class="card p-3">
+                                <!-- Card Header: Profile Picture, Name, and Rating -->
+                                <div class="d-flex align-items-start gap-3 mb-3">
+                                    <!-- Profile Picture -->
+                                    <div class="flex-shrink-0">
+                                        {% if review.source == 'google' and review.google_reviewer_data.profilePhotoUrl %}
+                                            <img src="{{ review.google_reviewer_data.profilePhotoUrl }}"
+                                                 alt="Profile"
+                                                 class="rounded-circle"
+                                                 style="width: 48px; height: 48px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center"
+                                                 style="width: 48px; height: 48px;">
+                                                <i class="fa-solid fa-user text-secondary"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
 
-
-
-                                            </h6>
-                                            <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
-                                                {% if review.source == 'google' %}
-                                                    <i class="fa-brands fa-google" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Google</span>
-                                                {% else %}
-                                                    <i class="fa-solid fa-lock" style="font-size: 0.65rem;"></i> <span class="d-none d-sm-inline">Interne</span>
-                                                {% endif %}
-                                            </span>
+                                    <!-- Name and Rating -->
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold mb-1">
+                                            {% if review.source == 'google' and review.google_reviewer_data.displayName %}
+                                                {{ review.google_reviewer_data.displayName }}
+                                            {% else %}
+                                                Anonyme
+                                            {% endif %}
                                         </div>
-                                        <div class="d-flex align-items-center gap-0">
+                                        <!-- Star Rating -->
+                                        <div class="d-flex align-items-center gap-1">
                                             {% for i in "12345"|make_list %}
                                                 {% if forloop.counter <= review.rating %}
-                                                    <i class="fa-solid fa-star text-warning" style="font-size: 0.75rem;"></i>
+                                                    <i class="fa-solid fa-star text-warning" style="font-size: 0.875rem;"></i>
                                                 {% else %}
-                                                    <i class="fa-solid fa-star" style="font-size: 0.75rem; color: #e3e9ed;"></i>
+                                                    <i class="fa-solid fa-star" style="font-size: 0.875rem; color: #e3e9ed;"></i>
                                                 {% endif %}
                                             {% endfor %}
                                         </div>
                                     </div>
-
-                                    {% if review.comment %}
-                                        <p class="mb-2 text-body-secondary" style="line-height: 1.5; white-space: pre-line;">{{ review.comment|after_original }}</p>
-                                    {% else %}
-                                        <p class="mb-2 text-muted small">
-                                            Aucun commentaire
-                                        </p>
-                                    {% endif %}
-
-                                    <p class="mb-0 small text-muted">
-                                        <i class="fa-solid fa-clock"></i>
-                                        {% if review.writen_at %}
-                                            {{ review.writen_at|date:"d F Y à H:i" }}
-                                        {% else %}
-                                            {{ review.created_at|date:"d F Y à H:i" }}
-                                        {% endif %}
-                                    </p>
                                 </div>
+
+                                <!-- Comment -->
+                                {% if review.comment %}
+                                    <p class="mb-0 text-body-secondary small" style="line-height: 1.5; white-space: pre-line;">{{ review.comment|after_original }}</p>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -188,29 +159,9 @@
         </div>
     </div>
 
-    <style>
-        .grid-sizer,
-        .grid-item { width: 33.333%; }
-        @media (max-width: 768px) {
-            .grid-sizer,
-            .grid-item { width: 100%; }
-        }
-        @media (min-width: 769px) and (max-width: 992px) {
-            .grid-sizer,
-            .grid-item { width: 50%; }
-        }
-    </style>
-
     <script src="{% static 'bootstrap/masonry.min.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensure Masonry initializes (HTML initialization might not work if script loads after DOM)
-            var elem = document.querySelector('.grid');
-            var msnry = new Masonry( elem, {
-                // options
-                itemSelector: '.grid-item',
-                columnWidth: '.grid-sizer',
-            });
             const filterForm = document.getElementById('filterForm');
             const sourceInput = document.getElementById('sourceInput');
             const ratingInput = document.getElementById('ratingInput');
