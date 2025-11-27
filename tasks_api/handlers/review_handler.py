@@ -34,16 +34,11 @@ def fetch_stats(etablissement_id: int) -> None:
 
     # Fetch stats
     try:
-        stats_response = (
-            reviews_service.accounts()
-            .locations()
-            .reviews()
-            .list(parent=parent_path, pageSize=1)
-            .execute()
-        )
+        stats_response = reviews_service.accounts().locations().reviews().list(parent=parent_path, pageSize=1).execute()
     except Exception as e:
         error_msg = f"Error fetching review stats for {etablissement.title}: {e}"
         logger.error(error_msg)
+        etablissement.google_credential._check_and_set_invalid_grant(e)
         raise RuntimeError(error_msg) from e
 
     # Record rating history
@@ -79,9 +74,7 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
         logger.error(error_msg)
         raise RuntimeError(error_msg)
 
-    logger.info(
-        f"Starting review import for {etablissement.title} (force_import={force_import})"
-    )
+    logger.info(f"Starting review import for {etablissement.title} (force_import={force_import})")
 
     continue_import = True
     import_count = 0
@@ -103,6 +96,7 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
         except Exception as e:
             error_msg = f"Error fetching reviews for {etablissement.title}: {e}"
             logger.error(error_msg)
+            etablissement.google_credential._check_and_set_invalid_grant(e)
             raise RuntimeError(error_msg) from e
 
         location_reviews = reviews_data.get("locationReviews", [])
@@ -127,16 +121,12 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
                     },
                 )
                 import_count += 1
-                logger.debug(
-                    f"Imported review {import_count} for {etablissement.title}"
-                )
+                logger.debug(f"Imported review {import_count} for {etablissement.title}")
 
                 # Stop import if we find an existing review and force_import is False
                 if not force_import and not created:
                     continue_import = False
-                    logger.info(
-                        f"Found existing review, stopping import for {etablissement.title}"
-                    )
+                    logger.info(f"Found existing review, stopping import for {etablissement.title}")
                     break
             except Exception as e:
                 logger.error(f"Error creating review: {e}")
@@ -147,9 +137,7 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
         if next_page_token is None or not continue_import:
             break
 
-    logger.info(
-        f"Completed review import for {etablissement.title}: {import_count} reviews processed"
-    )
+    logger.info(f"Completed review import for {etablissement.title}: {import_count} reviews processed")
 
 
 def fetch_reviews_all(etablissement_id: int) -> None:
@@ -192,9 +180,7 @@ def fetch_reviews_all(etablissement_id: int) -> None:
         # Mark task as successful
         task_execution.mark_success()
 
-        logger.info(
-            f"Successfully completed full import for Etablissement {etablissement_id}"
-        )
+        logger.info(f"Successfully completed full import for Etablissement {etablissement_id}")
     except ValueError as e:
         # ValueError could come from nested Etablissement lookup (already handled)
         # or from fetch_stats()/fetch_reviews() (need to handle)
@@ -202,16 +188,12 @@ def fetch_reviews_all(etablissement_id: int) -> None:
         task_execution.refresh_from_db()
         if task_execution.status == "running":
             task_execution.mark_error(str(e))
-        logger.error(
-            f"Error in fetch_reviews_all for Etablissement {etablissement_id}: {e}"
-        )
+        logger.error(f"Error in fetch_reviews_all for Etablissement {etablissement_id}: {e}")
         raise
     except Exception as e:
         # Mark task as failed for any other exception
         task_execution.mark_error(str(e))
-        logger.error(
-            f"Error in fetch_reviews_all for Etablissement {etablissement_id}: {e}"
-        )
+        logger.error(f"Error in fetch_reviews_all for Etablissement {etablissement_id}: {e}")
         raise
 
 
@@ -255,9 +237,7 @@ def fetch_reviews_refresh(etablissement_id: int) -> None:
         # Mark task as successful
         task_execution.mark_success()
 
-        logger.info(
-            f"Successfully completed refresh import for Etablissement {etablissement_id}"
-        )
+        logger.info(f"Successfully completed refresh import for Etablissement {etablissement_id}")
     except ValueError as e:
         # ValueError could come from nested Etablissement lookup (already handled)
         # or from fetch_stats()/fetch_reviews() (need to handle)
@@ -265,14 +245,10 @@ def fetch_reviews_refresh(etablissement_id: int) -> None:
         task_execution.refresh_from_db()
         if task_execution.status == "running":
             task_execution.mark_error(str(e))
-        logger.error(
-            f"Error in fetch_reviews_refresh for Etablissement {etablissement_id}: {e}"
-        )
+        logger.error(f"Error in fetch_reviews_refresh for Etablissement {etablissement_id}: {e}")
         raise
     except Exception as e:
         # Mark task as failed for any other exception
         task_execution.mark_error(str(e))
-        logger.error(
-            f"Error in fetch_reviews_refresh for Etablissement {etablissement_id}: {e}"
-        )
+        logger.error(f"Error in fetch_reviews_refresh for Etablissement {etablissement_id}: {e}")
         raise

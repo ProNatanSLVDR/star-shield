@@ -115,6 +115,37 @@ class GoogleCredentials(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def _check_and_set_invalid_grant(self, error: Exception) -> bool:
+        """
+        Check if error contains invalid_grant and set flag if found.
+
+        Args:
+            error: The exception/error to check
+
+        Returns:
+            bool: True if invalid_grant was detected, False otherwise
+        """
+        try:
+            error_str = str(error).lower()
+
+            # Check for HttpError details if available
+            if isinstance(error, HttpError):
+                error_details = error.error_details if hasattr(error, "error_details") else None
+                if error_details:
+                    error_str += str(error_details).lower()
+
+            # Check if invalid_grant is in the error message
+            if "invalid_grant" in error_str:
+                if not self.has_invalid_grants:
+                    self.has_invalid_grants = True
+                    self.save(update_fields=["has_invalid_grants"])
+                    logger.warning(f"Detected invalid_grant error for user {self.user_id}, flag set to True")
+                return True
+        except Exception as e:
+            logger.error(f"Error checking invalid_grant for user {self.user_id}: {e}", exc_info=True)
+
+        return False
+
     def get_valid_credentials(self) -> Credentials:
         creds = Credentials(
             token=self.token,
@@ -129,6 +160,7 @@ class GoogleCredentials(models.Model):
                 creds.refresh(Request())
             except RefreshError as e:
                 logger.error(f"Google OAuth token refresh failed for user {self.user_id}: {e}")
+                self._check_and_set_invalid_grant(e)
                 self.is_valid = False
                 self.save()
                 raise
@@ -152,6 +184,7 @@ class GoogleCredentials(models.Model):
             return reviews_service
         except Exception as e:
             logger.error(f"Error building reviews service for user {self.user_id}: {e}", exc_info=True)
+            self._check_and_set_invalid_grant(e)
             return None
 
     def get_locations_service(self):
@@ -165,6 +198,7 @@ class GoogleCredentials(models.Model):
             return locations_service
         except Exception as e:
             logger.error(f"Error building locations service for user {self.user_id}: {e}", exc_info=True)
+            self._check_and_set_invalid_grant(e)
             return None
 
     def get_accounts_service(self):
@@ -178,6 +212,7 @@ class GoogleCredentials(models.Model):
             return accounts_service
         except Exception as e:
             logger.error(f"Error building accounts service for user {self.user_id}: {e}", exc_info=True)
+            self._check_and_set_invalid_grant(e)
             return None
 
     def create_etablissement_from_location(self, account_id, location_id):
@@ -199,6 +234,7 @@ class GoogleCredentials(models.Model):
             metadata = location.get("metadata", {})
         except Exception as e:
             logger.error(f"Erreur lors de la création de l'établissement pour {location_id} (user {self.user_id}): {e}", exc_info=True)
+            self._check_and_set_invalid_grant(e)
             return None
 
         try:
@@ -234,22 +270,28 @@ class GoogleCredentials(models.Model):
             accounts = accounts_service.accounts().list().execute()
         except Exception as e:
             logger.error(f"Error fetching accounts for user {self.user_id}: {e}", exc_info=True)
+            self._check_and_set_invalid_grant(e)
             return []
 
         for account in accounts.get("accounts", []):
             next_page_token = None
             while True:
-                # Récupération des locations
-                locations = (
-                    locations_service.accounts()
-                    .locations()
-                    .list(
-                        parent=account["name"],
-                        readMask="name,title",
-                        pageToken=next_page_token,
+                try:
+                    # Récupération des locations
+                    locations = (
+                        locations_service.accounts()
+                        .locations()
+                        .list(
+                            parent=account["name"],
+                            readMask="name,title",
+                            pageToken=next_page_token,
+                        )
+                        .execute()
                     )
-                    .execute()
-                )
+                except Exception as e:
+                    logger.error(f"Error fetching locations for account {account['name']} (user {self.user_id}): {e}", exc_info=True)
+                    self._check_and_set_invalid_grant(e)
+                    break
 
                 available_locations.extend(locations.get("locations", []))
 
