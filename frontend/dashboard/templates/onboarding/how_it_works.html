@@ -4,7 +4,7 @@
 {% block onboarding_content %}
     <div class="container-fluid d-flex flex-column h-100">
         <div class="row justify-content-center flex-grow-1 overflow-hidden">
-            <div class="col-lg-8 d-flex flex-column h-100 justify-content-center">
+            <div class="col-lg-10 d-flex flex-column h-100 justify-content-center">
             <!-- Progress Indicator -->
                 <div class="py-4">
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -18,77 +18,238 @@
 
             <!-- Content - Scrollable -->
                 <div class="card border-0 shadow-sm rounded-4 flex-grow-1 d-flex flex-column overflow-hidden">
-                    <div class="card-body p-5 overflow-auto d-flex flex-column justify-content-center">
-                        <h1 class="display-5 fw-bold text-body-emphasis mb-4 text-center">
+                    <div class="card-body p-5 overflow-auto">
+                        <h1 class="display-5 fw-bold text-body-emphasis mb-5 text-center">
                             Comment ça fonctionne ?
                         </h1>
 
-                        <div class="mb-5">
-                            <div class="d-flex align-items-start mb-4">
-                                <div class="flex-shrink-0 me-4">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                        <span class="fw-bold fs-5">1</span>
+                        <!-- Two Column Layout: Steps Left, Visualization Right -->
+                        <div class="row g-4 mb-5">
+                            <!-- Left Column: Steps -->
+                            <div class="col-lg-5">
+                                <!-- Step 1: QR Code Generation -->
+                                <div class="card border-0 bg-light mb-3 rounded-3">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <span class="fw-bold">1</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h5 class="fw-bold mb-1">
+                                                    <i class="fa-solid fa-qrcode text-primary me-2"></i>
+                                                    Générez un QR Code
+                                                </h5>
+                                                <p class="text-muted small mb-0">
+                                                    Créez un QR code unique pour chaque établissement. Vos clients le scannent avec leur smartphone.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <h4 class="fw-bold mb-2">Générez un QR Code</h4>
-                                    <p class="text-muted mb-0">
-                                        Créez un QR code unique pour chaque établissement. Vos clients le scannent pour laisser un avis.
-                                    </p>
+
+                                <!-- Step 2: Customer Rating -->
+                                <div class="card border-0 bg-light mb-3 rounded-3">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <span class="fw-bold">2</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h5 class="fw-bold mb-1">
+                                                    <i class="fa-solid fa-star text-primary me-2"></i>
+                                                    Vos clients notent
+                                                </h5>
+                                                <p class="text-muted small mb-0">
+                                                    Après avoir scanné, vos clients accèdent à une page de notation simple où ils donnent une note de 1 à 5 étoiles.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: Redirection -->
+                                <div class="card border-0 bg-light mb-3 rounded-3">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <span class="fw-bold">3</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h5 class="fw-bold mb-1">
+                                                    <i class="fa-solid fa-sliders text-primary me-2"></i>
+                                                    Redirection intelligente
+                                                </h5>
+                                                <p class="text-muted small mb-0">
+                                                    StarShield analyse la note et la redirige automatiquement selon votre seuil configuré (voir à droite).
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 4: Analysis -->
+                                <div class="card border-0 bg-light rounded-3">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <span class="fw-bold">4</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h5 class="fw-bold mb-1">
+                                                    <i class="fa-solid fa-chart-line text-primary me-2"></i>
+                                                    Analysez et améliorez
+                                                </h5>
+                                                <p class="text-muted small mb-0">
+                                                    Consultez vos avis privés dans le tableau de bord pour identifier les tendances et optimiser votre service.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="d-flex align-items-start mb-4">
-                                <div class="flex-shrink-0 me-4">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                        <span class="fw-bold fs-5">2</span>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h4 class="fw-bold mb-2">Vos clients notent leur expérience</h4>
-                                    <p class="text-muted mb-0">
-                                        Après avoir scanné le QR code, vos clients accèdent à une page de notation simple et intuitive.
-                                    </p>
-                                </div>
-                            </div>
+                            <!-- Right Column: Threshold Visualization -->
+                            <div class="col-lg-7">
+                                <div class="card border-0 bg-light rounded-4 h-100">
+                                    <div class="card-body p-4">
+                                        <h4 class="fw-bold mb-3 text-center">
+                                            <i class="fa-solid fa-sliders me-2"></i>
+                                            Comment fonctionne le seuil ?
+                                        </h4>
+                                        <p class="text-muted small text-center mb-4">
+                                            Les avis sont automatiquement redirigés selon leur note
+                                        </p>
 
-                            <div class="d-flex align-items-start mb-4">
-                                <div class="flex-shrink-0 me-4">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                        <span class="fw-bold fs-5">3</span>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h4 class="fw-bold mb-2">Redirection intelligente</h4>
-                                    <p class="text-muted mb-0">
-                                        <strong>Si la note est supérieure à votre seuil</strong> (par défaut 4 étoiles), le client est automatiquement redirigé vers votre page Google pour laisser un avis public.
-                                    </p>
-                                    <p class="text-muted mb-0 mt-2">
-                                        <strong>Si la note est inférieure ou égale au seuil</strong>, l'avis reste privé dans StarShield pour que vous puissiez l'analyser et améliorer votre service.
-                                    </p>
-                                </div>
-                            </div>
+                                        <!-- Threshold Visualization -->
+                                        <div class="position-relative" style="height: 350px;">
+                                            <div class="row h-100 position-relative">
+                                                <!-- Threshold Line -->
+                                                <div class="position-absolute start-0 w-100" style="top: 40%; transform: translateY(-50%); z-index: 1;">
+                                                    <div class="position-relative w-100">
+                                                        <div class="border-bottom border-2 border-primary"></div>
+                                                        <span class="badge bg-primary border border-primary position-absolute translate-middle" style="z-index: 2; left: 35%;">
+                                                            <i class="fa-solid fa-star-half-stroke"></i> Seuil : 4 étoiles
+                                                        </span>
+                                                    </div>
+                                                </div>
 
-                            <div class="d-flex align-items-start">
-                                <div class="flex-shrink-0 me-4">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                        <span class="fw-bold fs-5">4</span>
+                                                <!-- Star Ratings Column -->
+                                                <div class="col-4 h-100 d-flex flex-column position-relative">
+                                                    {% for rating in "54321"|make_list %}
+                                                        <div class="d-flex align-items-center justify-content-center flex-grow-1 border-bottom" style="min-height: 0;">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <div class="d-flex align-items-center">
+                                                                    {% for i in "12345"|make_list %}
+                                                                        {% if i <= rating %}
+                                                                            <i class="fa-solid fa-star text-warning"></i>
+                                                                        {% else %}
+                                                                            <i class="fa-solid fa-star text-muted opacity-25"></i>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+
+                                                <!-- Arrows Column -->
+                                                <div class="col-2 h-100 d-flex flex-column position-relative">
+                                                    <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1" style="flex: 0 0 40%;">
+                                                        <i class="fa-solid fa-arrow-right-long fa-2x text-primary"></i>
+                                                    </div>
+                                                    <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1" style="flex: 0 0 60%;">
+                                                        <i class="fa-solid fa-arrow-right-long fa-2x text-primary"></i>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Destination Cards Column -->
+                                                <div class="col-6 h-100 d-flex flex-column position-relative">
+                                                    <!-- Google Card (Above Threshold) -->
+                                                    <div class="flex-grow-1 d-flex flex-column" style="flex: 0 0 40%; padding-bottom: 0.5rem;">
+                                                        <div class="card border rounded-3 d-flex flex-column bg-light h-100 border-primary" style="border-width: 2px;">
+                                                            <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
+                                                                <div class="row w-100">
+                                                                    <div class="col-auto d-flex justify-content-center align-items-center">
+                                                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 50px; height: 50px;">
+                                                                            <i class="fa-brands fa-google fa-2x text-primary"></i>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col d-flex flex-column justify-content-center">
+                                                                        <p class="fw-bold mb-1">Google</p>
+                                                                        <p class="mb-0 text-muted small">Avis publics (4★ et 5★)</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- StarShield Private Card (Below Threshold) -->
+                                                    <div class="flex-grow-1 d-flex flex-column" style="flex: 0 0 60%; padding-top: 0.5rem;">
+                                                        <div class="card border rounded-3 d-flex flex-column bg-light h-100">
+                                                            <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
+                                                                <div class="row w-100">
+                                                                    <div class="col-auto d-flex justify-content-center align-items-center">
+                                                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 50px; height: 50px;">
+                                                                            <i class="fa-solid fa-lock fa-2x text-primary"></i>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col d-flex flex-column justify-content-center">
+                                                                        <p class="fw-bold mb-1">StarShield</p>
+                                                                        <p class="mb-0 text-muted small">Avis privés (1★, 2★, 3★)</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Explanation Text -->
+                                        <div class="mt-4">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-start">
+                                                        <i class="fa-solid fa-check-circle text-success me-2 mt-1"></i>
+                                                        <div>
+                                                            <strong class="small">Notes ≥ 4 étoiles</strong>
+                                                            <p class="text-muted small mb-0">
+                                                                Redirection vers Google pour améliorer votre réputation publique.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-start">
+                                                        <i class="fa-solid fa-shield-halved text-primary me-2 mt-1"></i>
+                                                        <div>
+                                                            <strong class="small">Notes ≤ 3 étoiles</strong>
+                                                            <p class="text-muted small mb-0">
+                                                                Conservation privée pour analyser sans impact public.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h4 class="fw-bold mb-2">Analysez et améliorez</h4>
-                                    <p class="text-muted mb-0">
-                                        Consultez tous vos avis privés dans votre tableau de bord pour identifier les points d'amélioration et optimiser votre réputation publique.
-                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="alert alert-info border-0 mb-0">
+                        <!-- Info Alert -->
+                        <div class="alert alert-info border-0 rounded-4">
                             <div class="d-flex align-items-start">
-                                <i class="fa-solid fa-lightbulb text-info me-3 mt-1"></i>
+                                <i class="fa-solid fa-lightbulb text-info me-3 mt-1 fa-lg"></i>
                                 <div>
-                                    <strong>Astuce :</strong> Vous pouvez ajuster le seuil de notation pour chaque établissement selon vos besoins. Par défaut, seules les notes de 4 étoiles et plus sont redirigées vers Google.
+                                    <strong>Astuce :</strong> Vous pouvez ajuster le seuil de notation pour chaque établissement selon vos besoins dans les paramètres. Par défaut, seules les notes de 4 étoiles et plus sont redirigées vers Google pour maximiser votre réputation publique.
                                 </div>
                             </div>
                         </div>
@@ -110,4 +271,3 @@
         </div>
     </div>
 {% endblock onboarding_content %}
-
