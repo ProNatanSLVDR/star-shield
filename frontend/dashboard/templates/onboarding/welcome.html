@@ -1,0 +1,78 @@
+{% extends "onboarding/base.html" %}
+{% load i18n %}
+
+{% block onboarding_content %}
+    <div class="container-fluid d-flex flex-column h-100">
+        <div class="row justify-content-center flex-grow-1 overflow-hidden">
+            <div class="col-lg-8 d-flex flex-column h-100">
+            <!-- Progress Indicator -->
+                <div class="py-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Étape {{ step }} sur {{ total_steps }}</span>
+                        <a href="{% url 'dashboard:onboarding:skip' %}" class="text-muted small text-decoration-none">Passer</a>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio step total_steps 100 %}%"></div>
+                    </div>
+                </div>
+
+            <!-- Content - Scrollable -->
+                <div class="card border-0 shadow-sm rounded-4 flex-grow-1 d-flex flex-column overflow-hidden">
+                    <div class="card-body p-5 overflow-auto d-flex flex-column justify-content-center">
+                        <div class="text-center mb-4">
+                            <div class="mb-4">
+                                <i class="fa-solid fa-shield-halved text-primary" style="font-size: 5rem;"></i>
+                            </div>
+                            <h1 class="display-5 fw-bold text-body-emphasis mb-3">
+                                Bienvenue sur StarShield
+                            </h1>
+                            <p class="lead text-muted">
+                                Protégez et optimisez votre réputation en ligne en quelques minutes
+                            </p>
+                        </div>
+
+                        <div class="row g-4 mt-4">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="p-3 rounded-3 d-inline-block mb-3" style="background: rgba(13, 110, 253, 0.1);">
+                                        <i class="fa-solid fa-qrcode text-primary" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">QR Codes</h5>
+                                    <p class="text-muted small mb-0">Générez des QR codes pour vos clients</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="p-3 rounded-3 d-inline-block mb-3" style="background: rgba(13, 110, 253, 0.1);">
+                                        <i class="fa-solid fa-star text-primary" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Gestion Intelligente</h5>
+                                    <p class="text-muted small mb-0">Redirigez les avis positifs vers Google</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="p-3 rounded-3 d-inline-block mb-3" style="background: rgba(13, 110, 253, 0.1);">
+                                        <i class="fa-solid fa-chart-line text-primary" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Suivi en Temps Réel</h5>
+                                    <p class="text-muted small mb-0">Analysez votre réputation facilement</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Navigation Footer - Always at bottom -->
+                <div class="my-4">
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ next_url }}" class="btn btn-primary btn-lg rounded-pill px-5">
+                            Commencer <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock onboarding_content %}
+

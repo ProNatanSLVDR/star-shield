@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block body %}
+    <div class="d-flex w-100 h-100 bg-body-tertiary">
+    <!-- Main Content - Full Width -->
+        <main class="d-flex flex-column flex-grow-1 h-100">
+            {% block onboarding_content %}
+            {% endblock onboarding_content %}
+        </main>
+    </div>
+{% endblock body %}
+

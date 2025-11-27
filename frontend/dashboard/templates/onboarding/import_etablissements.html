@@ -1,0 +1,126 @@
+{% extends "onboarding/base.html" %}
+{% load i18n %}
+
+{% block onboarding_content %}
+    <div class="container-fluid d-flex flex-column h-100">
+        <div class="row justify-content-center flex-grow-1 overflow-hidden">
+            <div class="col-lg-8 d-flex flex-column h-100 justify-content-center">
+            <!-- Progress Indicator -->
+                <div class="py-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Étape {{ step }} sur {{ total_steps }}</span>
+                        <a href="{% url 'dashboard:onboarding:skip' %}" class="text-muted small text-decoration-none">Passer</a>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio step total_steps 100 %}%"></div>
+                    </div>
+                </div>
+
+            <!-- Content - Scrollable -->
+                {% if has_locations %}
+                    <form method="post" class="d-flex flex-column flex-grow-1 overflow-hidden">
+                        {% csrf_token %}
+                        <div class="card border-0 shadow-sm rounded-4 flex-grow-1 d-flex flex-column overflow-hidden">
+                            <div class="card-body p-5 overflow-auto d-flex flex-column justify-content-center">
+                                <div class="text-center mb-4">
+                                    <div class="mb-4">
+                                        <i class="fa-solid fa-building text-primary" style="font-size: 5rem;"></i>
+                                    </div>
+                                    <h1 class="display-5 fw-bold text-body-emphasis mb-3">
+                                        Importez vos établissements
+                                    </h1>
+                                    <p class="lead text-muted">
+                                        Sélectionnez les établissements que vous souhaitez gérer avec StarShield
+                                    </p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h5 class="fw-bold mb-3">Établissements disponibles</h5>
+                                    <div class="list-group">
+                                        {% for location in new_locations %}
+                                            <label class="list-group-item d-flex align-items-center">
+                                                <input type="checkbox" name="locations" value="{{ location.name }}" class="form-check-input me-3" checked>
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-bold">{{ location.title }}</div>
+                                                    <small class="text-muted">{{ location.name }}</small>
+                                                </div>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 pt-4 border-top">
+                                    <p class="text-muted small mb-0 text-center">
+                                        <i class="fa-solid fa-lightbulb me-2"></i>
+                                        Vous pourrez toujours ajouter ou importer d'autres établissements depuis votre tableau de bord
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                <!-- Navigation Footer - Always at bottom -->
+                        <div class="my-4">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ prev_url }}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                    <i class="fa-solid fa-arrow-left me-2"></i> Précédent
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">
+                                    <i class="fa-solid fa-download me-2"></i>
+                                    Importer les établissements sélectionnés
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="card border-0 shadow-sm rounded-4 flex-grow-1 d-flex flex-column overflow-hidden">
+                        <div class="card-body p-5 overflow-auto d-flex flex-column justify-content-center">
+                            <div class="text-center mb-4">
+                                <div class="mb-4">
+                                    <i class="fa-solid fa-building text-primary" style="font-size: 5rem;"></i>
+                                </div>
+                                <h1 class="display-5 fw-bold text-body-emphasis mb-3">
+                                    Importez vos établissements
+                                </h1>
+                                <p class="lead text-muted">
+                                    Sélectionnez les établissements que vous souhaitez gérer avec StarShield
+                                </p>
+                            </div>
+
+                            <div class="alert alert-info border-0 mb-4">
+                                <div class="d-flex align-items-start">
+                                    <i class="fa-solid fa-info-circle text-info me-3 mt-1"></i>
+                                    <div>
+                                        <strong>Aucun établissement disponible</strong>
+                                        <p class="mb-0 mt-2">Il semble que vous n'ayez pas d'établissements disponibles à importer depuis Google My Business, ou que tous vos établissements soient déjà importés.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-4 border-top">
+                                <p class="text-muted small mb-0 text-center">
+                                    <i class="fa-solid fa-lightbulb me-2"></i>
+                                    Vous pourrez toujours ajouter ou importer d'autres établissements depuis votre tableau de bord
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+            <!-- Navigation Footer - Always at bottom -->
+                    <div class="my-4">
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ prev_url }}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                <i class="fa-solid fa-arrow-left me-2"></i> Précédent
+                            </a>
+                            {% if next_url %}
+                                <a href="{{ next_url }}" class="btn btn-primary btn-lg rounded-pill px-5">
+                                    Continuer <i class="fa-solid fa-arrow-right ms-2"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock onboarding_content %}
+

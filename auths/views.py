@@ -7,7 +7,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpR
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from google_auth_oauthlib.flow import Flow  
+from google_auth_oauthlib.flow import Flow
 from django.contrib import messages
 
 from .models import Etablissement, GoogleCredentials
@@ -29,9 +29,8 @@ def get_google_auth_client_config() -> dict[str, dict[str, str]]:
     }
 
 
-
 def google_gmb_start(request: HttpRequest) -> HttpResponse:
-    redirect_uri = f"http://{settings.WEBSITE_URL}{reverse("auths:google_gmb_callback")}"
+    redirect_uri = f"http://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
 
     flow = Flow.from_client_config(
         get_google_auth_client_config(),
@@ -54,7 +53,7 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
     if settings.DEBUG:
         protocol = "http"
 
-    redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse("auths:google_gmb_callback")}"
+    redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
     state = request.session.get("state")
 
     if not state:
@@ -92,6 +91,12 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
     request.session.pop("state", None)
 
     messages.success(request, _("Compte Google My Business connecté avec succès."))
+
+    # If user is in onboarding, redirect to import step
+    if not request.user.onboarding_completed:
+        return redirect(reverse("dashboard:onboarding:import_etablissements"))
+
+    # Otherwise redirect to dashboard
     if google_credential:
         if google_credential.etablissements.all().count() == 0:
             return redirect(reverse("dashboard:accueil"))

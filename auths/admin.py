@@ -17,8 +17,9 @@ class UserAdmin(admin.ModelAdmin):
         "is_staff",
         "is_superuser",
         "is_active",
+        "onboarding_completed",
     )
-    list_filter = ("is_staff", "is_superuser", "is_active")
+    list_filter = ("is_staff", "is_superuser", "is_active", "onboarding_completed")
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email",)
 
@@ -29,6 +30,7 @@ class UserAdmin(admin.ModelAdmin):
             {"fields": ("first_name", "last_name", "profile_picture")},
         ),
         (_("Permissions"), {"fields": ("is_staff", "is_superuser", "is_active")}),
+        (_("Settings"), {"fields": ("onboarding_completed",)}),
         (_("Important dates"), {"fields": ("last_login", "created_at", "updated_at")}),
     )
     readonly_fields = ("created_at", "updated_at")

@@ -1,0 +1,113 @@
+{% extends "onboarding/base.html" %}
+{% load i18n %}
+
+{% block onboarding_content %}
+    <div class="container-fluid d-flex flex-column h-100">
+        <div class="row justify-content-center flex-grow-1 overflow-hidden">
+            <div class="col-lg-8 d-flex flex-column h-100 justify-content-center">
+            <!-- Progress Indicator -->
+                <div class="py-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Étape {{ step }} sur {{ total_steps }}</span>
+                        <a href="{% url 'dashboard:onboarding:skip' %}" class="text-muted small text-decoration-none">Passer</a>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio step total_steps 100 %}%"></div>
+                    </div>
+                </div>
+
+            <!-- Content - Scrollable -->
+                <div class="card border-0 shadow-sm rounded-4 flex-grow-1 d-flex flex-column overflow-hidden">
+                    <div class="card-body p-5 overflow-auto d-flex flex-column justify-content-center">
+                        <h1 class="display-5 fw-bold text-body-emphasis mb-4 text-center">
+                            Comment ça fonctionne ?
+                        </h1>
+
+                        <div class="mb-5">
+                            <div class="d-flex align-items-start mb-4">
+                                <div class="flex-shrink-0 me-4">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <span class="fw-bold fs-5">1</span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h4 class="fw-bold mb-2">Générez un QR Code</h4>
+                                    <p class="text-muted mb-0">
+                                        Créez un QR code unique pour chaque établissement. Vos clients le scannent pour laisser un avis.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-4">
+                                <div class="flex-shrink-0 me-4">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <span class="fw-bold fs-5">2</span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h4 class="fw-bold mb-2">Vos clients notent leur expérience</h4>
+                                    <p class="text-muted mb-0">
+                                        Après avoir scanné le QR code, vos clients accèdent à une page de notation simple et intuitive.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-4">
+                                <div class="flex-shrink-0 me-4">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <span class="fw-bold fs-5">3</span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h4 class="fw-bold mb-2">Redirection intelligente</h4>
+                                    <p class="text-muted mb-0">
+                                        <strong>Si la note est supérieure à votre seuil</strong> (par défaut 4 étoiles), le client est automatiquement redirigé vers votre page Google pour laisser un avis public.
+                                    </p>
+                                    <p class="text-muted mb-0 mt-2">
+                                        <strong>Si la note est inférieure ou égale au seuil</strong>, l'avis reste privé dans StarShield pour que vous puissiez l'analyser et améliorer votre service.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0 me-4">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <span class="fw-bold fs-5">4</span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h4 class="fw-bold mb-2">Analysez et améliorez</h4>
+                                    <p class="text-muted mb-0">
+                                        Consultez tous vos avis privés dans votre tableau de bord pour identifier les points d'amélioration et optimiser votre réputation publique.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info border-0 mb-0">
+                            <div class="d-flex align-items-start">
+                                <i class="fa-solid fa-lightbulb text-info me-3 mt-1"></i>
+                                <div>
+                                    <strong>Astuce :</strong> Vous pouvez ajuster le seuil de notation pour chaque établissement selon vos besoins. Par défaut, seules les notes de 4 étoiles et plus sont redirigées vers Google.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Navigation Footer - Always at bottom -->
+                <div class="my-4">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ prev_url }}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                            <i class="fa-solid fa-arrow-left me-2"></i> Précédent
+                        </a>
+                        <a href="{{ next_url }}" class="btn btn-primary btn-lg rounded-pill px-5">
+                            Suivant <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock onboarding_content %}
+
