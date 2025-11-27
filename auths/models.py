@@ -13,6 +13,7 @@ from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 from . import choices
 
@@ -102,6 +103,7 @@ class GoogleCredentials(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="google_credential")
 
     is_valid = models.BooleanField(default=False)
+    has_invalid_grants = models.BooleanField(default=False)
 
     token = models.TextField()
     refresh_token = models.TextField(blank=True, null=True)
@@ -235,37 +237,37 @@ class GoogleCredentials(models.Model):
         available_locations = []
         try:
             accounts = accounts_service.accounts().list().execute()
-
-            for account in accounts.get("accounts", []):
-                next_page_token = None
-                while True:
-                    # Récupération des locations
-                    locations = (
-                        locations_service.accounts()
-                        .locations()
-                        .list(
-                            parent=account["name"],
-                            readMask="name,title",
-                            pageToken=next_page_token,
-                        )
-                        .execute()
-                    )
-
-                    available_locations.extend(locations.get("locations", []))
-
-                    next_page_token = locations.get("nextPageToken")
-                    if not next_page_token:
-                        break
-
-            for location in available_locations:
-                location["account_id"] = account["name"]
-                if Etablissement.objects.filter(location_id=location["name"], account_id=account["name"]).exists():
-                    location["exists"] = True
-                else:
-                    location["exists"] = False
         except Exception as e:
-            logger.error(f"Error fetching available locations for user {self.user_id}: {e}", exc_info=True)
+            logger.error(f"Error fetching accounts for user {self.user_id}: {e}", exc_info=True)
             return []
+
+        for account in accounts.get("accounts", []):
+            next_page_token = None
+            while True:
+                # Récupération des locations
+                locations = (
+                    locations_service.accounts()
+                    .locations()
+                    .list(
+                        parent=account["name"],
+                        readMask="name,title",
+                        pageToken=next_page_token,
+                    )
+                    .execute()
+                )
+
+                available_locations.extend(locations.get("locations", []))
+
+                next_page_token = locations.get("nextPageToken")
+                if not next_page_token:
+                    break
+
+        for location in available_locations:
+            location["account_id"] = account["name"]
+            if Etablissement.objects.filter(location_id=location["name"], account_id=account["name"]).exists():
+                location["exists"] = True
+            else:
+                location["exists"] = False
 
         return available_locations
 
