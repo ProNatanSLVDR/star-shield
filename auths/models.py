@@ -150,9 +150,6 @@ class GoogleCredentials(models.Model):
                 credentials=credentials,
             )
             return reviews_service
-        except RefreshError as e:
-            logger.error(f"Failed to get valid credentials for reviews service (user {self.user_id}): {e}")
-            return None
         except Exception as e:
             logger.error(f"Error building reviews service for user {self.user_id}: {e}", exc_info=True)
             return None
@@ -166,9 +163,6 @@ class GoogleCredentials(models.Model):
                 credentials=credentials,
             )
             return locations_service
-        except RefreshError as e:
-            logger.error(f"Failed to get valid credentials for locations service (user {self.user_id}): {e}")
-            return None
         except Exception as e:
             logger.error(f"Error building locations service for user {self.user_id}: {e}", exc_info=True)
             return None
@@ -182,9 +176,6 @@ class GoogleCredentials(models.Model):
                 credentials=credentials,
             )
             return accounts_service
-        except RefreshError as e:
-            logger.error(f"Failed to get valid credentials for accounts service (user {self.user_id}): {e}")
-            return None
         except Exception as e:
             logger.error(f"Error building accounts service for user {self.user_id}: {e}", exc_info=True)
             return None
@@ -206,7 +197,11 @@ class GoogleCredentials(models.Model):
             location = locations_service.locations().get(name=location_id, readMask="name,title,metadata,websiteUri").execute()
 
             metadata = location.get("metadata", {})
+        except Exception as e:
+            logger.error(f"Erreur lors de la création de l'établissement pour {location_id} (user {self.user_id}): {e}", exc_info=True)
+            return None
 
+        try:
             # Création ou mise à jour de l'établissement
             etablissement, created = Etablissement.objects.update_or_create(
                 google_credential=self,
