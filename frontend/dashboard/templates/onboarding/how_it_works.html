@@ -19,9 +19,17 @@
             <!-- Content - Scrollable -->
                 <div class="card border-0 shadow-sm rounded-4 flex-grow-1 d-flex flex-column overflow-hidden">
                     <div class="card-body p-4 overflow-auto d-flex flex-column justify-content-center">
-                        <h1 class="h2 fw-bold text-body-emphasis mb-4 text-center">
-                            Comment fonctionne StarShield ?
-                        </h1>
+                        <div class="text-center mb-4">
+                            <h1 class="h2 fw-bold text-body-emphasis mb-1 d-flex align-items-center justify-content-center gap-3">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width: 48px; height: 48px;">
+                                    <i class="fa-solid fa-rocket text-primary" style="font-size: 1.5rem;"></i>
+                                </div>
+                                Comment fonctionne StarShield ?
+                            </h1>
+                            <p class="text-muted mb-0 small" style="font-size: 0.85rem;">
+                                Découvrez comment notre système protège et améliore votre réputation en ligne
+                            </p>
+                        </div>
 
                         <!-- Two Column Layout: Steps Left, Visualization Right -->
                         <div class="row g-3 mb-4">
@@ -38,7 +46,7 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <h6 class="fw-bold mb-1">
-                                                    1: Générez un QR Code
+                                                    <span class="opacity-50">1:</span> Générez un QR Code
                                                 </h6>
                                                 <p class="text-muted small mb-0" style="font-size: 0.9rem;">
                                                     Créez un QR code unique pour chaque établissement. Vos clients le scannent avec leur smartphone.
@@ -59,7 +67,7 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <h6 class="fw-bold mb-1">
-                                                    2: Vos clients notent
+                                                    <span class="opacity-50">2:</span> Vos clients notent
                                                 </h6>
                                                 <p class="text-muted small mb-0" style="font-size: 0.9rem;">
                                                     Après avoir scanné, vos clients accèdent à une page de notation simple où ils donnent une note de 1 à 5 étoiles.
@@ -80,7 +88,7 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <h6 class="fw-bold mb-1">
-                                                    3: Redirection intelligente
+                                                    <span class="opacity-50">3:</span> Redirection intelligente
                                                 </h6>
                                                 <p class="text-muted small mb-0" style="font-size: 0.9rem;">
                                                     StarShield analyse la note et la redirige automatiquement selon votre seuil configuré (voir à droite).
@@ -101,7 +109,7 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <h6 class="fw-bold mb-1">
-                                                    4: Analysez et améliorez
+                                                    <span class="opacity-50">4:</span> Analysez et améliorez
                                                 </h6>
                                                 <p class="text-muted small mb-0" style="font-size: 0.9rem;">
                                                     Consultez vos avis privés dans le tableau de bord pour identifier les tendances et optimiser votre service.
@@ -125,7 +133,7 @@
                                         </p>
 
                                         <!-- Threshold Visualization -->
-                                        <div class="position-relative" style="height: 300px;">
+                                        <div class="position-relative" style="height: 250px;">
                                             <div class="row h-100 position-relative">
                                                 <!-- Threshold Line -->
                                                 <div class="position-absolute start-0 w-100" style="top: 40%; transform: translateY(-50%); z-index: 1;">

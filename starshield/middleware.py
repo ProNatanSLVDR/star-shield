@@ -1,4 +1,6 @@
+from django.contrib import messages
 from django.contrib.messages import get_messages
+from django.shortcuts import reverse
 from django.utils.deprecation import MiddlewareMixin
 import json
 from auths.models import Etablissement
@@ -13,10 +15,7 @@ class CustomMessageMiddleware(MiddlewareMixin):
         storage = get_messages(request)
         messages = []
         for message in storage:
-            messages.append({
-                "message": str(message.message),
-                "tags": str(message.tags)
-            })
+            messages.append({"message": str(message.message), "tags": str(message.tags)})
         return messages
 
     def __call__(self, request):
@@ -41,5 +40,10 @@ class EtablissementMiddleware(MiddlewareMixin):
     def __call__(self, request):
         etablissement = request.session.get("selected_etablissement")
         if etablissement:
-            request.etablissement = Etablissement.objects.get(id=etablissement)
+            etablissement = Etablissement.objects.filter(id=etablissement).first()
+            if etablissement:
+                request.etablissement = etablissement
+            else:
+                del request.session["selected_etablissement"]
+
         return self.get_response(request)
