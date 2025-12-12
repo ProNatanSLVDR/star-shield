@@ -7,7 +7,8 @@ import logging
 
 from auths.models import Etablissement
 from tasks_api.models import TaskExecution
-from tasks_api.services.review_service import fetch_all_reviews, fetch_new_reviews
+from tasks_api.services.review_service import fetch_stats, fetch_reviews, fetch_new_reviews
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +41,15 @@ def execute_fetch_all(etablissement_id: int) -> None:
         task_execution.etablissement = etablissement
         task_execution.save(update_fields=["etablissement"])
 
-        # Execute review fetching (this handles stats, reviews, and timestamp update)
-        fetch_all_reviews(etablissement_id)
+        # Fetch stats first
+        fetch_stats(etablissement_id)
+
+        # Then fetch all reviews
+        fetch_reviews(etablissement_id, force_import=True)
+
+        # Update last_reviews_update timestamp
+        etablissement.last_reviews_update = timezone.now()
+        etablissement.save(update_fields=["last_reviews_update"])
 
         # Mark task as successful
         task_execution.mark_success()
@@ -91,8 +99,15 @@ def execute_fetch_refresh(etablissement_id: int) -> None:
         task_execution.etablissement = etablissement
         task_execution.save(update_fields=["etablissement"])
 
-        # Execute review fetching (this handles stats, reviews, and timestamp update)
-        fetch_new_reviews(etablissement_id)
+        # Fetch stats first
+        fetch_stats(etablissement_id)
+
+        # Then fetch new reviews
+        fetch_reviews(etablissement_id, force_import=False)
+
+        # Update last_reviews_update timestamp
+        etablissement.last_reviews_update = timezone.now()
+        etablissement.save(update_fields=["last_reviews_update"])
 
         # Mark task as successful
         task_execution.mark_success()
