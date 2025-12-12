@@ -1,5 +1,6 @@
 """
-Review fetching handlers for async task processing.
+Review fetching service - pure business logic for managing reviews.
+No task execution tracking, no API concerns.
 """
 
 import logging
@@ -8,7 +9,6 @@ from django.utils import timezone
 from auths.models import Etablissement, RatingHistory
 from frontend.reviews.models import Review
 from frontend.reviews.utils import google_stars_to_number
-from tasks_api.models import TaskExecution
 
 logger = logging.getLogger(__name__)
 
@@ -140,115 +140,43 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
     logger.info(f"Completed review import for {etablissement.title}: {import_count} reviews processed")
 
 
-def fetch_reviews_all(etablissement_id: int) -> None:
+def fetch_all_reviews(etablissement_id: int) -> None:
     """
     Full import - fetches stats and all reviews without stopping on existing ones.
     Uses force_import=True to import everything.
+    Updates last_reviews_update timestamp on the Etablissement.
     """
-    # Create task execution record first (etablissement may not exist)
-    task_execution = TaskExecution.objects.create(
-        task_type="fetch_reviews_all",
-        etablissement=None,  # Will be set after lookup
-        status="running",
-        metadata={"etablissement_id": etablissement_id},
-    )
+    etablissement = Etablissement.objects.get(id=etablissement_id)
 
-    try:
-        # Get Etablissement - this can fail and will be caught below
-        try:
-            etablissement = Etablissement.objects.get(id=etablissement_id)
-        except Etablissement.DoesNotExist:
-            error_msg = f"Etablissement {etablissement_id} not found"
-            logger.error(error_msg)
-            task_execution.mark_error(error_msg)
-            raise ValueError(error_msg)
+    # Fetch stats first
+    fetch_stats(etablissement_id)
 
-        # Update task execution with etablissement reference
-        task_execution.etablissement = etablissement
-        task_execution.save(update_fields=["etablissement"])
+    # Then fetch all reviews
+    fetch_reviews(etablissement_id, force_import=True)
 
-        # Fetch stats first
-        fetch_stats(etablissement_id)
+    # Update last_reviews_update timestamp
+    etablissement.last_reviews_update = timezone.now()
+    etablissement.save(update_fields=["last_reviews_update"])
 
-        # Then fetch all reviews
-        fetch_reviews(etablissement_id, force_import=True)
-
-        # Update last_reviews_update timestamp
-        etablissement.last_reviews_update = timezone.now()
-        etablissement.save(update_fields=["last_reviews_update"])
-
-        # Mark task as successful
-        task_execution.mark_success()
-
-        logger.info(f"Successfully completed full import for Etablissement {etablissement_id}")
-    except ValueError as e:
-        # ValueError could come from nested Etablissement lookup (already handled)
-        # or from fetch_stats()/fetch_reviews() (need to handle)
-        # Check if task is still in "running" status - if so, mark as error
-        task_execution.refresh_from_db()
-        if task_execution.status == "running":
-            task_execution.mark_error(str(e))
-        logger.error(f"Error in fetch_reviews_all for Etablissement {etablissement_id}: {e}")
-        raise
-    except Exception as e:
-        # Mark task as failed for any other exception
-        task_execution.mark_error(str(e))
-        logger.error(f"Error in fetch_reviews_all for Etablissement {etablissement_id}: {e}")
-        raise
+    logger.info(f"Successfully completed full import for Etablissement {etablissement_id}")
 
 
-def fetch_reviews_refresh(etablissement_id: int) -> None:
+def fetch_new_reviews(etablissement_id: int) -> None:
     """
     Incremental import - fetches stats and new reviews until it finds an existing one.
     Uses force_import=False to stop when encountering existing reviews.
+    Updates last_reviews_update timestamp on the Etablissement.
     """
-    # Create task execution record first (etablissement may not exist)
-    task_execution = TaskExecution.objects.create(
-        task_type="fetch_reviews_refresh",
-        etablissement=None,  # Will be set after lookup
-        status="running",
-        metadata={"etablissement_id": etablissement_id},
-    )
+    etablissement = Etablissement.objects.get(id=etablissement_id)
 
-    try:
-        # Get Etablissement - this can fail and will be caught below
-        try:
-            etablissement = Etablissement.objects.get(id=etablissement_id)
-        except Etablissement.DoesNotExist:
-            error_msg = f"Etablissement {etablissement_id} not found"
-            logger.error(error_msg)
-            task_execution.mark_error(error_msg)
-            raise ValueError(error_msg)
+    # Fetch stats first
+    fetch_stats(etablissement_id)
 
-        # Update task execution with etablissement reference
-        task_execution.etablissement = etablissement
-        task_execution.save(update_fields=["etablissement"])
+    # Then fetch new reviews
+    fetch_reviews(etablissement_id, force_import=False)
 
-        # Fetch stats first
-        fetch_stats(etablissement_id)
+    # Update last_reviews_update timestamp
+    etablissement.last_reviews_update = timezone.now()
+    etablissement.save(update_fields=["last_reviews_update"])
 
-        # Then fetch new reviews
-        fetch_reviews(etablissement_id, force_import=False)
-
-        # Update last_reviews_update timestamp
-        etablissement.last_reviews_update = timezone.now()
-        etablissement.save(update_fields=["last_reviews_update"])
-
-        # Mark task as successful
-        task_execution.mark_success()
-
-        logger.info(f"Successfully completed refresh import for Etablissement {etablissement_id}")
-    except ValueError as e:
-        # ValueError could come from nested Etablissement lookup (already handled)
-        # or from fetch_stats()/fetch_reviews() (need to handle)
-        # Check if task is still in "running" status - if so, mark as error
-        task_execution.refresh_from_db()
-        if task_execution.status == "running":
-            task_execution.mark_error(str(e))
-        logger.error(f"Error in fetch_reviews_refresh for Etablissement {etablissement_id}: {e}")
-        raise
-    except Exception as e:
-        # Mark task as failed for any other exception
-        task_execution.mark_error(str(e))
-        logger.error(f"Error in fetch_reviews_refresh for Etablissement {etablissement_id}: {e}")
-        raise
+    logger.info(f"Successfully completed refresh import for Etablissement {etablissement_id}")

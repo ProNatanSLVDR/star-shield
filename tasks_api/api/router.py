@@ -6,7 +6,7 @@ import logging
 from ninja import Router
 from django.conf import settings
 
-from tasks_api.handlers.review_handler import fetch_reviews_all, fetch_reviews_refresh
+from tasks_api.services.task_service import execute_fetch_all, execute_fetch_refresh
 from tasks_api.api.schemas import ReviewFetchRequest, ReviewFetchResponse
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def fetch_all(request, payload: ReviewFetchRequest):
         ), 401
 
     try:
-        fetch_reviews_all(payload.etablissement_id)
+        execute_fetch_all(payload.etablissement_id)
         return ReviewFetchResponse(
             status="success",
             etablissement_id=payload.etablissement_id,
@@ -81,7 +81,7 @@ def fetch_refresh(request, payload: ReviewFetchRequest):
         ), 401
 
     try:
-        fetch_reviews_refresh(payload.etablissement_id)
+        execute_fetch_refresh(payload.etablissement_id)
         return ReviewFetchResponse(
             status="success",
             etablissement_id=payload.etablissement_id,
