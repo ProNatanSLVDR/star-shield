@@ -37,17 +37,19 @@ def execute_fetch_all(etablissement_id: int) -> None:
             task_execution.mark_error(error_msg)
             raise ValueError(error_msg)
 
+        logger.info(f"Etablissement found: {etablissement} (id: {etablissement_id})")
+
         # Update task execution with etablissement reference
         task_execution.etablissement = etablissement
         task_execution.save(update_fields=["etablissement"])
 
         # Fetch stats first
-        logger.info(f"Step 1: Fetching stats for Etablissement {etablissement_id}")
-        fetch_stats(etablissement_id)
+        logger.info(f"Step 1: Fetching stats for Etablissement {etablissement}")
+        fetch_stats(etablissement)
 
         # Then fetch all reviews
-        logger.info(f"Step 2: Fetching all reviews for Etablissement {etablissement_id}")
-        fetch_reviews(etablissement_id, force_import=True)
+        logger.info(f"Step 2: Fetching all reviews for Etablissement {etablissement}")
+        fetch_reviews(etablissement, force_import=True)
 
         # Update last_reviews_update timestamp
         etablissement.last_reviews_update = timezone.now()
@@ -56,7 +58,7 @@ def execute_fetch_all(etablissement_id: int) -> None:
         # Mark task as successful
         task_execution.mark_success()
 
-        logger.info(f"Successfully completed full import for Etablissement {etablissement_id}")
+        logger.info(f"Successfully completed full import for Etablissement {etablissement}")
     except ValueError as e:
         # ValueError could come from nested Etablissement lookup (already handled)
         # or from fetch_all_reviews() (need to handle)
@@ -64,12 +66,12 @@ def execute_fetch_all(etablissement_id: int) -> None:
         task_execution.refresh_from_db()
         if task_execution.status == "running":
             task_execution.mark_error(str(e))
-        logger.error(f"Error in execute_fetch_all for Etablissement {etablissement_id}: {e}")
+        logger.error(f"Error in execute_fetch_all for Etablissement {etablissement}(id: {etablissement_id}): {e}")
         raise
     except Exception as e:
         # Mark task as failed for any other exception
         task_execution.mark_error(str(e))
-        logger.error(f"Error in execute_fetch_all for Etablissement {etablissement_id}: {e}")
+        logger.error(f"Error in execute_fetch_all for Etablissement {etablissement} (id: {etablissement_id}): {e}")
         raise
 
 
@@ -102,10 +104,10 @@ def execute_fetch_refresh(etablissement_id: int) -> None:
         task_execution.save(update_fields=["etablissement"])
 
         # Fetch stats first
-        fetch_stats(etablissement_id)
+        fetch_stats(etablissement)
 
         # Then fetch new reviews
-        fetch_reviews(etablissement_id, force_import=False)
+        fetch_reviews(etablissement, force_import=False)
 
         # Update last_reviews_update timestamp
         etablissement.last_reviews_update = timezone.now()

@@ -13,16 +13,11 @@ from frontend.reviews.utils import google_stars_to_number
 logger = logging.getLogger(__name__)
 
 
-def fetch_stats(etablissement_id: int) -> None:
+def fetch_stats(etablissement: Etablissement) -> None:
     """
     Fetch and record rating statistics for an Etablissement.
     Creates a RatingHistory entry with current average rating and total review count.
     """
-    try:
-        etablissement = Etablissement.objects.get(id=etablissement_id)
-    except Etablissement.DoesNotExist:
-        logger.error(f"Etablissement {etablissement_id} not found")
-        raise ValueError(f"Etablissement {etablissement_id} not found")
 
     reviews_service = etablissement.google_credential.get_reviews_service()
     if reviews_service is None:
@@ -31,6 +26,7 @@ def fetch_stats(etablissement_id: int) -> None:
         raise RuntimeError(error_msg)
 
     parent_path = f"{etablissement.account_id}/{etablissement.location_id}"
+    print(parent_path)
 
     # Fetch stats
     try:
@@ -48,13 +44,13 @@ def fetch_stats(etablissement_id: int) -> None:
             rating=stats_response.get("averageRating", 0),
             total_reviews=stats_response.get("totalReviewCount", 0),
         )
-        logger.info(f"Successfully recorded stats for Etablissement {etablissement_id}")
+        logger.info(f"Successfully recorded stats for Etablissement {etablissement}")
     except Exception as e:
-        logger.error(f"Error recording rating history for {etablissement.title}: {e}")
+        logger.error(f"Error recording rating history for {etablissement}: {e}")
         raise RuntimeError(f"Error recording rating history: {e}") from e
 
 
-def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
+def fetch_reviews(etablissement: Etablissement, force_import: bool = False) -> None:
     """
     Fetch reviews from Google My Business API.
 
@@ -62,19 +58,14 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
         etablissement_id: The ID of the Etablissement to fetch reviews for
         force_import: If True, import all reviews. If False, stop when finding existing review.
     """
-    try:
-        etablissement = Etablissement.objects.get(id=etablissement_id)
-    except Etablissement.DoesNotExist:
-        logger.error(f"Etablissement {etablissement_id} not found")
-        raise ValueError(f"Etablissement {etablissement_id} not found")
 
     reviews_service = etablissement.google_credential.get_reviews_service()
     if reviews_service is None:
-        error_msg = f"Unable to initialize reviews service for {etablissement.title}"
+        error_msg = f"{etablissement.title}(id: {etablissement.id}): Unable to initialize reviews service"
         logger.error(error_msg)
         raise RuntimeError(error_msg)
 
-    logger.info(f"Starting review import for {etablissement.title} (force_import={force_import})")
+    logger.info(f"{etablissement.title}(id: {etablissement.id}): Starting review import (force_import={force_import})")
 
     continue_import = True
     import_count = 0
@@ -94,20 +85,16 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
                 .execute()
             )
         except Exception as e:
-            error_msg = f"Error fetching reviews for {etablissement.title}: {e}"
+            error_msg = f"Error fetching reviews for {etablissement}: {e}"
             logger.error(error_msg)
             etablissement.google_credential._check_and_set_invalid_grant(e)
             raise RuntimeError(error_msg) from e
 
-        location_reviews = reviews_data.get("locationReviews", [])
-        if not location_reviews:
+        reviews_list = reviews_data.get("reviews", [])
+        if not reviews_list:
             break
 
-        for location_review in location_reviews:
-            review = location_review.get("review")
-            if review is None:
-                continue
-
+        for review in reviews_list:
             try:
                 new_review, created = Review.objects.update_or_create(
                     etablissement=etablissement,
@@ -121,17 +108,18 @@ def fetch_reviews(etablissement_id: int, force_import: bool = False) -> None:
                     },
                 )
                 import_count += 1
-                logger.debug(f"Imported review {import_count} for {etablissement.title}")
+                logger.debug(f"Imported review {import_count} for {etablissement}")
 
                 # Stop import if we find an existing review and force_import is False
                 if not force_import and not created:
                     continue_import = False
-                    logger.info(f"Found existing review, stopping import for {etablissement.title}")
+                    logger.info(f"Found existing review, stopping import for {etablissement}")
                     break
             except Exception as e:
                 logger.error(f"Error creating review: {e}")
                 continue
 
+        logger.info(f"{etablissement.title}(id: {etablissement.id}): Imported {import_count} reviews")
         # Check if there's a next page
         next_page_token = reviews_data.get("nextPageToken", None)
         if next_page_token is None or not continue_import:

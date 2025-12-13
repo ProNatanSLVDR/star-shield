@@ -36,13 +36,9 @@ class Command(BaseCommand):
         # Execute the appropriate task
         try:
             if task_type == "fetch-all":
-                self.stdout.write(f"Running fetch-all task for Etablissement {etablissement_id}...")
                 execute_fetch_all(etablissement_id)
-                self.stdout.write(self.style.SUCCESS(f"Successfully completed fetch-all task for Etablissement {etablissement_id}"))
             elif task_type == "fetch-refresh":
-                self.stdout.write(f"Running fetch-refresh task for Etablissement {etablissement_id}...")
                 execute_fetch_refresh(etablissement_id)
-                self.stdout.write(self.style.SUCCESS(f"Successfully completed fetch-refresh task for Etablissement {etablissement_id}"))
         except ValueError as e:
             raise CommandError(f"Task execution failed: {e}") from e
         except Exception as e:
