@@ -7,7 +7,7 @@ import logging
 
 from auths.models import Etablissement
 from tasks_api.models import TaskExecution
-from tasks_api.services.review_service import fetch_stats, fetch_reviews, fetch_new_reviews
+from tasks_api.services.review_service import fetch_stats, fetch_reviews
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -42,9 +42,11 @@ def execute_fetch_all(etablissement_id: int) -> None:
         task_execution.save(update_fields=["etablissement"])
 
         # Fetch stats first
+        logger.info(f"Step 1: Fetching stats for Etablissement {etablissement_id}")
         fetch_stats(etablissement_id)
 
         # Then fetch all reviews
+        logger.info(f"Step 2: Fetching all reviews for Etablissement {etablissement_id}")
         fetch_reviews(etablissement_id, force_import=True)
 
         # Update last_reviews_update timestamp
