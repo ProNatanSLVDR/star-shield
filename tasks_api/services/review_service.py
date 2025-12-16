@@ -48,13 +48,13 @@ def fetch_stats(etablissement: Etablissement) -> None:
         raise RuntimeError(f"Error recording rating history: {e}") from e
 
 
-def fetch_reviews(etablissement: Etablissement, force_import: bool = False) -> None:
+def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
     """
     Fetch reviews from Google My Business API.
 
     Args:
         etablissement_id: The ID of the Etablissement to fetch reviews for
-        force_import: If True, import all reviews. If False, stop when finding existing review.
+        new_only: If True, import only new reviews. If False, import all reviews.
     """
 
     reviews_service = etablissement.google_credential.get_reviews_service()
@@ -63,7 +63,7 @@ def fetch_reviews(etablissement: Etablissement, force_import: bool = False) -> N
         logger.error(f"[{etablissement.id}] {error_msg}")
         raise RuntimeError(error_msg)
 
-    logger.info(f"[{etablissement.id}] Starting review import (force_import={force_import})")
+    logger.info(f"[{etablissement.id}] Starting review import (new_only={new_only})")
 
     continue_import = True
     import_count = 0
@@ -108,8 +108,8 @@ def fetch_reviews(etablissement: Etablissement, force_import: bool = False) -> N
                 import_count += 1
                 logger.debug(f"[{etablissement.id}] Imported review {import_count} for {etablissement}")
 
-                # Stop import if we find an existing review and force_import is False
-                if not force_import and not created:
+                # Stop import if we find an existing review and new_only is True
+                if new_only and not created:
                     continue_import = False
                     logger.info(f"[{etablissement.id}] Found existing review, stopping import for {etablissement}")
                     break

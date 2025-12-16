@@ -49,7 +49,7 @@ def execute_fetch_all(etablissement_id: int) -> None:
 
         # Then fetch all reviews
         logger.info(f"[{etablissement_id}] Step 2: Fetching all reviews for Etablissement {etablissement}")
-        fetch_reviews(etablissement, force_import=True)
+        fetch_reviews(etablissement, new_only=False)
 
         # Update last_reviews_update timestamp
         etablissement.last_reviews_update = timezone.now()
@@ -109,7 +109,7 @@ def execute_fetch_refresh(etablissement_id: int) -> None:
 
         # Then fetch new reviews
         logger.info(f"[{etablissement_id}] Step 2: Fetching new reviews for Etablissement {etablissement}")
-        fetch_reviews(etablissement, force_import=False)
+        fetch_reviews(etablissement, new_only=True)
 
         # Update last_reviews_update timestamp
         etablissement.last_reviews_update = timezone.now()
