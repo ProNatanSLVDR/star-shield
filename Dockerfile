@@ -17,9 +17,6 @@ RUN pip install -r requirements.txt
 # copy project
 COPY . .
 
-# Collect static files
-RUN python prod.manage.py collectstatic --noinput
-
 # Expose port for web application
 EXPOSE 8080
 
