@@ -47,7 +47,7 @@ class ColoredFormatter(logging.Formatter):
         level_color = self.LEVEL_COLORS.get(level_name, "")
 
         # Get logger name
-        logger_name = record.name
+        logger_name = record.name.split(".")[-1]
 
         # Get message
         message = record.getMessage()
@@ -57,7 +57,7 @@ class ColoredFormatter(logging.Formatter):
             # Apply colors to each component
             timestamp_part = f"{self.TIMESTAMP_COLOR}[{timestamp}]{self.RESET}"
             level_part = f"{level_color}{self.BOLD}{level_display:5s}{self.RESET}"
-            logger_part = f"{self.LOGGER_COLOR}{logger_name}{self.RESET}"
+            logger_part = f"{self.LOGGER_COLOR}{logger_name:14s}{self.RESET}"
             separator = f"{self.TIMESTAMP_COLOR} | {self.RESET}"
 
             formatted = f"{timestamp_part} {level_part}{separator}{logger_part}{separator}{message}"

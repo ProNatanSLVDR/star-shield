@@ -37,18 +37,16 @@ def execute_fetch_all(etablissement_id: int) -> None:
             task_execution.mark_error(error_msg)
             raise ValueError(error_msg)
 
-        logger.info(f"[{etablissement_id}] Etablissement found: {etablissement}")
+        logger.info(f"[{etablissement_id}] Etablissement: {etablissement}")
 
         # Update task execution with etablissement reference
         task_execution.etablissement = etablissement
         task_execution.save(update_fields=["etablissement"])
 
         # Fetch stats first
-        logger.info(f"[{etablissement_id}] Step 1: Fetching stats for Etablissement {etablissement}")
         fetch_stats(etablissement)
 
         # Then fetch all reviews
-        logger.info(f"[{etablissement_id}] Step 2: Fetching all reviews for Etablissement {etablissement}")
         fetch_reviews(etablissement, new_only=False)
 
         # Update last_reviews_update timestamp
@@ -57,8 +55,6 @@ def execute_fetch_all(etablissement_id: int) -> None:
 
         # Mark task as successful
         task_execution.mark_success()
-
-        logger.info(f"[{etablissement_id}] Successfully completed full import for Etablissement {etablissement}")
     except ValueError as e:
         # ValueError could come from nested Etablissement lookup (already handled)
         # or from fetch_all_reviews() (need to handle)
@@ -99,16 +95,16 @@ def execute_fetch_refresh(etablissement_id: int) -> None:
             task_execution.mark_error(error_msg)
             raise ValueError(error_msg)
 
+        logger.info(f"[{etablissement_id}] Etablissement: {etablissement}")
+
         # Update task execution with etablissement reference
         task_execution.etablissement = etablissement
         task_execution.save(update_fields=["etablissement"])
 
         # Fetch stats first
-        logger.info(f"[{etablissement_id}] Step 1: Fetching stats for Etablissement {etablissement}")
         fetch_stats(etablissement)
 
         # Then fetch new reviews
-        logger.info(f"[{etablissement_id}] Step 2: Fetching new reviews for Etablissement {etablissement}")
         fetch_reviews(etablissement, new_only=True)
 
         # Update last_reviews_update timestamp
@@ -117,8 +113,6 @@ def execute_fetch_refresh(etablissement_id: int) -> None:
 
         # Mark task as successful
         task_execution.mark_success()
-
-        logger.info(f"[{etablissement_id}] Successfully completed refresh import for Etablissement {etablissement_id}")
     except ValueError as e:
         # ValueError could come from nested Etablissement lookup (already handled)
         # or from fetch_new_reviews() (need to handle)

@@ -51,3 +51,5 @@ class Command(BaseCommand):
         except Exception as e:
             logger.error(f"[{etablissement_id}] Unexpected error during task execution: {e}")
             raise CommandError(f"Unexpected error during task execution: {e}") from e
+
+        logger.info(f"[{etablissement_id}] Task execution completed: {task_type}")
