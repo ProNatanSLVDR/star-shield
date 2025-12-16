@@ -68,6 +68,10 @@ def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
     continue_import = True
     import_count = 0
     next_page_token = None
+    consecutive_existing_count = 0
+    # Threshold: stop if we've seen a full page (50) of consecutive existing reviews
+    # This handles gaps in the database while ensuring we don't process all reviews unnecessarily
+    EXISTING_REVIEW_THRESHOLD = 50
 
     while continue_import is True:
         try:
@@ -92,6 +96,11 @@ def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
         if not reviews_list:
             break
 
+        # Track how many reviews in this page were existing vs new
+        page_new_count = 0
+        page_existing_count = 0
+
+        # Process all reviews in the current page
         for review in reviews_list:
             try:
                 new_review, created = Review.objects.update_or_create(
@@ -108,14 +117,26 @@ def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
                 import_count += 1
                 logger.debug(f"[{etablissement.id}] Imported review {import_count} for {etablissement}")
 
-                # Stop import if we find an existing review and new_only is True
-                if new_only and not created:
-                    continue_import = False
-                    logger.info(f"[{etablissement.id}] Found existing review, stopping import for {etablissement}")
-                    break
+                if created:
+                    page_new_count += 1
+                    # Reset consecutive existing count when we find a new review
+                    consecutive_existing_count = 0
+                else:
+                    page_existing_count += 1
+                    if new_only:
+                        consecutive_existing_count += 1
             except Exception as e:
                 logger.error(f"[{etablissement.id}] Error creating review: {e}")
                 continue
+
+        logger.info(f"[{etablissement.id}] Page processed: {page_new_count} new, {page_existing_count} existing")
+
+        # For new_only mode: stop if we've encountered enough consecutive existing reviews
+        # This ensures we don't miss newer reviews due to gaps in the database
+        if new_only and consecutive_existing_count >= EXISTING_REVIEW_THRESHOLD:
+            continue_import = False
+            logger.info(f"[{etablissement.id}] Found {consecutive_existing_count} consecutive existing reviews, stopping import for {etablissement}")
+            break
 
         logger.info(f"[{etablissement.id}] Imported {import_count} reviews")
         # Check if there's a next page
