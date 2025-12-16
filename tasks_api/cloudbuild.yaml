@@ -1,5 +1,5 @@
 steps:
-  - name: Build image
+  - name: gcr.io/cloud-builders/docker
     args:
       - build
       - '-t'
@@ -7,7 +7,7 @@ steps:
       - '-f'
       - './tasks_api/Dockerfile'
       - '.'
-  - name: Push to registry
+  - name: gcr.io/cloud-builders/docker
     args:
       - push
       - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
