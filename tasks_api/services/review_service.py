@@ -4,7 +4,6 @@ No task execution tracking, no API concerns.
 """
 
 import logging
-from django.utils import timezone
 
 from auths.models import Etablissement, RatingHistory
 from frontend.reviews.models import Review
@@ -22,18 +21,17 @@ def fetch_stats(etablissement: Etablissement) -> None:
     reviews_service = etablissement.google_credential.get_reviews_service()
     if reviews_service is None:
         error_msg = f"Unable to initialize reviews service for {etablissement.title}"
-        logger.error(error_msg)
+        logger.error(f"[{etablissement.id}] {error_msg}")
         raise RuntimeError(error_msg)
 
     parent_path = f"{etablissement.account_id}/{etablissement.location_id}"
-    print(parent_path)
 
     # Fetch stats
     try:
         stats_response = reviews_service.accounts().locations().reviews().list(parent=parent_path, pageSize=1).execute()
     except Exception as e:
         error_msg = f"Error fetching review stats for {etablissement.title}: {e}"
-        logger.error(error_msg)
+        logger.error(f"[{etablissement.id}] {error_msg}")
         etablissement.google_credential._check_and_set_invalid_grant(e)
         raise RuntimeError(error_msg) from e
 
@@ -44,9 +42,9 @@ def fetch_stats(etablissement: Etablissement) -> None:
             rating=stats_response.get("averageRating", 0),
             total_reviews=stats_response.get("totalReviewCount", 0),
         )
-        logger.info(f"Successfully recorded stats for Etablissement {etablissement}")
+        logger.info(f"[{etablissement.id}] Successfully recorded stats for Etablissement {etablissement}")
     except Exception as e:
-        logger.error(f"Error recording rating history for {etablissement}: {e}")
+        logger.error(f"[{etablissement.id}] Error recording rating history for {etablissement}: {e}")
         raise RuntimeError(f"Error recording rating history: {e}") from e
 
 
@@ -61,11 +59,11 @@ def fetch_reviews(etablissement: Etablissement, force_import: bool = False) -> N
 
     reviews_service = etablissement.google_credential.get_reviews_service()
     if reviews_service is None:
-        error_msg = f"{etablissement.title}(id: {etablissement.id}): Unable to initialize reviews service"
-        logger.error(error_msg)
+        error_msg = f"Unable to initialize reviews service for {etablissement.title}"
+        logger.error(f"[{etablissement.id}] {error_msg}")
         raise RuntimeError(error_msg)
 
-    logger.info(f"{etablissement.title}(id: {etablissement.id}): Starting review import (force_import={force_import})")
+    logger.info(f"[{etablissement.id}] Starting review import (force_import={force_import})")
 
     continue_import = True
     import_count = 0
@@ -86,7 +84,7 @@ def fetch_reviews(etablissement: Etablissement, force_import: bool = False) -> N
             )
         except Exception as e:
             error_msg = f"Error fetching reviews for {etablissement}: {e}"
-            logger.error(error_msg)
+            logger.error(f"[{etablissement.id}] {error_msg}")
             etablissement.google_credential._check_and_set_invalid_grant(e)
             raise RuntimeError(error_msg) from e
 
@@ -108,21 +106,21 @@ def fetch_reviews(etablissement: Etablissement, force_import: bool = False) -> N
                     },
                 )
                 import_count += 1
-                logger.debug(f"Imported review {import_count} for {etablissement}")
+                logger.debug(f"[{etablissement.id}] Imported review {import_count} for {etablissement}")
 
                 # Stop import if we find an existing review and force_import is False
                 if not force_import and not created:
                     continue_import = False
-                    logger.info(f"Found existing review, stopping import for {etablissement}")
+                    logger.info(f"[{etablissement.id}] Found existing review, stopping import for {etablissement}")
                     break
             except Exception as e:
-                logger.error(f"Error creating review: {e}")
+                logger.error(f"[{etablissement.id}] Error creating review: {e}")
                 continue
 
-        logger.info(f"{etablissement.title}(id: {etablissement.id}): Imported {import_count} reviews")
+        logger.info(f"[{etablissement.id}] Imported {import_count} reviews")
         # Check if there's a next page
         next_page_token = reviews_data.get("nextPageToken", None)
         if next_page_token is None or not continue_import:
             break
 
-    logger.info(f"Completed review import for {etablissement.title}: {import_count} reviews processed")
+    logger.info(f"[{etablissement.id}] Completed review import: {import_count} reviews processed")

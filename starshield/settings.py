@@ -13,36 +13,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from configurations import Configuration
 import os
-import sys
-import logging
 from django_components import ComponentsSettings
+from starshield.logging_formatter import ColoredFormatter
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-class ColoredFormatter(logging.Formatter):
-    """Custom formatter that adds colors to log messages based on log level."""
-
-    # ANSI color codes
-    COLORS = {
-        "DEBUG": "\033[36m",  # Cyan
-        "INFO": "\033[32m",  # Green
-        "WARNING": "\033[33m",  # Yellow
-        "ERROR": "\033[31m",  # Red
-        "CRITICAL": "\033[35m",  # Magenta
-    }
-    RESET = "\033[0m"
-
-    def format(self, record):
-        # Get the color for this log level
-        color = self.COLORS.get(record.levelname, "")
-        # Format the message
-        log_message = super().format(record)
-        # Add color if terminal supports it (check if stdout is a TTY)
-        if color and sys.stdout.isatty():
-            return f"{color}{log_message}{self.RESET}"
-        return log_message
 
 
 class Base(Configuration):
@@ -237,7 +212,8 @@ class Base(Configuration):
             },
             "colored": {
                 "()": ColoredFormatter,
-                "format": "%(message)s",
+                "format": "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+                "datefmt": "%H:%M:%S",
             },
             "verbose": {
                 "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
