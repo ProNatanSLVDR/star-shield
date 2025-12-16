@@ -4,7 +4,9 @@ steps:
       - build
       - '-t'
       - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
-      - ./tasks_api/
+      - '-f'
+      - './tasks_api/Dockerfile'
+      - '.'
   - name: gcr.io/cloud-builders/docker
     args:
       - push
