@@ -277,17 +277,29 @@ class Prod(Base):
     }
 
     # Google Cloud Storage
-    GS_BUCKET_NAME = os.getenv("GCP_STORAGE_BUCKET_NAME", "")
+    GS_DEFAULT_BUCKET_NAME = None
+    GS_STATIC_BUCKET_NAME = "starshield-static"
     GS_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-            "OPTIONS": {},
+            "OPTIONS": {
+                "bucket_name": GS_DEFAULT_BUCKET_NAME,
+                "project_id": GS_PROJECT_ID,
+                "default_acl": "publicRead",
+                "querystring_auth": False,
+            },
         },
         "staticfiles": {
             "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-            "OPTIONS": {},
+            "OPTIONS": {
+                "bucket_name": GS_STATIC_BUCKET_NAME,
+                "project_id": GS_PROJECT_ID,
+                "default_acl": "publicRead",
+                "querystring_auth": False,
+            },
         },
     }
-    MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
+    MEDIA_URL = f"https://storage.googleapis.com/{GS_DEFAULT_BUCKET_NAME}/"
+    STATIC_URL = f"https://storage.googleapis.com/{GS_STATIC_BUCKET_NAME}/"

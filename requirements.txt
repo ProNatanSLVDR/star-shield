@@ -11,6 +11,7 @@ django-allauth==65.11.2
 django-configurations==2.5.1
 django-htmx==1.26.0
 django-ninja==1.5.1
+django-storages==1.14.6
 django-tailwind==4.2.0
 django_components==0.141.6
 djc_core_html_parser==1.0.2
@@ -54,4 +55,3 @@ uritemplate==4.2.0
 urllib3==2.5.0
 uv==0.8.22
 virtualenv==20.34.0
-gunicorn==23.0.0
