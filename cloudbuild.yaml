@@ -34,7 +34,7 @@ steps:
       - "./staticfiles/"
       - "gs://starshield-static"
   - name: deploy-to-cloud-run
-    image: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    image: 'gcr.io/cloud-builders/gcloud'
     entrypoint: gcloud
     args: 
       - 'run'
