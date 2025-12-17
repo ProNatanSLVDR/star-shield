@@ -4,7 +4,7 @@ steps:
     args:
       - build
       - '-t'
-      - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
       - '-t'
       - '${_IMAGE_NAME}'
       - '-f'
@@ -23,7 +23,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - push
-      - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
   - id: push-static-files-to-bucket
     name: gcr.io/cloud-builders/gsutil
     args:
@@ -41,12 +41,12 @@ steps:
       - 'deploy'
       - '${_SERVICE_NAME}'
       - '--image'
-      - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
       - '--region'
       - '${_REGION}'
 
 images:
-  - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+  - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
