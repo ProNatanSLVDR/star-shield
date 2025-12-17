@@ -185,14 +185,7 @@ class Base(Configuration):
 
     # URLS
     STATIC_URL = "static/"
-    STATICFILES_FINDERS = [
-        "django.contrib.staticfiles.finders.FileSystemFinder",
-        "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-        "django_components.finders.ComponentsFileSystemFinder",
-    ]
-    STATICFILES_DIRS = [
-        BASE_DIR / "static",
-    ]
+    STATIC_ROOT = BASE_DIR / "staticfiles"
 
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
@@ -277,7 +270,7 @@ class Prod(Base):
     }
 
     # Google Cloud Storage
-    GS_DEFAULT_BUCKET_NAME = None
+    GS_DEFAULT_BUCKET_NAME = "starshield-default"
     GS_STATIC_BUCKET_NAME = "starshield-static"
     GS_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 
@@ -292,13 +285,7 @@ class Prod(Base):
             },
         },
         "staticfiles": {
-            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-            "OPTIONS": {
-                "bucket_name": GS_STATIC_BUCKET_NAME,
-                "project_id": GS_PROJECT_ID,
-                "default_acl": "publicRead",
-                "querystring_auth": False,
-            },
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
     MEDIA_URL = f"https://storage.googleapis.com/{GS_DEFAULT_BUCKET_NAME}/"

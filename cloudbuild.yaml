@@ -11,6 +11,14 @@ steps:
     args:
       - push
       - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+  - name: gcr.io/cloud-builders/gsutil
+    args:
+      - "-m"
+      - "rsync"
+      - "-r"
+      - "-d"
+      - "staticfiles"
+      - "gs://starshield-static"
 
 images:
   - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
