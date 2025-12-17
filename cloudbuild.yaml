@@ -5,9 +5,20 @@ steps:
       - build
       - '-t'
       - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '-t'
+      - '${_IMAGE_NAME}'
       - '-f'
       - './Dockerfile'
       - '.'
+  - id: extract-static-files
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        docker create --name static_helper ${_IMAGE_NAME}
+        docker cp static_helper:/app/staticfiles .
+        docker rm static_helper
   - id: push-image-to-artifact-registry
     name: gcr.io/cloud-builders/docker
     args:
