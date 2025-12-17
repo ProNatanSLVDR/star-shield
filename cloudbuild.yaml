@@ -1,5 +1,6 @@
 steps:
-  - name: gcr.io/cloud-builders/docker
+  - id: build-docker-image
+    name: gcr.io/cloud-builders/docker
     args:
       - build
       - '-t'
@@ -7,11 +8,13 @@ steps:
       - '-f'
       - './Dockerfile'
       - '.'
-  - name: gcr.io/cloud-builders/docker
+  - id: push-image-to-artifact-registry
+    name: gcr.io/cloud-builders/docker
     args:
       - push
       - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
-  - name: gcr.io/cloud-builders/gsutil
+  - id: push-static-files-to-bucket
+    name: gcr.io/cloud-builders/gsutil
     args:
       - "-m"
       - "rsync"

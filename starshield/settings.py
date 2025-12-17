@@ -26,7 +26,7 @@ class Base(Configuration):
 
     # SECURITY
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
+    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
 
     # Application definition
 
