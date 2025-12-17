@@ -33,8 +33,8 @@ steps:
       - "-d"
       - "./staticfiles/"
       - "gs://starshield-static"
-  - name: deploy-to-cloud-run
-    image: 'gcr.io/cloud-builders/gcloud'
+  - id: deploy-to-cloud-run
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args: 
       - 'run'
