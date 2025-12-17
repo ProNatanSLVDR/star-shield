@@ -4,7 +4,7 @@ steps:
     args:
       - build
       - '-t'
-      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
       - '-t'
       - '${_IMAGE_NAME}'
       - '-f'
@@ -23,7 +23,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - push
-      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
   - id: push-static-files-to-bucket
     name: gcr.io/cloud-builders/gsutil
     args:
@@ -33,6 +33,17 @@ steps:
       - "-d"
       - "./staticfiles/"
       - "gs://starshield-static"
+  - name: deploy-to-cloud-run
+    image: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: 
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '--region'
+      - '${_REGION}'
 
 images:
   - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
@@ -43,5 +54,7 @@ options:
 substitutions:
     _REPO_NAME: production-builds
     _IMAGE_NAME: web-app
+    _SERVICE_NAME: web-app
     _TAG: latest
+    _REGION: europe-west9
     
