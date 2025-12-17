@@ -20,7 +20,7 @@ steps:
       - "rsync"
       - "-r"
       - "-d"
-      - "staticfiles/"
+      - "./staticfiles/"
       - "gs://starshield-static"
 
 images:
