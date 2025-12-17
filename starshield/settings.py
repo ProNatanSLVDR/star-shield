@@ -280,5 +280,14 @@ class Prod(Base):
     GS_BUCKET_NAME = os.getenv("GCP_STORAGE_BUCKET_NAME", "")
     GS_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 
-    DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+            "OPTIONS": {},
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+            "OPTIONS": {},
+        },
+    }
     MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
