@@ -3,17 +3,17 @@ steps:
     args:
       - build
       - '-t'
-      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
+      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
       - '-f'
       - './Dockerfile'
       - '.'
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
+      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
 
 images:
-  - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
+  - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
@@ -21,4 +21,5 @@ options:
 substitutions:
     _REPO_NAME: production-builds
     _IMAGE_NAME: web-app
+    _TAG: latest
     
