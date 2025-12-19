@@ -264,11 +264,11 @@ class Prod(Base):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("POSTGRES_DB"),
-            "USER": os.getenv("POSTGRES_USER"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-            "HOST": "db",
-            "PORT": os.getenv("POSTGRES_PORT"),
+            "NAME": "starshield_webapp",
+            "USER": os.getenv("DB_PROD_USER"),
+            "PASSWORD": os.getenv("DB_PROD_PASSWORD"),
+            "HOST": os.getenv("DB_PROD_HOST"),
+            "PORT": 3306,
         }
     }
 
