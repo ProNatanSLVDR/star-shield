@@ -25,8 +25,8 @@ class Base(Configuration):
     # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
     # SECURITY
-    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "VERY_INSECURE_SECRET_KEY")
+    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
     # Application definition
 
@@ -194,8 +194,8 @@ class Base(Configuration):
     MEDIA_ROOT = BASE_DIR / "media"
 
     # Google GMB
-    GOOGLE_GMB_CLIENT_ID = os.getenv("GOOGLE_GMB_CLIENT_ID")
-    GOOGLE_GMB_CLIENT_SECRET = os.getenv("GOOGLE_GMB_CLIENT_SECRET")
+    GOOGLE_GMB_CLIENT_ID = os.getenv("GOOGLE_GMB_CLIENT_ID", "")
+    GOOGLE_GMB_CLIENT_SECRET = os.getenv("GOOGLE_GMB_CLIENT_SECRET", "")
     GOOGLE_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
 
     # Logging configuration
