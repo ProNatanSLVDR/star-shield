@@ -259,7 +259,7 @@ class Dev(Base):
 class Prod(Base):
     DEBUG = False
 
-    WEBSITE_URL = os.getenv("WEBSITE_URL")
+    WEBSITE_URL = os.getenv("WEBSITE_URL", "https://starshield.pro")
 
     DATABASES = {
         "default": {
