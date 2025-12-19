@@ -48,6 +48,15 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
 
+availableSecrets:
+  secretManager:
+    - versionName: projects/621365538525/secrets/DB_PROD_HOST
+      env: DB_PROD_HOST
+    - versionName: projects/621365538525/secrets/DB_PROD_USER
+      env: DB_PROD_USER
+    - versionName: projects/621365538525/secrets/DB_PROD_PASSWORD
+      env: DB_PROD_PASSWORD
+
 substitutions:
     _REPO_NAME: production-builds
     _IMAGE_NAME: web-app
