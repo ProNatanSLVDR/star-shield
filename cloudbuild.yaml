@@ -66,11 +66,11 @@ options:
 
 availableSecrets:
   secretManager:
-    - versionName: projects/621365538525/secrets/DB_PROD_HOST
+    - versionName: projects/621365538525/secrets/DB_PROD_HOST/versions/latest
       env: DB_PROD_HOST
-    - versionName: projects/621365538525/secrets/DB_PROD_USER
+    - versionName: projects/621365538525/secrets/DB_PROD_USER/versions/latest
       env: DB_PROD_USER
-    - versionName: projects/621365538525/secrets/DB_PROD_PASSWORD
+    - versionName: projects/621365538525/secrets/DB_PROD_PASSWORD/versions/latest
       env: DB_PROD_PASSWORD
 
 substitutions:
