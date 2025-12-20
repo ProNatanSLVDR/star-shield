@@ -1,4 +1,10 @@
 steps:
+  - name: gcr.io/cloudsql-docker/gce-proxy
+    entrypoint: /cloud_sql_proxy
+    args:
+      - "-instances=${PROJECT_ID}:${_REGION}:${_INSTANCE_NAME}=tcp:5432"
+    background: true
+
   - id: build-docker-image
     name: gcr.io/cloud-builders/docker
     args:
@@ -10,6 +16,7 @@ steps:
       - '-f'
       - './Dockerfile'
       - '.'
+
   - id: extract-static-files
     name: gcr.io/cloud-builders/docker
     entrypoint: bash
@@ -19,11 +26,13 @@ steps:
         docker create --name static_helper ${_IMAGE_NAME}
         docker cp static_helper:/app/staticfiles .
         docker rm static_helper
+
   - id: push-image-to-artifact-registry
     name: gcr.io/cloud-builders/docker
     args:
       - push
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+
   - id: push-static-files-to-bucket
     name: gcr.io/cloud-builders/gsutil
     args:
@@ -33,6 +42,7 @@ steps:
       - "-d"
       - "./staticfiles/"
       - "gs://starshield-static"
+
   - id: run-migrations
     name: gcr.io/cloud-builders/docker
     entrypoint: bash
@@ -49,6 +59,7 @@ steps:
           -e DB_PROD_PASSWORD="$$DB_PROD_PASSWORD" \
           ${_IMAGE_NAME} \
           python prod.manage.py migrate --noinput
+
   - id: deploy-to-cloud-run
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -63,8 +74,6 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  pool:
-    name: 'projects/621365538525/locations/${_REGION}/workerPools/${_POOL_NAME}'
 
 availableSecrets:
   secretManager:
@@ -81,5 +90,4 @@ substitutions:
     _SERVICE_NAME: web-app
     _TAG: latest
     _REGION: europe-west9
-    _POOL_NAME: Prod-Build
     
