@@ -267,8 +267,8 @@ class Prod(Base):
             "NAME": "starshield_webapp",
             "USER": os.getenv("DB_PROD_USER"),
             "PASSWORD": os.getenv("DB_PROD_PASSWORD"),
-            "HOST": os.getenv("DB_PROD_HOST"),
-            "PORT": 3306,
+            "HOST": f"/cloudsql/{os.getenv('DB_PROD_HOST')}",
+            "PORT": 5432,
         }
     }
 
