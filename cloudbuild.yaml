@@ -63,6 +63,8 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY
+  pool:
+    name: 'projects/621365538525/locations/${_REGION}/workerPools/${_POOL_NAME}'
 
 availableSecrets:
   secretManager:
@@ -79,4 +81,5 @@ substitutions:
     _SERVICE_NAME: web-app
     _TAG: latest
     _REGION: europe-west9
+    _POOL_NAME: Prod-Build
     
