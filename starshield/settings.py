@@ -262,6 +262,9 @@ class Prod(Base):
     # login with google redirect uri protocol
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
+    # Trust Cloud Run proxy headers for HTTPS detection
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
     WEBSITE_URL = os.getenv("WEBSITE_URL", "app.starshield.pro")
     GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 

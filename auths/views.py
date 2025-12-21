@@ -30,9 +30,7 @@ def get_google_auth_client_config() -> dict[str, dict[str, str]]:
 
 
 def google_gmb_start(request: HttpRequest) -> HttpResponse:
-    protocol = "https"
-    if settings.DEBUG:
-        protocol = "http"
+    protocol = "https" if request.is_secure() else "http"
 
     redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
 
@@ -53,9 +51,7 @@ def google_gmb_start(request: HttpRequest) -> HttpResponse:
 
 
 def google_gmb_callback(request: HttpRequest) -> HttpResponse:
-    protocol = "https"
-    if settings.DEBUG:
-        protocol = "http"
+    protocol = "https" if request.is_secure() else "http"
 
     redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
     state = request.session.get("state")
