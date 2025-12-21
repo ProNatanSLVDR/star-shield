@@ -43,23 +43,6 @@ steps:
       - "./staticfiles/"
       - "gs://starshield-static"
 
-  - id: run-migrations
-    name: gcr.io/cloud-builders/docker
-    entrypoint: bash
-    secretEnv:
-      - 'DB_PROD_HOST'
-      - 'DB_PROD_USER'
-      - 'DB_PROD_PASSWORD'
-    args:
-      - '-c'
-      - |
-        docker run --rm \
-          -e DB_PROD_HOST="$$DB_PROD_HOST" \
-          -e DB_PROD_USER="$$DB_PROD_USER" \
-          -e DB_PROD_PASSWORD="$$DB_PROD_PASSWORD" \
-          ${_IMAGE_NAME} \
-          python prod.manage.py migrate --noinput
-
   - id: deploy-to-cloud-run
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud

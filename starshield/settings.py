@@ -260,6 +260,7 @@ class Prod(Base):
     DEBUG = False
 
     WEBSITE_URL = os.getenv("WEBSITE_URL", "https://starshield.pro")
+    GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 
     DATABASES = {
         "default": {
@@ -275,14 +276,13 @@ class Prod(Base):
     # Google Cloud Storage
     GS_DEFAULT_BUCKET_NAME = "starshield-default"
     GS_STATIC_BUCKET_NAME = "starshield-static"
-    GS_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
             "OPTIONS": {
                 "bucket_name": GS_DEFAULT_BUCKET_NAME,
-                "project_id": GS_PROJECT_ID,
+                "project_id": GCP_PROJECT_ID,
                 "default_acl": "publicRead",
                 "querystring_auth": False,
             },
