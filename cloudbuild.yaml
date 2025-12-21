@@ -53,9 +53,9 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-    _REPO_NAME: production-builds
+    _REPO_NAME: prod-builds
     _IMAGE_NAME: web-app
     _SERVICE_NAME: web-app
     _TAG: latest
-    _REGION: europe-west9
+    _REGION: europe-west1
     
