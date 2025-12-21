@@ -259,6 +259,9 @@ class Dev(Base):
 class Prod(Base):
     DEBUG = False
 
+    # login with google redirect uri protocol
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
     WEBSITE_URL = os.getenv("WEBSITE_URL", "app.starshield.pro")
     GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 
