@@ -16,8 +16,8 @@ urlpatterns = [
     path("", include(("frontend.dashboard.urls", "dashboard"))),
     path("reviews/", include(("frontend.reviews.urls", "reviews"))),
     # Errors
-    path("error/404/", errorviews.error_404_preview, name="error_404_preview"),
-    path("error/500/", errorviews.error_500_preview, name="error_500_preview"),
+    path("error_preview/404/", errorviews.error_404_preview, name="error_404_preview"),
+    path("error_preview/500/", errorviews.error_500_preview, name="error_500_preview"),
 ]
 # Serve media files in development (when not using GCS)
 if settings.DEBUG:
