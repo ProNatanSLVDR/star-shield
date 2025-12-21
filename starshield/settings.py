@@ -259,7 +259,7 @@ class Dev(Base):
 class Prod(Base):
     DEBUG = False
 
-    WEBSITE_URL = os.getenv("WEBSITE_URL", "https://app.starshield.pro")
+    WEBSITE_URL = os.getenv("WEBSITE_URL", "app.starshield.pro")
     GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
 
     DATABASES = {
