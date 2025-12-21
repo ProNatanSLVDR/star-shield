@@ -71,4 +71,4 @@ substitutions:
     _SERVICE_NAME: web-app
     _TAG: latest
     _REGION: europe-west1
-    _JOB_NAME: web-app-job
+    _JOB_NAME: migrate-prod
