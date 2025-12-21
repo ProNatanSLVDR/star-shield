@@ -49,16 +49,7 @@ steps:
       - '--region'
       - '${_REGION}'
 
-  - id: deploy-to-cloud-run-job
-    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: bash
-    args:
-      - '-c'
-      - |
-        gcloud run jobs update ${_JOB_NAME} 
-        
-
-  - id: execute-cloud-run-job
+  - id: execute-migrations-job
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
