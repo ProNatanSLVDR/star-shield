@@ -30,7 +30,11 @@ def get_google_auth_client_config() -> dict[str, dict[str, str]]:
 
 
 def google_gmb_start(request: HttpRequest) -> HttpResponse:
-    redirect_uri = f"http://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
+    protocol = "https"
+    if settings.DEBUG:
+        protocol = "http"
+
+    redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
 
     flow = Flow.from_client_config(
         get_google_auth_client_config(),
