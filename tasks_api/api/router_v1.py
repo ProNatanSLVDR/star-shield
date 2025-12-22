@@ -5,7 +5,6 @@ Django Ninja API router for tasks endpoints.
 import logging
 from ninja import Router
 from ninja.errors import HttpError
-from django.conf import settings
 
 from tasks_api.api.task_tracking import TaskTracker
 from tasks_api.services.review_service import fetch_stats, fetch_reviews
@@ -22,34 +21,12 @@ logger = logging.getLogger(__name__)
 api_router = Router()
 
 
-def verify_cloud_tasks_auth(request):
-    """
-    Verify that the request is from Cloud Tasks by checking the Authorization header.
-    """
-    auth_token = settings.TASKS_API_AUTH_TOKEN
-    if not auth_token:
-        # If no token is configured, skip auth (development only)
-        return True
-
-    auth_header = request.headers.get("Authorization", "")
-    expected_header = f"Bearer {auth_token}"
-
-    if auth_header != expected_header:
-        logger.warning(f"Invalid auth token in request from {request.META.get('REMOTE_ADDR')}")
-        return False
-
-    return True
-
-
 @api_router.post("/fetch-all", response=ReviewFetchResponse)
 def fetch_all(request, payload: ReviewFetchRequest):
     """
     Initial/full import handler - fetches stats and all reviews without stopping on existing ones.
     Called by Cloud Tasks.
     """
-    if not verify_cloud_tasks_auth(request):
-        raise HttpError(401, "Unauthorized")
-
     try:
         tracker = TaskTracker("fetch_reviews_all", payload.etablissement_id)
         tracker.execute(
@@ -75,9 +52,6 @@ def fetch_refresh(request, payload: ReviewFetchRequest):
     Incremental refresh handler - fetches stats and new reviews until it finds an existing one.
     Called by Cloud Tasks for nightly syncs.
     """
-    if not verify_cloud_tasks_auth(request):
-        raise HttpError(401, "Unauthorized")
-
     try:
         tracker = TaskTracker("fetch_reviews_refresh", payload.etablissement_id)
         tracker.execute(
@@ -103,9 +77,6 @@ def enqueue_refresh_all(request):
     Enqueue refresh tasks for all etablissements to Cloud Tasks queue.
     Called by Cloud Scheduler to trigger batch refresh of all establishments.
     """
-    if not verify_cloud_tasks_auth(request):
-        raise HttpError(401, "Unauthorized")
-
     try:
         result = enqueue_refresh_tasks()
         return EnqueueRefreshResponse(**result)
