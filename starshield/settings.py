@@ -63,7 +63,6 @@ class Base(Configuration):
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "django.contrib.auth.middleware.LoginRequiredMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "allauth.account.middleware.AccountMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
@@ -71,6 +70,7 @@ class Base(Configuration):
 
     MIDDLEWARE = [
         *CORE_MIDDLEWARE,
+        "django.contrib.auth.middleware.LoginRequiredMiddleware",  # Must be after AuthenticationMiddleware
         "django_htmx.middleware.HtmxMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
         "starshield.middleware.EtablissementMiddleware",
