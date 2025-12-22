@@ -9,7 +9,12 @@ from django.conf import settings
 
 from tasks_api.api.task_tracking import TaskTracker
 from tasks_api.services.review_service import fetch_stats, fetch_reviews
-from tasks_api.api.schemas import ReviewFetchRequest, ReviewFetchResponse
+from tasks_api.services.queue_service import enqueue_refresh_tasks
+from tasks_api.api.schemas import (
+    ReviewFetchRequest,
+    ReviewFetchResponse,
+    EnqueueRefreshResponse,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -89,4 +94,24 @@ def fetch_refresh(request, payload: ReviewFetchRequest):
         raise HttpError(400, str(e))
     except Exception as e:
         logger.error(f"Error processing fetch-refresh task: {e}", exc_info=True)
+        raise HttpError(500, "Internal server error")
+
+
+@api_router.post("/enqueue-refresh-all", response=EnqueueRefreshResponse)
+def enqueue_refresh_all(request):
+    """
+    Enqueue refresh tasks for all etablissements to Cloud Tasks queue.
+    Called by Cloud Scheduler to trigger batch refresh of all establishments.
+    """
+    if not verify_cloud_tasks_auth(request):
+        raise HttpError(401, "Unauthorized")
+
+    try:
+        result = enqueue_refresh_tasks()
+        return EnqueueRefreshResponse(**result)
+    except RuntimeError as e:
+        logger.error(f"Error enqueueing refresh tasks: {e}")
+        raise HttpError(500, str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error enqueueing refresh tasks: {e}", exc_info=True)
         raise HttpError(500, "Internal server error")
