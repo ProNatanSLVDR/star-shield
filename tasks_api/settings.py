@@ -30,8 +30,8 @@ class Base(StarshieldBase):
 
     # Cloud Tasks configuration
     CLOUD_TASKS_PROJECT_ID = os.getenv("CLOUD_TASKS_PROJECT_ID", "")
-    CLOUD_TASKS_LOCATION = os.getenv("CLOUD_TASKS_LOCATION", "us-central1")
-    CLOUD_TASKS_QUEUE_NAME = os.getenv("CLOUD_TASKS_QUEUE_NAME", "review-fetch-queue")
+    CLOUD_TASKS_LOCATION = os.getenv("CLOUD_TASKS_LOCATION", "")
+    CLOUD_TASKS_QUEUE_NAME = os.getenv("CLOUD_TASKS_QUEUE_NAME", "")
 
     # API base URL (for Cloud Tasks to call back)
     TASKS_API_BASE_URL = os.getenv("TASKS_API_BASE_URL", "http://localhost:8001")
