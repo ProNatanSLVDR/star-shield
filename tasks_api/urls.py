@@ -5,7 +5,7 @@ URL configuration for tasks_api project.
 from django.urls import path
 from ninja import NinjaAPI
 
-from tasks_api.api.router import api_router
+from tasks_api.api.router_v1 import api_router as api_router_v1
 
 # Create Django Ninja API instance
 api = NinjaAPI(
@@ -15,9 +15,8 @@ api = NinjaAPI(
 )
 
 # Mount the API router
-api.add_router("/tasks/reviews", api_router)
+api.add_router("v1/", api_router_v1)
 
 urlpatterns = [
-    path("api/v1/", api.urls),
+    path("", api.urls),
 ]
-

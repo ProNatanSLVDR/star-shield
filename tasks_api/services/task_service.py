@@ -1,5 +1,5 @@
 """
-Task execution service - wraps review service with TaskExecution tracking.
+Task execution service - wraps services with TaskExecution tracking.
 Handles all TaskExecution model interactions.
 """
 
