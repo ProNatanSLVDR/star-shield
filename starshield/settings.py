@@ -57,16 +57,19 @@ class Base(Configuration):
         *THIRD_PARTY_APPS,
         *CUSTOM_APPS,
     ]
-
-    MIDDLEWARE = [
+    CORE_MIDDLEWARE = [
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.auth.middleware.LoginRequiredMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    ]
+
+    MIDDLEWARE = [
+        *CORE_MIDDLEWARE,
+        "django.contrib.messages.middleware.MessageMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
         "allauth.account.middleware.AccountMiddleware",
         "starshield.middleware.CustomMessageMiddleware",

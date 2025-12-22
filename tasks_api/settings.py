@@ -26,21 +26,7 @@ class Base(StarshieldBase):
     WSGI_APPLICATION = "tasks_api.wsgi.application"
 
     # API-specific middleware (remove web-specific ones)
-    MIDDLEWARE = [
-        "django.middleware.security.SecurityMiddleware",
-        "django.contrib.sessions.middleware.SessionMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "django.middleware.csrf.CsrfViewMiddleware",
-        "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
-        "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    ]
-
-    # django-ninja doesn't need to be in INSTALLED_APPS, it works as a router
-    # Keep shared apps from starshield and add tasks_api app
-    INSTALLED_APPS = StarshieldBase.INSTALLED_APPS + [
-        "tasks_api",
-    ]
+    MIDDLEWARE = StarshieldBase.CORE_MIDDLEWARE
 
     # Cloud Tasks configuration
     CLOUD_TASKS_PROJECT_ID = os.getenv("CLOUD_TASKS_PROJECT_ID", "")
