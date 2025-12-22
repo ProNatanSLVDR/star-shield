@@ -9,7 +9,8 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 
-from tasks_api.services.task_service import execute_fetch_all, execute_fetch_refresh
+from tasks_api.api.task_tracking import TaskTracker
+from tasks_api.services.review_service import fetch_stats, fetch_reviews
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +40,29 @@ class Command(BaseCommand):
         if task_type not in ["fetch-all", "fetch-refresh"]:
             raise CommandError(f"Invalid task_type: '{task_type}'. Must be 'fetch-all' or 'fetch-refresh'")
 
-        # Execute the appropriate task
+        # Map command task types to TaskTracker task types
+        tracker_task_type = {
+            "fetch-all": "fetch_reviews_all",
+            "fetch-refresh": "fetch_reviews_refresh",
+        }[task_type]
+
+        # Execute the appropriate task using TaskTracker
         try:
+            tracker = TaskTracker(tracker_task_type, etablissement_id)
             if task_type == "fetch-all":
-                execute_fetch_all(etablissement_id)
+                tracker.execute(
+                    [
+                        fetch_stats,
+                        lambda e: fetch_reviews(e, new_only=False),
+                    ],
+                )
             elif task_type == "fetch-refresh":
-                execute_fetch_refresh(etablissement_id)
+                tracker.execute(
+                    [
+                        fetch_stats,
+                        lambda e: fetch_reviews(e, new_only=True),
+                    ],
+                )
         except ValueError as e:
             logger.error(f"[{etablissement_id}] Task execution failed: {e}")
             raise CommandError(f"Task execution failed: {e}") from e
