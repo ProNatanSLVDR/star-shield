@@ -4,7 +4,7 @@ steps:
     args:
       - build
       - '-t'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
       - '-t'
       - '${_IMAGE_NAME}'
       - '-f'
@@ -25,7 +25,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - push
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
 
   - id: push-static-files-to-bucket
     name: gcr.io/cloud-builders/gsutil
@@ -45,7 +45,7 @@ steps:
       - 'deploy'
       - '${_WEBAPP_SERVICE_NAME}'
       - '--image'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
       - '--region'
       - '${_REGION}'
     
@@ -57,7 +57,7 @@ steps:
       - 'deploy'
       - '${_TASKS_API_SERVICE_NAME}'
       - '--image'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
       - '--region'
       - '${_REGION}'
 
@@ -69,20 +69,11 @@ steps:
       - 'jobs'
       - 'update'
       - ${_MIGRATE_JOB_NAME}
-      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
       - '--region=${_REGION}'
       - '--execute-now'
       - '--wait'
 
 options:
   logging: CLOUD_LOGGING_ONLY
-
-substitutions:
-    _IMAGE_NAME: starshield-app
-    _REPO_NAME: prod-builds
-    _TAG: latest
-    _WEBAPP_SERVICE_NAME: web-app
-    _TASKS_API_SERVICE_NAME: tasks-api
-    _MIGRATE_JOB_NAME: migrate-prod
-    _REGION: europe-west1
     
