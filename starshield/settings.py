@@ -57,19 +57,21 @@ class Base(Configuration):
         *THIRD_PARTY_APPS,
         *CUSTOM_APPS,
     ]
+
+    # API-friendly middleware (excludes web-specific ones like LoginRequiredMiddleware)
     CORE_MIDDLEWARE = [
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        "allauth.account.middleware.AccountMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
     ]
 
     MIDDLEWARE = [
         *CORE_MIDDLEWARE,
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "allauth.account.middleware.AccountMiddleware",
         "django.contrib.auth.middleware.LoginRequiredMiddleware",  # Must be after AuthenticationMiddleware
         "django_htmx.middleware.HtmxMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
