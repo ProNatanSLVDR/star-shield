@@ -20,12 +20,7 @@ steps:
         docker create --name static_helper ${_IMAGE_NAME}
         docker cp static_helper:/app/staticfiles .
         docker rm static_helper
-
-  - id: push-image-to-artifact-registry
-    name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
+    waitFor: ['build-docker-image']
 
   - id: push-static-files-to-bucket
     name: gcr.io/cloud-builders/gsutil
@@ -36,6 +31,14 @@ steps:
       - "-d"
       - "./staticfiles/"
       - "gs://starshield-static"
+    waitFor: ['extract-static-files']
+
+  - id: push-image-to-artifact-registry
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
+    waitFor: ['build-docker-image']
 
   - id: deploy-to-cloud-run-webapp
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -48,6 +51,7 @@ steps:
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
       - '--region'
       - '${_REGION}'
+    waitFor: ['push-image-to-artifact-registry']
     
   - id: deploy-to-cloud-run-tasks-api
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -60,6 +64,7 @@ steps:
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
       - '--region'
       - '${_REGION}'
+    waitFor: ['push-image-to-artifact-registry']
 
   - id: execute-migrations-job
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -73,6 +78,7 @@ steps:
       - '--region=${_REGION}'
       - '--execute-now'
       - '--wait'
+    waitFor: ['push-image-to-artifact-registry']
 
 options:
   logging: CLOUD_LOGGING_ONLY
