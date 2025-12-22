@@ -1,24 +1,54 @@
 steps:
-  - name: gcr.io/cloud-builders/docker
+  - id: build-docker-image
+    name: gcr.io/cloud-builders/docker
     args:
       - build
       - '-t'
-      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '-t'
+      - '${_IMAGE_NAME}'
       - '-f'
       - './tasks_api/Dockerfile'
       - '.'
-  - name: gcr.io/cloud-builders/docker
+
+  - id: push-image-to-artifact-registry
+    name: gcr.io/cloud-builders/docker
     args:
       - push
-      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
 
-images:
-  - 'europe-west9-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA'
+  - id: deploy-to-cloud-run
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: 
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '--region'
+      - '${_REGION}'
+
+  - id: execute-migrations-job
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'jobs'
+      - 'update'
+      - ${_JOB_NAME}
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '--region=${_REGION}'
+      - '--execute-now'
+      - '--wait'
 
 options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-    _REPO_NAME: production-builds
+    _REPO_NAME: prod-builds
     _IMAGE_NAME: tasks-api
-    
+    _SERVICE_NAME: tasks-api
+    _TAG: latest
+    _REGION: europe-west1
+    _JOB_NAME: migrate-prod

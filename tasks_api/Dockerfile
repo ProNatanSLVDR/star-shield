@@ -18,8 +18,8 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Expose port for API service (different from main web app)
-EXPOSE 8001
+EXPOSE 8080
 
 # Run WSGI server for API
-CMD ["gunicorn", "tasks_api.wsgi:application", "--bind", "0.0.0.0:8001", "--workers", "2"]
+CMD ["gunicorn", "tasks_api.wsgi:application", "--bind", "0.0.0.0:8080", "--workers", "2"]
 
