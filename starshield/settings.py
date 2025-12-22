@@ -65,13 +65,13 @@ class Base(Configuration):
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.auth.middleware.LoginRequiredMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "allauth.account.middleware.AccountMiddleware",
     ]
 
     MIDDLEWARE = [
         *CORE_MIDDLEWARE,
         "django.contrib.messages.middleware.MessageMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
-        "allauth.account.middleware.AccountMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
         "starshield.middleware.EtablissementMiddleware",
     ]
