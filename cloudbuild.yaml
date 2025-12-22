@@ -37,13 +37,25 @@ steps:
       - "./staticfiles/"
       - "gs://starshield-static"
 
-  - id: deploy-to-cloud-run
+  - id: deploy-to-cloud-run-webapp
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args: 
       - 'run'
       - 'deploy'
-      - '${_SERVICE_NAME}'
+      - '${_WEBAPP_SERVICE_NAME}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '--region'
+      - '${_REGION}'
+    
+  - id: deploy-to-cloud-run-tasks-api
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: 
+      - 'run'
+      - 'deploy'
+      - '${_TASKS_API_SERVICE_NAME}'
       - '--image'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
       - '--region'
@@ -56,7 +68,7 @@ steps:
       - 'run'
       - 'jobs'
       - 'update'
-      - ${_JOB_NAME}
+      - ${_MIGRATE_JOB_NAME}
       - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
       - '--region=${_REGION}'
       - '--execute-now'
@@ -66,9 +78,11 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
+    _IMAGE_NAME: starshield-app
     _REPO_NAME: prod-builds
-    _IMAGE_NAME: web-app
-    _SERVICE_NAME: web-app
     _TAG: latest
+    _WEBAPP_SERVICE_NAME: web-app
+    _TASKS_API_SERVICE_NAME: tasks-api
+    _MIGRATE_JOB_NAME: migrate-prod
     _REGION: europe-west1
-    _JOB_NAME: migrate-prod
+    
