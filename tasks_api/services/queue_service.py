@@ -29,7 +29,6 @@ def enqueue_refresh_tasks() -> Dict[str, Any]:
     location = settings.CLOUD_TASKS_LOCATION
     queue_name = settings.CLOUD_TASKS_QUEUE_NAME
     base_url = settings.TASKS_API_BASE_URL
-    auth_token = settings.TASKS_API_AUTH_TOKEN
 
     # Check if Cloud Tasks is configured
     if not project_id or not location or not queue_name:
@@ -84,10 +83,6 @@ def enqueue_refresh_tasks() -> Dict[str, Any]:
                     "body": payload.encode(),
                 }
             }
-
-            # Add authorization header if token is configured
-            if auth_token:
-                task["http_request"]["headers"]["Authorization"] = f"Bearer {auth_token}"
 
             # Create the task
             response = client.create_task(parent=parent, task=task)

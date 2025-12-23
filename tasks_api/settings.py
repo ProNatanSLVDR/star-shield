@@ -31,13 +31,11 @@ class Base(StarshieldBase):
     # Cloud Tasks configuration
     CLOUD_TASKS_PROJECT_ID = os.getenv("CLOUD_TASKS_PROJECT_ID", "")
     CLOUD_TASKS_LOCATION = os.getenv("CLOUD_TASKS_LOCATION", "")
-    CLOUD_TASKS_QUEUE_NAME = os.getenv("CLOUD_TASKS_QUEUE_NAME", "")
+    CLOUD_TASKS_SERVICE_ACCOUNT = "tasks-agent@starshield-app.iam.gserviceaccount.com"
 
     # API base URL (for Cloud Tasks to call back)
     TASKS_API_BASE_URL = os.getenv("TASKS_API_BASE_URL", "http://localhost:8001")
-
-    # API authentication token (for Cloud Tasks callbacks)
-    TASKS_API_AUTH_TOKEN = os.getenv("TASKS_API_AUTH_TOKEN", "")
+    TASKS_API_QUEUE_NAME = os.getenv("TASKS_API_QUEUE_NAME", "")
 
     # Task configuration
     TASK_MAX_RETRIES = 3
