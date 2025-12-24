@@ -70,6 +70,7 @@ class Base(Configuration):
     ]
 
     MIDDLEWARE = [
+        *CORE_MIDDLEWARE,
         "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.LoginRequiredMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
