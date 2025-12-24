@@ -5,7 +5,6 @@ This extends starshield.settings and overrides API-specific configurations.
 """
 
 from pathlib import Path
-from configurations import Configuration
 import os
 
 # Import base settings from starshield
@@ -19,7 +18,7 @@ from starshield.settings import (
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-class Base(StarshieldBase):
+class Base:
     """Base settings for tasks API, extending starshield base settings."""
 
     ROOT_URLCONF = "tasks_api.urls"
