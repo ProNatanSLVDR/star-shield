@@ -8,15 +8,15 @@ from ninja import NinjaAPI
 from tasks_api.api.router_v1 import api_router as api_router_v1
 
 # Create Django Ninja API instance
-api = NinjaAPI(
+api_v1 = NinjaAPI(
     title="Tasks API",
     version="1.0.0",
     description="API for managing async review fetching tasks",
 )
 
 # Mount the API router
-api.add_router("v1/", api_router_v1)
+api_v1.add_router("", api_router_v1)
 
 urlpatterns = [
-    path("", api.urls),
+    path("v1/", api_v1.urls),
 ]
