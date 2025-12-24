@@ -30,33 +30,33 @@ class Base(Configuration):
 
     # Application definition
 
-    FRONTEND_APPS = [
-        "allauth",
-        "allauth.account",
-        "allauth.socialaccount",
-        "allauth.socialaccount.providers.google",
-        "django_htmx",
-        "django_components",
-    ]
-
-    CUSTOM_APPS = [
-        "auths",
-        "frontend.dashboard",
-        "frontend.reviews",
-        "frontend.roulette",
-        "tasks_api",
-    ]
-
-    CORE_APPS = [
+    INSTALLED_APPS = [
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.messages",
         "django.contrib.staticfiles",
+        #
+        # Auths app
+        "auths",
+        "allauth",
+        "allauth.account",
+        "allauth.socialaccount",
+        "allauth.socialaccount.providers.google",
+        #
+        # Third party apps
+        "django_htmx",
+        "django_components",
+        #
+        # Frontend apps
+        "frontend.dashboard",
+        "frontend.reviews",
+        "frontend.roulette",
+        #
+        # API apps
+        "tasks_api",
     ]
-
-    INSTALLED_APPS = [*CORE_APPS, *FRONTEND_APPS, *CUSTOM_APPS]
 
     # API-friendly middleware
     CORE_MIDDLEWARE = [
@@ -64,14 +64,13 @@ class Base(Configuration):
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
-    ]
-
-    MIDDLEWARE = [
-        *CORE_MIDDLEWARE,
-        "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "allauth.account.middleware.AccountMiddleware",
+    ]
+
+    MIDDLEWARE = [
+        "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.LoginRequiredMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
