@@ -299,24 +299,28 @@
                 });
             }
 
-            // Update preview function
+            // Update preview function with debouncing
+            let previewTimeout = null;
             function updatePreview() {
-                const fillColor = fillColorInput ? fillColorInput.value : "#000000";
-                const fillColorSecondary = fillColorSecondaryInput ? fillColorSecondaryInput.value : "#000000";
-                const backgroundColor = backgroundColorInput ? backgroundColorInput.value : "#FFFFFF";
-                const style = styleSelect ? styleSelect.value : "square";
-                const colorMask = colorMaskSelect ? colorMaskSelect.value : "solid";
+                clearTimeout(previewTimeout);
+                previewTimeout = setTimeout(function() {
+                    const fillColor = fillColorInput ? fillColorInput.value : "#000000";
+                    const fillColorSecondary = fillColorSecondaryInput ? fillColorSecondaryInput.value : "#000000";
+                    const backgroundColor = backgroundColorInput ? backgroundColorInput.value : "#FFFFFF";
+                    const style = styleSelect ? styleSelect.value : "square";
+                    const colorMask = colorMaskSelect ? colorMaskSelect.value : "solid";
 
-                // Update preview with query parameters for real-time preview
-                const baseUrl = "{{ qr_code_url }}";
-                const params = new URLSearchParams({
-                    fill_color: fillColor,
-                    fill_color_secondary: fillColorSecondary,
-                    background_color: backgroundColor,
-                    style: style,
-                    color_mask: colorMask
-                });
-                qrCodePreview.src = baseUrl + "?" + params.toString();
+                    // Update preview with query parameters for real-time preview
+                    const baseUrl = "{{ qr_code_url }}";
+                    const params = new URLSearchParams({
+                        fill_color: fillColor,
+                        fill_color_secondary: fillColorSecondary,
+                        background_color: backgroundColor,
+                        style: style,
+                        color_mask: colorMask
+                    });
+                    qrCodePreview.src = baseUrl + "?" + params.toString();
+                }, 300);
             }
 
             // Reset to defaults functionality
@@ -355,12 +359,6 @@
                 });
             }
 
-            // Update preview on form changes (for real-time preview)
-            if (form) {
-                form.addEventListener("input", function() {
-                    updatePreview();
-                });
-            }
 
             // Handle logo delete button
             if (deleteLogoBtn) {
