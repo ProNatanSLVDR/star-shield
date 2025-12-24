@@ -76,7 +76,7 @@ def enqueue_refresh_tasks() -> Dict[str, Any]:
     """
     project_id = settings.CLOUD_TASKS_PROJECT_ID
     location = settings.CLOUD_TASKS_LOCATION
-    queue_name = settings.CLOUD_TASKS_QUEUE_NAME
+    queue_name = settings.TASKS_API_QUEUE_NAME
     base_url = settings.TASKS_API_BASE_URL
 
     # Check if Cloud Tasks is configured
