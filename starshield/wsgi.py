@@ -1,7 +1,7 @@
 import os
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'starshield.settings')
-os.environ.setdefault('DJANGO_CONFIGURATION', 'Prod')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "starshield.settings")
+os.environ.setdefault("DJANGO_CONFIGURATION", "Prod")
 
 from configurations.wsgi import get_wsgi_application
 

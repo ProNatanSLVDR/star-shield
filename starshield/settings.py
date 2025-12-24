@@ -30,7 +30,7 @@ class Base(Configuration):
 
     # Application definition
 
-    THIRD_PARTY_APPS = [
+    FRONTEND_APPS = [
         "allauth",
         "allauth.account",
         "allauth.socialaccount",
@@ -47,16 +47,16 @@ class Base(Configuration):
         "tasks_api",
     ]
 
-    INSTALLED_APPS = [
+    CORE_APPS = [
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.messages",
         "django.contrib.staticfiles",
-        *THIRD_PARTY_APPS,
-        *CUSTOM_APPS,
     ]
+
+    INSTALLED_APPS = [*CORE_APPS, *FRONTEND_APPS, *CUSTOM_APPS]
 
     # API-friendly middleware
     CORE_MIDDLEWARE = [

@@ -28,6 +28,8 @@ class Base(StarshieldBase):
     # API-specific middleware (remove web-specific ones)
     MIDDLEWARE = StarshieldBase.CORE_MIDDLEWARE
 
+    INSTALLED_APPS = [*StarshieldBase.CORE_APPS, *StarshieldBase.CUSTOM_APPS]
+
     # Cloud Tasks configuration
     CLOUD_TASKS_PROJECT_ID = os.getenv("CLOUD_TASKS_PROJECT_ID", "")
     CLOUD_TASKS_LOCATION = os.getenv("CLOUD_TASKS_LOCATION", "")

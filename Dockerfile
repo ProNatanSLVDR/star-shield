@@ -6,8 +6,6 @@ WORKDIR /app
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_SETTINGS_MODULE=starshield.settings
-ENV DJANGO_CONFIGURATION=Prod
 
 # install dependencies
 RUN pip install --upgrade pip
