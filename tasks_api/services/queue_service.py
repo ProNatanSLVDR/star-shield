@@ -108,7 +108,7 @@ def enqueue_refresh_tasks() -> Dict[str, Any]:
     for etablissement in etablissements:
         try:
             # Create task payload
-            payload = json.dumps({"etablissement_id": etablissement.id})
+            payload = {"etablissement_id": etablissement.id}
 
             create_google_cloud_task(
                 queue=queue_name,
