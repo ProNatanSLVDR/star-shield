@@ -38,7 +38,7 @@ class Base:
 
     # Task configuration
     TASK_MAX_RETRIES = 3
-    TASK_TIMEOUT_SECONDS = 3600  # 1 hour
+    TASK_TIMEOUT_SECONDS = 300  # 1 hour
 
 
 class Dev(Base, StarshieldDev):
