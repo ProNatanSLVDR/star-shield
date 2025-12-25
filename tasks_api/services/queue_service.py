@@ -30,6 +30,8 @@ def create_google_cloud_task(
     # Initialize Cloud Tasks client
     client = tasks_v2.CloudTasksClient()
 
+    task_id_generated = f"{task_id}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
     # Construct the task.
     task = tasks_v2.Task(
         http_request=tasks_v2.HttpRequest(
@@ -39,7 +41,7 @@ def create_google_cloud_task(
             body=json.dumps(payload).encode(),
             oidc_token=tasks_v2.OidcToken(service_account_email=settings.CLOUD_TASKS_SERVICE_ACCOUNT),
         ),
-        name=(client.task_path(PROJECT_ID, LOCATION, queue, task_id)),
+        name=(client.task_path(PROJECT_ID, LOCATION, queue, task_id_generated)),
     )
 
     # Convert "seconds from now" to an absolute Protobuf Timestamp
