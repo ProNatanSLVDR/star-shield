@@ -17,6 +17,7 @@ django_components==0.141.6
 djc_core_html_parser==1.0.2
 djhtml==3.0.9
 filelock==3.19.1
+gevent==25.9.1
 google-api-core==2.25.2
 google-api-python-client==2.184.0
 google-auth==2.41.1
@@ -24,6 +25,7 @@ google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.2
 google-cloud-tasks==2.20.0
 googleapis-common-protos==1.70.0
+greenlet==3.3.0
 grpc-google-iam-v1==0.14.3
 grpcio==1.76.0
 grpcio-status==1.76.0
@@ -60,3 +62,5 @@ uritemplate==4.2.0
 urllib3==2.5.0
 uv==0.8.22
 virtualenv==20.34.0
+zope.event==6.1
+zope.interface==8.1.1
