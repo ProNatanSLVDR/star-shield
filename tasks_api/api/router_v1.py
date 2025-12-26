@@ -72,7 +72,7 @@ def fetch_refresh(request, payload: ReviewFetchRequest):
 
 
 @api_router.post("/enqueue-refresh-all", response=EnqueueRefreshResponse)
-async def enqueue_refresh_all(request):
+def enqueue_refresh_all(request):
     """
     Enqueue refresh tasks for all etablissements to Cloud Tasks queue.
     Called by Cloud Scheduler to trigger batch refresh of all establishments.
