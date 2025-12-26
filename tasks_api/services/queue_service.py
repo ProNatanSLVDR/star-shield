@@ -16,7 +16,7 @@ from auths.models import Etablissement
 logger = logging.getLogger(__name__)
 
 
-def create_google_cloud_task(
+async def create_google_cloud_task(
     queue: str,
     url: str,
     payload: dict,
@@ -57,7 +57,7 @@ def create_google_cloud_task(
         task.dispatch_deadline = duration
 
     # Create the task
-    client.create_task(
+    await client.create_task(
         tasks_v2.CreateTaskRequest(
             parent=client.queue_path(PROJECT_ID, LOCATION, queue),
             task=task,
