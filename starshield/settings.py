@@ -281,6 +281,13 @@ class Prod(Base):
             "PASSWORD": os.getenv("DB_PROD_PASSWORD"),
             "HOST": f"/cloudsql/{os.getenv('DB_PROD_HOST')}",
             "PORT": 5432,
+            "CONN_MAX_AGE": 600,
+            "OPTIONS": {
+                "connect_timeout": 10,
+                "keepalives_idle": 30,
+                "keepalives_interval": 10,
+                "keepalives_count": 5,
+            },
         }
     }
 
