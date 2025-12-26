@@ -2,7 +2,6 @@
 Queue service for enqueuing refresh tasks to Cloud Tasks.
 """
 
-import asyncio
 import json
 import logging
 from typing import Dict, Any
@@ -17,15 +16,7 @@ from auths.models import Etablissement
 logger = logging.getLogger(__name__)
 
 
-async def _create_task_async(
-    client: tasks_v2.CloudTasksClient,
-    request: tasks_v2.CreateTaskRequest,
-) -> None:
-    """Async helper function to create a Cloud Task."""
-    await client.create_task(request)
-
-
-def create_google_cloud_task(
+async def create_google_cloud_task(
     queue: str,
     url: str,
     payload: dict,
@@ -66,13 +57,10 @@ def create_google_cloud_task(
         task.dispatch_deadline = duration
 
     # Create the task
-    asyncio.run(
-        _create_task_async(
-            client,
-            tasks_v2.CreateTaskRequest(
-                parent=client.queue_path(PROJECT_ID, LOCATION, queue),
-                task=task,
-            ),
+    await client.create_task(
+        tasks_v2.CreateTaskRequest(
+            parent=client.queue_path(PROJECT_ID, LOCATION, queue),
+            task=task,
         )
     )
 
