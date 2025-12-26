@@ -117,8 +117,6 @@ def enqueue_refresh_tasks() -> Dict[str, Any]:
                 url=target_url,
                 payload=payload,
                 task_id=f"etablissement_{etablissement.id}",
-                scheduled_seconds_from_now=0,
-                timeout=settings.TASK_TIMEOUT_SECONDS,
             )
 
             enqueued += 1
