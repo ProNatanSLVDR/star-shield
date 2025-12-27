@@ -1,3 +1,5 @@
+{% load filters %}
+
 <div class="border rounded-3 p-3 bg-white">
     <!-- Profile Picture, Name, Rating, and Badge -->
     <div class="d-flex align-items-start gap-3">
@@ -50,7 +52,7 @@
     {% if has_comment %}
         <p class="mt-3 mb-0 small text-body-secondary"
            style="font-size: 0.8rem; line-height: 1.4;">
-            {{ comment_display }}
+            {{ comment_display|after_original }}
         </p>
     {% endif %}
 
