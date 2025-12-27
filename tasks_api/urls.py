@@ -11,7 +11,7 @@ from tasks_api.api.router_v1 import api_router as api_router_v1
 api_v1 = NinjaAPI(
     title="Tasks API",
     version="1.0.0",
-    description="API for managing async review fetching tasks",
+    description="API for managing review fetching tasks",
 )
 
 # Mount the API router
