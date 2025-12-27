@@ -232,36 +232,77 @@
             <div class="col-12 col-xl-7 p-2 px-3 h-100">
                 <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-                        <h3 class="h6 fw-semibold mb-0">Avis récents</h3>
+                        <div>
+                            <h3 class="h6 fw-semibold mb-0">Avis récents</h3>
+                            <p class="small text-muted mb-0 mt-1" style="font-size: 0.7rem;">
+                                Derniers 15 jours
+                            </p>
+                        </div>
+                        {% if latest_reviews %}
+                            <span class="badge rounded-pill bg-primary-subtle text-primary" style="font-size: 0.7rem;">
+                                {{ latest_reviews|length }} avis
+                            </span>
+                        {% endif %}
                     </div>
                     {% if latest_reviews %}
-                        <div class="d-flex flex-column gap-2 flex-grow-1" style="min-height: 0; overflow-y: auto;">
+                        <div class="d-flex flex-column gap-3 flex-grow-1" style="min-height: 0; overflow-y: auto;">
                             {% for review in latest_reviews %}
-                                <div class="border rounded-3 p-2 bg-white">
-                                    <div class="d-flex justify-content-between align-items-start mb-1">
-                                        <div class="d-flex align-items-center gap-1">
-                                            {% for i in "12345"|make_list %}
-                                                {% if forloop.counter <= review.rating %}
-                                                    <i class="fa-solid fa-star text-warning" style="font-size: 0.75rem;"></i>
-                                                {% else %}
-                                                    <i class="fa-solid fa-star" style="font-size: 0.75rem; color: #e3e9ed;"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                        <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.65rem;">
-                                            {% if review.source == 'google' %}
-                                                <i class="fa-brands fa-google"></i> Google
+                                <div class="border rounded-3 p-3 bg-white">
+                                    <!-- Profile Picture, Name, and Rating -->
+                                    <div class="d-flex align-items-start gap-3 mb-3">
+                                        <!-- Profile Picture -->
+                                        <div class="flex-shrink-0">
+                                            {% if review.source == 'google' and review.google_reviewer_data.profilePhotoUrl %}
+                                                <img src="{{ review.google_reviewer_data.profilePhotoUrl }}"
+                                                     alt="Profile"
+                                                     class="rounded-circle"
+                                                     style="width: 40px; height: 40px; object-fit: cover;">
                                             {% else %}
-                                                <i class="fa-solid fa-lock"></i> Interne
+                                                <div class="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center"
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fa-solid fa-user text-secondary" style="font-size: 0.75rem;"></i>
+                                                </div>
                                             {% endif %}
-                                        </span>
+                                        </div>
+
+                                        <!-- Name, Rating, and Source Badge -->
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div class="fw-semibold small" style="font-size: 0.8rem;">
+                                                    {% if review.source == 'google' and review.google_reviewer_data.displayName %}
+                                                        {{ review.google_reviewer_data.displayName }}
+                                                    {% else %}
+                                                        Anonyme
+                                                    {% endif %}
+                                                </div>
+                                                <span class="badge rounded-pill {% if review.source == 'google' %}bg-success-subtle text-success{% else %}bg-primary-subtle text-primary{% endif %}" style="font-size: 0.65rem;">
+                                                    {% if review.source == 'google' %}
+                                                        <i class="fa-brands fa-google"></i> Google
+                                                    {% else %}
+                                                        <i class="fa-solid fa-lock"></i> Interne
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            <!-- Star Rating -->
+                                            <div class="d-flex align-items-center gap-1">
+                                                {% for i in "12345"|make_list %}
+                                                    {% if forloop.counter <= review.rating %}
+                                                        <i class="fa-solid fa-star text-warning" style="font-size: 0.7rem;"></i>
+                                                    {% else %}
+                                                        <i class="fa-solid fa-star" style="font-size: 0.7rem; color: #e3e9ed;"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    <!-- Comment -->
                                     {% if review.comment %}
-                                        <p class="mb-1 small text-body-secondary" style="font-size: 0.8rem; line-height: 1.4;">
+                                        <p class="mb-2 small text-body-secondary" style="font-size: 0.8rem; line-height: 1.4;">
                                             {{ review.comment|truncatewords:20 }}
                                         </p>
                                     {% else %}
-                                        <p class="mb-1 small text-muted" style="font-size: 0.75rem;">
+                                        <p class="mb-2 small text-muted" style="font-size: 0.75rem;">
                                             Aucun commentaire
                                         </p>
                                     {% endif %}

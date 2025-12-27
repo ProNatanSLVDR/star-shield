@@ -59,7 +59,7 @@ def overview_view(request):
         ]
 
     reviews_queryset = Review.objects.filter(etablissement=etablissement)
-    ordered_reviews = reviews_queryset.order_by("-created_at")
+    ordered_reviews = reviews_queryset.order_by("-writen_at", "-created_at")
 
     total_reviews = reviews_queryset.count()
 
@@ -84,11 +84,7 @@ def overview_view(request):
     reviews_kept_private = analytics_queryset.filter(type="feedback_internal_viewed").count()
 
     # Last review update time
-    latest_reviews: list[Review] = list[Review](ordered_reviews[:5])
-
-    last_review_update = None
-    if latest_reviews:
-        last_review_update = latest_reviews[0].created_at
+    latest_reviews = ordered_reviews.filter(writen_at__gte=timezone.now() - timedelta(days=15))
 
     chart_payload = {
         "history": rating_history_points,
@@ -106,7 +102,6 @@ def overview_view(request):
         "qr_page_visits": qr_page_visits,
         "reviews_redirected_google": reviews_redirected_google,
         "reviews_kept_private": reviews_kept_private,
-        "last_review_update": last_review_update,
         "latest_reviews": latest_reviews,
         "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
     }
