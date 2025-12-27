@@ -24,8 +24,8 @@ def create_google_cloud_task(
     scheduled_seconds_from_now: int = None,
     timeout: int = None,
 ) -> dict:
-    PROJECT_ID = settings.CLOUD_TASKS_PROJECT_ID
-    LOCATION = settings.CLOUD_TASKS_LOCATION
+    PROJECT_ID = settings.GCP_PROJECT_ID
+    LOCATION = settings.GCP_PROJECT_REGION
 
     # Initialize Cloud Tasks client
     client = tasks_v2.CloudTasksClient()
@@ -76,19 +76,8 @@ def enqueue_full_import_task(etablissement_id: int) -> None:
     Returns:
         None (logs errors but doesn't raise)
     """
-    project_id = settings.CLOUD_TASKS_PROJECT_ID
-    location = settings.CLOUD_TASKS_LOCATION
     queue_name = settings.TASKS_API_QUEUE_NAME
     base_url = settings.TASKS_API_BASE_URL
-
-    # Check if Cloud Tasks is configured
-    if not project_id or not location or not queue_name:
-        logger.warning(f"Cloud Tasks not configured. Skipping full import task for etablissement {etablissement_id}")
-        return
-
-    if not base_url:
-        logger.warning(f"TASKS_API_BASE_URL not configured. Skipping full import task for etablissement {etablissement_id}")
-        return
 
     try:
         # Build target URL for fetch-all endpoint
@@ -121,21 +110,8 @@ def enqueue_refresh_tasks() -> Dict[str, Any]:
         - failed: Number of tasks that failed to enqueue
         - errors: List of error messages for failed tasks
     """
-    project_id = settings.CLOUD_TASKS_PROJECT_ID
-    location = settings.CLOUD_TASKS_LOCATION
     queue_name = settings.TASKS_API_QUEUE_NAME
     base_url = settings.TASKS_API_BASE_URL
-
-    # Check if Cloud Tasks is configured
-    if not project_id or not location or not queue_name:
-        error_msg = "Cloud Tasks not configured. Missing PROJECT_ID, LOCATION, or QUEUE_NAME."
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
-
-    if not base_url:
-        error_msg = "TASKS_API_BASE_URL not configured."
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
 
     # Get all etablissements
     etablissements = Etablissement.objects.all()
