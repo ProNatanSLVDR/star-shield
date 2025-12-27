@@ -164,54 +164,7 @@
                 <div class="row g-3" data-masonry='{"percentPosition": true }'>
                     {% for review in reviews %}
                         <div class="col-12 col-md-6 col-lg-4">
-
-                            <div class="card p-3">
-                                <!-- Card Header: Profile Picture, Name, and Rating -->
-                                <div class="d-flex align-items-start gap-3">
-                                    <!-- Profile Picture -->
-                                    <div class="flex-shrink-0">
-                                        {% if review.source == 'google' and review.google_reviewer_data.profilePhotoUrl %}
-                                            <img src="{{ review.google_reviewer_data.profilePhotoUrl }}"
-                                                 alt="Profile"
-                                                 class="rounded-circle"
-                                                 style="width: 48px; height: 48px; object-fit: cover;">
-                                        {% else %}
-                                            <div class="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center"
-                                                 style="width: 48px; height: 48px;">
-                                                <i class="fa-solid fa-user text-secondary"></i>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <!-- Name and Rating -->
-                                    <div class="flex-grow-1">
-                                        <div class="fw-semibold mb-1">
-                                            {% if review.source == 'google' and review.google_reviewer_data.displayName %}
-                                                {{ review.google_reviewer_data.displayName }}
-                                            {% else %}
-                                                Anonyme
-                                            {% endif %}
-                                        </div>
-                                        <!-- Star Rating -->
-                                        <div class="d-flex align-items-center gap-1">
-                                            {% for i in "12345"|make_list %}
-                                                {% if forloop.counter <= review.rating %}
-                                                    <i class="fa-solid fa-star text-warning" style="font-size: 0.875rem;"></i>
-                                                {% else %}
-                                                    <i class="fa-solid fa-star" style="font-size: 0.875rem; color: #e3e9ed;"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Comment -->
-                                {% if review.comment %}
-                                    <p class="mb-0 text-body-secondary small mt-3" style="line-height: 1.5; white-space: pre-line;">
-                                        {{ review.comment|after_original }}
-                                    </p>
-                                {% endif %}
-                            </div>
+                            {% component "review" review=review show_badge=True show_timestamp=False truncate_comment=False / %}
                         </div>
                     {% endfor %}
                 </div>
