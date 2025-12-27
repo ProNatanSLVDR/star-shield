@@ -207,7 +207,9 @@
 
                                 <!-- Comment -->
                                 {% if review.comment %}
-                                    <p class="mb-0 text-body-secondary small mt-3" style="line-height: 1.5; white-space: pre-line;">{{ review.comment|after_original }}</p>
+                                    <p class="mb-0 text-body-secondary small mt-3" style="line-height: 1.5; white-space: pre-line;">
+                                        {{ review.comment|after_original }}
+                                    </p>
                                 {% endif %}
                             </div>
                         </div>

@@ -5,9 +5,9 @@ from .models import Review, ReviewAnalytics
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ("etablissement", "rating", "created_at")
-    list_filter = ("rating", "created_at", "etablissement")
-    search_fields = ("etablissement__name", "comment")
+    list_display = ("__str__", "etablissement", "rating", "created_at")
+    list_filter = ("rating", "writen_at", "created_at", "etablissement")
+    search_fields = ("etablissement__name", "comment", "google_reviewer_data__displayName")
 
 
 @admin.register(ReviewAnalytics)

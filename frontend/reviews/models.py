@@ -25,7 +25,7 @@ class Review(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Review {self.rating}★ for {self.etablissement}"
+        return f"{self.google_reviewer_data.get('displayName', 'Anonyme')} {self.rating}★ for {self.etablissement}"
 
 
 class ReviewAnalytics(models.Model):
