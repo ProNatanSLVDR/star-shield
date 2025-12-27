@@ -74,6 +74,91 @@
                     }
                 });
             })
+
+            // Handle modal loading states
+            htmx.on("htmx:beforeRequest", (e) => {
+                const elt = e.detail.elt;
+                // Get the target from the triggering element
+                const targetSelector = elt.getAttribute('hx-target');
+                let target = null;
+
+                if (targetSelector) {
+                    // Check if target selector matches modal content
+                    if (targetSelector.includes('#dynamicModal .modal-content') || targetSelector.includes('#dynamicModal2 .modal-content')) {
+                        // Resolve target selector directly
+                        target = document.querySelector(targetSelector);
+                    }
+                }
+
+                // Check if target is modal content
+                if (target && (target.matches('#dynamicModal .modal-content') || target.matches('#dynamicModal2 .modal-content'))) {
+                    // Store existing content and hide it
+                    const existingContent = Array.from(target.children);
+                    existingContent.forEach(el => {
+                        el.style.display = 'none';
+                    });
+
+                    // Create and show loader
+                    const loader = document.createElement('div');
+                    loader.className = 'modal-loader d-flex justify-content-center align-items-center py-5';
+                    loader.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>';
+                    target.appendChild(loader);
+
+                    // Store loader reference for cleanup
+                    target.dataset.loaderActive = 'true';
+                }
+            });
+
+            htmx.on("htmx:afterSwap", (e) => {
+                const target = e.detail.target;
+                // Check if target is modal content
+                if (target && (target.matches('#dynamicModal .modal-content') || target.matches('#dynamicModal2 .modal-content'))) {
+                    // Remove loader if it exists (should be removed by swap, but ensure cleanup)
+                    const loader = target.querySelector('.modal-loader');
+                    if (loader) {
+                        loader.remove();
+                    }
+                    target.removeAttribute('data-loader-active');
+                }
+            });
+
+            // Handle errors - hide loader on error
+            htmx.on("htmx:responseError", (e) => {
+                const target = e.detail.target;
+                if (target && (target.matches('#dynamicModal .modal-content') || target.matches('#dynamicModal2 .modal-content'))) {
+                    const loader = target.querySelector('.modal-loader');
+                    if (loader) {
+                        loader.remove();
+                    }
+                    target.removeAttribute('data-loader-active');
+                    // Show existing content again on error (if swap didn't happen)
+                    const existingContent = Array.from(target.children);
+                    existingContent.forEach(el => {
+                        if (!el.classList.contains('modal-loader')) {
+                            el.style.display = '';
+                        }
+                    });
+                }
+            });
+
+            // Handle request cancellation
+            htmx.on("htmx:sendError", (e) => {
+                const target = e.detail.target;
+                if (target && (target.matches('#dynamicModal .modal-content') || target.matches('#dynamicModal2 .modal-content'))) {
+                    const loader = target.querySelector('.modal-loader');
+                    if (loader) {
+                        loader.remove();
+                    }
+                    target.removeAttribute('data-loader-active');
+                    // Show existing content again
+                    const existingContent = Array.from(target.children);
+                    existingContent.forEach(el => {
+                        if (!el.classList.contains('modal-loader')) {
+                            el.style.display = '';
+                        }
+                    });
+                }
+            });
         });
     </script>
 
