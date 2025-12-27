@@ -203,6 +203,19 @@ class Base(Configuration):
     GOOGLE_GMB_CLIENT_SECRET = os.getenv("GOOGLE_GMB_CLIENT_SECRET", "")
     GOOGLE_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
 
+    # Cloud Tasks configuration
+    CLOUD_TASKS_PROJECT_ID = os.getenv("CLOUD_TASKS_PROJECT_ID", "")
+    CLOUD_TASKS_LOCATION = os.getenv("CLOUD_TASKS_LOCATION", "")
+    CLOUD_TASKS_SERVICE_ACCOUNT = "tasks-agent@starshield-app.iam.gserviceaccount.com"
+
+    # API base URL (for Cloud Tasks to call back)
+    TASKS_API_BASE_URL = os.getenv("TASKS_API_BASE_URL", "http://localhost:8001")
+    TASKS_API_QUEUE_NAME = os.getenv("TASKS_API_QUEUE_NAME", "")
+
+    # Task configuration
+    TASK_MAX_RETRIES = 3
+    TASK_TIMEOUT_SECONDS = 300  # 5 minutes
+
     # Logging configuration
     LOGGING = {
         "version": 1,

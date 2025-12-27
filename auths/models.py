@@ -252,6 +252,14 @@ class GoogleCredentials(models.Model):
                 },
             )
 
+            # Enqueue full import task for newly created etablissements
+            if created:
+                try:
+                    from tasks_api.services.queue_service import enqueue_full_import_task
+                    enqueue_full_import_task(etablissement.id)
+                except Exception as e:
+                    logger.warning(f"Failed to enqueue full import task for etablissement {etablissement.id}: {e}", exc_info=True)
+
             return etablissement
 
         except Exception as e:

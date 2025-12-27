@@ -65,6 +65,51 @@ def create_google_cloud_task(
     )
 
 
+def enqueue_full_import_task(etablissement_id: int) -> None:
+    """
+    Enqueue a full import task for a single etablissement to Cloud Tasks queue.
+    This triggers a fetch-all operation that imports all reviews and stats.
+
+    Args:
+        etablissement_id: ID of the Etablissement to process
+
+    Returns:
+        None (logs errors but doesn't raise)
+    """
+    project_id = settings.CLOUD_TASKS_PROJECT_ID
+    location = settings.CLOUD_TASKS_LOCATION
+    queue_name = settings.TASKS_API_QUEUE_NAME
+    base_url = settings.TASKS_API_BASE_URL
+
+    # Check if Cloud Tasks is configured
+    if not project_id or not location or not queue_name:
+        logger.warning(f"Cloud Tasks not configured. Skipping full import task for etablissement {etablissement_id}")
+        return
+
+    if not base_url:
+        logger.warning(f"TASKS_API_BASE_URL not configured. Skipping full import task for etablissement {etablissement_id}")
+        return
+
+    try:
+        # Build target URL for fetch-all endpoint
+        target_url = f"{base_url.rstrip('/')}/v1/fetch-all"
+
+        # Create task payload
+        payload = {"etablissement_id": etablissement_id}
+
+        create_google_cloud_task(
+            queue=queue_name,
+            url=target_url,
+            payload=payload,
+            task_id=f"etablissement_{etablissement_id}_full_import",
+        )
+
+        logger.info(f"Enqueued full import task for etablissement {etablissement_id}")
+
+    except Exception as e:
+        logger.error(f"Failed to enqueue full import task for etablissement {etablissement_id}: {e}", exc_info=True)
+
+
 def enqueue_refresh_tasks() -> Dict[str, Any]:
     """
     Enqueue refresh tasks for all etablissements to Cloud Tasks queue.

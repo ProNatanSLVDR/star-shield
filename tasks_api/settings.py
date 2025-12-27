@@ -5,7 +5,6 @@ This extends starshield.settings and overrides API-specific configurations.
 """
 
 from pathlib import Path
-import os
 
 # Import base settings from starshield
 from starshield.settings import (
@@ -26,19 +25,6 @@ class Base:
 
     # API-specific middleware (remove web-specific ones)
     MIDDLEWARE = StarshieldBase.CORE_MIDDLEWARE
-
-    # Cloud Tasks configuration
-    CLOUD_TASKS_PROJECT_ID = os.getenv("CLOUD_TASKS_PROJECT_ID", "")
-    CLOUD_TASKS_LOCATION = os.getenv("CLOUD_TASKS_LOCATION", "")
-    CLOUD_TASKS_SERVICE_ACCOUNT = "tasks-agent@starshield-app.iam.gserviceaccount.com"
-
-    # API base URL (for Cloud Tasks to call back)
-    TASKS_API_BASE_URL = os.getenv("TASKS_API_BASE_URL", "http://localhost:8001")
-    TASKS_API_QUEUE_NAME = os.getenv("TASKS_API_QUEUE_NAME", "")
-
-    # Task configuration
-    TASK_MAX_RETRIES = 3
-    TASK_TIMEOUT_SECONDS = 300  # 1 hour
 
 
 class Dev(Base, StarshieldDev):
