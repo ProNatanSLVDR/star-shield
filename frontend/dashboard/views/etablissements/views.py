@@ -106,9 +106,14 @@ def import_etablissement_partial(request):
         print(available_locations)
         request.session["available_locations"] = available_locations
         form = ImportEtablissementForm(available_locations=available_locations)
+
+    # Count imported établissements
+    imported_count = sum(1 for location in available_locations if location.get("exists", False))
+
     context = {
         "form": form,
         "available_locations": available_locations,
+        "imported_count": imported_count,
     }
     return starshield_render(
         request,
