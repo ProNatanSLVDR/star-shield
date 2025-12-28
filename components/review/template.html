@@ -34,17 +34,25 @@
                     </span>
                 {% endif %}
             </div>
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex align-items-center gap-1">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= rating %}
+                            <i class="fa-solid fa-star text-warning" style="font-size: 0.7rem;"></i>
+                        {% else %}
+                            <i class="fa-solid fa-star" style="font-size: 0.7rem; color: #e3e9ed;"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% if show_timestamp %}
+                    <p class="mb-0 small text-muted" style="font-size: 0.7rem;">
+                        <i class="fa-solid fa-clock"></i> {{ timestamp_display }}
+                    </p>
+                {% endif %}
+            </div>
 
             <!-- Star Rating -->
-            <div class="d-flex align-items-center gap-1">
-                {% for i in "12345"|make_list %}
-                    {% if forloop.counter <= rating %}
-                        <i class="fa-solid fa-star text-warning" style="font-size: 0.7rem;"></i>
-                    {% else %}
-                        <i class="fa-solid fa-star" style="font-size: 0.7rem; color: #e3e9ed;"></i>
-                    {% endif %}
-                {% endfor %}
-            </div>
+
         </div>
     </div>
 
@@ -53,13 +61,6 @@
         <p class="mt-3 mb-0 small text-body-secondary"
            style="font-size: 0.8rem; line-height: 1.4;">
             {{ comment_display|after_original }}
-        </p>
-    {% endif %}
-
-    <!-- Timestamp -->
-    {% if show_timestamp and timestamp_display %}
-        <p class="mb-0 mt-2 small text-muted" style="font-size: 0.7rem;">
-            <i class="fa-solid fa-clock"></i> {{ timestamp_display }}
         </p>
     {% endif %}
 </div>
