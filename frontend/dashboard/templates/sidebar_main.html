@@ -32,6 +32,15 @@
             <span class="ms-3 flex-grow-1">
                 Établissement
             </span>
+            {% if request.etablissement %}
+                <a href="{% url 'dashboard:etablissements:unselect' %}"
+                   class="text-white text-decoration-none ms-2"
+                   style="opacity: 0.8; font-size: 0.9em;"
+                   onclick="event.stopPropagation();"
+                   title="Désélectionner l'établissement">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </a>
+            {% endif %}
 
         </div>
         <div class="p-2 text-center">
