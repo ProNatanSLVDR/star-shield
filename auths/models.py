@@ -88,6 +88,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
     onboarding_completed = models.BooleanField(default=False)
 
+    # Stripe
+    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = "email"
