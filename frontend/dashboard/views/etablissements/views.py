@@ -27,6 +27,13 @@ def list_etablissements_view(request):
         },
         {"label": "Site web", "key": "website_uri", "orderable": False, "icon": "fa-solid fa-globe"},
         {
+            "label": "Statut",
+            "key": "status",
+            "orderable": True,
+            "centered": True,
+            "icon": "fa-solid fa-circle-check",
+        },
+        {
             "label": "Date de création",
             "key": "created_at",
             "orderable": True,
@@ -49,9 +56,16 @@ def list_etablissements_view(request):
             },
         }
 
+        status_badge = {
+            "type": "badge",
+            "value": "Actif" if etablissement.active else "Inactif",
+            "variant": "success" if etablissement.active else "warning",
+        }
+
         row = {
             "title": etablissement.title,
             "website_uri": etablissement.website_uri or "N/A",
+            "status": status_badge,
             "created_at": etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A",
             "actions": {
                 "type": "buttons",
@@ -175,6 +189,18 @@ def select_etablissement(request, id):
 
 
 @google_gmb_connected_required
+def unselect_etablissement(request):
+    """
+    Unselects the currently selected établissement by clearing the session variable.
+    """
+    if "selected_etablissement" in request.session:
+        del request.session["selected_etablissement"]
+        messages.success(request, "Établissement désélectionné.")
+    
+    return redirect("dashboard:accueil")
+
+
+@google_gmb_connected_required
 def etablissement_selector_partial(request):
     """
     Returns the établissement selector partial for the sidebar.
@@ -189,6 +215,13 @@ def etablissement_selector_partial(request):
             "key": "title",
             "searchable": True,
             "orderable": True,
+        },
+        {
+            "label": "Statut",
+            "key": "status",
+            "orderable": True,
+            "centered": True,
+            "icon": "fa-solid fa-circle-check",
         },
         {"label": "Actions", "key": "actions", "centered": True},
     ]
@@ -205,10 +238,15 @@ def etablissement_selector_partial(request):
             },
         }
 
+        status_badge = {
+            "type": "badge",
+            "value": "Actif" if etablissement.active else "Inactif",
+            "variant": "success" if etablissement.active else "warning",
+        }
+
         row = {
             "title": etablissement.title,
-            "website_uri": etablissement.website_uri or "N/A",
-            "created_at": etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A",
+            "status": status_badge,
             "actions": {
                 "type": "buttons",
                 "buttons": [select_button],

@@ -11,5 +11,6 @@ urlpatterns = [
 
     # Selection d'un établissement
     path('select/<int:id>/', views.select_etablissement, name='select'),
+    path('unselect/', views.unselect_etablissement, name='unselect'),
     path('selector-partial/', views.etablissement_selector_partial, name='selector_partial'),
 ]
