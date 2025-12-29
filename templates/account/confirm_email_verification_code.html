@@ -1,0 +1,62 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+
+{% block auths_card_title %}
+    {% trans "Vérification" %}
+{% endblock auths_card_title %}
+
+{% block auths_card_subtitle %}
+    {% trans "Confirmez votre adresse e-mail" %}
+{% endblock auths_card_subtitle %}
+
+{% block content %}
+    <div class="mb-4 mt-3 text-center">
+        <i class="fa-solid fa-envelope-circle-check fa-3x text-primary mb-3"></i>
+        <h3 class="fw-bold mb-2">{% trans "Code de vérification" %}</h3>
+        <p class="text-muted mb-0">
+            {% trans "Entrez le code de vérification que nous avons envoyé à votre adresse e-mail." %}
+        </p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger small mb-4" role="alert">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-4">
+            <label for="{{ form.code.id_for_label }}" class="form-label fw-semibold small">{% trans "Code de vérification" %}</label>
+            <input
+                type="text"
+                name="{{ form.code.name }}"
+                id="{{ form.code.id_for_label }}"
+                class="form-control {% if form.code.errors %} is-invalid{% endif %} text-center"
+                placeholder="ABF3D2"
+                autocomplete="one-time-code"
+                required
+                autofocus
+                maxlength="6"
+                pattern="[0-9]*"
+                inputmode="numeric"
+                value="{{ form.code.value|default:'' }}"
+            >
+            {% if form.code.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.code.errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-dark btn-lg rounded-4 fs-6 fw-bold">{% trans "Vérifier" %}</button>
+        </div>
+    </form>
+{% endblock content %}
+

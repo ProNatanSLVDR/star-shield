@@ -12,20 +12,29 @@
 
 {% block content %}
     <div class="text-center">
-        <div class="mb-4">
+        <div class="mb-4 mt-3">
             <i class="fa-solid fa-envelope-circle-check fa-3x text-primary mb-3"></i>
             <h3 class="fw-bold mb-2">{% trans "Vérification envoyée !" %}</h3>
+            <p class="text-muted mb-0">
+                {% trans "Nous avons envoyé un code de vérification à votre adresse e-mail." %}
+            </p>
         </div>
-        <p class="mb-3">
-            {% trans "Nous avons envoyé un email de vérification à votre adresse e-mail" %}
-        </p>
 
-        <ul class="list-group">
-            <li class="list-group-item"><i class="fa-solid fa-link text-primary me-1"></i>
-                {% trans "Cliquez sur le lien dans l'email pour finaliser votre inscription." %}</li>
-            <li class="list-group-item"><i class="fa-solid fa-inbox text-primary me-1"></i>
-                {% trans "Vérifiez votre dossier spam si vous ne trouvez pas l'email dans votre boîte de réception." %}</li>
+        <ul class="list-group text-start">
+            <li class="list-group-item d-flex align-items-start gap-3">
+                <span class="text-primary"><i class="fa-solid fa-key"></i></span>
+                <span>{% trans "Entrez le code de vérification que vous avez reçu par email pour finaliser votre inscription." %}</span>
+            </li>
+            <li class="list-group-item d-flex align-items-start gap-3">
+                <span class="text-primary"><i class="fa-solid fa-inbox"></i></span>
+                <span>{% trans "Vérifiez votre dossier spam ou promotions si vous ne recevez rien." %}</span>
+            </li>
         </ul>
 
+        <div class="mt-4">
+            <a href="{% url 'account_email_verification_sent' %}" class="btn btn-dark rounded-4 fw-semibold">
+                {% trans "Entrer le code de vérification" %}
+            </a>
+        </div>
     </div>
 {% endblock content %}
