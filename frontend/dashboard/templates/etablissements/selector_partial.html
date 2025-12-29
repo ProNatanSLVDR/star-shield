@@ -7,6 +7,18 @@ rows=etablissements_table.rows
 title="Liste de vos établissements"
 modal_size="lg"
 %}
-
-
+{% fill actions %}
+    {% if request.etablissement %}
+        {% url 'dashboard:etablissements:unselect' as unselect_url %}
+        {% component "button"
+        text=""
+        classes="btn-sm btn-outline-danger"
+        icon="fa-solid fa-x"
+        extra_kwargs={
+        "href": unselect_url,
+        "title": "Désélectionner l'établissement"
+        }
+        /%}
+    {% endif %}
+{% endfill %}
 {% endcomponent %}
