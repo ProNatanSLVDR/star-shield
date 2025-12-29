@@ -148,19 +148,6 @@ class Base(Configuration):
     LOGIN_URL = "account_login"
     LOGIN_EXEMPT_PATHS = ()
 
-    SOCIALACCOUNT_PROVIDERS = {
-        "google": {
-            "APP": {
-                "client_id": os.getenv("GOOGLE_LOGIN_CLIENT_ID", ""),
-                "secret": os.getenv("GOOGLE_LOGIN_CLIENT_SECRET", ""),
-                "key": "",
-            },
-            "SCOPE": ["profile", "email"],
-            "EMAIL_AUTHENTICATION": True,
-            "EMAIL_VERIFICATION": "none",
-        }
-    }
-
     ACCOUNT_USER_MODEL_USERNAME_FIELD = None
     ACCOUNT_SESSION_REMEMBER = True
     ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
@@ -199,19 +186,9 @@ class Base(Configuration):
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 
-    # Google GMB
-    GOOGLE_GMB_CLIENT_ID = os.getenv("GOOGLE_GMB_CLIENT_ID", "")
-    GOOGLE_GMB_CLIENT_SECRET = os.getenv("GOOGLE_GMB_CLIENT_SECRET", "")
-    GOOGLE_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
-
     # Task configuration
     TASK_MAX_RETRIES = 3
     TASK_TIMEOUT_SECONDS = 300  # 5 minutes
-
-    # Stripe
-    STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
-    STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-    STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
     # Logging configuration
     LOGGING = {
@@ -254,11 +231,6 @@ class Base(Configuration):
         },
     }
 
-    # STRIPE (test keys)
-    STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
-    STRIPE_SECRET_KEY = "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
-    STRIPE_WEBHOOK_SECRET = "whsec_1a33b01f5f912d07f415cce17a6a55572f51f681e91ae2a077a78d57335078ba"
-
 
 class Dev(Base):
     DEBUG = True
@@ -274,6 +246,28 @@ class Dev(Base):
 
     # Email
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # TODO: Change to SMTP backend
+
+    # STRIPE (test keys)
+    STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
+    STRIPE_SECRET_KEY = "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
+    STRIPE_WEBHOOK_SECRET = "whsec_1a33b01f5f912d07f415cce17a6a55572f51f681e91ae2a077a78d57335078ba"
+
+    # Google OAuth
+    GOOGLE_OAUTH_CLIENT_ID = "621365538525-pmqljdfrvshf91c3dn3aqbe62k5l5909.apps.googleusercontent.com"
+    GOOGLE_OAUTH_CLIENT_SECRET = "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"
+    GOOGLE_OAUTH_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
+    SOCIALACCOUNT_PROVIDERS = {
+        "google": {
+            "APP": {
+                "client_id": GOOGLE_OAUTH_CLIENT_ID,
+                "secret": GOOGLE_OAUTH_CLIENT_SECRET,
+                "key": "",
+            },
+            "SCOPE": ["profile", "email"],
+            "EMAIL_AUTHENTICATION": True,
+            "EMAIL_VERIFICATION": "none",
+        }
+    }
 
 
 class Prod(Base):
@@ -337,3 +331,20 @@ class Prod(Base):
     STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
     STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+
+    # Google OAuth
+    GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
+    GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
+    GOOGLE_OAUTH_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
+    SOCIALACCOUNT_PROVIDERS = {
+        "google": {
+            "APP": {
+                "client_id": GOOGLE_OAUTH_CLIENT_ID,
+                "secret": GOOGLE_OAUTH_CLIENT_SECRET,
+                "key": "",
+            },
+            "SCOPE": ["profile", "email"],
+            "EMAIL_AUTHENTICATION": True,
+            "EMAIL_VERIFICATION": "none",
+        }
+    }

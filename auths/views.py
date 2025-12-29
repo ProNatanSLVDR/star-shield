@@ -19,12 +19,12 @@ logger = logging.getLogger(__name__)
 def get_google_auth_client_config() -> dict[str, dict[str, str]]:
     return {
         "web": {
-            "client_id": settings.GOOGLE_GMB_CLIENT_ID,
+            "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
             "project_id": "starshield-app",
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_secret": settings.GOOGLE_GMB_CLIENT_SECRET,
+            "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET,
         }
     }
 
@@ -36,7 +36,7 @@ def google_gmb_start(request: HttpRequest) -> HttpResponse:
 
     flow = Flow.from_client_config(
         get_google_auth_client_config(),
-        scopes=settings.GOOGLE_GMB_SCOPES,
+        scopes=settings.GOOGLE_OAUTH_GMB_SCOPES,
         redirect_uri=redirect_uri,
     )
 
@@ -62,7 +62,7 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
 
     flow = Flow.from_client_config(
         get_google_auth_client_config(),
-        scopes=settings.GOOGLE_GMB_SCOPES,
+        scopes=settings.GOOGLE_OAUTH_GMB_SCOPES,
         state=state,
         redirect_uri=redirect_uri,
     )
