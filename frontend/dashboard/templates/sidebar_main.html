@@ -22,8 +22,8 @@
          hx-swap="innerHTML"
          data-bs-toggle="modal"
          data-bs-target="#etablissementSelectorModal"
-         class="d-flex flex-column border border-primary-subtle border-2 rounded-3 overflow-hidden"
-         style="cursor: pointer;">
+         class="d-flex flex-column border border-primary-subtle border-2 rounded-3 overflow-hidden {% if not request.etablissement %}fa-beat-fade{% endif %}"
+         style="cursor: pointer; --fa-beat-fade-opacity: 0.67; --fa-beat-fade-scale: 1.025;">
         <div class="d-flex align-items-center bg-primary p-2 px-3 fw-bold text-white">
 
             <div class="rounded-circle bg-white text-primary text-center d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
@@ -41,53 +41,62 @@
                 Aucun
             {% endif %}
         </div>
-
-        {% component "empty_modal"
-        modal_id="etablissementSelectorModal"
-        size="lg"
-        %}
-        {% fill title %}
-            Sélectionnez un établissement
-        {% endfill %}
-        {% endcomponent %}
     </div>
 
-    <hr>
+    {% component "empty_modal"
+    modal_id="etablissementSelectorModal"
+    size="lg"
+    %}
+    {% fill title %}
+        Sélectionnez un établissement
+    {% endfill %}
+    {% endcomponent %}
 
-    {% component "navlink"
-    link="dashboard:etablissement:overview"
-    icon="fa-solid fa-chart-pie"
-    text="Vue d'ensemble"
-    page_name="etablissement"
-    current_page=current_page / %}
+    {% if not request.etablissement %}
+        <div class="alert alert-primary d-flex flex-column align-items-center text-center p-3 mb-0 mt-3" role="alert">
+            <i class="fa-solid fa-arrow-up fa-lg mb-2 text-primary-subtle"></i>
+            <strong>Sélectionnez un établissement</strong>
+            <p class="mb-0 mt-2 small">Cliquez sur le bouton ci-dessus pour sélectionner un établissement et accéder à ses pages.</p>
+        </div>
+    {% endif %}
 
-    {% component "navlink"
-    link="dashboard:etablissement:settings:threshold"
-    icon="fa-solid fa-chart-line"
-    text="Seuil et Objectif"
-    page_name="seuil_et_objectif"
-    current_page=current_page / %}
+    {% if request.etablissement %}
+        <hr>
+        {% component "navlink"
+        link="dashboard:etablissement:overview"
+        icon="fa-solid fa-chart-pie"
+        text="Vue d'ensemble"
+        page_name="etablissement"
+        current_page=current_page / %}
 
-    {% component "navlink"
-    link="dashboard:etablissement:settings:reviews"
-    icon="fa-solid fa-palette"
-    text="Personalisation"
-    page_name="personalisation"
-    current_page=current_page / %}
+        {% component "navlink"
+        link="dashboard:etablissement:settings:threshold"
+        icon="fa-solid fa-chart-line"
+        text="Seuil et Objectif"
+        page_name="seuil_et_objectif"
+        current_page=current_page / %}
 
-    {% component "navlink"
-    link="dashboard:etablissement:settings:qrcode"
-    icon="fa-solid fa-qrcode"
-    text="QR Code"
-    page_name="qr_code"
-    current_page=current_page / %}
+        {% component "navlink"
+        link="dashboard:etablissement:settings:reviews"
+        icon="fa-solid fa-palette"
+        text="Personalisation"
+        page_name="personalisation"
+        current_page=current_page / %}
 
-    {% component "navlink"
-    link="dashboard:etablissement:avis"
-    icon="fa-solid fa-comments"
-    text="Avis"
-    page_name="avis"
-    current_page=current_page / %}
+        {% component "navlink"
+        link="dashboard:etablissement:settings:qrcode"
+        icon="fa-solid fa-qrcode"
+        text="QR Code"
+        page_name="qr_code"
+        current_page=current_page / %}
+
+        {% component "navlink"
+        link="dashboard:etablissement:avis"
+        icon="fa-solid fa-comments"
+        text="Avis"
+        page_name="avis"
+        current_page=current_page / %}
+    {% endif %}
 
 
 </ul>
