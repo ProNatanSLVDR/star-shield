@@ -259,6 +259,7 @@ class GoogleCredentials(models.Model):
             if created:
                 try:
                     from tasks_api.services.queue_service import enqueue_full_import_task
+
                     enqueue_full_import_task(etablissement.id)
                 except Exception as e:
                     logger.warning(f"Failed to enqueue full import task for etablissement {etablissement.id}: {e}", exc_info=True)
@@ -332,6 +333,9 @@ class Etablissement(models.Model):
     website_uri = models.URLField(max_length=255, blank=True, null=True)
     maps_uri = models.URLField(max_length=255, blank=True, null=True)
     new_reviews_uri = models.URLField(max_length=255, blank=True, null=True)
+
+    # for billing
+    active = models.BooleanField(default=False)
 
     # access
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)

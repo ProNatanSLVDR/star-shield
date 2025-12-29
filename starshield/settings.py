@@ -254,7 +254,7 @@ class Base(Configuration):
         },
     }
 
-    # STRIPE
+    # STRIPE (test keys)
     STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
     STRIPE_SECRET_KEY = "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
     STRIPE_WEBHOOK_SECRET = "whsec_1a33b01f5f912d07f415cce17a6a55572f51f681e91ae2a077a78d57335078ba"
