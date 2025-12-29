@@ -11,7 +11,7 @@ from .utils import (
     get_valid_session_key,
     set_valid_session_key,
 )
-from utils.qrcodes import generate_qrcode_png
+from starshield.qrcodes import generate_qrcode_png
 
 logger = logging.getLogger(__name__)
 
