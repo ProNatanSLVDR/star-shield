@@ -1,0 +1,133 @@
+{% extends "dashboard_base.html" %}
+{% load i18n %}
+
+{% block dashboard_content %}
+    <div class="d-flex flex-column h-100">
+        <div class="mb-3">
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                <i class="fa-solid fa-user me-2"></i>
+                Mon profil
+            </h1>
+            <p class="text-muted mb-0 small">Gérez vos informations personnelles et vos paramètres de compte.</p>
+        </div>
+
+        <div class="row g-3">
+            <!-- Profile Form -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm border rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0 text-white">
+                            <i class="fa-solid fa-user-pen me-2"></i>
+                            Informations personnelles
+                        </h2>
+                    </div>
+                    <div class="card-body px-4 py-4">
+                        <form method="post" enctype="multipart/form-data" id="profileForm">
+                            {% csrf_token %}
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-4">
+                                <label for="id_first_name" class="form-label fw-semibold">
+                                    Prénom
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="id_first_name"
+                                       name="first_name"
+                                       value="{{ form.first_name.value|default:user.first_name }}"
+                                       maxlength="150">
+                                <div class="form-text">Votre prénom.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_last_name" class="form-label fw-semibold">
+                                    Nom
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="id_last_name"
+                                       name="last_name"
+                                       value="{{ form.last_name.value|default:user.last_name }}"
+                                       maxlength="150">
+                                <div class="form-text">Votre nom de famille.</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-save me-2"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Preview & Account Actions -->
+            <div class="col-lg-6">
+                {% include "profile/profile_picture_partial.html" %}
+
+                <div class="card shadow-sm border rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary border-bottom px-4 py-3">
+                        <h2 class="h6 fw-semibold mb-0 text-white">
+                            <i class="fa-solid fa-gear me-2"></i>
+                            Paramètres du compte
+                        </h2>
+                    </div>
+                    <div class="card-body px-4 py-4">
+                        <div class="d-grid gap-3">
+                            <a href="{% url 'account_email' %}"
+                               class="card text-decoration-none border rounded-3 p-3 hover-shadow">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center me-3"
+                                         style="width: 48px; height: 48px;">
+                                        <i class="fa-solid fa-envelope fa-lg"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="h6 fw-semibold mb-1 text-body-emphasis">Gérer les e-mails</h3>
+                                        <p class="text-muted mb-0 small">Modifiez votre adresse e-mail ou ajoutez des adresses supplémentaires.</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                            <a href="{% url 'account_change_password' %}"
+                               class="card text-decoration-none border rounded-3 p-3 hover-shadow">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center me-3"
+                                         style="width: 48px; height: 48px;">
+                                        <i class="fa-solid fa-key fa-lg"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="h6 fw-semibold mb-1 text-body-emphasis">Changer le mot de passe</h3>
+                                        <p class="text-muted mb-0 small">Mettez à jour votre mot de passe pour sécuriser votre compte.</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .hover-shadow {
+            transition: box-shadow 0.2s ease;
+        }
+        .hover-shadow:hover {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+        }
+    </style>
+
+{% endblock dashboard_content %}
+

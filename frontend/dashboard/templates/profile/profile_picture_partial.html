@@ -1,0 +1,64 @@
+<div id="profile-picture-card" class="card shadow-sm border rounded-4 overflow-hidden mb-3">
+    <div class="card-header bg-primary border-bottom px-4 py-3">
+        <h2 class="h6 fw-semibold mb-0 text-white">
+            <i class="fa-solid fa-image me-2"></i>
+            Photo de profil
+        </h2>
+    </div>
+    <div class="card-body px-4 py-4 text-center">
+        {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}"
+                 alt="Photo de profil"
+                 class="img-fluid rounded-circle shadow-sm mb-3"
+                 style="width: 150px; height: 150px; object-fit: cover;">
+        {% else %}
+            <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center mb-3"
+                 style="width: 150px; height: 150px;">
+                <i class="fa-solid fa-user fa-4x"></i>
+            </div>
+        {% endif %}
+        <p class="text-muted small mb-3">
+            {% if user.profile_picture %}
+                Photo de profil actuelle
+            {% else %}
+                Aucune photo de profil
+            {% endif %}
+        </p>
+
+        <form method="post"
+              enctype="multipart/form-data"
+              id="profilePictureForm"
+              hx-post="{% url 'dashboard:profile:picture_partial' %}"
+              hx-target="#profile-picture-card"
+              hx-swap="outerHTML"
+              class="d-grid gap-2">
+            {% csrf_token %}
+            <div class="d-grid">
+                <label for="id_profile_picture" class="btn btn-outline-primary mb-0">
+                    <i class="fa-solid fa-upload me-2"></i>
+                    {% if user.profile_picture %}Changer la photo{% else %}Ajouter une photo{% endif %}
+                </label>
+                <input type="file"
+                       class="form-control d-none"
+                       id="id_profile_picture"
+                       name="profile_picture"
+                       accept="image/*"
+                       onchange="this.form.requestSubmit();">
+            </div>
+            {% if user.profile_picture %}
+                <button type="button"
+                        class="btn btn-outline-danger"
+                        hx-post="{% url 'dashboard:profile:picture_partial' %}"
+                        hx-target="#profile-picture-card"
+                        hx-swap="outerHTML"
+                        hx-include="[name='csrfmiddlewaretoken']"
+                        hx-vals='{"delete_profile_picture": "1"}'
+                        hx-confirm="Êtes-vous sûr de vouloir supprimer votre photo de profil ?">
+                    <i class="fa-solid fa-trash me-2"></i>
+                    Supprimer la photo
+                </button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
