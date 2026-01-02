@@ -1,0 +1,72 @@
+<!-- Activation Modal -->
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="fa-solid fa-power-off pe-2"></i>
+        Activer l'établissement <strong>{{ etablissement.title }}</strong>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    {% if has_active_subscription %}
+        <div class="alert alert-info mb-3" role="alert">
+            <i class="fa-solid fa-info-circle pe-2"></i>
+            <strong>Activation immédiate</strong>
+            <p class="mb-0 mt-2">Vous avez un abonnement actif. L'activation de cet établissement ajoutera une unité à votre abonnement et l'activera immédiatement.</p>
+        </div>
+        
+        <div class="mb-3">
+            <p class="mb-2"><strong>Comment fonctionne la facturation :</strong></p>
+            <ul class="mb-0">
+                <li>Chaque établissement actif compte comme une unité dans votre abonnement</li>
+                <li>Vous êtes facturé mensuellement pour le nombre d'établissements actifs</li>
+                <li>Actuellement, vous avez <strong>{{ active_count }}</strong> établissement{{ active_count|pluralize }} actif{{ active_count|pluralize }}</li>
+                <li>Après activation, vous aurez <strong>{{ active_count|add:1 }}</strong> établissement{{ active_count|add:1|pluralize }} actif{{ active_count|add:1|pluralize }}</li>
+            </ul>
+        </div>
+    {% else %}
+        <div class="alert alert-warning mb-3" role="alert">
+            <i class="fa-solid fa-exclamation-triangle pe-2"></i>
+            <strong>Abonnement requis</strong>
+            <p class="mb-0 mt-2">Vous devez avoir un abonnement actif pour activer un établissement.</p>
+        </div>
+        
+        <div class="mb-3">
+            <p class="mb-2"><strong>Comment fonctionne la facturation :</strong></p>
+            <ul class="mb-0">
+                <li>Chaque établissement actif compte comme une unité dans votre abonnement</li>
+                <li>Vous serez facturé mensuellement pour le nombre d'établissements actifs</li>
+                <li>Pour activer cet établissement, vous devez d'abord créer un abonnement</li>
+                <li>Après le paiement, l'établissement sera automatiquement activé</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+<div class="modal-footer">
+    {% if has_active_subscription %}
+        {% component "button"
+        text="Activer maintenant"
+        classes="btn-primary"
+        icon="fa-solid fa-check"
+        extra_kwargs={
+        "hx-post": activate_url,
+        "hx-target": "#dynamicModal .modal-content",
+        }
+        /%}
+    {% else %}
+        <form method="post" action="{{ checkout_url }}" id="checkout-form">
+            {% csrf_token %}
+            <input type="hidden" name="etablissement_id" value="{{ etablissement.id }}">
+            {% component "button"
+            text="Créer un abonnement"
+            classes="btn-primary"
+            icon="fa-solid fa-credit-card"
+            extra_kwargs={
+            "type": "submit",
+            }
+            /%}
+        </form>
+    {% endif %}
+</div>
+

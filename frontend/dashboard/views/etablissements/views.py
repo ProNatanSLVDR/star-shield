@@ -1,12 +1,15 @@
 from allauth.account.decorators import reverse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.http import require_POST, require_http_methods
 from auths.models import GoogleCredentials, Etablissement
 from starshield.decorators import google_gmb_connected_required
 from frontend.dashboard.render import starshield_render
 from django.contrib import messages
 from .forms import ImportEtablissementForm
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @google_gmb_connected_required
@@ -46,6 +49,22 @@ def list_etablissements_view(request):
     # Prepare table rows
     rows = []
     for etablissement in etablissements:
+        buttons = []
+
+        # Add activate button for inactive establishments
+        if not etablissement.active:
+            activate_button = {
+                "text": "Activer",
+                "icon": "fa-solid fa-power-off",
+                "classes": "btn-sm btn-success",
+                "extra_kwargs": {
+                    "hx_modal_toggle": True,
+                    "hx-get": reverse("dashboard:etablissements:activate_partial", args=[etablissement.id]),
+                },
+            }
+            buttons.append(activate_button)
+
+        # Add delete button
         delete_button = {
             "text": "",
             "icon": "fa-solid fa-trash",
@@ -55,6 +74,7 @@ def list_etablissements_view(request):
                 "hx-get": reverse("dashboard:etablissements:delete_partial", args=[etablissement.id]),
             },
         }
+        buttons.append(delete_button)
 
         status_badge = {
             "type": "badge",
@@ -69,7 +89,7 @@ def list_etablissements_view(request):
             "created_at": etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A",
             "actions": {
                 "type": "buttons",
-                "buttons": [delete_button],
+                "buttons": buttons,
                 "centered": True,
             },
         }
@@ -264,3 +284,126 @@ def etablissement_selector_partial(request):
     }
 
     return starshield_render(request, "etablissements/selector_partial.html", context=context)
+
+
+@google_gmb_connected_required
+def activate_etablissement_partial(request, id):
+    """
+    Show activation modal with billing explanation.
+    """
+    etablissement = get_object_or_404(
+        Etablissement,
+        id=id,
+        google_credential=request.user.google_credential
+    )
+
+    # Check if user has an active subscription
+    subscription = getattr(request.user, "stripe_subscription", None)
+    has_active_subscription = (
+        subscription is not None and
+        subscription.status == "active"
+    )
+
+    # Count active establishments
+    active_count = request.user.google_credential.etablissements.filter(active=True).count()
+
+    context = {
+        "etablissement": etablissement,
+        "has_active_subscription": has_active_subscription,
+        "active_count": active_count,
+        "activate_url": reverse("dashboard:etablissements:activate", args=[etablissement.id]),
+        "checkout_url": reverse("payments:create_checkout_session"),
+    }
+
+    return starshield_render(
+        request,
+        "etablissements/activate_partial.html",
+        context=context,
+    )
+
+
+@google_gmb_connected_required
+@require_POST
+def activate_etablissement(request, id):
+    """
+    Activate an establishment.
+    If user has subscription: increment quantity and activate.
+    If no subscription: should not reach here (handled by checkout flow).
+    """
+    etablissement = get_object_or_404(
+        Etablissement,
+        id=id,
+        google_credential=request.user.google_credential
+    )
+
+    # Check if already active
+    if etablissement.active:
+        messages.info(request, f"L'établissement {etablissement.title} est déjà actif.")
+        hx_triggers = {
+            "etablissements-updated": True,
+            "close-modal": True,
+        }
+        return starshield_render(
+            request,
+            "etablissements/activate_partial.html",
+            context={"etablissement": etablissement},
+            hx_triggers=hx_triggers,
+        )
+
+    # Check if user has active subscription
+    subscription = getattr(request.user, "stripe_subscription", None)
+    if not subscription or subscription.status != "active":
+        messages.error(request, "Vous devez avoir un abonnement actif pour activer un établissement.")
+        hx_triggers = {
+            "close-modal": True,
+        }
+        return starshield_render(
+            request,
+            "etablissements/activate_partial.html",
+            context={"etablissement": etablissement},
+            hx_triggers=hx_triggers,
+        )
+
+    try:
+        # Import here to avoid circular imports
+        from payments.services import increment_subscription_quantity, sync_stripe_data
+
+        # Increment subscription quantity
+        increment_subscription_quantity(request.user)
+
+        # Sync subscription data
+        sync_stripe_data(request.user)
+
+        # Activate the establishment
+        etablissement.active = True
+        etablissement.save()
+
+        messages.success(
+            request,
+            f"L'établissement {etablissement.title} a été activé avec succès."
+        )
+
+        hx_triggers = {
+            "etablissements-updated": True,
+            "close-modal": True,
+        }
+
+        return starshield_render(
+            request,
+            "etablissements/activate_partial.html",
+            context={"etablissement": etablissement},
+            hx_triggers=hx_triggers,
+        )
+
+    except Exception as e:
+        logger.error(f"Error activating establishment {id}: {e}")
+        messages.error(request, "Une erreur est survenue lors de l'activation de l'établissement.")
+        hx_triggers = {
+            "close-modal": True,
+        }
+        return starshield_render(
+            request,
+            "etablissements/activate_partial.html",
+            context={"etablissement": etablissement},
+            hx_triggers=hx_triggers,
+        )

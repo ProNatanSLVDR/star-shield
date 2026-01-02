@@ -269,6 +269,10 @@ class Dev(Base):
         }
     }
 
+    STRIPE_PRODUCTS = {
+        "basic_subscription": "prod_Th3YAxKCSwFz7C",
+    }
+
 
 class Prod(Base):
     DEBUG = False
@@ -347,4 +351,8 @@ class Prod(Base):
             "EMAIL_AUTHENTICATION": True,
             "EMAIL_VERIFICATION": "none",
         }
+    }
+
+    STRIPE_PRODUCTS = {
+        "basic_subscription": "prod_Th3YAxKCSwFz7C",
     }
