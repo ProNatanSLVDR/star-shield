@@ -1,0 +1,96 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% load account %}
+
+{% block auths_card_title %}
+    {% trans "Changer l'adresse e-mail" %}
+{% endblock auths_card_title %}
+
+{% block auths_card_subtitle %}
+    {% trans "Mettez à jour votre adresse e-mail principale." %}
+{% endblock auths_card_subtitle %}
+
+{% block content %}
+    {% if user.emailaddress_set.all %}
+        <div class="mb-4">
+            <p class="small text-muted mb-2">{% trans "Adresse e-mail actuelle :" %}</p>
+            {% for emailaddress in user.emailaddress_set.all %}
+                {% if emailaddress.primary %}
+                    <div class="d-flex align-items-center gap-2 mb-3 p-2 bg-light rounded">
+                        <i class="fa-solid fa-envelope text-primary"></i>
+                        <span class="fw-semibold">{{ emailaddress.email }}</span>
+                        {% if emailaddress.verified %}
+                            <span class="badge bg-success small ms-auto">
+                                <i class="fa-solid fa-check-circle me-1"></i>
+                                {% trans "Vérifié" %}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning small ms-auto">
+                                <i class="fa-solid fa-clock me-1"></i>
+                                {% trans "Non vérifié" %}
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger small mb-4" role="alert">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'account_email' %}" novalidate>
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold small">{% trans "Nouvelle adresse e-mail" %}</label>
+            <input
+                type="email"
+                name="{{ form.email.name }}"
+                id="{{ form.email.id_for_label }}"
+                class="form-control{% if form.email.errors %} is-invalid{% endif %}"
+                placeholder="nom@entreprise.com"
+                autocomplete="email"
+                required
+                autofocus
+                value="{{ form.email.value|default_if_none:'' }}"
+            >
+            {% if form.email.errors %}
+                <div class="invalid-feedback small">
+                    {% for error in form.email.errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="alert alert-info small mb-4" role="alert">
+            <i class="fa-solid fa-info-circle me-2"></i>
+            {% blocktrans %}
+                Vous recevrez un e-mail de vérification à la nouvelle adresse pour confirmer qu'elle vous appartient.
+            {% endblocktrans %}
+        </div>
+
+        <div class="d-grid mb-3">
+            <button name="action_add" type="submit" class="btn btn-dark btn-lg rounded-4 fs-6 fw-bold">
+                {% trans "Changer l'adresse e-mail" %}
+            </button>
+        </div>
+    </form>
+
+    <div class="border-top pt-4 mt-4">
+        <div class="d-flex flex-column gap-2">
+            <div class="text-center">
+                <a href="{% url 'dashboard:profile:profile' %}" class="text-decoration-none small text-muted">
+                    <i class="fa-solid fa-arrow-left me-2"></i>
+                    {% trans "Retour au profil" %}
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
