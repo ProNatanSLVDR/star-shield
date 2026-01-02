@@ -76,23 +76,23 @@ def increment_subscription_quantity(user):
             logger.warning(f"No active subscription found for user {user.id}")
             return None
 
-        subscription = subscriptions.data[0]
+        subscription = dict(subscriptions.data[0])
 
         # Get the subscription item
-        if not subscription.items.data:
-            logger.error(f"Subscription {subscription.id} has no items")
+        if not subscription["items"]["data"]:
+            logger.error(f"Subscription {subscription['id']} has no items")
             return None
 
-        subscription_item = subscription.items.data[0]
-        current_quantity = subscription_item.quantity or 1
+        subscription_item = subscription["items"]["data"][0]
+        current_quantity = subscription_item.get("quantity") or 1
         new_quantity = current_quantity + 1
 
         # Update the subscription quantity
         updated_subscription = stripe.Subscription.modify(
-            subscription.id,
+            subscription["id"],
             items=[
                 {
-                    "id": subscription_item.id,
+                    "id": subscription_item["id"],
                     "quantity": new_quantity,
                 }
             ],
