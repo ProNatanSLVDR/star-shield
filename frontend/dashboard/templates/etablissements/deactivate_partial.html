@@ -1,0 +1,50 @@
+<!-- Deactivation Modal -->
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="fa-solid fa-power-off pe-2"></i>
+        Désactiver l'établissement <strong>{{ etablissement.title }}</strong>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    {% if has_active_subscription %}
+        <div class="alert alert-warning mb-3" role="alert">
+            <i class="fa-solid fa-exclamation-triangle pe-2"></i>
+            <strong>Impact sur la facturation</strong>
+            <p class="mb-0 mt-2">La désactivation de cet établissement réduira d'une unité votre abonnement.</p>
+        </div>
+        
+        <div class="mb-3">
+            <p class="mb-2"><strong>Comment fonctionne la facturation :</strong></p>
+            <ul class="mb-0">
+                <li>Chaque établissement actif compte comme une unité dans votre abonnement</li>
+                <li>Vous êtes facturé mensuellement pour le nombre d'établissements actifs</li>
+                <li>Actuellement, vous avez <strong>{{ active_count }}</strong> établissement{{ active_count|pluralize }} actif{{ active_count|pluralize }}</li>
+                <li>Après désactivation, vous aurez <strong>{{ active_count|add:-1 }}</strong> établissement{{ active_count|add:-1|pluralize }} actif{{ active_count|add:-1|pluralize }}</li>
+                {% if active_count == 1 %}
+                    <li class="text-danger mt-2"><strong>Attention :</strong> Si vous désactivez cet établissement, votre abonnement sera annulé à la fin de la période de facturation.</li>
+                {% endif %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="alert alert-info mb-3" role="alert">
+            <i class="fa-solid fa-info-circle pe-2"></i>
+            <strong>Désactivation</strong>
+            <p class="mb-0 mt-2">Cet établissement sera désactivé. Vous pourrez le réactiver plus tard si nécessaire.</p>
+        </div>
+    {% endif %}
+</div>
+
+<div class="modal-footer">
+    {% component "button"
+    text="Désactiver"
+    classes="btn-warning"
+    icon="fa-solid fa-power-off"
+    extra_kwargs={
+    "hx-post": deactivate_url,
+    "hx-target": "#dynamicModal .modal-content",
+    }
+    /%}
+</div>
+

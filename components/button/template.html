@@ -13,10 +13,11 @@
     </a>
 {% else %}
     <button class="btn {{classes}} {% if disabled %}disabled{% endif %}"
+            {% if disabled %}disabled{% endif %}
             {% for key, value in extra_kwargs.items %}
                 {{ key }}="{{ value }}"
             {% endfor %}
-            {% if hx_modal_toggle %}
+            {% if hx_modal_toggle and not disabled %}
                 hx-target="#dynamicModal .modal-content"
                 data-bs-toggle="modal"
                 data-bs-target="#dynamicModal"

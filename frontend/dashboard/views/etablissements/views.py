@@ -63,17 +63,37 @@ def list_etablissements_view(request):
                 },
             }
             buttons.append(activate_button)
+        else:
+            # Add deactivate button for active establishments
+            deactivate_button = {
+                "text": "Désactiver",
+                "icon": "fa-solid fa-power-off",
+                "classes": "btn-sm btn-warning",
+                "extra_kwargs": {
+                    "hx_modal_toggle": True,
+                    "hx-get": reverse("dashboard:etablissements:deactivate_partial", args=[etablissement.id]),
+                },
+            }
+            buttons.append(deactivate_button)
 
         # Add delete button
         delete_button = {
             "text": "",
             "icon": "fa-solid fa-trash",
             "classes": "btn-sm btn-danger",
-            "extra_kwargs": {
-                "hx_modal_toggle": True,
-                "hx-get": reverse("dashboard:etablissements:delete_partial", args=[etablissement.id]),
-            },
+            "extra_kwargs": {},
         }
+        
+        # Disable delete button if etablissement is active
+        if etablissement.active:
+            delete_button["extra_kwargs"]["disabled"] = True
+            delete_button["extra_kwargs"]["data-bs-toggle"] = "tooltip"
+            delete_button["extra_kwargs"]["data-bs-placement"] = "top"
+            delete_button["extra_kwargs"]["title"] = "Vous devez d'abord désactiver l'établissement avant de le supprimer"
+        else:
+            delete_button["extra_kwargs"]["hx_modal_toggle"] = True
+            delete_button["extra_kwargs"]["hx-get"] = reverse("dashboard:etablissements:delete_partial", args=[etablissement.id])
+        
         buttons.append(delete_button)
 
         status_badge = {
@@ -163,6 +183,7 @@ def delete_etablissement_confirmation_partial(request, id):
     """
     Pour supprimer un etablissement
     Double confirmation la suppression (modal + hx-confirm)
+    Safety check: block deletion of active etablissements (button is disabled in UI)
     """
 
     # on essaye de récupérer l'établissement
@@ -175,14 +196,20 @@ def delete_etablissement_confirmation_partial(request, id):
     }
 
     if etablissement:
-        context["etablissement_title"] = etablissement.title
-        context["delete_url"] = reverse("dashboard:etablissements:delete_partial", args=[etablissement.id])
-
-        if request.method == "POST":
-            etablissement.delete()
-            messages.success(request, f"L'établissement {etablissement.title} a été supprimé.")
+        # Safety check: prevent deletion of active etablissements
+        if etablissement.active:
+            messages.error(request, "Vous devez d'abord désactiver l'établissement avant de le supprimer.")
             hx_triggers["etablissements-updated"] = True
             hx_triggers["close-modal"] = True
+        else:
+            context["etablissement_title"] = etablissement.title
+            context["delete_url"] = reverse("dashboard:etablissements:delete_partial", args=[etablissement.id])
+
+            if request.method == "POST":
+                etablissement.delete()
+                messages.success(request, f"L'établissement {etablissement.title} a été supprimé.")
+                hx_triggers["etablissements-updated"] = True
+                hx_triggers["close-modal"] = True
     else:
         messages.error(request, "Établissement non trouvé.")
         hx_triggers["etablissements-updated"] = True
@@ -404,6 +431,113 @@ def activate_etablissement(request, id):
         return starshield_render(
             request,
             "etablissements/activate_partial.html",
+            context={"etablissement": etablissement},
+            hx_triggers=hx_triggers,
+        )
+
+
+@google_gmb_connected_required
+def deactivate_etablissement_partial(request, id):
+    """
+    Show deactivation modal with billing explanation.
+    """
+    etablissement = get_object_or_404(
+        Etablissement,
+        id=id,
+        google_credential=request.user.google_credential
+    )
+
+    # Check if user has an active subscription
+    subscription = getattr(request.user, "stripe_subscription", None)
+    has_active_subscription = (
+        subscription is not None and
+        subscription.status == "active"
+    )
+
+    # Count active establishments
+    active_count = request.user.google_credential.etablissements.filter(active=True).count()
+
+    context = {
+        "etablissement": etablissement,
+        "has_active_subscription": has_active_subscription,
+        "active_count": active_count,
+        "deactivate_url": reverse("dashboard:etablissements:deactivate", args=[etablissement.id]),
+    }
+
+    return starshield_render(
+        request,
+        "etablissements/deactivate_partial.html",
+        context=context,
+    )
+
+
+@google_gmb_connected_required
+@require_POST
+def deactivate_etablissement(request, id):
+    """
+    Deactivate an establishment.
+    Decrements subscription quantity and deactivates the establishment.
+    """
+    etablissement = get_object_or_404(
+        Etablissement,
+        id=id,
+        google_credential=request.user.google_credential
+    )
+
+    # Check if already inactive
+    if not etablissement.active:
+        messages.info(request, f"L'établissement {etablissement.title} est déjà inactif.")
+        hx_triggers = {
+            "etablissements-updated": True,
+            "close-modal": True,
+        }
+        return starshield_render(
+            request,
+            "etablissements/deactivate_partial.html",
+            context={"etablissement": etablissement},
+            hx_triggers=hx_triggers,
+        )
+
+    try:
+        # Import here to avoid circular imports
+        from payments.services import decrement_subscription_quantity, sync_stripe_data
+
+        # Decrement subscription quantity if user has active subscription
+        subscription = getattr(request.user, "stripe_subscription", None)
+        if subscription and subscription.status == "active":
+            decrement_subscription_quantity(request.user)
+            sync_stripe_data(request.user)
+
+        # Deactivate the establishment
+        etablissement.active = False
+        etablissement.save()
+
+        messages.success(
+            request,
+            f"L'établissement {etablissement.title} a été désactivé avec succès."
+        )
+
+        hx_triggers = {
+            "etablissements-updated": True,
+            "close-modal": True,
+        }
+
+        return starshield_render(
+            request,
+            "etablissements/deactivate_partial.html",
+            context={"etablissement": etablissement},
+            hx_triggers=hx_triggers,
+        )
+
+    except Exception as e:
+        logger.error(f"Error deactivating establishment {id}: {e}")
+        messages.error(request, "Une erreur est survenue lors de la désactivation de l'établissement.")
+        hx_triggers = {
+            "close-modal": True,
+        }
+        return starshield_render(
+            request,
+            "etablissements/deactivate_partial.html",
             context={"etablissement": etablissement},
             hx_triggers=hx_triggers,
         )

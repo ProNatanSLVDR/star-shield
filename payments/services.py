@@ -106,6 +106,65 @@ def increment_subscription_quantity(user):
         raise
 
 
+def decrement_subscription_quantity(user):
+    """
+    Decrement the subscription quantity by 1 for the user's active subscription.
+    If quantity reaches 0, sets cancel_at_period_end to True.
+    Returns the updated subscription object.
+    """
+    if not user.stripe_customer_id:
+        logger.warning(f"Cannot decrement subscription: User {user.id} has no stripe_customer_id")
+        return None
+
+    try:
+        # Get the user's active subscription
+        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, status="active", limit=1)
+
+        if not subscriptions.data:
+            logger.warning(f"No active subscription found for user {user.id}")
+            return None
+
+        subscription = dict(subscriptions.data[0])
+
+        # Get the subscription item
+        if not subscription["items"]["data"]:
+            logger.error(f"Subscription {subscription['id']} has no items")
+            return None
+
+        subscription_item = subscription["items"]["data"][0]
+        current_quantity = subscription_item.get("quantity") or 1
+        new_quantity = max(0, current_quantity - 1)
+
+        # Prepare update parameters
+        update_params = {
+            "items": [
+                {
+                    "id": subscription_item["id"],
+                    "quantity": new_quantity,
+                }
+            ],
+        }
+
+        # If quantity reaches 0, set cancel_at_period_end to True
+        if new_quantity == 0:
+            update_params["cancel_at_period_end"] = True
+
+        # Update the subscription quantity
+        updated_subscription = stripe.Subscription.modify(
+            subscription["id"],
+            **update_params,
+        )
+
+        logger.info(f"Decremented subscription quantity for user {user.id} from {current_quantity} to {new_quantity}")
+        if new_quantity == 0:
+            logger.info(f"Subscription {subscription['id']} set to cancel at period end")
+        return updated_subscription
+
+    except Exception as e:
+        logger.error(f"Failed to decrement subscription quantity for user {user.id}: {e}")
+        raise
+
+
 def sync_stripe_data(user):
     """
     Sync subscription data from Stripe to the local database.
