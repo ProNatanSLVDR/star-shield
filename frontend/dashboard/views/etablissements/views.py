@@ -83,7 +83,7 @@ def list_etablissements_view(request):
             "classes": "btn-sm btn-danger",
             "extra_kwargs": {},
         }
-        
+
         # Disable delete button if etablissement is active
         if etablissement.active:
             delete_button["extra_kwargs"]["disabled"] = True
@@ -93,7 +93,7 @@ def list_etablissements_view(request):
         else:
             delete_button["extra_kwargs"]["hx_modal_toggle"] = True
             delete_button["extra_kwargs"]["hx-get"] = reverse("dashboard:etablissements:delete_partial", args=[etablissement.id])
-        
+
         buttons.append(delete_button)
 
         status_badge = {
@@ -243,7 +243,7 @@ def unselect_etablissement(request):
     if "selected_etablissement" in request.session:
         del request.session["selected_etablissement"]
         messages.success(request, "Établissement désélectionné.")
-    
+
     return redirect("dashboard:accueil")
 
 
@@ -318,18 +318,11 @@ def activate_etablissement_partial(request, id):
     """
     Show activation modal with billing explanation.
     """
-    etablissement = get_object_or_404(
-        Etablissement,
-        id=id,
-        google_credential=request.user.google_credential
-    )
+    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
     # Check if user has an active subscription
     subscription = getattr(request.user, "stripe_subscription", None)
-    has_active_subscription = (
-        subscription is not None and
-        subscription.status == "active"
-    )
+    has_active_subscription = subscription is not None and subscription.status == "active"
 
     # Count active establishments
     active_count = request.user.google_credential.etablissements.filter(active=True).count()
@@ -357,11 +350,7 @@ def activate_etablissement(request, id):
     If user has subscription: increment quantity and activate.
     If no subscription: should not reach here (handled by checkout flow).
     """
-    etablissement = get_object_or_404(
-        Etablissement,
-        id=id,
-        google_credential=request.user.google_credential
-    )
+    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
     # Check if already active
     if etablissement.active:
@@ -393,10 +382,10 @@ def activate_etablissement(request, id):
 
     try:
         # Import here to avoid circular imports
-        from payments.services import increment_subscription_quantity, sync_stripe_data
+        from payments.services import change_subscription_quantity, sync_stripe_data
 
         # Increment subscription quantity
-        increment_subscription_quantity(request.user)
+        change_subscription_quantity(request.user, quantity=1, increment=True)
 
         # Sync subscription data
         sync_stripe_data(request.user)
@@ -405,10 +394,7 @@ def activate_etablissement(request, id):
         etablissement.active = True
         etablissement.save()
 
-        messages.success(
-            request,
-            f"L'établissement {etablissement.title} a été activé avec succès."
-        )
+        messages.success(request, f"L'établissement {etablissement.title} a été activé avec succès.")
 
         hx_triggers = {
             "etablissements-updated": True,
@@ -441,18 +427,11 @@ def deactivate_etablissement_partial(request, id):
     """
     Show deactivation modal with billing explanation.
     """
-    etablissement = get_object_or_404(
-        Etablissement,
-        id=id,
-        google_credential=request.user.google_credential
-    )
+    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
     # Check if user has an active subscription
     subscription = getattr(request.user, "stripe_subscription", None)
-    has_active_subscription = (
-        subscription is not None and
-        subscription.status == "active"
-    )
+    has_active_subscription = subscription is not None and subscription.status == "active"
 
     # Count active establishments
     active_count = request.user.google_credential.etablissements.filter(active=True).count()
@@ -478,11 +457,7 @@ def deactivate_etablissement(request, id):
     Deactivate an establishment.
     Decrements subscription quantity and deactivates the establishment.
     """
-    etablissement = get_object_or_404(
-        Etablissement,
-        id=id,
-        google_credential=request.user.google_credential
-    )
+    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
     # Check if already inactive
     if not etablissement.active:
@@ -500,22 +475,19 @@ def deactivate_etablissement(request, id):
 
     try:
         # Import here to avoid circular imports
-        from payments.services import decrement_subscription_quantity, sync_stripe_data
+        from payments.services import change_subscription_quantity, sync_stripe_data
 
         # Decrement subscription quantity if user has active subscription
         subscription = getattr(request.user, "stripe_subscription", None)
         if subscription and subscription.status == "active":
-            decrement_subscription_quantity(request.user)
+            change_subscription_quantity(request.user, quantity=1, decrement=True)
             sync_stripe_data(request.user)
 
         # Deactivate the establishment
         etablissement.active = False
         etablissement.save()
 
-        messages.success(
-            request,
-            f"L'établissement {etablissement.title} a été désactivé avec succès."
-        )
+        messages.success(request, f"L'établissement {etablissement.title} a été désactivé avec succès.")
 
         hx_triggers = {
             "etablissements-updated": True,
