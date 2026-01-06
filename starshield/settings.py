@@ -215,14 +215,31 @@ class Base(Configuration):
         },
         "root": {
             "handlers": ["console"],
-            "level": "WARNING",
+            "level": "INFO",
         },
         "loggers": {
+            # App loggers - all propagate to root
+            "auths": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "payments": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
             "tasks_api": {
                 "handlers": ["console"],
                 "level": "INFO",
-                "propagate": False,
+                "propagate": True,
             },
+            "frontend": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            # Django framework logger - don't propagate to avoid duplicates
             "django": {
                 "handlers": ["console"],
                 "level": "INFO",

@@ -3,33 +3,36 @@ from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_not_required
 import stripe
 from .services import sync_stripe_data
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
+
 @csrf_exempt
 @require_POST
+@login_not_required
 def stripe_webhook(request):
+    event = None
     payload = request.body
-    sig_header = request.headers.get('Stripe-Signature')
     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
-        # Invalid payload
-        return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
+        event = json.loads(payload)
+    except json.decoder.JSONDecodeError as e:
+        logger.error(f"Webhook error while parsing basic request: {e}")
         return HttpResponse(status=400)
 
-    # Events we care about
-    # The guide lists many, but since we always sync full state, 
-    # we just need to know IF we should sync.
+    sig_header = request.headers.get("stripe-signature")
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Webhook signature verification failed: {e}")
+        return HttpResponse(status=400)
+
     allowed_events = [
         "checkout.session.completed",
         "customer.subscription.created",
@@ -48,23 +51,24 @@ def stripe_webhook(request):
         "invoice.payment_succeeded",
     ]
 
-    if event['type'] in allowed_events:
-        data_object = event['data']['object']
-        
+    if event["type"] in allowed_events:
+        data_object = event["data"]["object"]
+
         # Extract customer ID
-        customer_id = data_object.get('customer')
-        
+        customer_id = data_object.get("customer")
+
         if customer_id:
             User = get_user_model()
             try:
                 user = User.objects.get(stripe_customer_id=customer_id)
                 sync_stripe_data(user)
+                logger.info(f"Synced stripe data for user {user} : {user.id}")
             except User.DoesNotExist:
-                logger.warning(f"Received webhook for unknown customer: {customer_id}")
+                logger.error(f"Received webhook for unknown customer: {customer_id}")
             except Exception as e:
                 logger.error(f"Error syncing data in webhook: {e}")
         else:
-             logger.warning(f"Webhook event {event['type']} has no customer ID")
+            logger.warning(f"Webhook event {event['type']} has no customer ID")
 
+        logger.info(f"Webhook event {event['type']} processed successfully")
     return HttpResponse(status=200)
-

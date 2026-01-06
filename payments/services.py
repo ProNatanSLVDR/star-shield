@@ -147,7 +147,7 @@ def sync_stripe_data(user):
         return None
 
     try:
-        subscription = dict(subscriptions.data[0])
+        subscription = subscriptions.data[0]
     except Exception as e:
         logger.error(f"Failed to fetch subscriptions for user {user.id}: {e}")
         return None
@@ -156,9 +156,12 @@ def sync_stripe_data(user):
     price_id = subscription["items"]["data"][0].price.id if subscription["items"]["data"] else None
 
     # Payment method details
-    payment_method_brand = subscription["default_payment_method"]["card"]["brand"]
-    payment_method_last4 = subscription["default_payment_method"]["card"]["last4"]
+    payment_method_brand = subscription["default_payment_method"]["card"]["brand"] if subscription["default_payment_method"] else None
+    payment_method_last4 = subscription["default_payment_method"]["card"]["last4"] if subscription["default_payment_method"] else None
 
+    cancel_at_period_end = True if subscription["cancel_at_period_end"] is True or subscription["cancel_at"] is not None else False
+    print(f"cancel_at_period_end: {subscription['cancel_at_period_end']}")
+    print(f"cancel_at: {subscription['cancel_at']}")
     # Update local database
     sub_obj, created = StripeSubscription.objects.update_or_create(
         user=user,
@@ -168,7 +171,7 @@ def sync_stripe_data(user):
             "price_id": price_id,
             "current_period_end": None,
             "current_period_start": None,
-            "cancel_at_period_end": subscription["cancel_at_period_end"],
+            "cancel_at_period_end": cancel_at_period_end,
             "payment_method_brand": payment_method_brand,
             "payment_method_last4": payment_method_last4,
         },

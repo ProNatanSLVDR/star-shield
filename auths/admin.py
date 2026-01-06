@@ -30,7 +30,7 @@ class UserAdmin(admin.ModelAdmin):
             {"fields": ("first_name", "last_name", "profile_picture")},
         ),
         (_("Permissions"), {"fields": ("is_staff", "is_superuser", "is_active")}),
-        (_("Settings"), {"fields": ("onboarding_completed",)}),
+        (_("Settings"), {"fields": ("onboarding_completed", "stripe_customer_id")}),
         (_("Important dates"), {"fields": ("last_login", "created_at", "updated_at")}),
     )
     readonly_fields = ("created_at", "updated_at")
@@ -45,9 +45,80 @@ class GoogleCredentialsAdmin(admin.ModelAdmin):
 
 @admin.register(Etablissement)
 class EtablissementAdmin(admin.ModelAdmin):
-    list_display = ("title", "slug", "uuid", "review_threshold")
+    list_display = ("title", "slug", "uuid", "active", "review_threshold")
     search_fields = ("title", "slug", "uuid")
-    list_filter = ("created_at", "updated_at")
+    list_filter = ("active", "created_at", "updated_at")
+
+    fieldsets = (
+        (
+            _("Important/Core Fields"),
+            {
+                "fields": (
+                    "google_credential",
+                    "location_id",
+                    "account_id",
+                    "active",
+                    "uuid",
+                    "slug",
+                )
+            },
+        ),
+        (
+            _("General Settings"),
+            {
+                "fields": (
+                    "title",
+                    "review_threshold",
+                    "target_rating",
+                )
+            },
+        ),
+        (
+            _("Personalisation Settings"),
+            {
+                "fields": (
+                    "review_accent_color",
+                    "review_show_etablissement_pill",
+                    "review_page_label",
+                    "review_page_text",
+                )
+            },
+        ),
+        (
+            _("QR Code Settings"),
+            {
+                "fields": (
+                    "qr_fill_color",
+                    "qr_fill_color_secondary",
+                    "qr_background_color",
+                    "qr_style",
+                    "qr_color_mask",
+                    "qr_logo",
+                )
+            },
+        ),
+        (
+            _("URLs"),
+            {
+                "fields": (
+                    "website_uri",
+                    "maps_uri",
+                    "new_reviews_uri",
+                )
+            },
+        ),
+        (
+            _("Important dates"),
+            {
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                    "last_reviews_update",
+                )
+            },
+        ),
+    )
+    readonly_fields = ("uuid", "created_at", "updated_at", "last_reviews_update")
 
 
 @admin.register(RatingHistory)
