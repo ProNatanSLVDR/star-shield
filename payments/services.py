@@ -1,7 +1,5 @@
 import stripe
 from django.conf import settings
-from django.utils import timezone
-from datetime import datetime
 from .models import StripeSubscription
 import logging
 
@@ -106,6 +104,9 @@ def change_subscription_quantity(user, quantity=1, increment=False, decrement=Fa
         # If quantity reaches 0, set cancel_at_period_end to True
         if new_quantity == 0:
             update_params["cancel_at_period_end"] = True
+
+        # Always invoice immediately when changing quantity
+        update_params["proration_behavior"] = "always_invoice"
 
         # Update the subscription quantity
         updated_subscription = stripe.Subscription.modify(
