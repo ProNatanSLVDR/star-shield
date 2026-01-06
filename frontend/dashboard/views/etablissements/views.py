@@ -382,9 +382,12 @@ def activate_etablissement(request, id):
 
     try:
         # Import here to avoid circular imports
-        from payments.services import change_subscription_quantity, sync_stripe_data
+        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync
 
-        # Increment subscription quantity
+        # Validate quantity sync before activation
+        validate_quantity_sync(request.user)
+
+        # Increment subscription quantity (this will handle reactivation automatically)
         change_subscription_quantity(request.user, quantity=1, increment=True)
 
         # Sync subscription data
@@ -393,6 +396,9 @@ def activate_etablissement(request, id):
         # Activate the establishment
         etablissement.active = True
         etablissement.save()
+
+        # Validate quantity sync after activation
+        validate_quantity_sync(request.user)
 
         messages.success(request, f"L'établissement {etablissement.title} a été activé avec succès.")
 
@@ -475,7 +481,10 @@ def deactivate_etablissement(request, id):
 
     try:
         # Import here to avoid circular imports
-        from payments.services import change_subscription_quantity, sync_stripe_data
+        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync
+
+        # Validate quantity sync before deactivation
+        validate_quantity_sync(request.user)
 
         # Decrement subscription quantity if user has active subscription
         subscription = getattr(request.user, "stripe_subscription", None)
@@ -486,6 +495,9 @@ def deactivate_etablissement(request, id):
         # Deactivate the establishment
         etablissement.active = False
         etablissement.save()
+
+        # Validate quantity sync after deactivation
+        validate_quantity_sync(request.user)
 
         messages.success(request, f"L'établissement {etablissement.title} a été désactivé avec succès.")
 

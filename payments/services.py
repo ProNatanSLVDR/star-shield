@@ -57,10 +57,72 @@ def get_price_id_from_product():
         return None
 
 
+def get_stripe_subscription_quantity(user):
+    """
+    Fetch the current subscription quantity from Stripe.
+    Returns the quantity or None if no active subscription found.
+    """
+    if not user.stripe_customer_id:
+        return None
+
+    try:
+        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, status="active", limit=1)
+        if not subscriptions.data:
+            return None
+
+        subscription = subscriptions.data[0]
+        if not subscription["items"]["data"]:
+            return None
+
+        subscription_item = subscription["items"]["data"][0]
+        return subscription_item.get("quantity") or 0
+    except Exception as e:
+        logger.error(f"Failed to get Stripe subscription quantity for user {user.id}: {e}")
+        return None
+
+
+def get_active_etablissements_count(user):
+    """
+    Count the number of active établissements for a user.
+    Returns 0 if user has no google_credential.
+    """
+    try:
+        if hasattr(user, "google_credential") and user.google_credential:
+            return user.google_credential.etablissements.filter(active=True).count()
+        return 0
+    except Exception as e:
+        logger.error(f"Failed to get active établissements count for user {user.id}: {e}")
+        return 0
+
+
+def validate_quantity_sync(user):
+    """
+    Compare Stripe subscription quantity with active établissements count.
+    Logs a warning if there's a mismatch.
+    Returns True if in sync, False if mismatch detected.
+    """
+    stripe_quantity = get_stripe_subscription_quantity(user)
+    active_count = get_active_etablissements_count(user)
+
+    if stripe_quantity is None:
+        # No active subscription, which is fine if there are no active établissements
+        if active_count == 0:
+            return True
+        logger.warning(f"User {user.id}: No active Stripe subscription but has {active_count} active établissements")
+        return False
+
+    if stripe_quantity != active_count:
+        logger.warning(f"User {user.id}: Quantity mismatch - Stripe quantity: {stripe_quantity}, Active établissements: {active_count}")
+        return False
+
+    return True
+
+
 def change_subscription_quantity(user, quantity=1, increment=False, decrement=False):
     """
     Change the subscription quantity for the user's active subscription.
     If quantity reaches 0, sets cancel_at_period_end to True.
+    If reactivating from 0 (going to 1+), removes cancel_at_period_end.
     Returns the updated subscription object.
     """
     if not user.stripe_customer_id:
@@ -104,6 +166,10 @@ def change_subscription_quantity(user, quantity=1, increment=False, decrement=Fa
         # If quantity reaches 0, set cancel_at_period_end to True
         if new_quantity == 0:
             update_params["cancel_at_period_end"] = True
+        # If reactivating from 0 (going from 0 to 1+), remove cancel_at_period_end
+        elif current_quantity == 0 and new_quantity > 0:
+            update_params["cancel_at_period_end"] = False
+            logger.info(f"Reactivating subscription {subscription['id']} for user {user.id}")
 
         # Always invoice immediately when changing quantity
         update_params["proration_behavior"] = "always_invoice"
@@ -117,6 +183,10 @@ def change_subscription_quantity(user, quantity=1, increment=False, decrement=Fa
         logger.info(f"Changed subscription quantity for user {user.id} from {current_quantity} to {new_quantity}")
         if new_quantity == 0:
             logger.info(f"Subscription {subscription['id']} set to cancel at period end")
+
+        # Validate quantity sync after update
+        validate_quantity_sync(user)
+
         return updated_subscription
 
     except Exception as e:
