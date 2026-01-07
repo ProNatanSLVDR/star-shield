@@ -118,9 +118,9 @@ def validate_quantity_sync(user):
     return True
 
 
-def change_subscription_quantity(user, quantity=1, increment=False, decrement=False):
+def change_subscription_quantity(user, quantity):
     """
-    Change the subscription quantity for the user's active subscription.
+    Set the subscription quantity for the user's active subscription to the specified value.
     If quantity reaches 0, sets cancel_at_period_end to True.
     If reactivating from 0 (going to 1+), removes cancel_at_period_end.
     Returns the updated subscription object.
@@ -146,12 +146,7 @@ def change_subscription_quantity(user, quantity=1, increment=False, decrement=Fa
 
         subscription_item = subscription["items"]["data"][0]
         current_quantity = subscription_item.get("quantity") or 1
-        if increment:
-            new_quantity = current_quantity + 1
-        elif decrement:
-            new_quantity = max(0, current_quantity - 1)
-        else:
-            new_quantity = quantity
+        new_quantity = quantity
 
         # Prepare update parameters
         update_params = {

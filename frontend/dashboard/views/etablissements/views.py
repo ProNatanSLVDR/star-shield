@@ -382,18 +382,23 @@ def activate_etablissement(request, id):
 
     try:
         # Import here to avoid circular imports
-        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync
+        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync, get_active_etablissements_count
 
         # Validate quantity sync before activation
         validate_quantity_sync(request.user)
 
-        # Increment subscription quantity (this will handle reactivation automatically)
-        change_subscription_quantity(request.user, quantity=1, increment=True)
+        # Calculate the new quantity (current active count + 1 for this activation)
+        current_active_count = get_active_etablissements_count(request.user)
+        new_quantity = current_active_count + 1
+
+        # Update subscription quantity first (before activating establishment)
+        # If this fails, the establishment won't be activated
+        change_subscription_quantity(request.user, quantity=new_quantity)
 
         # Sync subscription data
         sync_stripe_data(request.user)
 
-        # Activate the establishment
+        # Only activate the establishment after successful payment update
         etablissement.active = True
         etablissement.save()
 
@@ -481,18 +486,23 @@ def deactivate_etablissement(request, id):
 
     try:
         # Import here to avoid circular imports
-        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync
+        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync, get_active_etablissements_count
 
         # Validate quantity sync before deactivation
         validate_quantity_sync(request.user)
 
-        # Decrement subscription quantity if user has active subscription
+        # Calculate the new quantity (current active count - 1 for this deactivation)
+        current_active_count = get_active_etablissements_count(request.user)
+        new_quantity = max(0, current_active_count - 1)
+
+        # Update subscription quantity first (before deactivating establishment)
+        # If this fails, the establishment won't be deactivated
         subscription = getattr(request.user, "stripe_subscription", None)
         if subscription and subscription.status == "active":
-            change_subscription_quantity(request.user, quantity=1, decrement=True)
+            change_subscription_quantity(request.user, quantity=new_quantity)
             sync_stripe_data(request.user)
 
-        # Deactivate the establishment
+        # Only deactivate the establishment after successful payment update
         etablissement.active = False
         etablissement.save()
 
