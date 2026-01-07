@@ -166,10 +166,8 @@ def change_subscription_quantity(user, quantity=1, increment=False, decrement=Fa
         # If quantity reaches 0, set cancel_at_period_end to True
         if new_quantity == 0:
             update_params["cancel_at_period_end"] = True
-        # If reactivating from 0 (going from 0 to 1+), remove cancel_at_period_end
-        elif current_quantity == 0 and new_quantity > 0:
+        else:
             update_params["cancel_at_period_end"] = False
-            logger.info(f"Reactivating subscription {subscription['id']} for user {user.id}")
 
         # Always invoice immediately when changing quantity
         update_params["proration_behavior"] = "always_invoice"
