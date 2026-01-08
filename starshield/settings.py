@@ -191,6 +191,49 @@ class Base(Configuration):
     TASK_TIMEOUT_SECONDS = 300  # 5 minutes
 
     # Logging configuration
+
+
+class Dev(Base):
+    DEBUG = True
+
+    WEBSITE_URL = "http://localhost:8000"
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+    # Email
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # TODO: Change to SMTP backend
+
+    # STRIPE (test keys)
+    STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
+    STRIPE_SECRET_KEY = "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
+    STRIPE_WEBHOOK_SECRET = "whsec_1a33b01f5f912d07f415cce17a6a55572f51f681e91ae2a077a78d57335078ba"
+
+    # Google OAuth
+    GOOGLE_OAUTH_CLIENT_ID = "621365538525-pmqljdfrvshf91c3dn3aqbe62k5l5909.apps.googleusercontent.com"
+    GOOGLE_OAUTH_CLIENT_SECRET = "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"
+    GOOGLE_OAUTH_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
+    SOCIALACCOUNT_PROVIDERS = {
+        "google": {
+            "APP": {
+                "client_id": GOOGLE_OAUTH_CLIENT_ID,
+                "secret": GOOGLE_OAUTH_CLIENT_SECRET,
+                "key": "",
+            },
+            "SCOPE": ["profile", "email"],
+            "EMAIL_AUTHENTICATION": True,
+            "EMAIL_VERIFICATION": "none",
+        }
+    }
+
+    STRIPE_PRODUCTS = {
+        "basic_subscription": "prod_Th3YAxKCSwFz7C",
+    }
+
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -246,48 +289,6 @@ class Base(Configuration):
                 "propagate": False,
             },
         },
-    }
-
-
-class Dev(Base):
-    DEBUG = True
-
-    WEBSITE_URL = "http://localhost:8000"
-
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
-
-    # Email
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # TODO: Change to SMTP backend
-
-    # STRIPE (test keys)
-    STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
-    STRIPE_SECRET_KEY = "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
-    STRIPE_WEBHOOK_SECRET = "whsec_1a33b01f5f912d07f415cce17a6a55572f51f681e91ae2a077a78d57335078ba"
-
-    # Google OAuth
-    GOOGLE_OAUTH_CLIENT_ID = "621365538525-pmqljdfrvshf91c3dn3aqbe62k5l5909.apps.googleusercontent.com"
-    GOOGLE_OAUTH_CLIENT_SECRET = "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"
-    GOOGLE_OAUTH_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
-    SOCIALACCOUNT_PROVIDERS = {
-        "google": {
-            "APP": {
-                "client_id": GOOGLE_OAUTH_CLIENT_ID,
-                "secret": GOOGLE_OAUTH_CLIENT_SECRET,
-                "key": "",
-            },
-            "SCOPE": ["profile", "email"],
-            "EMAIL_AUTHENTICATION": True,
-            "EMAIL_VERIFICATION": "none",
-        }
-    }
-
-    STRIPE_PRODUCTS = {
-        "basic_subscription": "prod_Th3YAxKCSwFz7C",
     }
 
 

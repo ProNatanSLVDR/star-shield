@@ -34,17 +34,15 @@ def get_or_create_stripe_customer(user):
 def get_price_id_from_product(product_id):
     """
     Fetch the default/active price ID from the Stripe product.
-    Returns the first active recurring price ID from the product.
     """
     try:
         if not product_id:
             logger.error("No product ID given")
             return None
 
-        # Get all prices for this product
         prices = stripe.Product.retrieve(product_id)
 
-        price = prices.default_price.id
+        price = prices.default_price
 
         return price
     except Exception as e:
