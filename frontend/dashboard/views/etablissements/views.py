@@ -63,7 +63,7 @@ def list_etablissements_view(request):
                 "classes": "btn-sm btn-success",
                 "extra_kwargs": {
                     "hx_modal_toggle": True,
-                    "hx-get": reverse("dashboard:etablissements:activate_partial", args=[etablissement.id]),
+                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
                 },
             }
             buttons.append(activate_button)
@@ -75,7 +75,7 @@ def list_etablissements_view(request):
                 "classes": "btn-sm btn-warning",
                 "extra_kwargs": {
                     "hx_modal_toggle": True,
-                    "hx-get": reverse("dashboard:etablissements:deactivate_partial", args=[etablissement.id]),
+                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
                 },
             }
             buttons.append(deactivate_button)
@@ -318,11 +318,12 @@ def etablissement_selector_partial(request):
 
 
 @google_gmb_connected_required
-def activate_etablissement_partial(request, id):
+def toggle_etablissement_status_partial(request, id):
     """
-    Show activation modal with billing explanation.
+    Show toggle status modal (activate/deactivate) with billing explanation.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
+    is_activation = not etablissement.active
 
     # Check if user has an active subscription
     subscription = getattr(request.user, "stripe_subscription", None)
@@ -334,246 +335,112 @@ def activate_etablissement_partial(request, id):
     # Fetch price information from Stripe
     price_amount = None
     price_currency = None
-    price_id = None
 
+    price_id = None
     if has_active_subscription and subscription.price_id:
-        # User has subscription, use their price_id
         price_id = subscription.price_id
-    else:
+    elif is_activation:
+        # Default price for new activation if no subscription
         price_id = get_price_id_from_product(settings.STRIPE_PRODUCTS.get("basic_subscription"))
 
     if price_id:
-        price = stripe.Price.retrieve(price_id, expand=["tiers"])
-        print(price)
-        if price.unit_amount is not None:
-            price_amount = price.unit_amount / 100  # Convert from cents to currency unit
-        if hasattr(price, "currency") and price.currency:
-            price_currency = price.currency.upper()
+        try:
+            price = stripe.Price.retrieve(price_id, expand=["tiers"])
+            if price.unit_amount is not None:
+                price_amount = price.unit_amount / 100
+            if hasattr(price, "currency") and price.currency:
+                price_currency = price.currency.upper()
+        except Exception as e:
+            logger.error(f"Error fetching price from Stripe: {e}")
 
     context = {
         "etablissement": etablissement,
+        "is_activation": is_activation,
         "has_active_subscription": has_active_subscription,
         "active_count": active_count,
         "price_amount": price_amount,
         "price_currency": price_currency,
-        "activate_url": reverse("dashboard:etablissements:activate", args=[etablissement.id]),
+        "toggle_url": reverse("dashboard:etablissements:toggle_status", args=[etablissement.id]),
         "checkout_url": reverse("payments:create_checkout_session"),
     }
 
     return starshield_render(
         request,
-        "etablissements/activate_partial.html",
+        "etablissements/toggle_status_partial.html",
         context=context,
     )
 
 
 @google_gmb_connected_required
 @require_POST
-def activate_etablissement(request, id):
+def toggle_etablissement_status(request, id):
     """
-    Activate an establishment.
-    If user has subscription: increment quantity and activate.
-    If no subscription: should not reach here (handled by checkout flow).
-    """
-    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
-
-    # Check if already active
-    if etablissement.active:
-        messages.info(request, f"L'établissement {etablissement.title} est déjà actif.")
-        hx_triggers = {
-            "etablissements-updated": True,
-            "close-modal": True,
-        }
-        return starshield_render(
-            request,
-            "etablissements/activate_partial.html",
-            context={"etablissement": etablissement},
-            hx_triggers=hx_triggers,
-        )
-
-    # Check if user has active subscription
-    subscription = getattr(request.user, "stripe_subscription", None)
-    if not subscription or subscription.status != "active":
-        messages.error(request, "Vous devez avoir un abonnement actif pour activer un établissement.")
-        hx_triggers = {
-            "close-modal": True,
-        }
-        return starshield_render(
-            request,
-            "etablissements/activate_partial.html",
-            context={"etablissement": etablissement},
-            hx_triggers=hx_triggers,
-        )
-
-    try:
-        # Import here to avoid circular imports
-        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync, get_active_etablissements_count
-
-        # Validate quantity sync before activation
-        validate_quantity_sync(request.user)
-
-        # Calculate the new quantity (current active count + 1 for this activation)
-        current_active_count = get_active_etablissements_count(request.user)
-        new_quantity = current_active_count + 1
-
-        # Update subscription quantity first (before activating establishment)
-        # If this fails, the establishment won't be activated
-        change_subscription_quantity(request.user, quantity=new_quantity)
-
-        # Sync subscription data
-        sync_stripe_data(request.user)
-
-        # Only activate the establishment after successful payment update
-        etablissement.active = True
-        etablissement.save()
-
-        # Validate quantity sync after activation
-        validate_quantity_sync(request.user)
-
-        messages.success(request, f"L'établissement {etablissement.title} a été activé avec succès.")
-
-        hx_triggers = {
-            "etablissements-updated": True,
-            "close-modal": True,
-        }
-
-        return starshield_render(
-            request,
-            "etablissements/activate_partial.html",
-            context={"etablissement": etablissement},
-            hx_triggers=hx_triggers,
-        )
-
-    except Exception as e:
-        logger.error(f"Error activating establishment {id}: {e}")
-        messages.error(request, "Une erreur est survenue lors de l'activation de l'établissement.")
-        hx_triggers = {
-            "close-modal": True,
-        }
-        return starshield_render(
-            request,
-            "etablissements/activate_partial.html",
-            context={"etablissement": etablissement},
-            hx_triggers=hx_triggers,
-        )
-
-
-@google_gmb_connected_required
-def deactivate_etablissement_partial(request, id):
-    """
-    Show deactivation modal with billing explanation.
+    Toggle establishment status (activate/deactivate).
+    Updates subscription quantity and establishment status.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
+    is_activation = not etablissement.active
 
-    # Check if user has an active subscription
-    subscription = getattr(request.user, "stripe_subscription", None)
-    has_active_subscription = subscription is not None and subscription.status == "active"
-
-    # Count active establishments
-    active_count = request.user.google_credential.etablissements.filter(active=True).count()
-
-    # Fetch price information from Stripe to show potential savings
-    price_amount = None
-    price_currency = None
-
-    try:
-        if has_active_subscription and subscription.price_id:
-            price = stripe.Price.retrieve(subscription.price_id)
-            if price.unit_amount is not None:
-                price_amount = price.unit_amount / 100  # Convert from cents to currency unit
-            if hasattr(price, "currency") and price.currency:
-                price_currency = price.currency.upper()
-    except Exception as e:
-        logger.error(f"Error fetching price from Stripe for deactivation modal: {e}")
-        # Continue without price information - template will handle gracefully
-
-    context = {
-        "etablissement": etablissement,
-        "has_active_subscription": has_active_subscription,
-        "active_count": active_count,
-        "price_amount": price_amount,
-        "price_currency": price_currency,
-        "deactivate_url": reverse("dashboard:etablissements:deactivate", args=[etablissement.id]),
+    hx_triggers = {
+        "close-modal": True,
     }
 
-    return starshield_render(
-        request,
-        "etablissements/deactivate_partial.html",
-        context=context,
-    )
-
-
-@google_gmb_connected_required
-@require_POST
-def deactivate_etablissement(request, id):
-    """
-    Deactivate an establishment.
-    Decrements subscription quantity and deactivates the establishment.
-    """
-    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
-
-    # Check if already inactive
-    if not etablissement.active:
-        messages.info(request, f"L'établissement {etablissement.title} est déjà inactif.")
-        hx_triggers = {
-            "etablissements-updated": True,
-            "close-modal": True,
-        }
-        return starshield_render(
-            request,
-            "etablissements/deactivate_partial.html",
-            context={"etablissement": etablissement},
-            hx_triggers=hx_triggers,
-        )
+    # Validation for activation
+    if is_activation:
+        # For activation, require active subscription
+        subscription = getattr(request.user, "stripe_subscription", None)
+        if not subscription or subscription.status != "active":
+            messages.error(request, "Vous devez avoir un abonnement actif pour activer un établissement.")
+            return starshield_render(
+                request,
+                "etablissements/toggle_status_partial.html",
+                context={
+                    "etablissement": etablissement,
+                    "is_activation": True,
+                    "has_active_subscription": False,
+                },
+                hx_triggers=hx_triggers,
+            )
 
     try:
-        # Import here to avoid circular imports
         from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync, get_active_etablissements_count
 
-        # Validate quantity sync before deactivation
         validate_quantity_sync(request.user)
-
-        # Calculate the new quantity (current active count - 1 for this deactivation)
         current_active_count = get_active_etablissements_count(request.user)
-        new_quantity = max(0, current_active_count - 1)
 
-        # Update subscription quantity first (before deactivating establishment)
-        # If this fails, the establishment won't be deactivated
+        new_quantity = current_active_count + 1 if is_activation else max(0, current_active_count - 1)
+
+        # Update subscription quantity
         subscription = getattr(request.user, "stripe_subscription", None)
         if subscription and subscription.status == "active":
             change_subscription_quantity(request.user, quantity=new_quantity)
             sync_stripe_data(request.user)
 
-        # Only deactivate the establishment after successful payment update
-        etablissement.active = False
+        # Update establishment status
+        etablissement.active = is_activation
         etablissement.save()
 
-        # Validate quantity sync after deactivation
         validate_quantity_sync(request.user)
 
-        messages.success(request, f"L'établissement {etablissement.title} a été désactivé avec succès.")
+        action_text = "activé" if is_activation else "désactivé"
+        messages.success(request, f"L'établissement {etablissement.title} a été {action_text} avec succès.")
 
-        hx_triggers = {
-            "etablissements-updated": True,
-            "close-modal": True,
-        }
+        hx_triggers["etablissements-updated"] = True
 
         return starshield_render(
             request,
-            "etablissements/deactivate_partial.html",
-            context={"etablissement": etablissement},
+            "etablissements/toggle_status_partial.html",
+            context={"etablissement": etablissement, "is_activation": is_activation},
             hx_triggers=hx_triggers,
         )
 
     except Exception as e:
-        logger.error(f"Error deactivating establishment {id}: {e}")
-        messages.error(request, "Une erreur est survenue lors de la désactivation de l'établissement.")
-        hx_triggers = {
-            "close-modal": True,
-        }
+        action_text = "l'activation" if is_activation else "la désactivation"
+        logger.error(f"Error during {action_text} of establishment {id}: {e}")
+        messages.error(request, f"Une erreur est survenue lors de {action_text} de l'établissement.")
         return starshield_render(
             request,
-            "etablissements/deactivate_partial.html",
-            context={"etablissement": etablissement},
+            "etablissements/toggle_status_partial.html",
+            context={"etablissement": etablissement, "is_activation": is_activation},
             hx_triggers=hx_triggers,
         )
