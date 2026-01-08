@@ -97,25 +97,72 @@ def get_active_etablissements_count(user):
 
 def validate_quantity_sync(user):
     """
-    Compare Stripe subscription quantity with active établissements count.
-    Logs a warning if there's a mismatch.
-    Returns True if in sync, False if mismatch detected.
+    Sync établissements to match Stripe subscription quantity.
+    Stripe is the source of truth - establishments are adjusted to match.
+    Returns True if sync was successful, False otherwise.
     """
     stripe_quantity = get_stripe_subscription_quantity(user)
     active_count = get_active_etablissements_count(user)
 
-    if stripe_quantity is None:
-        # No active subscription, which is fine if there are no active établissements
-        if active_count == 0:
+    # Handle case where user has no google_credential
+    if not hasattr(user, "google_credential") or not user.google_credential:
+        if stripe_quantity is None or stripe_quantity == 0:
             return True
-        logger.warning(f"User {user.id}: No active Stripe subscription but has {active_count} active établissements")
+        logger.warning(f"User {user.id}: Has Stripe quantity {stripe_quantity} but no google_credential")
         return False
 
-    if stripe_quantity != active_count:
-        logger.warning(f"User {user.id}: Quantity mismatch - Stripe quantity: {stripe_quantity}, Active établissements: {active_count}")
-        return False
+    try:
+        etablissements = user.google_credential.etablissements
 
-    return True
+        # Case 1: No subscription exists - deactivate all establishments
+        if stripe_quantity is None:
+            if active_count == 0:
+                return True
+
+            # Deactivate all establishments
+            deactivated = etablissements.filter(active=True).update(active=False)
+            logger.info(f"User {user.id}: No active Stripe subscription - deactivated {deactivated} établissements")
+            return True
+
+        # Case 2: Stripe quantity > active establishments - activate needed establishments
+        if stripe_quantity > active_count:
+            needed = stripe_quantity - active_count
+            inactive_queryset = etablissements.filter(active=False).order_by("id")
+            available_count = inactive_queryset.count()
+
+            if available_count < needed:
+                logger.warning(
+                    f"User {user.id}: Stripe quantity is {stripe_quantity} but only "
+                    f"{available_count} inactive établissements available. "
+                    f"Activating {available_count} establishments."
+                )
+
+            inactive_etablissements = inactive_queryset[:needed]
+            activated_ids = list(inactive_etablissements.values_list("id", flat=True))
+            etablissements.filter(id__in=activated_ids).update(active=True)
+
+            if activated_ids:
+                logger.info(f"User {user.id}: Activated {len(activated_ids)} établissements (IDs: {activated_ids}) to match Stripe quantity {stripe_quantity}")
+            return True
+
+        # Case 3: Stripe quantity < active establishments - deactivate excess establishments
+        if stripe_quantity < active_count:
+            excess = active_count - stripe_quantity
+            active_etablissements = etablissements.filter(active=True).order_by("id")[:excess]
+
+            deactivated_ids = list(active_etablissements.values_list("id", flat=True))
+            etablissements.filter(id__in=deactivated_ids).update(active=False)
+
+            if deactivated_ids:
+                logger.info(f"User {user.id}: Deactivated {len(deactivated_ids)} établissements (IDs: {deactivated_ids}) to match Stripe quantity {stripe_quantity}")
+            return True
+
+        # Case 4: Already in sync
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to sync établissements for user {user.id}: {e}")
+        return False
 
 
 def change_subscription_quantity(user, quantity):
