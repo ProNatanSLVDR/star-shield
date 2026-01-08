@@ -1,16 +1,14 @@
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 import logging
-from urllib.parse import urljoin
 
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
-from django.shortcuts import redirect, render
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from google_auth_oauthlib.flow import Flow
 from django.contrib import messages
 
-from .models import Etablissement, GoogleCredentials
+from .models import GoogleCredentials
 
 
 logger = logging.getLogger(__name__)
@@ -30,9 +28,7 @@ def get_google_auth_client_config() -> dict[str, dict[str, str]]:
 
 
 def google_gmb_start(request: HttpRequest) -> HttpResponse:
-    protocol = "https" if request.is_secure() else "http"
-
-    redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
+    redirect_uri = f"{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
 
     flow = Flow.from_client_config(
         get_google_auth_client_config(),
@@ -51,9 +47,7 @@ def google_gmb_start(request: HttpRequest) -> HttpResponse:
 
 
 def google_gmb_callback(request: HttpRequest) -> HttpResponse:
-    protocol = "https" if request.is_secure() else "http"
-
-    redirect_uri = f"{protocol}://{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
+    redirect_uri = f"{settings.WEBSITE_URL}{reverse('auths:google_gmb_callback')}"
     state = request.session.get("state")
 
     if not state:

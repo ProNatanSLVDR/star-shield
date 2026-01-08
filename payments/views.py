@@ -37,10 +37,6 @@ def create_checkout_session(request):
 
         # Construct absolute URLs
         base_url = settings.WEBSITE_URL
-        if not base_url.startswith("http"):
-            # Simple heuristic: localhost -> http, else https
-            protocol = "http" if "localhost" in base_url or "127.0.0.1" in base_url else "https"
-            base_url = f"{protocol}://{base_url}"
 
         # Build success URL with etablissement_id if provided
         success_url = f"{base_url}/payments/success?session_id={{CHECKOUT_SESSION_ID}}"
@@ -149,6 +145,6 @@ def stripe_customer_portal(request):
     customer_id = get_or_create_stripe_customer(request.user)
     stripe_customer_portal_session = stripe.billing_portal.Session.create(
         customer=customer_id,
-        return_url=f"http://{settings.WEBSITE_URL}/payments/success",
+        return_url=f"{settings.WEBSITE_URL}/payments/success",
     )
     return redirect(stripe_customer_portal_session.url)

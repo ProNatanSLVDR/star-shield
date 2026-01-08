@@ -252,7 +252,7 @@ class Base(Configuration):
 class Dev(Base):
     DEBUG = True
 
-    WEBSITE_URL = "localhost:8000"
+    WEBSITE_URL = "http://localhost:8000"
 
     DATABASES = {
         "default": {
@@ -300,7 +300,7 @@ class Prod(Base):
     # Trust Cloud Run proxy headers for HTTPS detection
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-    WEBSITE_URL = os.getenv("WEBSITE_URL", "app.starshield.pro")
+    WEBSITE_URL = f"https://{os.getenv('WEBSITE_URL', 'app.starshield.pro')}"
     GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
     GCP_PROJECT_REGION = os.getenv("GCP_PROJECT_REGION", "")
 
