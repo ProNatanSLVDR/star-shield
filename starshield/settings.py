@@ -371,5 +371,5 @@ class Prod(Base):
     }
 
     STRIPE_PRODUCTS = {
-        "basic_subscription": "prod_Th3YAxKCSwFz7C",
+        "basic_subscription": "prod_Th1zNTFwvksqWC",
     }
