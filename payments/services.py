@@ -31,30 +31,80 @@ def get_or_create_stripe_customer(user):
         raise
 
 
-def get_price_id_from_product():
+def get_price_id_from_product(product_id):
     """
     Fetch the default/active price ID from the Stripe product.
     Returns the first active recurring price ID from the product.
     """
     try:
-        product_id = settings.STRIPE_PRODUCTS.get("basic_subscription")
         if not product_id:
-            logger.error("STRIPE_PRODUCTS['basic_subscription'] not configured")
+            logger.error("No product ID given")
             return None
 
         # Get all prices for this product
-        prices = stripe.Price.list(product=product_id, active=True, limit=10)
+        prices = stripe.Product.retrieve(product_id)
 
-        # Find the first recurring price (subscription)
-        for price in prices.data:
-            if price.type == "recurring":
-                return price.id
+        price = prices.default_price.id
 
-        logger.error(f"No recurring price found for product {product_id}")
-        return None
+        return price
     except Exception as e:
-        logger.error(f"Failed to get price ID from product: {e}")
+        logger.error(f"Failed to get price ID from product {product_id}: {e}")
         return None
+
+
+def read_pricing_tier(tiers_data, quantity):
+    """
+    Read the pricing tier for a given quantity.
+    Expects the following structure:
+
+    "tiers": [
+        {
+            "flat_amount": null,
+            "flat_amount_decimal": null,
+            "unit_amount": 5000,
+            "unit_amount_decimal": "5000",
+            "up_to": 3
+        },
+        {
+            "flat_amount": 2000,
+            "flat_amount_decimal": "2000",
+            "unit_amount": 3000,
+            "unit_amount_decimal": "3000",
+            "up_to": 10
+        },
+        {
+            "flat_amount": 20000,
+            "flat_amount_decimal": "20000",
+            "unit_amount": 2000,
+            "unit_amount_decimal": "2000",
+            "up_to": null
+        }
+    ],
+    """
+    # Track where the previous tier ended
+    total_amount = 0
+    current_tier_index = 0
+    tier_first = True
+
+    for i in range(1, quantity + 1):
+        # if its the first time we enter this tier, we add the flat amount
+        if tier_first:
+            tier_first = False
+
+            flat_amount = tiers_data[current_tier_index]["flat_amount"]
+            if flat_amount is not None:
+                total_amount += flat_amount
+
+        unit_amount = tiers_data[current_tier_index]["unit_amount"]
+        if unit_amount is not None:
+            total_amount += unit_amount
+
+        # test if we need to move to the next tier
+        if i == tiers_data[current_tier_index].get("up_to"):
+            current_tier_index += 1
+            tier_first = True
+
+    return total_amount
 
 
 def get_stripe_subscription_quantity(user):

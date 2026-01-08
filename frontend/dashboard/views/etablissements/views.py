@@ -1,15 +1,19 @@
 from allauth.account.decorators import reverse
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.http import require_POST, require_http_methods
-from auths.models import GoogleCredentials, Etablissement
+from auths.models import Etablissement
 from starshield.decorators import google_gmb_connected_required
 from frontend.dashboard.render import starshield_render
 from django.contrib import messages
 from .forms import ImportEtablissementForm
 import logging
+import stripe
+from django.conf import settings
+from payments.services import get_price_id_from_product
 
 logger = logging.getLogger(__name__)
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @google_gmb_connected_required
@@ -327,10 +331,31 @@ def activate_etablissement_partial(request, id):
     # Count active establishments
     active_count = request.user.google_credential.etablissements.filter(active=True).count()
 
+    # Fetch price information from Stripe
+    price_amount = None
+    price_currency = None
+    price_id = None
+
+    if has_active_subscription and subscription.price_id:
+        # User has subscription, use their price_id
+        price_id = subscription.price_id
+    else:
+        price_id = get_price_id_from_product(settings.STRIPE_PRODUCTS.get("basic_subscription"))
+
+    if price_id:
+        price = stripe.Price.retrieve(price_id, expand=["tiers"])
+        print(price)
+        if price.unit_amount is not None:
+            price_amount = price.unit_amount / 100  # Convert from cents to currency unit
+        if hasattr(price, "currency") and price.currency:
+            price_currency = price.currency.upper()
+
     context = {
         "etablissement": etablissement,
         "has_active_subscription": has_active_subscription,
         "active_count": active_count,
+        "price_amount": price_amount,
+        "price_currency": price_currency,
         "activate_url": reverse("dashboard:etablissements:activate", args=[etablissement.id]),
         "checkout_url": reverse("payments:create_checkout_session"),
     }
@@ -447,10 +472,27 @@ def deactivate_etablissement_partial(request, id):
     # Count active establishments
     active_count = request.user.google_credential.etablissements.filter(active=True).count()
 
+    # Fetch price information from Stripe to show potential savings
+    price_amount = None
+    price_currency = None
+
+    try:
+        if has_active_subscription and subscription.price_id:
+            price = stripe.Price.retrieve(subscription.price_id)
+            if price.unit_amount is not None:
+                price_amount = price.unit_amount / 100  # Convert from cents to currency unit
+            if hasattr(price, "currency") and price.currency:
+                price_currency = price.currency.upper()
+    except Exception as e:
+        logger.error(f"Error fetching price from Stripe for deactivation modal: {e}")
+        # Continue without price information - template will handle gracefully
+
     context = {
         "etablissement": etablissement,
         "has_active_subscription": has_active_subscription,
         "active_count": active_count,
+        "price_amount": price_amount,
+        "price_currency": price_currency,
         "deactivate_url": reverse("dashboard:etablissements:deactivate", args=[etablissement.id]),
     }
 

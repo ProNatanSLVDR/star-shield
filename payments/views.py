@@ -4,7 +4,7 @@ from django.conf import settings
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, HttpResponseBadRequest
 import stripe
-from .services import get_or_create_stripe_customer, sync_stripe_data
+from .services import get_or_create_stripe_customer, sync_stripe_data, get_price_id_from_product
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,13 +23,9 @@ def create_checkout_session(request):
     price_id = request.POST.get("price_id")
     etablissement_id = request.POST.get("etablissement_id")
 
-    # If no price_id provided, fetch from product
+    price_id = get_price_id_from_product(settings.STRIPE_PRODUCTS.get("basic_subscription"))
     if not price_id:
-        from .services import get_price_id_from_product
-
-        price_id = get_price_id_from_product()
-        if not price_id:
-            return HttpResponseBadRequest("Could not determine price_id")
+        return HttpResponseBadRequest("Could not determine price_id")
 
     try:
         # 1. Ensure customer exists
