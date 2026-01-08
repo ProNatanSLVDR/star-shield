@@ -9,8 +9,16 @@
 
 <div class="modal-body p-4">
     {% if has_active_subscription or not is_activation %}
-        <div class="">
-            <div class="row g-3 mb-3 align-items-center position-relative">
+        <!-- Etablissement Information -->
+        <div class="mb-4 pb-3 border-bottom">
+            <h6 class="mb-1">
+                Établissement:
+                <span class="fw-bold ms-1">{{ etablissement.title }}</span>
+            </h6>
+        </div>
+
+        <div class=" position-relative">
+            <div class="row g-3 mb-3 align-items-center">
             <!-- Before Card -->
                 <div class="col-12 col-md-6">
                     <div class="card shadow-sm h-100 overflow-hidden">
@@ -104,14 +112,22 @@
             <!-- Arrow Separator -->
 
             </div>
-            <div class="position-absolute top-50 start-50 translate-middle bg-white rounded-circle rounded-pill p-2 shadow-sm border fa-fade">
-                <i class="fa-solid fa-arrow-right"></i>
+            <div class="position-absolute top-50 start-50 translate-middle bg-white rounded-circle rounded-pill p-2 shadow-sm border fa-beat-fade">
+                <i class="fa-solid fa-arrow-right fa-xl"></i>
             </div>
         </div>
 
-        <p>
-
-        </p>
+        <!-- Billing Flow Explanation -->
+        <div class="mt-4 pt-3 border-top">
+            <p class="text-muted small mb-2">
+                <strong>Modèle de tarification :</strong> Notre abonnement utilise un système de tarification par paliers basé sur le nombre d'établissements actifs.
+                Plus vous avez d'établissements actifs, plus le prix par établissement diminue grâce aux paliers tarifaires.
+            </p>
+            <p class="text-muted small mb-0">
+                <strong>Prise en compte immédiate :</strong> Les modifications de votre abonnement sont prises en compte immédiatement.
+                Cette mise à jour déclenche une facturation immédiate (ou un crédit) au prorata.
+            </p>
+        </div>
     {% else %}
         <div class="alert alert-info mb-0">
             <div class="d-flex align-items-start gap-3">
