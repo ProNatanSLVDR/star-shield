@@ -86,6 +86,9 @@ def read_pricing_tier(tiers_data, quantity):
     current_tier_index = 0
     tier_first = True
 
+    if quantity <= 0:
+        return 0
+
     for i in range(1, quantity + 1):
         # if its the first time we enter this tier, we add the flat amount
         if tier_first:

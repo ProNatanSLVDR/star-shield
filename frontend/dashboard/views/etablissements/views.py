@@ -9,7 +9,7 @@ from .forms import ImportEtablissementForm
 import logging
 import stripe
 from django.conf import settings
-from payments.services import get_price_id_from_product
+from payments.services import get_price_id_from_product, read_pricing_tier
 
 logger = logging.getLogger(__name__)
 
@@ -331,10 +331,9 @@ def toggle_etablissement_status_partial(request, id):
 
     # Count active establishments
     active_count = request.user.google_credential.etablissements.filter(active=True).count()
+    new_active_count = active_count + 1 if is_activation else active_count - 1
 
     # Fetch price information from Stripe
-    price_amount = None
-    price_currency = None
 
     price_id = None
     if has_active_subscription and subscription.price_id:
@@ -343,13 +342,17 @@ def toggle_etablissement_status_partial(request, id):
         # Default price for new activation if no subscription
         price_id = get_price_id_from_product(settings.STRIPE_PRODUCTS.get("basic_subscription"))
 
+    current_price_amount = 0
+    new_price_amount = 0
+    price_currency = "EUR"
+
     if price_id:
         try:
             price = stripe.Price.retrieve(price_id, expand=["tiers"])
-            if price.unit_amount is not None:
-                price_amount = price.unit_amount / 100
-            if hasattr(price, "currency") and price.currency:
-                price_currency = price.currency.upper()
+            tiers_data = price.tiers
+            price_currency = (price.currency or "eur").upper()
+            current_price_amount = read_pricing_tier(tiers_data, active_count) / 100
+            new_price_amount = read_pricing_tier(tiers_data, new_active_count) / 100
         except Exception as e:
             logger.error(f"Error fetching price from Stripe: {e}")
 
@@ -358,7 +361,9 @@ def toggle_etablissement_status_partial(request, id):
         "is_activation": is_activation,
         "has_active_subscription": has_active_subscription,
         "active_count": active_count,
-        "price_amount": price_amount,
+        "new_active_count": new_active_count,
+        "current_price_amount": current_price_amount,
+        "new_price_amount": new_price_amount,
         "price_currency": price_currency,
         "toggle_url": reverse("dashboard:etablissements:toggle_status", args=[etablissement.id]),
         "checkout_url": reverse("payments:create_checkout_session"),
