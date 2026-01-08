@@ -67,6 +67,7 @@ def stripe_webhook(request):
                 logger.error(f"Received webhook for unknown customer: {customer_id}")
             except Exception as e:
                 logger.error(f"Error syncing data in webhook: {e}")
+                return HttpResponse(status=500)
         else:
             logger.warning(f"Webhook event {event['type']} has no customer ID")
 
