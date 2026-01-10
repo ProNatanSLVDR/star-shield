@@ -2,127 +2,217 @@
 {% load i18n %}
 
 {% block dashboard_content %}
-    <div class="d-flex flex-column h-100">
-        <div class="mb-3">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">
-                <i class="fa-solid fa-receipt me-2"></i>
+    <div class="p-5 d-flex flex-column h-100">
+        <div class="mb-4">
+            <h1 class="display-4 fw-bold text-body-emphasis mb-2">
+                <i class="fa-solid fa-receipt me-2 text-primary"></i>
                 Facturation
             </h1>
-            <p class="text-muted mb-0 small">Gérez votre abonnement et consultez vos factures.</p>
+            <p class="lead text-muted">Gérez votre abonnement et consultez vos factures</p>
         </div>
 
-        <div class="row g-3">
-            <!-- Subscription Information -->
-            <div class="col-lg-8">
-                <div class="card shadow-sm border rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-credit-card me-2"></i>
-                            Informations d'abonnement
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-4">
-                        {% if subscription %}
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold text-muted small">Statut de l'abonnement</label>
-                                <div class="d-flex align-items-center gap-2">
-                                    {% if subscription.status == "active" %}
-                                        <span class="badge bg-success">Actif</span>
-                                    {% elif subscription.status == "canceled" or subscription.cancel_at_period_end %}
-                                        <span class="badge bg-warning">Annulé</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">{{ subscription.status|capfirst }}</span>
-                                    {% endif %}
-                                    {% if subscription.cancel_at_period_end %}
-                                        <span class="text-muted small">(Se termine à la fin de la période)</span>
-                                    {% endif %}
+        {% if subscription %}
+            <!-- Subscription Overview Hero Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
+                                    <i class="fa-solid fa-credit-card text-primary" style="font-size: 2rem;"></i>
                                 </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold text-muted small">Établissements actifs</label>
-                                <p class="mb-0 d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-building text-primary"></i>
-                                    <span class="fw-semibold">{{ active_etablissements_count }}</span>
-                                    <span class="text-muted">établissement{{ active_etablissements_count|pluralize }}</span>
-                                </p>
-                            </div>
-
-                            {% if price_amount %}
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-muted small">Prix payé</label>
-                                    <p class="mb-0">
-                                        <span class="fw-bold fs-5">{{ price_amount|floatformat:2 }}</span>
-                                        <span class="text-muted">{{ price_currency }}</span>
-                                        <span class="text-muted small">/ mois</span>
-                                    </p>
-                                </div>
-                            {% endif %}
-
-                            {% if subscription.current_period_start and subscription.current_period_end %}
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-muted small">Période de facturation</label>
-                                    <p class="mb-0">
-                                        Du {{ subscription.current_period_start|date:"d/m/Y" }} au {{ subscription.current_period_end|date:"d/m/Y" }}
-                                    </p>
-                                </div>
-                            {% endif %}
-
-                            {% if subscription.payment_method_brand and subscription.payment_method_last4 %}
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-muted small">Méthode de paiement</label>
+                                <div>
+                                    <h2 class="h5 fw-bold mb-1">Votre abonnement</h2>
                                     <div class="d-flex align-items-center gap-2">
-                                        {% if subscription.payment_method_brand|lower == "visa" %}
-                                            <i class="fa-brands fa-cc-visa fa-2x text-muted"></i>
-                                        {% elif subscription.payment_method_brand|lower == "mastercard" %}
-                                            <i class="fa-brands fa-cc-mastercard fa-2x text-muted"></i>
-                                        {% elif subscription.payment_method_brand|lower == "amex" or subscription.payment_method_brand|lower == "american express" %}
-                                            <i class="fa-brands fa-cc-amex fa-2x text-muted"></i>
-                                        {% elif subscription.payment_method_brand|lower == "discover" %}
-                                            <i class="fa-brands fa-cc-discover fa-2x text-muted"></i>
+                                        {% if subscription.status == "active" %}
+                                            <span class="badge bg-success">Actif</span>
+                                        {% elif subscription.status == "canceled" or subscription.cancel_at_period_end %}
+                                            <span class="badge bg-warning">Annulé</span>
                                         {% else %}
-                                            <i class="fa-solid fa-credit-card fa-2x text-muted"></i>
+                                            <span class="badge bg-secondary">{{ subscription.status|capfirst }}</span>
                                         {% endif %}
-                                        <span class="fw-semibold">{{ subscription.payment_method_brand|capfirst }} •••• {{ subscription.payment_method_last4 }}</span>
+                                        {% if subscription.cancel_at_period_end %}
+                                            <span class="text-muted small">(Se termine à la fin de la période)</span>
+                                        {% endif %}
                                     </div>
                                 </div>
-                            {% endif %}
-                        {% else %}
-                            <div class="text-center py-4">
-                                <i class="fa-solid fa-credit-card fa-3x text-muted mb-3"></i>
-                                <p class="text-muted mb-0">Aucun abonnement actif.</p>
                             </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm border rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-gear me-2"></i>
-                            Actions
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-4">
-                        <div class="d-grid gap-3">
-                            <form method="post" action="{% url 'payments:stripe_customer_portal' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fa-solid fa-external-link me-2"></i>
-                                    Accéder au portail client Stripe
-                                </button>
-                            </form>
-                            <p class="text-muted small mb-0 text-center">
-                                Gérez votre abonnement, consultez vos factures et modifiez votre méthode de paiement.
-                            </p>
+                            {% if price_amount %}
+                                <div class="ms-5">
+                                    <p class="text-muted small mb-1">Montant mensuel</p>
+                                    <h3 class="fw-bold mb-0">
+                                        <span class="fs-2">{{ price_amount|floatformat:2 }}</span>
+                                        <span class="text-muted fs-5">{{ price_currency }}</span>
+                                        <span class="text-muted small">/ mois</span>
+                                    </h3>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            {% if subscription.current_period_end %}
+                                <div class="d-inline-block text-start">
+                                    <p class="text-muted small mb-1">Prochain renouvellement</p>
+                                    <p class="fw-semibold mb-0 fs-5">{{ subscription.current_period_end|date:"d/m/Y" }}</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-{% endblock dashboard_content %}
 
+            <!-- Information Cards Row -->
+            <div class="row g-3 mb-4">
+                <!-- Payment Method Card -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100 rounded-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-2 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
+                                        <i class="fa-solid fa-wallet text-primary" style="font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0 fw-semibold">Méthode de paiement</h5>
+                                        <span class="badge bg-info-subtle text-info small">
+                                            <i class="fa-solid fa-pencil me-1"></i>Modifiable
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if subscription.payment_method_brand and subscription.payment_method_last4 %}
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if subscription.payment_method_brand|lower == "visa" %}
+                                        <i class="fa-brands fa-cc-visa fa-3x text-muted"></i>
+                                    {% elif subscription.payment_method_brand|lower == "mastercard" %}
+                                        <i class="fa-brands fa-cc-mastercard fa-3x text-muted"></i>
+                                    {% elif subscription.payment_method_brand|lower == "amex" or subscription.payment_method_brand|lower == "american express" %}
+                                        <i class="fa-brands fa-cc-amex fa-3x text-muted"></i>
+                                    {% elif subscription.payment_method_brand|lower == "discover" %}
+                                        <i class="fa-brands fa-cc-discover fa-3x text-muted"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-credit-card fa-3x text-muted"></i>
+                                    {% endif %}
+                                    <div>
+                                        <p class="fw-semibold mb-1">{{ subscription.payment_method_brand|capfirst }} •••• {{ subscription.payment_method_last4 }}</p>
+                                        <p class="text-muted small mb-0">Carte enregistrée</p>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">Aucune méthode de paiement enregistrée</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Card -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100 rounded-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-2 rounded-3" style="background: rgba(25, 135, 84, 0.1);">
+                                        <i class="fa-solid fa-building text-success" style="font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0 fw-semibold">Établissements actifs</h5>
+                                        <span class="text-muted small">Utilisation actuelle</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ms-5">
+                                <h2 class="fw-bold text-body-emphasis mb-0" style="font-size: 2.5rem;">{{ active_etablissements_count }}</h2>
+                                <p class="text-muted small mb-0">établissement{{ active_etablissements_count|pluralize }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Period Card -->
+            {% if subscription.current_period_start and subscription.current_period_end %}
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 rounded-3" style="background: rgba(111, 66, 193, 0.1);">
+                                <i class="fa-solid fa-calendar-days" style="color: #6f42c1; font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1 fw-semibold">Période de facturation actuelle</h5>
+                                <p class="text-muted mb-0">
+                                    Du <span class="fw-semibold">{{ subscription.current_period_start|date:"d/m/Y" }}</span> 
+                                    au <span class="fw-semibold">{{ subscription.current_period_end|date:"d/m/Y" }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Billing Portal Access Card -->
+            <div class="card border-0 shadow-sm rounded-4 border-primary border-2">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8 mb-3 mb-lg-0">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="p-2 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
+                                    <i class="fa-solid fa-gear text-primary" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1 fw-bold">Portail de facturation</h5>
+                                    <p class="text-muted small mb-0">Accédez à votre espace de gestion</p>
+                                </div>
+                            </div>
+                            <div class="ms-5">
+                                <p class="mb-2 fw-semibold small">Vous pouvez modifier :</p>
+                                <ul class="list-unstyled mb-0 small">
+                                    <li class="mb-1">
+                                        <i class="fa-solid fa-check-circle text-success me-2"></i>
+                                        Votre méthode de paiement
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fa-solid fa-check-circle text-success me-2"></i>
+                                        Les paramètres de votre abonnement
+                                    </li>
+                                    <li class="mb-0">
+                                        <i class="fa-solid fa-check-circle text-success me-2"></i>
+                                        Consulter et télécharger vos factures
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <form method="post" action="{% url 'payments:stripe_customer_portal' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
+                                    <i class="fa-solid fa-external-link me-2"></i>
+                                    Accéder au portail
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- No Subscription State -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5 text-center">
+                    <div class="p-4 rounded-circle d-inline-block mb-3" style="background: rgba(13, 110, 253, 0.1);">
+                        <i class="fa-solid fa-credit-card fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2">Aucun abonnement actif</h3>
+                    <p class="text-muted mb-4">Vous n'avez pas d'abonnement actif pour le moment.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <style>
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+        }
+    </style>
+{% endblock dashboard_content %}
