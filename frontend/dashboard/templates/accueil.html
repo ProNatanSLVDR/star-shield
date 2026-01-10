@@ -20,8 +20,8 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <p class="text-muted small mb-1">Établissements</p>
-                                <h2 class="fw-bold text-body-emphasis mb-0">0</h2>
+                                <p class="text-muted small mb-1">Nb Établissements</p>
+                                <h2 class="fw-bold text-body-emphasis mb-0">{{ total_etablissements|default:"0" }}</h2>
                             </div>
                             <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
                                 <i class="fa-solid fa-building text-primary" style="font-size: 1.5rem;"></i>
@@ -35,11 +35,11 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <p class="text-muted small mb-1">Avis Récents</p>
-                                <h2 class="fw-bold text-body-emphasis mb-0">0</h2>
+                                <p class="text-muted small mb-1">Nb Établissements Actifs</p>
+                                <h2 class="fw-bold text-body-emphasis mb-0">{{ active_etablissements|default:"0" }}</h2>
                             </div>
-                            <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
-                                <i class="fa-solid fa-star text-primary" style="font-size: 1.5rem;"></i>
+                            <div class="p-3 rounded-3" style="background: rgba(25, 135, 84, 0.1);">
+                                <i class="fa-solid fa-check-circle text-success" style="font-size: 1.5rem;"></i>
                             </div>
                         </div>
                     </div>
@@ -51,10 +51,16 @@
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
                                 <p class="text-muted small mb-1">Note Moyenne</p>
-                                <h2 class="fw-bold text-body-emphasis mb-0">-</h2>
+                                <h2 class="fw-bold text-body-emphasis mb-0">
+                                    {% if average_rating %}
+                                        {{ average_rating|floatformat:2 }}★
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </h2>
                             </div>
                             <div class="p-3 rounded-3" style="background: rgba(255, 193, 7, 0.1);">
-                                <i class="fa-solid fa-chart-line text-warning" style="font-size: 1.5rem;"></i>
+                                <i class="fa-solid fa-star text-warning" style="font-size: 1.5rem;"></i>
                             </div>
                         </div>
                     </div>
@@ -65,11 +71,11 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
-                                <p class="text-muted small mb-1">Statut Protection</p>
-                                <h2 class="fw-bold text-success mb-0">Actif</h2>
+                                <p class="text-muted small mb-1">Consultations QR</p>
+                                <h2 class="fw-bold text-body-emphasis mb-0">{{ total_qr_consultations|default:"0" }}</h2>
                             </div>
-                            <div class="p-3 rounded-3" style="background: rgba(25, 135, 84, 0.1);">
-                                <i class="fa-solid fa-shield-check text-success" style="font-size: 1.5rem;"></i>
+                            <div class="p-3 rounded-3" style="background: rgba(111, 66, 193, 0.1);">
+                                <i class="fa-solid fa-qrcode" style="color: #6f42c1; font-size: 1.5rem;"></i>
                             </div>
                         </div>
                     </div>
@@ -98,25 +104,17 @@
 
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body p-4">
+                    <div class="card-body p-4 h-100">
                         <div class="d-flex align-items-center mb-3">
                             <div class="p-2 rounded-3" style="background: rgba(111, 66, 193, 0.1);">
-                                <i class="fa-solid fa-wand-magic-sparkles" style="color: #6f42c1; font-size: 1.5rem;"></i>
+                                <i class="fa-solid fa-list-ul" style="color: #6f42c1; font-size: 1.5rem;"></i>
                             </div>
-                            <h5 class="card-title mb-0 ms-3">Fonctionnalités</h5>
+                            <h5 class="card-title mb-0 ms-3">Mises à jour</h5>
                         </div>
-                        <div class="d-flex flex-column gap-2">
-                            <div class="d-flex align-items-center text-muted">
-                                <i class="fa-solid fa-check-circle text-success me-2"></i>
-                                <span>Surveillance automatique des avis</span>
-                            </div>
-                            <div class="d-flex align-items-center text-muted">
-                                <i class="fa-solid fa-check-circle text-success me-2"></i>
-                                <span>Analyse de votre réputation</span>
-                            </div>
-                            <div class="d-flex align-items-center text-muted">
-                                <i class="fa-solid fa-check-circle text-success me-2"></i>
-                                <span>Gestion centralisée</span>
+                        <div class="d-flex flex-column gap-3 overflow-scroll">
+                            <div class="text-muted">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Mise à jour 1.0.0</span>
                             </div>
                         </div>
                     </div>
