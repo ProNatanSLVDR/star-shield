@@ -7,16 +7,22 @@ from django.utils.translation import gettext as _
 def google_gmb_connected_required(view_func):
     """
     Decorator to ensure the user has a connected Google My Business account.
-    If not, redirect to the Google GMB connection/setup page.
+    If not, redirect to the Google GMB reconnection page.
     """
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if (
-            not hasattr(request.user, "google_credential") or
-            not request.user.google_credential.is_valid
-        ):
-            messages.warning(request, _("Veuillez connecter votre compte Google My Business pour accéder à cette page."))
-            return redirect(reverse("dashboard:accueil"))
+        has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
+        
+        if not has_credential:
+            # No credential exists
+            return redirect(reverse("dashboard:onboarding:reconnect_google"))
+        
+        google_credential = request.user.google_credential
+        
+        if not google_credential.is_valid or google_credential.has_invalid_grants:
+            # Credential exists but is invalid or has invalid grants
+            return redirect(reverse("dashboard:onboarding:reconnect_google"))
+        
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 

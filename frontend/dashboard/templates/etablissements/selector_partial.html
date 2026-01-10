@@ -1,12 +1,27 @@
 
-
-{% component
-"table"
-headers=etablissements_table.headers
-rows=etablissements_table.rows
-title="Liste de vos établissements"
-modal_size="lg"
-%}
-
-
-{% endcomponent %}
+{% if error %}
+    <div class="p-4">
+        <div class="alert alert-warning border-0 mb-4">
+            <div class="d-flex align-items-start">
+                <i class="fa-solid fa-exclamation-triangle me-3 mt-1"></i>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-2">Connexion requise</h5>
+                    <p class="mb-3">{{ error_message }}</p>
+                    <a href="{{ reconnect_url }}" class="btn btn-primary">
+                        <i class="fa-brands fa-google me-2"></i>
+                        Se reconnecter avec Google My Business
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    {% component
+    "table"
+    headers=etablissements_table.headers
+    rows=etablissements_table.rows
+    title="Liste de vos établissements"
+    modal_size="lg"
+    %}
+    {% endcomponent %}
+{% endif %}

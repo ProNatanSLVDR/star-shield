@@ -251,12 +251,35 @@ def unselect_etablissement(request):
     return redirect("dashboard:accueil")
 
 
-@google_gmb_connected_required
 def etablissement_selector_partial(request):
     """
     Returns the établissement selector partial for the sidebar.
     Only loaded on demand via HTMX.
+    Handles invalid credentials gracefully by showing an error message.
     """
+    # Check credential validity without using decorator to avoid redirect
+    has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
+    
+    if not has_credential:
+        context = {
+            "error": True,
+            "error_message": "Aucun compte Google My Business n'est connecté.",
+            "reconnect_url": reverse("dashboard:onboarding:reconnect_google"),
+        }
+        return starshield_render(request, "etablissements/selector_partial.html", context=context)
+    
+    google_credential = request.user.google_credential
+    
+    if not google_credential.is_valid or google_credential.has_invalid_grants:
+        reason = "invalid_grants" if google_credential.has_invalid_grants else "expired"
+        context = {
+            "error": True,
+            "error_message": "Votre connexion Google My Business a expiré ou a été révoquée.",
+            "reconnect_url": reverse("dashboard:onboarding:reconnect_google"),
+            "reason": reason,
+        }
+        return starshield_render(request, "etablissements/selector_partial.html", context=context)
+
     etablissements = request.user.google_credential.etablissements.all()
 
     # Prepare table headers

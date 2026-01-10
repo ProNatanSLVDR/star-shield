@@ -216,7 +216,10 @@ class Dev(Base):
     # Google OAuth
     GOOGLE_OAUTH_CLIENT_ID = "621365538525-pmqljdfrvshf91c3dn3aqbe62k5l5909.apps.googleusercontent.com"
     GOOGLE_OAUTH_CLIENT_SECRET = "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"
-    GOOGLE_OAUTH_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
+    GOOGLE_OAUTH_GMB_SCOPES = [
+        "https://www.googleapis.com/auth/business.manage",
+        "https://www.googleapis.com/auth/userinfo.email",
+    ]
     SOCIALACCOUNT_PROVIDERS = {
         "google": {
             "APP": {

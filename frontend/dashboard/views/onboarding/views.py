@@ -150,3 +150,31 @@ def skip_onboarding_view(request):
     request.user.save()
     messages.info(request, _("Vous pouvez toujours accéder à l'onboarding depuis votre profil."))
     return redirect(reverse("dashboard:accueil"))
+
+
+@login_required
+def reconnect_google_view(request):
+    """
+    Page for reconnecting Google credentials when they expire or become invalid.
+    """
+    has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
+    google_credential = getattr(request.user, "google_credential", None)
+    
+    # Determine the reason for reconnection
+    reason = None
+    if not has_credential:
+        reason = "missing"
+    elif google_credential and google_credential.has_invalid_grants:
+        reason = "invalid_grants"
+    elif google_credential and not google_credential.is_valid:
+        reason = "expired"
+    
+    previous_email = google_credential.google_account_email if google_credential else None
+    
+    context = {
+        "has_credential": has_credential,
+        "previous_email": previous_email,
+        "reason": reason,
+        "google_connect_url": reverse("auths:google_gmb_start"),
+    }
+    return starshield_render(request, "onboarding/reconnect_google.html", context=context, page_name="reconnect")

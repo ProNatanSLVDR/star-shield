@@ -108,6 +108,7 @@ class GoogleCredentials(models.Model):
 
     is_valid = models.BooleanField(default=False)
     has_invalid_grants = models.BooleanField(default=False)
+    google_account_email = models.EmailField(blank=True, null=True, help_text="Email of the connected Google account")
 
     token = models.TextField()
     refresh_token = models.TextField(blank=True, null=True)
