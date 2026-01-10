@@ -219,6 +219,7 @@ class Dev(Base):
     GOOGLE_OAUTH_GMB_SCOPES = [
         "https://www.googleapis.com/auth/business.manage",
         "https://www.googleapis.com/auth/userinfo.email",
+        "openid",
     ]
     SOCIALACCOUNT_PROVIDERS = {
         "google": {
@@ -363,6 +364,7 @@ class Prod(Base):
     GOOGLE_OAUTH_GMB_SCOPES = [
         "https://www.googleapis.com/auth/business.manage",
         "https://www.googleapis.com/auth/userinfo.email",
+        "openid",
     ]
     SOCIALACCOUNT_PROVIDERS = {
         "google": {
