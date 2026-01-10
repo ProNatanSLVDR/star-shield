@@ -1,5 +1,7 @@
 from django.conf import settings
 import logging
+import requests
+import warnings
 
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
@@ -63,11 +65,28 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
 
     try:
         flow.fetch_token(authorization_response=request.build_absolute_uri())
-    except Exception as exc:  # pragma: no cover - defensive catch for OAuth errors
-        logger.exception("Google OAuth token exchange failed: %%s", exc)
+    except Exception as e:  # pragma: no cover - defensive catch for OAuth errors
+        logger.error(f"Google OAuth token exchange failed: {e}")
         return HttpResponseBadRequest("Unable to complete Google authorization.")
 
     credentials = flow.credentials
+
+    # Fetch Google account email using OAuth2 userinfo API
+    google_account_email = None
+    try:
+        # Make direct HTTP request to userinfo endpoint
+        response = requests.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {credentials.token}"},
+            timeout=10,
+        )
+        if response.status_code == 200:
+            user_info = response.json()
+            google_account_email = user_info.get("email")
+        else:
+            logger.warning(f"Failed to fetch Google account email: HTTP {response.status_code}")
+    except Exception as e:
+        logger.warning(f"Failed to fetch Google account email: {e}")
 
     google_credential, created = GoogleCredentials.objects.update_or_create(
         user=request.user,
@@ -79,12 +98,15 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
             "client_secret": credentials.client_secret,
             "scopes": " ".join(credentials.scopes),
             "is_valid": True,
+            "has_invalid_grants": False,
+            "google_account_email": google_account_email,
         },
     )
 
     request.session.pop("state", None)
 
-    messages.success(request, _("Compte Google My Business connecté avec succès."))
+    if google_credential.google_account_email != google_account_email:
+        messages.info(request, _("Compte Google My Business reconnecté avec succès (compte différent)."))
 
     # If user is in onboarding, redirect to import step
     if not request.user.onboarding_completed:

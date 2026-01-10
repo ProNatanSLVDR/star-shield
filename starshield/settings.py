@@ -360,7 +360,10 @@ class Prod(Base):
     # Google OAuth
     GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
     GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
-    GOOGLE_OAUTH_GMB_SCOPES = ["https://www.googleapis.com/auth/business.manage"]
+    GOOGLE_OAUTH_GMB_SCOPES = [
+        "https://www.googleapis.com/auth/business.manage",
+        "https://www.googleapis.com/auth/userinfo.email",
+    ]
     SOCIALACCOUNT_PROVIDERS = {
         "google": {
             "APP": {
