@@ -348,37 +348,6 @@ def toggle_etablissement_status_partial(request, id):
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
     is_activation = not etablissement.active
 
-    # Check if user has an active subscription
-    subscription = getattr(request.user, "stripe_subscription", None)
-    has_active_subscription = subscription is not None and subscription.status == "active"
-
-    # Count active establishments
-    active_count = request.user.google_credential.etablissements.filter(active=True).count()
-    new_active_count = active_count + 1 if is_activation else active_count - 1
-
-    # Fetch price information from Stripe
-
-    price_id = None
-    if has_active_subscription and subscription.price_id:
-        price_id = subscription.price_id
-    elif is_activation:
-        # Default price for new activation if no subscription
-        price_id = get_price_id_from_product(settings.STRIPE_PRODUCTS.get("basic_subscription"))
-
-    current_price_amount = 0
-    new_price_amount = 0
-    price_currency = "EUR"
-
-    if price_id:
-        try:
-            price = stripe.Price.retrieve(price_id, expand=["tiers"])
-            tiers_data = price.tiers
-            price_currency = (price.currency or "eur").upper()
-            current_price_amount = read_pricing_tier(tiers_data, active_count) / 100
-            new_price_amount = read_pricing_tier(tiers_data, new_active_count) / 100
-        except Exception as e:
-            logger.error(f"Error fetching price from Stripe: {e}")
-
     context = {
         "etablissement": etablissement,
         "is_activation": is_activation,
