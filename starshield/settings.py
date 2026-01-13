@@ -235,7 +235,11 @@ class Dev(Base):
     }
 
     STRIPE_PRODUCTS = {
-        "basic_subscription": "prod_Th3YAxKCSwFz7C",
+        "basic_subscription": {
+            "product_id": "prod_Th3YAxKCSwFz7C",
+            "monthly": "price_1Sp8GTLTXmr2kgo15d4HWHCa",
+            "yearly": "price_1Sp8DyLTXmr2kgo1SZyuntfr",
+        },
     }
 
     LOGGING = {
