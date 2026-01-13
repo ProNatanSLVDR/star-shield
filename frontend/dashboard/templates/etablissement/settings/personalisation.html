@@ -2,6 +2,16 @@
 {% load i18n %}
 
 {% block dashboard_content %}
+    <style>
+        .preview-disabled {
+            pointer-events: none;
+            user-select: none;
+            cursor: not-allowed !important;
+        }
+        .preview-disabled * {
+            cursor: not-allowed !important;
+        }
+    </style>
     <div class="d-flex flex-column h-100">
         <div class="mb-3">
             <h1 class="h4 fw-bold text-body-emphasis mb-1">
@@ -125,7 +135,7 @@
                             Aperçu
                         </h2>
                     </div>
-                    <div class="card-body p-0 flex-grow-1 overflow-auto" style="min-height: 0;">
+                    <div class="card-body p-0 flex-grow-1 overflow-auto preview-disabled" style="min-height: 0;">
                         <section class="h-100 d-flex align-items-center justify-content-center bg-light">
                             <div class="container">
                                 <div class="row justify-content-center">
