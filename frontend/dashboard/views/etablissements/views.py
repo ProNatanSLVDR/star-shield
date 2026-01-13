@@ -9,7 +9,7 @@ from .forms import ImportEtablissementForm
 import logging
 import stripe
 from django.conf import settings
-from payments.services import get_price_id_from_product, read_pricing_tier
+from payments.services import get_price_id_from_product
 
 logger = logging.getLogger(__name__)
 
@@ -259,7 +259,7 @@ def etablissement_selector_partial(request):
     """
     # Check credential validity without using decorator to avoid redirect
     has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
-    
+
     if not has_credential:
         context = {
             "error": True,
@@ -267,9 +267,9 @@ def etablissement_selector_partial(request):
             "reconnect_url": reverse("dashboard:onboarding:reconnect_google"),
         }
         return starshield_render(request, "etablissements/selector_partial.html", context=context)
-    
+
     google_credential = request.user.google_credential
-    
+
     if not google_credential.is_valid or google_credential.has_invalid_grants:
         reason = "invalid_grants" if google_credential.has_invalid_grants else "expired"
         context = {
