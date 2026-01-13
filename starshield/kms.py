@@ -39,6 +39,10 @@ def decrypt_symmetric(ciphertext: str, key_id: str) -> str:
     """
     Decrypt the ciphertext using the symmetric key
     """
+    # If debug mode is enabled, return the ciphertext without decrypting.
+    if settings.DEBUG:
+        return ciphertext
+
     client, key_name = _get_kms_client_and_path(key_id)
 
     # Decode the base64-encoded ciphertext string to bytes.
@@ -72,6 +76,9 @@ def encrypt_symmetric(plaintext: str, key_id: str) -> str:
     """
     Encrypt plaintext using a symmetric key.
     """
+    # If debug mode is enabled, return the plaintext without encrypting.
+    if settings.DEBUG:
+        return plaintext
 
     # Convert the plaintext to bytes.
     plaintext_bytes = plaintext.encode("utf-8")
