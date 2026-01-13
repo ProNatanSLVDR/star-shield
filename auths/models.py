@@ -168,7 +168,7 @@ class GoogleCredentials(models.Model):
         # Create the Credentials object, decrypting all secrets/tokens as needed
         creds = Credentials(
             token=decrypt_symmetric(self.token, "oauth-encrypt"),
-            refresh_token=decrypt_symmetric(self.refresh_token),
+            refresh_token=decrypt_symmetric(self.refresh_token, "oauth-encrypt"),
             token_uri=self.token_uri,
             client_id=self.client_id,
             client_secret=decrypt_symmetric(self.client_secret, "oauth-encrypt"),
