@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from google_auth_oauthlib.flow import Flow
 from django.contrib import messages
+from starshield.kms import encrypt_symmetric
 
 from .models import GoogleCredentials
 
@@ -92,10 +93,10 @@ def google_gmb_callback(request: HttpRequest) -> HttpResponse:
         user=request.user,
         client_id=credentials.client_id,
         defaults={
-            "token": credentials.token,
-            "refresh_token": credentials.refresh_token,
+            "token": encrypt_symmetric(credentials.token, "oauth-encrypt"),
+            "refresh_token": encrypt_symmetric(credentials.refresh_token, "oauth-encrypt"),
             "token_uri": credentials.token_uri,
-            "client_secret": credentials.client_secret,
+            "client_secret": encrypt_symmetric(credentials.client_secret, "oauth-encrypt"),
             "scopes": " ".join(credentials.scopes),
             "is_valid": True,
             "has_invalid_grants": False,

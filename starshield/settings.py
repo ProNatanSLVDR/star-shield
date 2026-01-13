@@ -366,6 +366,10 @@ class Prod(Base):
         "https://www.googleapis.com/auth/userinfo.email",
         "openid",
     ]
+
+    # Google KMS
+    GOOGLE_KMS_KEY_RING_ID = "starshield-keys"
+
     SOCIALACCOUNT_PROVIDERS = {
         "google": {
             "APP": {

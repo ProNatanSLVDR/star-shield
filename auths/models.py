@@ -15,6 +15,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from starshield.kms import decrypt_symmetric, encrypt_symmetric
 from . import choices
 
 logger = logging.getLogger(__name__)
@@ -152,28 +153,47 @@ class GoogleCredentials(models.Model):
         return False
 
     def get_valid_credentials(self) -> Credentials:
+        """
+        Return a valid Google OAuth Credentials object for the stored user.
+
+        Decrypts database-stored tokens/secrets, and attempts to refresh the OAuth token
+        if expired. If a refresh occurs, saves updated (encrypted) tokens back to database.
+
+        Returns:
+            Credentials: Google OAuth credentials for API client usage.
+
+        Raises:
+            RefreshError: If token refresh fails, propagates the error after handling.
+        """
+        # Create the Credentials object, decrypting all secrets/tokens as needed
         creds = Credentials(
-            token=self.token,
-            refresh_token=self.refresh_token,
+            token=decrypt_symmetric(self.token, "oauth-encrypt"),
+            refresh_token=decrypt_symmetric(self.refresh_token),
             token_uri=self.token_uri,
             client_id=self.client_id,
-            client_secret=self.client_secret,
-            scopes=self.scopes.split(),
+            client_secret=decrypt_symmetric(self.client_secret, "oauth-encrypt"),
+            scopes=self.scopes.split(),  # assumes space-separated scopes string
         )
+
+        # If the token is expired but we have a refresh_token, attempt to refresh it
         if creds.expired and creds.refresh_token:
             try:
-                creds.refresh(Request())
+                creds.refresh(Request())  # Request is from google.auth.transport.requests
             except RefreshError as e:
+                # Handle refresh failure: log error, set invalid grants flag, mark as not valid, save, then raise
                 logger.error(f"Google OAuth token refresh failed for user {self.user_id}: {e}")
                 self._check_and_set_invalid_grant(e)
                 self.is_valid = False
                 self.save()
-                raise
+                raise  # propagate the error
 
-            self.token = creds.token
-            self.refresh_token = creds.refresh_token or self.refresh_token
+            # On successful refresh, update local DB tokens with new values (encrypted)
+            self.token = encrypt_symmetric(creds.token, "oauth-encrypt")
+            if creds.refresh_token:
+                self.refresh_token = encrypt_symmetric(creds.refresh_token, "oauth-encrypt")
             self.save()
 
+        # Return the (possibly refreshed) credentials
         return creds
 
     def get_reviews_service(self):
