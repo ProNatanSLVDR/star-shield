@@ -20,12 +20,12 @@ logger = logging.getLogger(__name__)
 def feedback_view(request, identifier=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
-    # Redirect to Google Maps if establishment is inactive
+    # Show inactive page if establishment is inactive
     if not etablissement.active:
-        if etablissement.maps_uri:
-            return redirect(etablissement.maps_uri)
-        # Fallback: if maps_uri is missing, redirect to default Google Maps
-        return redirect("https://www.google.com/maps")
+        context = {
+            "feedback_context": build_feedback_context(etablissement, identifier, mode="inactive"),
+        }
+        return render(request, "reviews/feedback_base.html", context)
 
     analytics_key = f"review_page_consulted_{etablissement.id}"
     if not get_valid_session_key(request, analytics_key):

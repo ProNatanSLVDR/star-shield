@@ -51,6 +51,8 @@
             {% include "reviews/feedback_internal.html" %}
         {% elif feedback_context.mode == "thanks" %}
             {% include "reviews/feedback_thanks.html" %}
+        {% elif feedback_context.mode == "inactive" %}
+            {% include "reviews/feedback_inactive.html" %}
         {% endif %}
 
     </div>
