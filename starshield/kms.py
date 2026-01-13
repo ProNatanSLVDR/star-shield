@@ -41,15 +41,18 @@ def decrypt_symmetric(ciphertext: str, key_id: str) -> str:
     """
     client, key_name = _get_kms_client_and_path(key_id)
 
+    # Decode the base64-encoded ciphertext string to bytes.
+    ciphertext_bytes = base64.b64decode(ciphertext)
+
     # Optional, but recommended: compute ciphertext's CRC32C.
     # See crc32c() function defined below.
-    ciphertext_crc32c = crc32c(ciphertext)
+    ciphertext_crc32c = crc32c(ciphertext_bytes)
 
     # Call the API.
     decrypt_response = client.decrypt(
         request={
             "name": key_name,
-            "ciphertext": ciphertext,
+            "ciphertext": ciphertext_bytes,
             "ciphertext_crc32c": ciphertext_crc32c,
         }
     )
@@ -62,7 +65,7 @@ def decrypt_symmetric(ciphertext: str, key_id: str) -> str:
     # End integrity verification
 
     print(f"Plaintext: {decrypt_response.plaintext!r}")
-    return str(decrypt_response.plaintext)
+    return decrypt_response.plaintext.decode("utf-8")
 
 
 def encrypt_symmetric(plaintext: str, key_id: str) -> str:
