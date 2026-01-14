@@ -52,6 +52,69 @@ def get_price_id_from_product(product_id):
         return None
 
 
+def check_existing_subscription_for_etablissement(user, etablissement_id):
+    """
+    Check if an etablissement already has a subscription in Stripe.
+    Returns the subscription if found, None otherwise.
+    """
+    if not user.stripe_customer_id:
+        return None
+
+    try:
+        # Fetch all subscriptions for the customer
+        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, status="all", limit=100)
+
+        # Check if any subscription has this etablissement_id in metadata
+        for subscription in subscriptions.data:
+            metadata = subscription.get("metadata", {})
+            if metadata.get("etablissement_id") == str(etablissement_id):
+                return subscription
+        return None
+    except Exception as e:
+        logger.error(f"Failed to check existing subscriptions for etablissement {etablissement_id}: {e}")
+        return None
+
+
+def cancel_subscription_for_etablissement(user, etablissement_id):
+    """
+    Cancel the subscription for an etablissement in Stripe at period end.
+    Returns the cancelled subscription object or None if not found/already cancelled.
+    """
+    if not user.stripe_customer_id:
+        logger.warning(f"Cannot cancel subscription: User {user.id} has no stripe_customer_id")
+        return None
+
+    try:
+        # Find the subscription for this etablissement
+        subscription = check_existing_subscription_for_etablissement(user, etablissement_id)
+
+        if not subscription:
+            logger.warning(f"No subscription found for etablissement {etablissement_id}")
+            return None
+
+        subscription_id = subscription["id"]
+        subscription_status = subscription.get("status")
+
+        # Check if subscription is already cancelled or scheduled for cancellation
+        if subscription_status == "canceled":
+            logger.info(f"Subscription {subscription_id} is already cancelled")
+            return subscription
+
+        if subscription.get("cancel_at_period_end") is True:
+            logger.info(f"Subscription {subscription_id} is already scheduled for cancellation at period end")
+            return subscription
+
+        # Cancel at period end (not immediately)
+        cancelled_subscription = stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+
+        logger.info(f"Successfully scheduled cancellation for subscription {subscription_id} at period end")
+        return cancelled_subscription
+
+    except Exception as e:
+        logger.error(f"Failed to cancel subscription for etablissement {etablissement_id}: {e}")
+        return None
+
+
 def sync_stripe_data(user):
     """
     Sync subscription data from Stripe to the local database.
@@ -95,7 +158,25 @@ def sync_stripe_data(user):
             logger.warning(f"Subscription {subscription_id} has no etablissement")
             continue
 
-        # Track this subscription ID
+        # we get the subscription status
+        subscription_status = subscription["status"]
+
+        # If subscription is canceled, delete the database record and deactivate etablissement
+        if subscription_status == "canceled":
+            # Delete the StripeSubscription record if it exists
+            StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
+
+            # Deactivate etablissement if it's active
+            if etablissement.active:
+                etablissement.active = False
+                etablissement.save()
+                logger.info(f"Deactivated etablissement {etablissement_id} - subscription {subscription_id} is canceled")
+
+            logger.info(f"Deleted StripeSubscription record for canceled subscription {subscription_id}")
+            # Skip adding to processed_subscription_ids and continue to next subscription
+            continue
+
+        # Track this subscription ID (only for non-canceled subscriptions)
         processed_subscription_ids.append(subscription_id)
 
         # we exclude the etablissement from the list (to keep only the etablissements without a subscription)
@@ -110,11 +191,6 @@ def sync_stripe_data(user):
             cancel_at_period_end = True
         if subscription["cancel_at"] is not None:
             cancel_at_period_end = True
-        if subscription["status"] == "canceled":
-            cancel_at_period_end = True
-
-        # we get the subscription status
-        subscription_status = subscription["status"]
 
         # Update local database
         sub_obj, created = StripeSubscription.objects.update_or_create(

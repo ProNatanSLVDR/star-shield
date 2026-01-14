@@ -6,7 +6,7 @@ from starshield.decorators import google_gmb_connected_required
 from frontend.dashboard.render import starshield_render
 from django.contrib import messages
 from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
-from payments.services import sync_stripe_data
+from payments.services import sync_stripe_data, cancel_subscription_for_etablissement
 import logging
 import stripe
 from django.conf import settings
@@ -444,9 +444,31 @@ def toggle_etablissement_status(request, id):
 
     # Désactivation
     else:
+        # Check if etablissement has an active subscription and cancel it
+        if etablissement.has_active_subscription():
+            try:
+                cancelled_subscription = cancel_subscription_for_etablissement(request.user, etablissement.id)
+                if cancelled_subscription:
+                    # Sync Stripe data to update local database with cancellation status
+                    sync_stripe_data(request.user)
+                    messages.success(request, f"L'établissement {etablissement.title} a été désactivé. Votre abonnement continuera jusqu'à la fin de la période en cours.")
+                else:
+                    # Subscription not found or already cancelled, proceed with deactivation
+                    messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
+            except Exception as e:
+                logger.error(f"Error cancelling subscription for etablissement {etablissement.id}: {e}")
+                # Still proceed with deactivation even if cancellation fails
+                messages.warning(
+                    request,
+                    f"L'établissement {etablissement.title} a été désactivé, "
+                    "mais une erreur est survenue lors de l'annulation de l'abonnement. "
+                    "Veuillez vérifier votre portail de facturation.",
+                )
+        else:
+            messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
+
         etablissement.active = False
         etablissement.save()
-        messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
         hx_triggers["etablissements-updated"] = True
 
     return redirect("dashboard:etablissements:list")

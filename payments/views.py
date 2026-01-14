@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 import stripe
 
 from auths.models import Etablissement
-from .services import get_or_create_stripe_customer, sync_stripe_data
+from .services import get_or_create_stripe_customer, sync_stripe_data, check_existing_subscription_for_etablissement
 import logging
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,29 @@ def create_checkout_session(request):
     if not price_id:
         logger.warning(f"Price ID not found for etablissement {etablissement_id}")
         raise Http404("Le plan d'abonnement n'a pas été trouvé")
+
+    # Check database for existing subscription
+    existing_subscription_db = getattr(etablissement, "stripe_subscription", None)
+
+    # Check Stripe API for existing subscription
+    existing_subscription_stripe = check_existing_subscription_for_etablissement(request.user, etablissement_id)
+
+    # If subscription exists in either place, handle it
+    if existing_subscription_db or existing_subscription_stripe:
+        # Sync to ensure database is up to date
+        sync_stripe_data(request.user)
+
+        # Refresh database record if it exists
+        if existing_subscription_db:
+            existing_subscription_db.refresh_from_db()
+            if existing_subscription_db.status == "active":
+                logger.warning(f"Etablissement {etablissement_id} already has an active subscription {existing_subscription_db.subscription_id}")
+                raise Http404("Cet établissement a déjà un abonnement actif")
+
+        # Also check Stripe subscription status
+        if existing_subscription_stripe and existing_subscription_stripe.status == "active":
+            logger.warning(f"Etablissement {etablissement_id} already has an active subscription in Stripe {existing_subscription_stripe.id}")
+            raise Http404("Cet établissement a déjà un abonnement actif")
 
     try:
         # 1. Ensure customer exists
