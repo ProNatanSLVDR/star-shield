@@ -161,21 +161,6 @@ def sync_stripe_data(user):
         # we get the subscription status
         subscription_status = subscription["status"]
 
-        # If subscription is canceled, delete the database record and deactivate etablissement
-        if subscription_status == "canceled":
-            # Delete the StripeSubscription record if it exists
-            StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
-
-            # Deactivate etablissement if it's active
-            if etablissement.active:
-                etablissement.active = False
-                etablissement.save()
-                logger.info(f"Deactivated etablissement {etablissement_id} - subscription {subscription_id} is canceled")
-
-            logger.info(f"Deleted StripeSubscription record for canceled subscription {subscription_id}")
-            # Skip adding to processed_subscription_ids and continue to next subscription
-            continue
-
         # Track this subscription ID (only for non-canceled subscriptions)
         processed_subscription_ids.append(subscription_id)
 
@@ -205,15 +190,19 @@ def sync_stripe_data(user):
 
         # Activate etablissement if subscription is active (even if cancelled at period end, keep active until period ends)
         if subscription_status == "active":
-            if not etablissement.active:
-                etablissement.active = True
-                etablissement.save()
-                logger.info(f"Activated etablissement {etablissement_id} for active subscription {subscription_id}")
+            etablissement.active = True
+            etablissement.save()
+            logger.info(f"Activated etablissement {etablissement_id} for active subscription {subscription_id}")
+        elif subscription_status == "canceled":
+            StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
+            etablissement.active = False
+            etablissement.save()
+            logger.info(f"Deleted StripeSubscription record for canceled subscription {subscription_id}")
+            continue
         else:
-            if etablissement.active:
-                etablissement.active = False
-                etablissement.save()
-                logger.info(f"Deactivated etablissement {etablissement_id} for inactive subscription {subscription_id}")
+            etablissement.active = False
+            etablissement.save()
+            logger.info(f"Deactivated etablissement {etablissement_id} for inactive subscription {subscription_id}")
 
     # Delete orphaned local subscriptions that no longer exist in Stripe
     if processed_subscription_ids:
