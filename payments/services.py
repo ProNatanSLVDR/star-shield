@@ -194,7 +194,7 @@ def sync_stripe_data(user):
             etablissement.save()
             logger.info(f"Activated etablissement {etablissement_id} for active subscription {subscription_id}")
         elif subscription_status == "canceled":
-            StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
+            StripeSubscription.objects.filter(etablissement=etablissement).delete()
             etablissement.active = False
             etablissement.save()
             logger.info(f"Deleted StripeSubscription record for canceled subscription {subscription_id}")
