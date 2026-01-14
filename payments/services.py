@@ -71,9 +71,10 @@ def sync_stripe_data(user):
     if not subscriptions.data:
         StripeSubscription.objects.filter(etablissement__google_credential__user=user).delete()
         return None
-
+    print(f"syncing stripe data for user {user.id}")
     # we get all etablissements from the user (not just active ones)
     etablissements = Etablissement.objects.filter(google_credential__user=user)
+    print(f"etablissements: {etablissements}")
 
     # Track processed subscription IDs to clean up orphaned records
     processed_subscription_ids = []
@@ -90,7 +91,6 @@ def sync_stripe_data(user):
         etablissement_id = metadata["etablissement_id"]
 
         etablissement = Etablissement.objects.filter(google_credential__user=user, id=etablissement_id).first()
-
         if not etablissement:
             logger.warning(f"Subscription {subscription_id} has no etablissement")
             continue
@@ -101,10 +101,19 @@ def sync_stripe_data(user):
         # we exclude the etablissement from the list (to keep only the etablissements without a subscription)
         etablissements = etablissements.exclude(id=etablissement.id)
 
+        # we get the price_id
         price_id = subscription["items"]["data"][0].price.id if subscription["items"]["data"] else None
 
-        cancel_at_period_end = True if subscription["cancel_at_period_end"] is True or subscription["cancel_at"] is not None else False
+        # we get the cancel_at_period_end status
+        cancel_at_period_end = False
+        if subscription["cancel_at_period_end"] is True:
+            cancel_at_period_end = True
+        if subscription["cancel_at"] is not None:
+            cancel_at_period_end = True
+        if subscription["status"] == "canceled":
+            cancel_at_period_end = True
 
+        # we get the subscription status
         subscription_status = subscription["status"]
 
         # Update local database
@@ -124,6 +133,11 @@ def sync_stripe_data(user):
                 etablissement.active = True
                 etablissement.save()
                 logger.info(f"Activated etablissement {etablissement_id} for active subscription {subscription_id}")
+        else:
+            if etablissement.active:
+                etablissement.active = False
+                etablissement.save()
+                logger.info(f"Deactivated etablissement {etablissement_id} for inactive subscription {subscription_id}")
 
     # Delete orphaned local subscriptions that no longer exist in Stripe
     if processed_subscription_ids:
