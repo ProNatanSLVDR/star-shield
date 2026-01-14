@@ -1,10 +1,12 @@
+from django.http.response import Http404
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.views.decorators.http import require_POST, require_GET
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 import stripe
-from .services import get_or_create_stripe_customer, sync_stripe_data, get_price_id_from_product
+
+from auths.models import Etablissement
+from .services import get_or_create_stripe_customer, sync_stripe_data
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,39 +15,47 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @login_required
-@require_POST
+@require_http_methods(["GET", "POST"])
 def create_checkout_session(request):
     """
     Create a Stripe Checkout Session and redirect the user to it.
-    Expects 'price_id' in POST data, or will fetch from product if not provided.
-    Optionally accepts 'etablissement_id' to activate establishment after payment.
+    Accepts 'price_id' and 'etablissement_id' from POST or GET.
+    If price_id not provided, will fetch from product default.
     """
-    price_id = request.POST.get("price_id")
-    etablissement_id = request.POST.get("etablissement_id")
+    # Support both GET (for redirects) and POST (for forms)
+    price_id = request.session.get("price_id", None)
+    etablissement_id = request.session.get("etablissement_id", None)
 
-    price_id = get_price_id_from_product(settings.STRIPE_PRODUCTS.get("basic_subscription"))
+    etablissement = Etablissement.objects.filter(id=etablissement_id, google_credential__user=request.user).first()
+
+    if not etablissement:
+        logger.warning(f"Etablissement not found for id {etablissement_id}")
+        raise Http404("Établissement non trouvé")
+
     if not price_id:
-        return HttpResponseBadRequest("Could not determine price_id")
+        logger.warning(f"Price ID not found for etablissement {etablissement_id}")
+        raise Http404("Le plan d'abonnement n'a pas été trouvé")
 
     try:
         # 1. Ensure customer exists
         customer_id = get_or_create_stripe_customer(request.user)
+    except Exception as e:
+        logger.error(f"Error getting or creating stripe customer: {e}")
+        raise
 
-        # Construct absolute URLs
-        base_url = settings.WEBSITE_URL
+    # Build success URL with etablissement_id if provided
+    success_url = f"{settings.WEBSITE_URL}/payments/success?session_id={{CHECKOUT_SESSION_ID}}"
+    if etablissement_id:
+        success_url += f"&etablissement_id={etablissement_id}"
 
-        # Build success URL with etablissement_id if provided
-        success_url = f"{base_url}/payments/success?session_id={{CHECKOUT_SESSION_ID}}"
-        if etablissement_id:
-            success_url += f"&etablissement_id={etablissement_id}"
+    # Build metadata
+    metadata = {
+        "userId": request.user.id,
+    }
+    if etablissement_id:
+        metadata["etablissement_id"] = etablissement_id
 
-        # Build metadata
-        metadata = {
-            "userId": request.user.id,
-        }
-        if etablissement_id:
-            metadata["etablissement_id"] = etablissement_id
-
+    try:
         # 2. Create Checkout Session
         checkout_session = stripe.checkout.Session.create(
             customer=customer_id,
@@ -58,8 +68,10 @@ def create_checkout_session(request):
             ],
             mode="subscription",
             success_url=success_url,
-            cancel_url=f"{base_url}/payments/cancel",
-            metadata=metadata,
+            cancel_url=f"{settings.WEBSITE_URL}/payments/cancel",
+            subscription_data={
+                "metadata": metadata,
+            },
             # Optional: Allow promotion codes
             allow_promotion_codes=True,
         )
@@ -69,7 +81,7 @@ def create_checkout_session(request):
 
     except Exception as e:
         logger.error(f"Error creating checkout session: {e}")
-        return JsonResponse({"error": str(e)}, status=500)
+        raise
 
 
 @login_required
@@ -79,41 +91,10 @@ def checkout_success(request):
     Handler for successful checkout return.
     Syncs Stripe data and activates establishment if etablissement_id is provided.
     """
-    session_id = request.GET.get("session_id")
     etablissement_id = request.GET.get("etablissement_id")
 
     # 1. Sync data immediately to avoid race conditions
     sync_stripe_data(request.user)
-
-    # 2. If etablissement_id is provided, activate the establishment
-    if etablissement_id:
-        try:
-            # Retrieve session to get metadata (as backup)
-            if session_id:
-                session = stripe.checkout.Session.retrieve(session_id)
-                # Use metadata from session if query param not available
-                if not etablissement_id and session.metadata.get("etablissement_id"):
-                    etablissement_id = session.metadata.get("etablissement_id")
-
-            if etablissement_id:
-                from auths.models import Etablissement
-
-                etablissement = Etablissement.objects.filter(id=etablissement_id, google_credential=request.user.google_credential).first()
-
-                if etablissement and not etablissement.active:
-                    etablissement.active = True
-                    etablissement.save()
-                    logger.info(f"Activated establishment {etablissement_id} for user {request.user.id} after checkout")
-
-                    # Redirect to establishment list with success message
-                    from django.contrib import messages
-
-                    messages.success(request, f"L'établissement {etablissement.title} a été activé avec succès !")
-                    return redirect("dashboard:etablissements:list")
-
-        except Exception as e:
-            logger.error(f"Error activating establishment after checkout: {e}")
-            # Continue to normal redirect even if activation fails
 
     # 3. Redirect to dashboard (or establishment list if we came from activation)
     if etablissement_id:

@@ -437,6 +437,11 @@ class Etablissement(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_reviews_update = models.DateTimeField(blank=True, null=True)
 
+    def has_active_subscription(self):
+        """Check if the establishment has an active Stripe subscription."""
+        subscription = getattr(self, "stripe_subscription", None)
+        return subscription is not None and subscription.status == "active"
+
     def __str__(self):
         return self.title
 

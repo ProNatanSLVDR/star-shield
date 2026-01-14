@@ -5,11 +5,11 @@ from auths.models import Etablissement
 from starshield.decorators import google_gmb_connected_required
 from frontend.dashboard.render import starshield_render
 from django.contrib import messages
-from .forms import ImportEtablissementForm
+from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
+from payments.services import sync_stripe_data
 import logging
 import stripe
 from django.conf import settings
-from payments.services import get_price_id_from_product
 
 logger = logging.getLogger(__name__)
 
@@ -344,6 +344,8 @@ def etablissement_selector_partial(request):
 def toggle_etablissement_status_partial(request, id):
     """
     Show toggle status modal (activate/deactivate) with billing explanation.
+    For activation: shows price selection if no subscription, or confirmation if subscription exists.
+    For deactivation: shows confirmation explaining subscription continues until period end.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
     is_activation = not etablissement.active
@@ -351,15 +353,46 @@ def toggle_etablissement_status_partial(request, id):
     context = {
         "etablissement": etablissement,
         "is_activation": is_activation,
-        "has_active_subscription": has_active_subscription,
-        "active_count": active_count,
-        "new_active_count": new_active_count,
-        "current_price_amount": current_price_amount,
-        "new_price_amount": new_price_amount,
-        "price_currency": price_currency,
         "toggle_url": reverse("dashboard:etablissements:toggle_status", args=[etablissement.id]),
         "checkout_url": reverse("payments:create_checkout_session"),
     }
+
+    # Check if establishment has an active subscription
+    has_active_subscription = etablissement.has_active_subscription()
+    context["has_active_subscription"] = has_active_subscription
+
+    # For activation: if no subscription, fetch price options
+    if is_activation and not has_active_subscription:
+        monthly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly")
+        yearly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly")
+
+        monthly_price_data = None
+        yearly_price_data = None
+
+        if monthly_price_id:
+            try:
+                monthly_price = stripe.Price.retrieve(monthly_price_id)
+                monthly_price_data = {
+                    "id": monthly_price_id,
+                    "amount": monthly_price.unit_amount / 100 if monthly_price.unit_amount else 0,
+                    "currency": (monthly_price.currency or "eur").upper(),
+                }
+            except Exception as e:
+                logger.error(f"Error fetching monthly price from Stripe: {e}")
+
+        if yearly_price_id:
+            try:
+                yearly_price = stripe.Price.retrieve(yearly_price_id)
+                yearly_price_data = {
+                    "id": yearly_price_id,
+                    "amount": yearly_price.unit_amount / 100 if yearly_price.unit_amount else 0,
+                    "currency": (yearly_price.currency or "eur").upper(),
+                }
+            except Exception as e:
+                logger.error(f"Error fetching yearly price from Stripe: {e}")
+
+        context["monthly_price"] = monthly_price_data
+        context["yearly_price"] = yearly_price_data
 
     return starshield_render(
         request,
@@ -373,7 +406,8 @@ def toggle_etablissement_status_partial(request, id):
 def toggle_etablissement_status(request, id):
     """
     Toggle establishment status (activate/deactivate).
-    Updates subscription quantity and establishment status.
+    For activation: if no subscription, redirects to checkout. If subscription exists, activates establishment.
+    For deactivation: sets active=False (subscription continues until period end).
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
     is_activation = not etablissement.active
@@ -382,62 +416,35 @@ def toggle_etablissement_status(request, id):
         "close-modal": True,
     }
 
-    # Validation for activation
+    # Activation
     if is_activation:
-        # For activation, require active subscription
-        subscription = getattr(request.user, "stripe_subscription", None)
-        if not subscription or subscription.status != "active":
-            messages.error(request, "Vous devez avoir un abonnement actif pour activer un établissement.")
-            return starshield_render(
-                request,
-                "etablissements/toggle_status_partial.html",
-                context={
-                    "etablissement": etablissement,
-                    "is_activation": True,
-                    "has_active_subscription": False,
-                },
-                hx_triggers=hx_triggers,
-            )
+        has_active_subscription = etablissement.has_active_subscription()
 
-    try:
-        from payments.services import change_subscription_quantity, sync_stripe_data, validate_quantity_sync, get_active_etablissements_count
-
-        validate_quantity_sync(request.user)
-        current_active_count = get_active_etablissements_count(request.user)
-
-        new_quantity = current_active_count + 1 if is_activation else max(0, current_active_count - 1)
-
-        # Update subscription quantity
-        subscription = getattr(request.user, "stripe_subscription", None)
-        if subscription and subscription.status == "active":
-            change_subscription_quantity(request.user, quantity=new_quantity)
+        # si l'établissement a un abonnement actif, on sync les données de Stripe
+        if has_active_subscription:
             sync_stripe_data(request.user)
+            hx_triggers["etablissements-updated"] = True
 
-        # Update establishment status
-        etablissement.active = is_activation
+        # si l'établissement n'a pas d'abonnement actif, on redirige vers la sélection du plan d'abonnement
+        else:
+            # Validate form for price_id when activating without subscription
+            form = ToggleEtablissementStatusForm(request.POST)
+
+            if form.is_valid():
+                price_id = form.cleaned_data["price_id"]
+
+                request.session["price_id"] = price_id
+                request.session["etablissement_id"] = etablissement.id
+                return redirect("payments:create_checkout_session")
+            else:
+                print(form.errors)
+                messages.error(request, "Une erreur est survenue lors de la sélection du plan d'abonnement.")
+
+    # Désactivation
+    else:
+        etablissement.active = False
         etablissement.save()
-
-        validate_quantity_sync(request.user)
-
-        action_text = "activé" if is_activation else "désactivé"
-        messages.success(request, f"L'établissement {etablissement.title} a été {action_text} avec succès.")
-
+        messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
         hx_triggers["etablissements-updated"] = True
 
-        return starshield_render(
-            request,
-            "etablissements/toggle_status_partial.html",
-            context={"etablissement": etablissement, "is_activation": is_activation},
-            hx_triggers=hx_triggers,
-        )
-
-    except Exception as e:
-        action_text = "l'activation" if is_activation else "la désactivation"
-        logger.error(f"Error during {action_text} of establishment {id}: {e}")
-        messages.error(request, f"Une erreur est survenue lors de {action_text} de l'établissement.")
-        return starshield_render(
-            request,
-            "etablissements/toggle_status_partial.html",
-            context={"etablissement": etablissement, "is_activation": is_activation},
-            hx_triggers=hx_triggers,
-        )
+    return redirect("dashboard:etablissements:list")

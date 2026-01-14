@@ -13,4 +13,4 @@ class StripeSubscription(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.etablissement.title} - {self.status}"
+        return f"{self.etablissement} - {self.status}"
