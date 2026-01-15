@@ -121,10 +121,16 @@ def sync_stripe_data(user):
     This is the single source of truth for subscription state.
     """
 
-    print(f"syncing stripe data for user {user.id} ({user.email})")
     STRIPE_ACTIVE_STATUS = ["active", "trialing"]
     STRIPE_INACTIVE_STATUS = ["incomplete", "incomplete_expired", "past_due"]
     STRIPE_CANCELED_STATUS = ["canceled", "unpaid", "paused"]
+
+    # on garde une liste des etablissements traités pour desactiver les etablissements qui n'ont pas d'abonnement actif
+    processed_etablissements_ids = []
+
+    # listes de filtrage et de traitement
+    subscriptions_to_filter = []
+    subscriptions_to_process = []
 
     # on check si l'utilisateur a un stripe_customer_id
     if not user.stripe_customer_id:
@@ -133,30 +139,34 @@ def sync_stripe_data(user):
 
     # on fetch les abonnements de l'utilisateur
     try:
-        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"])
+        all_subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"])
     except Exception as e:
         logger.error(f"Failed to fetch subscriptions for user {user.id}: {e}")
         return
 
-    logger.info(f"Found {len(subscriptions.data)} subscriptions for user {user.id}")
+    # on filtre les abonnements pour ne garder que les abonnements qui contiennent l'etablissement_id dans le metadata
+    logger.info(f"Found {len(all_subscriptions.data)} subscriptions for user {user.email} ({user.id})")
+    for subscription in all_subscriptions.data:
+        logger.info(f"Subscription {subscription['id']} - Status: {subscription['status']}")
+        if subscription.get("metadata", {}).get("etablissement_id"):
+            subscriptions_to_filter.append(subscription)
+        else:
+            logger.warning(f"Subscription {subscription['id']} has no metadata or etablissement_id")
+            # TODO: cancel all subs with no metadata
 
-    # on fetch les etablissements de l'utilisateur
-    processed_etablissements_ids = []
+    # on parcours les abonnements pour garder uniquement l'abonnement le plus récent pour chaque etablissement
+    filter_dict = {}
+    for subscription in subscriptions_to_filter:
+        print("todo")
 
     # on parcours les abonnements
-    for subscription in subscriptions.data:
+    for subscription in subscriptions_to_process:
         subscription_id = subscription["id"]
 
         logger.info(f"Processing subscription {subscription_id}")
 
         # on check si le metadata existe et contient l'etablissement_id
         metadata = subscription.get("metadata")
-
-        # si le metadata n'existe pas ou ne contient pas l'etablissement_id, on passe à l'abonnement suivant
-        if not metadata or "etablissement_id" not in metadata:
-            logger.warning(f"Subscription {subscription_id} has no metadata or etablissement_id")
-            continue
-
         subscription_status = subscription["status"]
         etablissement_id = metadata["etablissement_id"]
         etablissement = Etablissement.objects.filter(google_credential__user=user, id=etablissement_id).first()

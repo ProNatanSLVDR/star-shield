@@ -269,26 +269,26 @@ class Dev(Base):
             "level": "INFO",
         },
         "loggers": {
-            # App loggers - all propagate to root
+            # App loggers - don't propagate to root to avoid duplicates
             "auths": {
                 "handlers": ["console"],
                 "level": "INFO",
-                "propagate": True,
+                "propagate": False,
             },
             "payments": {
                 "handlers": ["console"],
                 "level": "INFO",
-                "propagate": True,
+                "propagate": False,
             },
             "tasks_api": {
                 "handlers": ["console"],
                 "level": "INFO",
-                "propagate": True,
+                "propagate": False,
             },
             "frontend": {
                 "handlers": ["console"],
                 "level": "INFO",
-                "propagate": True,
+                "propagate": False,
             },
             # Django framework logger - don't propagate to avoid duplicates
             "django": {
