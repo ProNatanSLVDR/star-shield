@@ -95,6 +95,9 @@ def create_checkout_session(request):
             subscription_data={
                 "metadata": metadata,
             },
+            saved_payment_method_options={
+                "payment_method_save": "enabled",
+            },
             # Optional: Allow promotion codes
             allow_promotion_codes=True,
         )
