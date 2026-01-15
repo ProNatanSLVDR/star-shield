@@ -21,8 +21,6 @@ def list_etablissements_view(request):
     if not request.htmx:
         return starshield_render(request, "etablissements/list.html", page_name="etablissements")
 
-    sync_stripe_data(request.user)
-
     etablissements = request.user.google_credential.etablissements.all()
 
     # Prepare table headers

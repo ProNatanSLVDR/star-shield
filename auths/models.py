@@ -439,8 +439,7 @@ class Etablissement(models.Model):
 
     def has_active_subscription(self):
         """Check if the establishment has an active Stripe subscription."""
-        subscription = getattr(self, "stripe_subscription", None)
-        return subscription is not None and subscription.status == "active"
+        return self.stripe_subscription.filter(status="active").exists()
 
     def __str__(self):
         return self.title

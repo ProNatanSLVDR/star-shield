@@ -37,7 +37,7 @@ def create_checkout_session(request):
         raise Http404("Le plan d'abonnement n'a pas été trouvé")
 
     # Check database for existing subscription
-    existing_subscription_db = getattr(etablissement, "stripe_subscription", None)
+    existing_subscription_db = etablissement.stripe_subscription.first()
 
     # Check Stripe API for existing subscription
     existing_subscription_stripe = check_existing_subscription_for_etablissement(request.user, etablissement_id)
