@@ -388,5 +388,9 @@ class Prod(Base):
     }
 
     STRIPE_PRODUCTS = {
-        "basic_subscription": "prod_Th1zNTFwvksqWC",
+        "basic_subscription": {
+            "product_id": "prod_TnSZAJHkKpEyON",
+            "monthly": "price_1SpreCPuCLDC9hxjZCjnSi0F",
+            "yearly": "price_1SprefPuCLDC9hxjfphbMRIj",
+        },
     }
