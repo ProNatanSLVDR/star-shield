@@ -27,6 +27,7 @@ class CellData(TypedDict, total=False):
     popover_threshold: int
     is_long: NotRequired[bool]
     buttons: NotRequired[List[Dict[str, Any]]]
+    icon: NotRequired[Optional[str]]
 
 
 def normalize_header(header: Union[str, Dict[str, Any]]) -> HeaderConfig:
@@ -106,6 +107,7 @@ def process_cell(
                 "variant": cell_data.get("variant", "secondary"),
                 "tooltip": cell_data.get("tooltip", None),
                 "sort_value": cell_data.get("sort_value", None),
+                "icon": cell_data.get("icon", None),
                 "centered": header["centered"],
                 "popover_if_long": header["popover_if_long"],
                 "popover_threshold": header["popover_threshold"],

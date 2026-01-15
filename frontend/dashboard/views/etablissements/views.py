@@ -32,7 +32,6 @@ def list_etablissements_view(request):
             "orderable": True,
             "icon": "fa-solid fa-building",
         },
-        {"label": "Site web", "key": "website_uri", "orderable": False, "icon": "fa-solid fa-globe"},
         {
             "label": "Statut",
             "key": "status",
@@ -46,6 +45,13 @@ def list_etablissements_view(request):
             "orderable": True,
             "centered": True,
             "icon": "fa-solid fa-calendar",
+        },
+        {
+            "label": "Abonnement",
+            "key": "subscription",
+            "orderable": True,
+            "centered": True,
+            "icon": "fa-solid fa-credit-card",
         },
         {"label": "Actions", "key": "actions", "centered": True, "icon": "fa-solid fa-gear"},
     ]
@@ -106,11 +112,45 @@ def list_etablissements_view(request):
             "variant": "success" if etablissement.active else "warning",
         }
 
+        # Subscription status logic
+        subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
+        if not subscription:
+            subscription_badge = {
+                "type": "badge",
+                "value": "Aucun abonnement",
+                "variant": "secondary",
+                "icon": "fa-solid fa-circle",
+            }
+        elif subscription.cancel_at_period_end:
+            subscription_badge = {
+                "type": "badge",
+                "value": "Actif (annulation)",
+                "variant": "warning",
+                "icon": "fa-solid fa-clock",
+                "tooltip": "L'abonnement sera annulé à la fin de la période en cours",
+            }
+        else:
+            subscription_badge = {
+                "type": "badge",
+                "value": "Actif",
+                "variant": "success",
+                "icon": "fa-solid fa-check-circle",
+            }
+
+        # Date formatting with tooltip
+        created_at_str = etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A"
+        created_at_full = etablissement.created_at.strftime("%d/%m/%Y à %H:%M") if etablissement.created_at else "N/A"
+        created_at_cell = {
+            "type": "text",
+            "value": created_at_str,
+            "tooltip": created_at_full if etablissement.created_at else None,
+        } if etablissement.created_at else created_at_str
+
         row = {
             "title": etablissement.title,
-            "website_uri": etablissement.website_uri or "N/A",
             "status": status_badge,
-            "created_at": etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A",
+            "created_at": created_at_cell,
+            "subscription": subscription_badge,
             "actions": {
                 "type": "buttons",
                 "buttons": buttons,

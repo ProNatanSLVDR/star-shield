@@ -64,7 +64,8 @@
                                     {% if cell.centered %}class="text-center"{% endif %}>
 
                                     {% if cell.type == "badge" %}
-                                        <span class="badge bg-{{ cell.variant }} {% if cell.variant == "warning" %}text-dark{% endif %}">
+                                        <span class="badge bg-{{ cell.variant }} {% if cell.variant == "warning" %}text-dark{% elif cell.variant == "secondary" %}text-white{% endif %} d-inline-flex align-items-center gap-1">
+                                            {% if cell.icon %}<i class="{{ cell.icon }}"></i>{% endif %}
                                             {{ cell.value }}
                                         </span>
 
