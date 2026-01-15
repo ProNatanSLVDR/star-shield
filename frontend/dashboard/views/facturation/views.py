@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from frontend.dashboard.render import starshield_render
 
 
@@ -28,18 +29,24 @@ def facturation_view(request):
                         plan_breakdown[subscription.price_id] = 0
                     plan_breakdown[subscription.price_id] += 1
 
-    # Convert to list for template
-    plan_breakdown_list = [
-        {
-            "price_id": price_id,
-            "count": count,
-        }
-        for price_id, count in plan_breakdown.items()
-    ]
+    # Get monthly and yearly price IDs from settings
+    monthly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly")
+    yearly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly")
+
+    # Categorize plan breakdown into monthly and yearly counts
+    monthly_count = 0
+    yearly_count = 0
+
+    for price_id, count in plan_breakdown.items():
+        if price_id == monthly_price_id:
+            monthly_count += count
+        elif price_id == yearly_price_id:
+            yearly_count += count
 
     context = {
         "active_etablissements_count": active_etablissements_count,
-        "plan_breakdown": plan_breakdown_list,
+        "monthly_count": monthly_count,
+        "yearly_count": yearly_count,
     }
 
     return starshield_render(

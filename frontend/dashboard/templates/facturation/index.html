@@ -11,50 +11,17 @@
             <p class="lead text-muted">Gérez votre abonnement et consultez vos factures</p>
         </div>
 
-        {% if subscription %}
-            <!-- Subscription Overview Hero Card -->
+        {% if monthly_count > 0 or yearly_count > 0 or active_etablissements_count > 0 %}
+            <!-- Plan Breakdown Overview Card -->
             <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                 <div class="card-body p-4">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
-                                    <i class="fa-solid fa-credit-card text-primary" style="font-size: 2rem;"></i>
-                                </div>
-                                <div>
-                                    <h2 class="h5 fw-bold mb-1">Votre abonnement</h2>
-                                    <div class="d-flex align-items-center gap-2">
-                                        {% if subscription.status == "active" %}
-                                            <span class="badge bg-success">Actif</span>
-                                        {% elif subscription.status == "canceled" or subscription.cancel_at_period_end %}
-                                            <span class="badge bg-warning">Annulé</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">{{ subscription.status|capfirst }}</span>
-                                        {% endif %}
-                                        {% if subscription.cancel_at_period_end %}
-                                            <span class="text-muted small">(Se termine à la fin de la période)</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% if price_amount %}
-                                <div class="ms-5">
-                                    <p class="text-muted small mb-1">Montant mensuel</p>
-                                    <h3 class="fw-bold mb-0">
-                                        <span class="fs-2">{{ price_amount|floatformat:2 }}</span>
-                                        <span class="text-muted fs-5">{{ price_currency }}</span>
-                                        <span class="text-muted small">/ mois</span>
-                                    </h3>
-                                </div>
-                            {% endif %}
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
+                            <i class="fa-solid fa-credit-card text-primary" style="font-size: 2rem;"></i>
                         </div>
-                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                            {% if subscription.current_period_end %}
-                                <div class="d-inline-block text-start">
-                                    <p class="text-muted small mb-1">Prochain renouvellement</p>
-                                    <p class="fw-semibold mb-0 fs-5">{{ subscription.current_period_end|date:"d/m/Y" }}</p>
-                                </div>
-                            {% endif %}
+                        <div>
+                            <h2 class="h5 fw-bold mb-1">Vos abonnements</h2>
+                            <p class="text-muted small mb-0">Répartition par type de plan</p>
                         </div>
                     </div>
                 </div>
@@ -62,56 +29,60 @@
 
             <!-- Information Cards Row -->
             <div class="row g-3 mb-4">
-                <!-- Payment Method Card -->
-                <div class="col-lg-6">
+                <!-- Monthly Plan Card -->
+                <div class="col-lg-4">
                     <div class="card border-0 shadow-sm h-100 rounded-4">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-start justify-content-between mb-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="p-2 rounded-3" style="background: rgba(13, 110, 253, 0.1);">
-                                        <i class="fa-solid fa-wallet text-primary" style="font-size: 1.5rem;"></i>
+                                        <i class="fa-solid fa-calendar-day text-primary" style="font-size: 1.5rem;"></i>
                                     </div>
                                     <div>
-                                        <h5 class="card-title mb-0 fw-semibold">Méthode de paiement</h5>
-                                        <span class="badge bg-info-subtle text-info small">
-                                            <i class="fa-solid fa-pencil me-1"></i>Modifiable
-                                        </span>
+                                        <h5 class="card-title mb-0 fw-semibold">Plan mensuel</h5>
+                                        <span class="text-muted small">Abonnements mensuels</span>
                                     </div>
                                 </div>
                             </div>
-                            {% if subscription.payment_method_brand and subscription.payment_method_last4 %}
-                                <div class="d-flex align-items-center gap-3">
-                                    {% if subscription.payment_method_brand|lower == "visa" %}
-                                        <i class="fa-brands fa-cc-visa fa-3x text-muted"></i>
-                                    {% elif subscription.payment_method_brand|lower == "mastercard" %}
-                                        <i class="fa-brands fa-cc-mastercard fa-3x text-muted"></i>
-                                    {% elif subscription.payment_method_brand|lower == "amex" or subscription.payment_method_brand|lower == "american express" %}
-                                        <i class="fa-brands fa-cc-amex fa-3x text-muted"></i>
-                                    {% elif subscription.payment_method_brand|lower == "discover" %}
-                                        <i class="fa-brands fa-cc-discover fa-3x text-muted"></i>
-                                    {% else %}
-                                        <i class="fa-solid fa-credit-card fa-3x text-muted"></i>
-                                    {% endif %}
-                                    <div>
-                                        <p class="fw-semibold mb-1">{{ subscription.payment_method_brand|capfirst }} •••• {{ subscription.payment_method_last4 }}</p>
-                                        <p class="text-muted small mb-0">Carte enregistrée</p>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <p class="text-muted mb-0">Aucune méthode de paiement enregistrée</p>
-                            {% endif %}
+                            <div class="ms-5">
+                                <h2 class="fw-bold text-body-emphasis mb-0" style="font-size: 2.5rem;">{{ monthly_count }}</h2>
+                                <p class="text-muted small mb-0">établissement{{ monthly_count|pluralize }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Usage Card -->
-                <div class="col-lg-6">
+                <!-- Yearly Plan Card -->
+                <div class="col-lg-4">
                     <div class="card border-0 shadow-sm h-100 rounded-4">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-start justify-content-between mb-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="p-2 rounded-3" style="background: rgba(25, 135, 84, 0.1);">
-                                        <i class="fa-solid fa-building text-success" style="font-size: 1.5rem;"></i>
+                                        <i class="fa-solid fa-calendar text-success" style="font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0 fw-semibold">Plan annuel</h5>
+                                        <span class="text-muted small">Abonnements annuels</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ms-5">
+                                <h2 class="fw-bold text-body-emphasis mb-0" style="font-size: 2.5rem;">{{ yearly_count }}</h2>
+                                <p class="text-muted small mb-0">établissement{{ yearly_count|pluralize }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Card -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100 rounded-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-2 rounded-3" style="background: rgba(111, 66, 193, 0.1);">
+                                        <i class="fa-solid fa-building" style="color: #6f42c1; font-size: 1.5rem;"></i>
                                     </div>
                                     <div>
                                         <h5 class="card-title mb-0 fw-semibold">Établissements actifs</h5>
@@ -127,26 +98,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Billing Period Card -->
-            {% if subscription.current_period_start and subscription.current_period_end %}
-                <div class="card border-0 shadow-sm rounded-4 mb-4">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="p-2 rounded-3" style="background: rgba(111, 66, 193, 0.1);">
-                                <i class="fa-solid fa-calendar-days" style="color: #6f42c1; font-size: 1.5rem;"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="card-title mb-1 fw-semibold">Période de facturation actuelle</h5>
-                                <p class="text-muted mb-0">
-                                    Du <span class="fw-semibold">{{ subscription.current_period_start|date:"d/m/Y" }}</span> 
-                                    au <span class="fw-semibold">{{ subscription.current_period_end|date:"d/m/Y" }}</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
 
             <!-- Billing Portal Access Card -->
             <div class="card border-0 shadow-sm rounded-4 border-primary border-2">
