@@ -196,22 +196,6 @@
                                         <p class="mb-0 small text-muted">
                                             Votre abonnement sera annulé automatiquement à la fin de la période de facturation en cours.
                                         </p>
-                                        {% if period_end_date_formatted %}
-                                            <div class="mt-2 p-2 bg-white rounded border-start border-warning border-3">
-                                                <p class="mb-0 small">
-                                                    <strong>Exemple :</strong> Si votre période se termine le
-                                                    <strong>{{ period_end_date_formatted }}</strong>,
-                                                    l'annulation aura lieu le <strong>{{ period_end_date_formatted }}</strong>.
-                                                </p>
-                                            </div>
-                                        {% else %}
-                                            <div class="mt-2 p-2 bg-white rounded border-start border-warning border-3">
-                                                <p class="mb-0 small">
-                                                    <strong>Exemple :</strong> Si votre période se termine le 31 janvier 2025,
-                                                    l'annulation aura lieu le 31 janvier 2025.
-                                                </p>
-                                            </div>
-                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
