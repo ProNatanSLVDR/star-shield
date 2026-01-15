@@ -139,7 +139,19 @@ def sync_stripe_data(user):
 
     # on fetch les abonnements de l'utilisateur
     try:
-        all_subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"])
+        all_subscriptions_data = []
+        subscriptions_response = stripe.Subscription.list(customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"])
+        all_subscriptions_data.extend(subscriptions_response.data)
+
+        # Handle pagination to fetch all subscriptions
+        while subscriptions_response.has_more:
+            last_subscription_id = subscriptions_response.data[-1].id
+            subscriptions_response = stripe.Subscription.list(
+                customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"], starting_after=last_subscription_id
+            )
+            all_subscriptions_data.extend(subscriptions_response.data)
+
+        all_subscriptions = type("obj", (object,), {"data": all_subscriptions_data})()
     except Exception as e:
         logger.error(f"Failed to fetch subscriptions for user {user.id}: {e}")
         return
@@ -190,10 +202,14 @@ def sync_stripe_data(user):
             continue
 
         # on ajoute l'etablissement à la liste des etablissements traités
-        processed_etablissements_ids.append(etablissement_id)
+        processed_etablissements_ids.append(int(etablissement_id))
 
         # on get le price_id
-        price_id = subscription["items"]["data"][0].price.id if subscription["items"]["data"] else None
+        price_id = None
+        if subscription.get("items") and subscription["items"].get("data") and len(subscription["items"]["data"]) > 0:
+            first_item = subscription["items"]["data"][0]
+            if first_item.get("price") and first_item["price"].get("id"):
+                price_id = first_item["price"]["id"]
 
         # on get le status de cancel_at_period_end
         cancel_at_period_end = False
@@ -203,36 +219,51 @@ def sync_stripe_data(user):
             cancel_at_period_end = True
 
         # Update local database
-        if subscription_status not in STRIPE_CANCELED_STATUS:
-            sub_obj, created = StripeSubscription.objects.update_or_create(
-                etablissement=etablissement,
-                subscription_id=subscription_id,
-                defaults={
-                    "status": subscription_status,
-                    "price_id": price_id,
-                    "cancel_at_period_end": cancel_at_period_end,
-                },
-            )
-        else:
-            StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
+        try:
+            if subscription_status not in STRIPE_CANCELED_STATUS:
+                sub_obj, created = StripeSubscription.objects.update_or_create(
+                    etablissement=etablissement,
+                    subscription_id=subscription_id,
+                    defaults={
+                        "status": subscription_status,
+                        "price_id": price_id,
+                        "cancel_at_period_end": cancel_at_period_end,
+                    },
+                )
+            else:
+                StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
+        except Exception as e:
+            logger.error(f"Failed to update StripeSubscription for subscription {subscription_id}: {e}")
+            continue
 
         # Activate etablissement if subscription is active (even if cancelled at period end, keep active until period ends)
-        if subscription_status in STRIPE_ACTIVE_STATUS or subscription_status in STRIPE_INACTIVE_STATUS:
-            if not etablissement.active:
-                etablissement.active = True
-                etablissement.save()
-                logger.info(f"Activated etablissement {etablissement_id} for active subscription {subscription_id}")
-        elif subscription_status in STRIPE_CANCELED_STATUS:
-            if etablissement.active:
-                etablissement.active = False
-                etablissement.save()
-                logger.info(f"Deactivated etablissement {etablissement_id} for inactive subscription {subscription_id}")
-        else:
-            logger.warning(f"Subscription {subscription_id} has unknown status: {subscription_status}")
+        try:
+            if subscription_status in STRIPE_ACTIVE_STATUS or subscription_status in STRIPE_INACTIVE_STATUS:
+                if not etablissement.active:
+                    etablissement.active = True
+                    etablissement.save()
+                    logger.info(f"Activated etablissement {etablissement.id} for active subscription {subscription_id}")
+            elif subscription_status in STRIPE_CANCELED_STATUS:
+                if etablissement.active:
+                    etablissement.active = False
+                    etablissement.save()
+                    logger.info(f"Deactivated etablissement {etablissement.id} for inactive subscription {subscription_id}")
+            else:
+                logger.warning(f"Subscription {subscription_id} has unknown status: {subscription_status}")
+        except Exception as e:
+            logger.error(f"Failed to update etablissement {etablissement.id} status for subscription {subscription_id}: {e}")
+            continue
 
     # on désactive les etablissements qui n'ont pas d'abonnement actif
-    etablissements_to_deactivate = Etablissement.objects.filter(google_credential__user=user, active=True).exclude(id__in=processed_etablissements_ids)
-    for etablissement in etablissements_to_deactivate:
-        etablissement.active = False
-        etablissement.save()
-        logger.info(f"Deactivated etablissement {etablissement.id} for inactive subscription")
+    try:
+        etablissements_to_deactivate = Etablissement.objects.filter(google_credential__user=user, active=True).exclude(id__in=processed_etablissements_ids)
+        for etablissement in etablissements_to_deactivate:
+            try:
+                etablissement.active = False
+                etablissement.save()
+                logger.info(f"Deactivated etablissement {etablissement.id} for inactive subscription")
+            except Exception as e:
+                logger.error(f"Failed to deactivate etablissement {etablissement.id}: {e}")
+                continue
+    except Exception as e:
+        logger.error(f"Failed to query etablissements to deactivate for user {user.id}: {e}")
