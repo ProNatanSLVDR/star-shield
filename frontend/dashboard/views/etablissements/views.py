@@ -353,7 +353,7 @@ def etablissement_selector_partial(request):
     for etablissement in etablissements:
         select_button = {
             "text": "Sélectionner",
-            "icon": "fa-solid fa-check",
+            "icon": "fa-solid fa-right-to-bracket",
             "classes": "btn-sm btn-primary",
             "extra_kwargs": {
                 "href": reverse("dashboard:etablissements:select", args=[etablissement.id]),
