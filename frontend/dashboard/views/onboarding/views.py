@@ -28,7 +28,7 @@ def check_onboarding_completed(view_func):
 def welcome_view(request):
     context = {
         "step": 1,
-        "total_steps": 5,
+        "total_steps": 6,
         "next_url": reverse("dashboard:onboarding:how_it_works"),
     }
     return starshield_render(request, "onboarding/welcome.html", context=context, page_name="onboarding")
@@ -39,11 +39,23 @@ def welcome_view(request):
 def how_it_works_view(request):
     context = {
         "step": 2,
-        "total_steps": 5,
+        "total_steps": 6,
         "prev_url": reverse("dashboard:onboarding:welcome"),
-        "next_url": reverse("dashboard:onboarding:connect_google"),
+        "next_url": reverse("dashboard:onboarding:threshold"),
     }
     return starshield_render(request, "onboarding/how_it_works.html", context=context, page_name="onboarding")
+
+
+@login_required
+@check_onboarding_completed
+def threshold_view(request):
+    context = {
+        "step": 3,
+        "total_steps": 6,
+        "prev_url": reverse("dashboard:onboarding:how_it_works"),
+        "next_url": reverse("dashboard:onboarding:connect_google"),
+    }
+    return starshield_render(request, "onboarding/threshold.html", context=context, page_name="onboarding")
 
 
 @login_required
@@ -52,9 +64,9 @@ def connect_google_view(request):
     has_google_connected = hasattr(request.user, "google_credential") and request.user.google_credential.is_valid
 
     context = {
-        "step": 3,
-        "total_steps": 5,
-        "prev_url": reverse("dashboard:onboarding:how_it_works"),
+        "step": 4,
+        "total_steps": 6,
+        "prev_url": reverse("dashboard:onboarding:threshold"),
         "next_url": reverse("dashboard:onboarding:import_etablissements") if has_google_connected else None,
         "has_google_connected": has_google_connected,
         "google_connect_url": reverse("auths:google_gmb_start"),
@@ -114,8 +126,8 @@ def import_etablissements_view(request):
     form = ImportEtablissementForm(available_locations=available_locations)
 
     context = {
-        "step": 4,
-        "total_steps": 5,
+        "step": 5,
+        "total_steps": 6,
         "prev_url": reverse("dashboard:onboarding:connect_google"),
         "next_url": reverse("dashboard:onboarding:complete") if new_locations else None,
         "available_locations": available_locations,
@@ -136,8 +148,8 @@ def complete_view(request):
         messages.success(request, _("Bienvenue sur StarShield ! Votre configuration est terminée."))
 
     context = {
-        "step": 5,
-        "total_steps": 5,
+        "step": 6,
+        "total_steps": 6,
     }
     return starshield_render(request, "onboarding/complete.html", context=context, page_name="onboarding")
 
