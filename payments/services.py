@@ -120,57 +120,60 @@ def sync_stripe_data(user):
     Sync subscription data from Stripe to the local database.
     This is the single source of truth for subscription state.
     """
+
+    print(f"syncing stripe data for user {user.id} ({user.email})")
+    STRIPE_ACTIVE_STATUS = ["active", "trialing"]
+    STRIPE_INACTIVE_STATUS = ["incomplete", "incomplete_expired", "past_due"]
+    STRIPE_CANCELED_STATUS = ["canceled", "unpaid", "paused"]
+
+    # on check si l'utilisateur a un stripe_customer_id
     if not user.stripe_customer_id:
         logger.warning(f"Cannot sync Stripe data: User {user.id} has no stripe_customer_id")
-        return None
+        return
 
+    # on fetch les abonnements de l'utilisateur
     try:
-        # Fetch latest subscription data from Stripe
         subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"])
     except Exception as e:
         logger.error(f"Failed to fetch subscriptions for user {user.id}: {e}")
-        return None
+        return
 
-    if not subscriptions.data:
-        StripeSubscription.objects.filter(etablissement__google_credential__user=user).delete()
-        return None
-    print(f"syncing stripe data for user {user.id}")
-    # we get all etablissements from the user (not just active ones)
-    etablissements = Etablissement.objects.filter(google_credential__user=user)
-    print(f"etablissements: {etablissements}")
+    logger.info(f"Found {len(subscriptions.data)} subscriptions for user {user.id}")
 
-    # Track processed subscription IDs to clean up orphaned records
-    processed_subscription_ids = []
+    # on fetch les etablissements de l'utilisateur
+    processed_etablissements_ids = []
 
+    # on parcours les abonnements
     for subscription in subscriptions.data:
         subscription_id = subscription["id"]
 
-        # Validate metadata exists and contains etablissement_id
+        logger.info(f"Processing subscription {subscription_id}")
+
+        # on check si le metadata existe et contient l'etablissement_id
         metadata = subscription.get("metadata")
+
+        # si le metadata n'existe pas ou ne contient pas l'etablissement_id, on passe à l'abonnement suivant
         if not metadata or "etablissement_id" not in metadata:
             logger.warning(f"Subscription {subscription_id} has no metadata or etablissement_id")
             continue
 
+        subscription_status = subscription["status"]
         etablissement_id = metadata["etablissement_id"]
-
         etablissement = Etablissement.objects.filter(google_credential__user=user, id=etablissement_id).first()
         if not etablissement:
             logger.warning(f"Subscription {subscription_id} has no etablissement")
             continue
 
-        # we get the subscription status
-        subscription_status = subscription["status"]
+        logger.info(f"Found etablissement {etablissement.id} for subscription {subscription_id}")
+        logger.info(f"Subscription status: {subscription_status}")
 
-        # Track this subscription ID (only for non-canceled subscriptions)
-        processed_subscription_ids.append(subscription_id)
+        # on ajoute l'etablissement à la liste des etablissements traités
+        processed_etablissements_ids.append(etablissement_id)
 
-        # we exclude the etablissement from the list (to keep only the etablissements without a subscription)
-        etablissements = etablissements.exclude(id=etablissement.id)
-
-        # we get the price_id
+        # on get le price_id
         price_id = subscription["items"]["data"][0].price.id if subscription["items"]["data"] else None
 
-        # we get the cancel_at_period_end status
+        # on get le status de cancel_at_period_end
         cancel_at_period_end = False
         if subscription["cancel_at_period_end"] is True:
             cancel_at_period_end = True
@@ -178,39 +181,36 @@ def sync_stripe_data(user):
             cancel_at_period_end = True
 
         # Update local database
-        sub_obj, created = StripeSubscription.objects.update_or_create(
-            etablissement=etablissement,
-            subscription_id=subscription_id,
-            defaults={
-                "status": subscription_status,
-                "price_id": price_id,
-                "cancel_at_period_end": cancel_at_period_end,
-            },
-        )
+        if subscription_status not in STRIPE_CANCELED_STATUS:
+            sub_obj, created = StripeSubscription.objects.update_or_create(
+                etablissement=etablissement,
+                subscription_id=subscription_id,
+                defaults={
+                    "status": subscription_status,
+                    "price_id": price_id,
+                    "cancel_at_period_end": cancel_at_period_end,
+                },
+            )
+        else:
+            StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
 
         # Activate etablissement if subscription is active (even if cancelled at period end, keep active until period ends)
-        if subscription_status == "active":
-            etablissement.active = True
-            etablissement.save()
-            logger.info(f"Activated etablissement {etablissement_id} for active subscription {subscription_id}")
-        elif subscription_status == "canceled":
-            StripeSubscription.objects.filter(etablissement=etablissement).delete()
-            etablissement.active = False
-            etablissement.save()
-            logger.info(f"Deleted StripeSubscription record for canceled subscription {subscription_id}")
-            continue
+        if subscription_status in STRIPE_ACTIVE_STATUS or subscription_status in STRIPE_INACTIVE_STATUS:
+            if not etablissement.active:
+                etablissement.active = True
+                etablissement.save()
+                logger.info(f"Activated etablissement {etablissement_id} for active subscription {subscription_id}")
+        elif subscription_status in STRIPE_CANCELED_STATUS:
+            if etablissement.active:
+                etablissement.active = False
+                etablissement.save()
+                logger.info(f"Deactivated etablissement {etablissement_id} for inactive subscription {subscription_id}")
         else:
-            etablissement.active = False
-            etablissement.save()
-            logger.info(f"Deactivated etablissement {etablissement_id} for inactive subscription {subscription_id}")
+            logger.warning(f"Subscription {subscription_id} has unknown status: {subscription_status}")
 
-    # Delete orphaned local subscriptions that no longer exist in Stripe
-    if processed_subscription_ids:
-        StripeSubscription.objects.filter(etablissement__google_credential__user=user).exclude(subscription_id__in=processed_subscription_ids).delete()
-
-    # Deactivate etablissements without active subscriptions
-    for etablissement in etablissements:
-        if etablissement.active:
-            etablissement.active = False
-            etablissement.save()
-            logger.info(f"Deactivated etablissement {etablissement.id} - no active subscription")
+    # on désactive les etablissements qui n'ont pas d'abonnement actif
+    etablissements_to_deactivate = Etablissement.objects.filter(google_credential__user=user, active=True).exclude(id__in=processed_etablissements_ids)
+    for etablissement in etablissements_to_deactivate:
+        etablissement.active = False
+        etablissement.save()
+        logger.info(f"Deactivated etablissement {etablissement.id} for inactive subscription")
