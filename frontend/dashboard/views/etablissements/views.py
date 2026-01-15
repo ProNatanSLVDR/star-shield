@@ -208,17 +208,18 @@ def import_etablissement_partial(request):
             hx_triggers["close-modal"] = True
     else:
         available_locations = request.user.google_credential.list_available_locations()
-        print(available_locations)
         request.session["available_locations"] = available_locations
         form = ImportEtablissementForm(available_locations=available_locations)
 
     # Count imported établissements
     imported_count = sum(1 for location in available_locations if location.get("exists", False))
+    selectable_count = len(available_locations) - imported_count
 
     context = {
         "form": form,
         "available_locations": available_locations,
         "imported_count": imported_count,
+        "selectable_count": selectable_count,
     }
     return starshield_render(
         request,
