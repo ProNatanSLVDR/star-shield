@@ -145,7 +145,7 @@ def sync_stripe_data(user):
         return
 
     # on filtre les abonnements pour ne garder que les abonnements qui contiennent l'etablissement_id dans le metadata
-    logger.info(f"Found {len(all_subscriptions.data)} subscriptions for user {user.email} ({user.id})")
+    logger.info(f"Found {len(all_subscriptions.data)} subscriptions for user {user.id}")
     for subscription in all_subscriptions.data:
         logger.info(f"Subscription {subscription['id']} - Status: {subscription['status']}")
         if subscription.get("metadata", {}).get("etablissement_id"):
@@ -157,7 +157,22 @@ def sync_stripe_data(user):
     # on parcours les abonnements pour garder uniquement l'abonnement le plus récent pour chaque etablissement
     filter_dict = {}
     for subscription in subscriptions_to_filter:
-        print("todo")
+        etablissement_id = subscription["metadata"]["etablissement_id"]
+        created_timestamp = subscription["created"]
+
+        # Si on n'a pas encore de subscription pour cet etablissement, ou si celle-ci est plus récente
+        if etablissement_id not in filter_dict:
+            filter_dict[etablissement_id] = subscription
+        else:
+            existing_subscription = filter_dict[etablissement_id]
+            existing_created = existing_subscription["created"]
+            if created_timestamp > existing_created:
+                filter_dict[etablissement_id] = subscription
+
+    # Populate subscriptions_to_process with the latest subscription for each etablissement
+    subscriptions_to_process = list(filter_dict.values())
+
+    logger.info(f"Found {len(subscriptions_to_process)} subscriptions to process for user {user.id}")
 
     # on parcours les abonnements
     for subscription in subscriptions_to_process:
@@ -173,9 +188,6 @@ def sync_stripe_data(user):
         if not etablissement:
             logger.warning(f"Subscription {subscription_id} has no etablissement")
             continue
-
-        logger.info(f"Found etablissement {etablissement.id} for subscription {subscription_id}")
-        logger.info(f"Subscription status: {subscription_status}")
 
         # on ajoute l'etablissement à la liste des etablissements traités
         processed_etablissements_ids.append(etablissement_id)
