@@ -33,13 +33,6 @@ def list_etablissements_view(request):
             "icon": "fa-solid fa-building",
         },
         {
-            "label": "Statut",
-            "key": "status",
-            "orderable": True,
-            "centered": True,
-            "icon": "fa-solid fa-circle-check",
-        },
-        {
             "label": "Date de création",
             "key": "created_at",
             "orderable": True,
@@ -106,12 +99,6 @@ def list_etablissements_view(request):
 
         buttons.append(delete_button)
 
-        status_badge = {
-            "type": "badge",
-            "value": "Actif" if etablissement.active else "Inactif",
-            "variant": "success" if etablissement.active else "warning",
-        }
-
         # Subscription status logic
         subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
         if not subscription:
@@ -125,7 +112,7 @@ def list_etablissements_view(request):
             subscription_badge = {
                 "type": "badge",
                 "value": "Actif (annulation)",
-                "variant": "warning",
+                "variant": "success",
                 "icon": "fa-solid fa-clock",
                 "tooltip": "L'abonnement sera annulé à la fin de la période en cours",
             }
@@ -140,15 +127,18 @@ def list_etablissements_view(request):
         # Date formatting with tooltip
         created_at_str = etablissement.created_at.strftime("%d/%m/%Y") if etablissement.created_at else "N/A"
         created_at_full = etablissement.created_at.strftime("%d/%m/%Y à %H:%M") if etablissement.created_at else "N/A"
-        created_at_cell = {
-            "type": "text",
-            "value": created_at_str,
-            "tooltip": created_at_full if etablissement.created_at else None,
-        } if etablissement.created_at else created_at_str
+        created_at_cell = (
+            {
+                "type": "text",
+                "value": created_at_str,
+                "tooltip": created_at_full if etablissement.created_at else None,
+            }
+            if etablissement.created_at
+            else created_at_str
+        )
 
         row = {
             "title": etablissement.title,
-            "status": status_badge,
             "created_at": created_at_cell,
             "subscription": subscription_badge,
             "actions": {

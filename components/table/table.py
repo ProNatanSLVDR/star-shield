@@ -5,6 +5,7 @@ from django_components import component
 
 class HeaderConfig(TypedDict, total=False):
     """Configuration for a table header column."""
+
     label: str
     key: str
     orderable: bool
@@ -17,6 +18,7 @@ class HeaderConfig(TypedDict, total=False):
 
 class CellData(TypedDict, total=False):
     """Data for a single table cell."""
+
     type: str
     value: Any
     variant: str
@@ -32,10 +34,10 @@ class CellData(TypedDict, total=False):
 
 def normalize_header(header: Union[str, Dict[str, Any]]) -> HeaderConfig:
     """Convert header input to normalized HeaderConfig.
-    
+
     Args:
         header: Either a string (label) or dict with header properties
-        
+
     Returns:
         Normalized HeaderConfig dictionary
     """
@@ -50,7 +52,7 @@ def normalize_header(header: Union[str, Dict[str, Any]]) -> HeaderConfig:
             "popover_if_long": header.get("popover_if_long", False),
             "popover_threshold": header.get("popover_threshold", 15),
         }
-    
+
     # String header
     return {
         "label": header,
@@ -66,40 +68,37 @@ def normalize_header(header: Union[str, Dict[str, Any]]) -> HeaderConfig:
 
 def check_text_is_long(text: str, threshold: int, popover_enabled: bool) -> bool:
     """Determine if text exceeds popover threshold.
-    
+
     Args:
         text: Text to check
         threshold: Character threshold for display
         popover_enabled: Whether popover is enabled for this cell
-        
+
     Returns:
         True if text length exceeds threshold and popover is enabled
     """
     if not popover_enabled:
         return False
-    
+
     try:
         return len(text.strip()) > int(threshold)
     except (ValueError, TypeError):
         return False
 
 
-def process_cell(
-    cell_data: Any, 
-    header: HeaderConfig
-) -> CellData:
+def process_cell(cell_data: Any, header: HeaderConfig) -> CellData:
     """Convert raw cell data to processed CellData.
-    
+
     Args:
         cell_data: Raw cell data from row
         header: Header configuration for this cell
-        
+
     Returns:
         Processed CellData dictionary
     """
     if isinstance(cell_data, dict):
         cell_type = cell_data.get("type", "text")
-        
+
         if cell_type == "badge":
             return {
                 "type": "badge",
@@ -112,7 +111,7 @@ def process_cell(
                 "popover_if_long": header["popover_if_long"],
                 "popover_threshold": header["popover_threshold"],
             }
-        
+
         if cell_type == "buttons":
             return {
                 "type": "buttons",
@@ -122,7 +121,7 @@ def process_cell(
                 "popover_if_long": header["popover_if_long"],
                 "popover_threshold": header["popover_threshold"],
             }
-        
+
         if cell_type == "html":
             return {
                 "type": "html",
@@ -132,7 +131,7 @@ def process_cell(
                 "popover_if_long": header["popover_if_long"],
                 "popover_threshold": header["popover_threshold"],
             }
-        
+
         # Default dict handling (assume text with metadata)
         value_str = str(cell_data.get("value", "")) if cell_data.get("value") is not None else ""
         return {
@@ -145,7 +144,7 @@ def process_cell(
             "popover_threshold": header["popover_threshold"],
             "is_long": check_text_is_long(value_str, header["popover_threshold"], header["popover_if_long"]),
         }
-    
+
     # Scalar value
     value_str = "" if cell_data is None else str(cell_data)
     return {
@@ -160,30 +159,27 @@ def process_cell(
     }
 
 
-def process_row(
-    row: Dict[str, Any], 
-    headers: List[HeaderConfig]
-) -> Dict[str, Any]:
+def process_row(row: Dict[str, Any], headers: List[HeaderConfig]) -> Dict[str, Any]:
     """Convert raw row data to processed row with cells.
-    
+
     Args:
         row: Raw row data
         headers: Processed headers for column mapping
-        
+
     Returns:
         Processed row with cells and metadata
     """
     cells = []
     has_buttons = False
-    
+
     for header in headers:
         cell_data = row.get(header["key"], "")
         processed_cell = process_cell(cell_data, header)
         cells.append(processed_cell)
-        
+
         if processed_cell.get("type") == "buttons":
             has_buttons = True
-    
+
     return {
         "cells": cells,
         "modal_link": row.get("modal_link", None),
@@ -201,31 +197,28 @@ class Table(component.Component):
         rows: Optional[List[Dict[str, Any]]] = None,
         title: Optional[str] = None,
         modal_size: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Process table data and return context for template.
-        
+
         Args:
             headers: List of header definitions (strings or dicts)
             rows: List of row data (dicts)
             title: Optional table title
             modal_size: Bootstrap modal size ('sm', 'lg', 'xl')
             **kwargs: Additional context variables
-            
+
         Returns:
             Context dictionary for template rendering
         """
         # Normalize all headers
         processed_headers = [normalize_header(h) for h in (headers or [])]
-        
+
         # Track if any column is searchable
         has_searchable = any(h.get("searchable", False) for h in processed_headers)
-        
+
         # Process all rows
-        processed_rows = [
-            process_row(row, processed_headers) 
-            for row in (rows or [])
-        ]
+        processed_rows = [process_row(row, processed_headers) for row in (rows or [])]
 
         return {
             "headers": processed_headers,
