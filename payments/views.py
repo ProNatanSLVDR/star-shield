@@ -94,6 +94,7 @@ def create_checkout_session(request):
             cancel_url=f"{settings.WEBSITE_URL}/payments/cancel",
             subscription_data={
                 "metadata": metadata,
+                "description": etablissement.title,
             },
             saved_payment_method_options={
                 "payment_method_save": "enabled",
