@@ -6,7 +6,7 @@ from starshield.decorators import google_gmb_connected_required
 from frontend.dashboard.render import starshield_render
 from django.contrib import messages
 from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
-from payments.services import sync_stripe_data, cancel_subscription_for_etablissement, reactivate_subscription_for_etablissement
+from payments.services import sync_stripe_data, cancel_subscription_for_etablissement, reactivate_subscription_for_etablissement, check_existing_subscription_for_etablissement
 import logging
 import stripe
 from django.conf import settings
@@ -413,6 +413,40 @@ def toggle_etablissement_status_partial(request, id):
     # Check if establishment has an active subscription
     has_active_subscription = etablissement.has_active_subscription()
     context["has_active_subscription"] = has_active_subscription
+
+    # Fetch period end date from Stripe if subscription exists
+    period_end_date = None
+    period_end_date_formatted = None
+    if subscription or has_active_subscription:
+        try:
+            stripe_subscription = check_existing_subscription_for_etablissement(request.user, etablissement.id)
+            if stripe_subscription and stripe_subscription.get("current_period_end"):
+                from datetime import datetime
+
+                period_end_timestamp = stripe_subscription["current_period_end"]
+                period_end_date = datetime.fromtimestamp(period_end_timestamp)
+                # Format date in French
+                french_months = {
+                    1: "janvier",
+                    2: "février",
+                    3: "mars",
+                    4: "avril",
+                    5: "mai",
+                    6: "juin",
+                    7: "juillet",
+                    8: "août",
+                    9: "septembre",
+                    10: "octobre",
+                    11: "novembre",
+                    12: "décembre",
+                }
+                month_name = french_months.get(period_end_date.month, period_end_date.strftime("%B"))
+                period_end_date_formatted = f"{period_end_date.day} {month_name} {period_end_date.year}"
+        except Exception as e:
+            logger.error(f"Error fetching period end date for etablissement {etablissement.id}: {e}")
+
+    context["period_end_date"] = period_end_date
+    context["period_end_date_formatted"] = period_end_date_formatted
 
     # For activation: if no subscription, fetch price options
     if is_activation and not has_active_subscription:
