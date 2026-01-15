@@ -33,7 +33,13 @@
 <!-- Toggle Status Modal -->
 <div class="modal-header border-bottom">
     <h5 class="modal-title fw-bold text-dark mb-0">
-        <i class="fa-solid fa-power-off pe-2"></i>
+        {% if is_reactivation %}
+            <i class="fa-solid fa-toggle-on pe-2"></i>
+        {% elif is_activation %}
+            <i class="fa-solid fa-toggle-on pe-2"></i>
+        {% else %}
+            <i class="fa-solid fa-toggle-off pe-2"></i>
+        {% endif %}
         {% if is_reactivation %}Réactivation{% elif is_activation %}Activation{% else %}Désactivation{% endif %}
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -234,8 +240,8 @@
         {% if is_reactivation %}
             {% component "button"
             text="Confirmer la réactivation"
-            classes="btn-success px-4 w-100"
-            icon="fa-solid fa-power-off"
+            classes="btn-primary btn-lg w-100"
+            icon="fa-solid fa-toggle-on"
             extra_kwargs={
             "type": "submit",
             }
@@ -244,7 +250,7 @@
             {% component "button"
             text="Continuer vers le paiement"
             classes="btn-primary btn-lg w-100"
-            icon="fa-solid fa-credit-card"
+            icon="fa-solid fa-toggle-on"
             extra_kwargs={
             "type": "submit",
             }
@@ -252,8 +258,8 @@
         {% else %}
             {% component "button"
             text="Confirmer la désactivation"
-            classes="btn-warning px-4 w-100"
-            icon="fa-solid fa-power-off"
+            classes="btn-primary btn-lg w-100"
+            icon="fa-solid fa-toggle-off"
             extra_kwargs={
             "type": "submit",
             }

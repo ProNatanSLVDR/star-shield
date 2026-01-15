@@ -8,7 +8,7 @@
             <i class="{{icon}}"></i>
         {% endif %}
         {% if text %}
-            {{text}}
+            {{text|safe}}
         {% endif %}
     </a>
 {% else %}
@@ -33,7 +33,7 @@
             <i class="{{icon}}"></i>
         {% endif %}
         {% if text %}
-            {{text}}
+            {{text|safe}}
         {% endif %}
     </button>
 {% endif %}

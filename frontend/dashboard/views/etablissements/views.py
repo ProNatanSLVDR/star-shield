@@ -62,8 +62,8 @@ def list_etablissements_view(request):
         if not etablissement.active:
             activate_button = {
                 "text": "Activer",
-                "icon": "fa-solid fa-power-off",
-                "classes": "btn-sm btn-success",
+                "icon": "fa-solid fa-toggle-on",
+                "classes": "btn-sm btn-success w-100",
                 "extra_kwargs": {
                     "hx_modal_toggle": True,
                     "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
@@ -74,8 +74,8 @@ def list_etablissements_view(request):
             # Add reactivate button for establishments with cancelled subscription
             reactivate_button = {
                 "text": "Réactiver",
-                "icon": "fa-solid fa-power-off",
-                "classes": "btn-sm btn-success",
+                "icon": "fa-solid fa-toggle-on",
+                "classes": "btn-sm btn-success w-100",
                 "extra_kwargs": {
                     "hx_modal_toggle": True,
                     "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
@@ -86,8 +86,8 @@ def list_etablissements_view(request):
             # Add deactivate button for active establishments
             deactivate_button = {
                 "text": "Désactiver",
-                "icon": "fa-solid fa-power-off",
-                "classes": "btn-sm btn-warning",
+                "icon": "fa-solid fa-toggle-off",
+                "classes": "btn-sm btn-danger w-100",
                 "extra_kwargs": {
                     "hx_modal_toggle": True,
                     "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
