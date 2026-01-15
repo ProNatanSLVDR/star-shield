@@ -6,7 +6,7 @@ from starshield.decorators import google_gmb_connected_required
 from frontend.dashboard.render import starshield_render
 from django.contrib import messages
 from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
-from payments.services import sync_stripe_data, cancel_subscription_for_etablissement
+from payments.services import sync_stripe_data, cancel_subscription_for_etablissement, reactivate_subscription_for_etablissement
 import logging
 import stripe
 from django.conf import settings
@@ -54,6 +54,10 @@ def list_etablissements_view(request):
     for etablissement in etablissements:
         buttons = []
 
+        # Check subscription status for reactivation case
+        subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
+        is_cancelled_at_period_end = subscription and subscription.cancel_at_period_end
+
         # Add activate button for inactive establishments
         if not etablissement.active:
             activate_button = {
@@ -66,6 +70,18 @@ def list_etablissements_view(request):
                 },
             }
             buttons.append(activate_button)
+        elif is_cancelled_at_period_end:
+            # Add reactivate button for establishments with cancelled subscription
+            reactivate_button = {
+                "text": "Réactiver",
+                "icon": "fa-solid fa-power-off",
+                "classes": "btn-sm btn-success",
+                "extra_kwargs": {
+                    "hx_modal_toggle": True,
+                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
+                },
+            }
+            buttons.append(reactivate_button)
         else:
             # Add deactivate button for active establishments
             deactivate_button = {
@@ -99,8 +115,9 @@ def list_etablissements_view(request):
 
         buttons.append(delete_button)
 
-        # Subscription status logic
-        subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
+        # Subscription status logic (reuse subscription from above if available)
+        if not subscription:
+            subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
         if not subscription:
             subscription_badge = {
                 "type": "badge",
@@ -373,16 +390,22 @@ def etablissement_selector_partial(request):
 @google_gmb_connected_required
 def toggle_etablissement_status_partial(request, id):
     """
-    Show toggle status modal (activate/deactivate) with billing explanation.
+    Show toggle status modal (activate/deactivate/reactivate) with billing explanation.
     For activation: shows price selection if no subscription, or confirmation if subscription exists.
     For deactivation: shows confirmation explaining subscription continues until period end.
+    For reactivation: shows confirmation explaining subscription will continue normally.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
     is_activation = not etablissement.active
 
+    # Check if this is a reactivation case (active etablissement with cancelled subscription)
+    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
+    is_reactivation = etablissement.active and subscription and subscription.cancel_at_period_end
+
     context = {
         "etablissement": etablissement,
         "is_activation": is_activation,
+        "is_reactivation": is_reactivation,
         "toggle_url": reverse("dashboard:etablissements:toggle_status", args=[etablissement.id]),
         "checkout_url": reverse("payments:create_checkout_session"),
     }
@@ -435,19 +458,42 @@ def toggle_etablissement_status_partial(request, id):
 @require_POST
 def toggle_etablissement_status(request, id):
     """
-    Toggle establishment status (activate/deactivate).
+    Toggle establishment status (activate/deactivate/reactivate).
     For activation: if no subscription, redirects to checkout. If subscription exists, activates establishment.
     For deactivation: sets active=False (subscription continues until period end).
+    For reactivation: removes cancel_at_period_end flag from subscription.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
     is_activation = not etablissement.active
+
+    # Check if this is a reactivation case (active etablissement with cancelled subscription)
+    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
+    is_reactivation = etablissement.active and subscription and subscription.cancel_at_period_end
 
     hx_triggers = {
         "close-modal": True,
     }
 
+    # Reactivation
+    if is_reactivation:
+        try:
+            reactivated_subscription = reactivate_subscription_for_etablissement(request.user, etablissement.id)
+            if reactivated_subscription:
+                # Sync Stripe data to update local database with reactivation status
+                sync_stripe_data(request.user)
+                messages.success(request, f"L'abonnement de l'établissement {etablissement.title} a été réactivé avec succès.")
+                hx_triggers["etablissements-updated"] = True
+            else:
+                messages.error(request, f"Impossible de réactiver l'abonnement de l'établissement {etablissement.title}.")
+        except Exception as e:
+            logger.error(f"Error reactivating subscription for etablissement {etablissement.id}: {e}")
+            messages.error(
+                request,
+                f"Une erreur est survenue lors de la réactivation de l'abonnement de l'établissement {etablissement.title}. Veuillez réessayer ou contacter le support.",
+            )
+
     # Activation
-    if is_activation:
+    elif is_activation:
         has_active_subscription = etablissement.has_active_subscription()
 
         # si l'établissement a un abonnement actif, on sync les données de Stripe

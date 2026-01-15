@@ -115,6 +115,47 @@ def cancel_subscription_for_etablissement(user, etablissement_id):
         return None
 
 
+def reactivate_subscription_for_etablissement(user, etablissement_id):
+    """
+    Reactivate a subscription for an etablissement by removing the cancel_at_period_end flag.
+    Returns the reactivated subscription object or None if not found/already reactivated.
+    """
+    if not user.stripe_customer_id:
+        logger.warning(f"Cannot reactivate subscription: User {user.id} has no stripe_customer_id")
+        return None
+
+    try:
+        # Find the subscription for this etablissement
+        subscription = check_existing_subscription_for_etablissement(user, etablissement_id)
+
+        if not subscription:
+            logger.warning(f"No subscription found for etablissement {etablissement_id}")
+            return None
+
+        subscription_id = subscription["id"]
+        subscription_status = subscription.get("status")
+
+        # Check if subscription is already cancelled
+        if subscription_status == "canceled":
+            logger.warning(f"Subscription {subscription_id} is already cancelled and cannot be reactivated")
+            return None
+
+        # Check if subscription is not scheduled for cancellation
+        if subscription.get("cancel_at_period_end") is not True:
+            logger.info(f"Subscription {subscription_id} is not scheduled for cancellation")
+            return subscription
+
+        # Reactivate by removing cancel_at_period_end flag
+        reactivated_subscription = stripe.Subscription.modify(subscription_id, cancel_at_period_end=False)
+
+        logger.info(f"Successfully reactivated subscription {subscription_id}")
+        return reactivated_subscription
+
+    except Exception as e:
+        logger.error(f"Failed to reactivate subscription for etablissement {etablissement_id}: {e}")
+        return None
+
+
 def sync_stripe_data(user):
     """
     Sync subscription data from Stripe to the local database.

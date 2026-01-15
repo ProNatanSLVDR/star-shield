@@ -34,7 +34,7 @@
 <div class="modal-header border-bottom">
     <h5 class="modal-title fw-bold text-dark mb-0">
         <i class="fa-solid fa-power-off pe-2"></i>
-        {% if is_activation %}Activation{% else %}Désactivation{% endif %}
+        {% if is_reactivation %}Réactivation{% elif is_activation %}Activation{% else %}Désactivation{% endif %}
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
@@ -65,7 +65,22 @@
             </div>
         </div>
 
-        {% if is_activation %}
+        {% if is_reactivation %}
+        <!-- Reactivation -->
+            <div class="alert alert-success mb-0">
+                <div class="d-flex align-items-start gap-3">
+                    <i class="fa-solid fa-check-circle mt-1 fs-5"></i>
+                    <div class="flex-grow-1">
+                        <h6 class="alert-heading mb-2 fw-bold">Confirmation de réactivation</h6>
+                        <p class="mb-2">Votre abonnement sera réactivé et continuera normalement.</p>
+                        <p class="mb-0 small">
+                            L'abonnement reprendra son cycle de facturation habituel et ne sera plus annulé à la fin de la période en cours.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        {% elif is_activation %}
 
             <!-- Activation without subscription: Show price selection -->
             <div>
@@ -131,7 +146,16 @@
     </div>
 
     <div class="modal-footer border-top bg-light p-3">
-        {% if is_activation %}
+        {% if is_reactivation %}
+            {% component "button"
+            text="Confirmer la réactivation"
+            classes="btn-success px-4 w-100"
+            icon="fa-solid fa-power-off"
+            extra_kwargs={
+            "type": "submit",
+            }
+            /%}
+        {% elif is_activation %}
             {% component "button"
             text="Continuer vers le paiement"
             classes="btn-primary btn-lg w-100"
