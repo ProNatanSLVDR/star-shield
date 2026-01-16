@@ -91,19 +91,55 @@ def overview_view(request):
         "goal": goal_projection_points,
     }
 
+    stats_items = [
+        {
+            "label": "Note actuelle",
+            "value": current_rating if current_rating else "-",
+            "icon": "fa-solid fa-gauge-high",
+        },
+        {
+            "label": "Visites du QR Code",
+            "value": qr_page_visits if qr_page_visits else "-",
+            "icon": "fa-solid fa-qrcode",
+        },
+        {
+            "label": "Redirections Google",
+            "value": reviews_redirected_google if reviews_redirected_google else "-",
+            "icon": "fa-solid fa-arrow-up-right-from-square",
+        },
+        {
+            "label": "Redirections Internes",
+            "value": reviews_kept_private if reviews_kept_private else "-",
+            "icon": "fa-solid fa-lock",
+        },
+        {
+            "label": "Avis Internes",
+            "value": internal_reviews_count if internal_reviews_count else "-",
+            "icon": "fa-solid fa-inbox",
+        },
+        {
+            "label": "Avis Google",
+            "value": google_reviews_count if google_reviews_count else "-",
+            "icon": "fa-brands fa-google",
+        },
+        {
+            "label": "Avis Total",
+            "value": total_reviews if total_reviews else "-",
+            "icon": "fa-solid fa-star",
+        },
+        {
+            "label": "Dernier Avis",
+            "value": latest_reviews.first().writen_at if latest_reviews.exists() else "-",
+            "icon": "fa-solid fa-clock-rotate-left",
+        },
+    ]
+
     context = {
         "etablissement": etablissement,
         "chart_payload_json": json.dumps(chart_payload),
-        "current_rating": current_rating,
-        "total_reviews": total_reviews,
-        "google_reviews_count": google_reviews_count,
-        "internal_reviews_count": internal_reviews_count,
-        "rating_distribution": rating_distribution,
-        "qr_page_visits": qr_page_visits,
-        "reviews_redirected_google": reviews_redirected_google,
-        "reviews_kept_private": reviews_kept_private,
-        "latest_reviews": latest_reviews,
+        "stats_items": stats_items,
         "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
+        "range_8": list(range(8)),
     }
 
     return starshield_render(
