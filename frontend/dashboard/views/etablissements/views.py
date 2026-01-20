@@ -452,9 +452,11 @@ def toggle_etablissement_status_partial(request, id):
     # For activation: if no subscription, fetch price options
     if is_activation and not has_active_subscription:
         monthly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly")
+        trimestrial_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("trimestrial")
         yearly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly")
 
         monthly_price_data = None
+        trimestrial_price_data = None
         yearly_price_data = None
 
         if monthly_price_id:
@@ -468,6 +470,17 @@ def toggle_etablissement_status_partial(request, id):
             except Exception as e:
                 logger.error(f"Error fetching monthly price from Stripe: {e}")
 
+        if trimestrial_price_id:
+            try:
+                trimestrial_price = stripe.Price.retrieve(trimestrial_price_id)
+                trimestrial_price_data = {
+                    "id": trimestrial_price_id,
+                    "amount": trimestrial_price.unit_amount / 100 if trimestrial_price.unit_amount else 0,
+                    "currency": (trimestrial_price.currency or "eur").upper(),
+                }
+            except Exception as e:
+                logger.error(f"Error fetching trimestrial price from Stripe: {e}")
+
         if yearly_price_id:
             try:
                 yearly_price = stripe.Price.retrieve(yearly_price_id)
@@ -480,6 +493,7 @@ def toggle_etablissement_status_partial(request, id):
                 logger.error(f"Error fetching yearly price from Stripe: {e}")
 
         context["monthly_price"] = monthly_price_data
+        context["trimestrial_price"] = trimestrial_price_data
         context["yearly_price"] = yearly_price_data
 
     return starshield_render(

@@ -131,6 +131,22 @@
                             </label>
                         </div>
                     {% endif %}
+                    {% if trimestrial_price %}
+                        <div class="flex-fill">
+                            <input class="list-group-item-check pe-none" type="radio" name="price_id" id="price_trimestrial" value="{{ trimestrial_price.id }}">
+                            <label class="list-group-item rounded-3 py-3" for="price_trimestrial">
+                                <div class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                                        <i class="fa-solid fa-calendar-week"></i>
+                                        <strong>Trimestriel</strong>
+                                    </div>
+                                    <span class="d-block small opacity-50 mb-2">Facturé trimestriellement</span>
+                                    <span class="fw-bold fs-4 d-block">{{ trimestrial_price.amount|floatformat:2 }}</span>
+                                    <span class="text-muted small">{% if trimestrial_price.currency == "EUR" %}€{% else %}{{ trimestrial_price.currency }}{% endif %}/trimestre</span>
+                                </div>
+                            </label>
+                        </div>
+                    {% endif %}
                     {% if yearly_price %}
                         <div class="flex-fill">
                             <input class="list-group-item-check pe-none" type="radio" name="price_id" id="price_yearly" value="{{ yearly_price.id }}">

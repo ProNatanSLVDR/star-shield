@@ -1,6 +1,5 @@
 from django import forms
 from django.conf import settings
-from typing import List, Dict, Any, Optional
 
 
 class ImportEtablissementForm(forms.Form):
@@ -29,6 +28,7 @@ class ToggleEtablissementStatusForm(forms.Form):
 
         allowed_prices = [
             settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly"),
+            settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("trimestrial"),
             settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly"),
         ]
 

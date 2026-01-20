@@ -238,6 +238,7 @@ class Dev(Base):
         "basic_subscription": {
             "product_id": "prod_Th3YAxKCSwFz7C",
             "monthly": "price_1Sp8GTLTXmr2kgo15d4HWHCa",
+            "trimestrial": "price_1SrecTLTXmr2kgo1asA4ew0i",
             "yearly": "price_1Sp8DyLTXmr2kgo1SZyuntfr",
         },
     }
@@ -390,7 +391,8 @@ class Prod(Base):
     STRIPE_PRODUCTS = {
         "basic_subscription": {
             "product_id": "prod_TnSZAJHkKpEyON",
-            "monthly": "price_1SpreCPuCLDC9hxjZCjnSi0F",
-            "yearly": "price_1SprefPuCLDC9hxjfphbMRIj",
+            "monthly": "price_1SreSiPuCLDC9hxjRhhONOHs",
+            "trimestrial": "price_1SreT9PuCLDC9hxjzuTLQnir",
+            "yearly": "price_1SreTNPuCLDC9hxjvW6yG3fP",
         },
     }
