@@ -1,4 +1,3 @@
-# Import base64 for printing the ciphertext.
 import base64
 
 # Import the client library.
@@ -68,7 +67,6 @@ def decrypt_symmetric(ciphertext: str, key_id: str) -> str:
         raise Exception("The response received from the server was corrupted in-transit.")
     # End integrity verification
 
-    print(f"Plaintext: {decrypt_response.plaintext!r}")
     return decrypt_response.plaintext.decode("utf-8")
 
 
@@ -108,5 +106,4 @@ def encrypt_symmetric(plaintext: str, key_id: str) -> str:
         raise Exception("The response received from the server was corrupted in-transit.")
     # End integrity verification
 
-    print(f"Ciphertext: {base64.b64encode(encrypt_response.ciphertext)}")
     return base64.b64encode(encrypt_response.ciphertext).decode("utf-8")
