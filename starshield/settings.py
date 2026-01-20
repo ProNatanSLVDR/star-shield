@@ -190,6 +190,12 @@ class Base(Configuration):
     TASK_MAX_RETRIES = 3
     TASK_TIMEOUT_SECONDS = 300  # 5 minutes
 
+    # Brevo Email Configuration
+    BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+    BREVO_SENDER_EMAIL = "noreply@starshield.pro"
+    BREVO_SENDER_NAME = "StarShield"
+    DEFAULT_FROM_EMAIL = BREVO_SENDER_EMAIL
+
     # Logging configuration
 
 
@@ -206,7 +212,7 @@ class Dev(Base):
     }
 
     # Email
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # TODO: Change to SMTP backend
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
     # STRIPE (test keys)
     STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
@@ -357,6 +363,9 @@ class Prod(Base):
     CLOUD_TASKS_SERVICE_ACCOUNT = "tasks-agent@starshield-app.iam.gserviceaccount.com"
     TASKS_API_BASE_URL = os.getenv("TASKS_API_BASE_URL", "http://localhost:8001")
     TASKS_API_QUEUE_NAME = "tasks-api"
+
+    # Email
+    EMAIL_BACKEND = "starshield.email_backends.BrevoEmailBackend"
 
     # Stripe
     STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
