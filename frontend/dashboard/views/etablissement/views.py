@@ -140,6 +140,9 @@ def overview_view(request):
         "stats_items": stats_items,
         "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
         "range_8": list(range(8)),
+        "latest_reviews": list(latest_reviews),
+        "total_reviews": total_reviews,
+        "rating_distribution": rating_distribution,
     }
 
     return starshield_render(
