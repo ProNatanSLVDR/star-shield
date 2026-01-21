@@ -12,9 +12,9 @@
         <div class="mb-3">
             <h1 class="h4 fw-bold text-body-emphasis mb-1">
                 <i class="fa-solid fa-star-half-stroke me-2"></i>
-                Seuil de redirection et objectif
+                Seuil de redirection
             </h1>
-            <p class="text-muted mb-0 small">Trouvez le seuil de redirection et l'objectif de note optimaux pour optimiser la collecte d'avis de votre établissement.</p>
+            <p class="text-muted mb-0 small">Trouvez le seuil de redirection optimal pour optimiser la collecte d'avis de votre établissement.</p>
         </div>
 
 
@@ -26,7 +26,7 @@
                     <div class="card-header bg-primary border-bottom px-4 py-3">
                         <h2 class="h6 fw-semibold mb-0 text-white">
                             <i class="fa-solid fa-sliders me-2"></i>
-                            Paramètres de seuil et objectif
+                            Paramètres de seuil
                         </h2>
                     </div>
                     <div class="card-body px-4 py-3 flex-grow-1 d-flex flex-column">
@@ -128,28 +128,6 @@
                                 </div>
                             </div>
 
-                            <div class="mb-4">
-                                <label for="id_target_rating" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-bullseye me-2"></i>
-                                    Objectif
-                                </label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="range"
-                                           class="form-range flex-grow-1"
-                                           id="id_target_rating"
-                                           name="target_rating"
-                                           value="{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}"
-                                           step="0.1"
-                                           min="3.5"
-                                           max="4.9">
-                                    <div class="text-primary fw-bold d-flex align-items-center gap-1" style="min-width: 60px; justify-content: center;">
-                                        <span id="target_rating_display">{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}</span>
-                                        <i class="fa-solid fa-star"></i>
-                                    </div>
-                                </div>
-                                <div class="form-text">Note cible que vous souhaitez atteindre à l'avenir.</div>
-                            </div>
-
                             <div>
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="fa-solid fa-save me-2"></i>
@@ -192,19 +170,6 @@
                             <div class="form-text">Nombre d'avis reçus par semaine pour le calcul des estimations.</div>
                         </div>
 
-                        <div class="pt-3 border-top mb-3">
-                            <h3 class="h6 fw-semibold mb-3">
-                                <i class="fa-solid fa-chart-bar me-2"></i>
-                                Estimation de la distribution des notes
-                            </h3>
-                            <p class="text-muted small mb-3">
-                                Cette estimation permet de visualiser la distribution des notes selon le seuil de redirection actuel.
-                            </p>
-                            <div style="height: 200px; position: relative;">
-                                <canvas id="distributionChart"></canvas>
-                            </div>
-                        </div>
-
                         <div class="pt-3 border-top d-flex flex-column flex-grow-1" style="min-height: 0;">
                             <h3 class="h6 fw-semibold mb-3">
                                 <i class="fa-solid fa-clock me-2"></i>
@@ -219,13 +184,6 @@
                                             <span class="fw-bold" id="current-rating-display">
                                                 {% if current_rating %}{{ current_rating|stringformat:'.2f' }}{% else %}N/A{% endif %}
                                                 <i class="fa-solid fa-star text-warning ms-1"></i>
-                                            </span>
-                                        </div>
-                                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                                            <span class="text-muted">Objectif:</span>
-                                            <span class="fw-bold" id="target-rating-display">
-                                                {% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}
-                                                <i class="fa-solid fa-star text-primary ms-1"></i>
                                             </span>
                                         </div>
                                         <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
@@ -286,7 +244,6 @@
 
     </div>
 
-    <script src="{% static 'chartjs.min.js' %}"></script>
     <script>
         (function() {
             'use strict';
@@ -302,71 +259,12 @@
             const CURRENT_RATING = {% if current_rating %}{{ current_rating|stringformat:'.2f' }}{% else %}null{% endif %};
             const TOTAL_REVIEWS = {% if total_reviews %}{{ total_reviews }}{% else %}0{% endif %};
 
-            const DISTRIBUTION_DATA = {
-                5: {5: 100.0, 4: 0.0, 3: 0.0, 2: 0.0, 1: 0.0},
-                4: {5: 75.0, 4: 25.0, 3: 0.0, 2: 0.0, 1: 0.0},
-                3: {5: 75.0, 4: 16.6, 3: 8.3, 2: 0.0, 1: 0.0}
-            };
-
             // Distribution notes matching utils.py
             const DISTRIBUTION_NOTES = {
                 5: {5: 1},
                 4: {5: 3/4, 4: 1/4},
                 3: {5: 3/4, 4: 2/12, 3: 1/12}
             };
-
-            const STAR_RATINGS = [5, 4, 3];
-            const STAR_LABELS = STAR_RATINGS.map(rating => {
-                return rating + '★';
-            });
-
-            const CHART_COLORS = {
-                background: 'rgba(13, 110, 253, 0.8)',
-                border: 'rgba(13, 110, 253, 1)',
-                grid: 'rgba(108, 117, 125, 0.15)'
-            };
-
-            // Chart configuration
-            function getChartOptions(notesPerWeek) {
-                return {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: PERCENTAGE_MAX,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            },
-                            grid: {
-                                color: CHART_COLORS.grid
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const percentage = context.formattedValue;
-                                    const reviewCount = Math.round((parseFloat(percentage) / 100) * notesPerWeek);
-                                    return reviewCount + ' avis (' + percentage + '%)';
-                                }
-                            }
-                        },
-                        legend: {
-                            display: false
-                        }
-                    }
-                };
-            }
 
             // Threshold functions
             function parseThreshold(value) {
@@ -385,65 +283,8 @@
                 document.documentElement.style.setProperty('--card-height-reverse', `${cardHeightReverse}%`);
             }
 
-            // Chart functions
-            function createChartDataset(threshold) {
-                const data = STAR_RATINGS.map(rating => {
-                    return DISTRIBUTION_DATA[threshold] && DISTRIBUTION_DATA[threshold][rating]
-                        ? DISTRIBUTION_DATA[threshold][rating]
-                        : 0;
-                });
-
-                return {
-                    label: `Seuil ${threshold}`,
-                    data: data,
-                    backgroundColor: CHART_COLORS.background,
-                    borderColor: CHART_COLORS.border,
-                    borderWidth: 1
-                };
-            }
-
-            function createChart(canvas, threshold, notesPerWeek) {
-                return new window.Chart(canvas, {
-                    type: 'bar',
-                    data: {
-                        labels: STAR_LABELS,
-                        datasets: [createChartDataset(threshold)]
-                    },
-                    options: getChartOptions(notesPerWeek)
-                });
-            }
-
-            function updateDistributionChart(chart, threshold, notesPerWeek) {
-                if (chart) {
-                    chart.data.datasets[0] = createChartDataset(threshold);
-                    chart.options = getChartOptions(notesPerWeek);
-                    chart.update();
-                }
-            }
-
             // Slider functions
-            function initializeTargetRatingSlider() {
-                const slider = document.getElementById('id_target_rating');
-                const display = document.getElementById('target_rating_display');
-                const targetRatingDisplay = document.getElementById('target-rating-display');
-
-                if (slider && display) {
-                    // Update display value while dragging
-                    slider.addEventListener('input', function() {
-                        const value = parseFloat(this.value).toFixed(1);
-                        display.textContent = value;
-                        if (targetRatingDisplay) {
-                            targetRatingDisplay.innerHTML = value + ' <i class="fa-solid fa-star text-primary ms-1"></i>';
-                        }
-                    });
-                    // Update time estimation only on release
-                    slider.addEventListener('change', function() {
-                        updateTimeEstimation();
-                    });
-                }
-            }
-
-            function initializeNotesPerWeekSlider(distributionChart) {
+            function initializeNotesPerWeekSlider() {
                 const slider = document.getElementById('id_notes_per_week');
                 const display = document.getElementById('notes_per_week_display');
                 const notesPerWeekDisplay = document.getElementById('notes-per-week-display');
@@ -457,16 +298,8 @@
                             notesPerWeekDisplay.textContent = notesPerWeek;
                         }
                     });
-                    // Update chart and time estimation only on release
+                    // Update time estimation only on release
                     slider.addEventListener('change', function() {
-                        const notesPerWeek = parseInt(this.value, 10);
-                        if (distributionChart) {
-                            const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
-                            if (checkedRadio) {
-                                const threshold = parseThreshold(checkedRadio.value);
-                                updateDistributionChart(distributionChart, threshold, notesPerWeek);
-                            }
-                        }
                         updateTimeEstimation();
                     });
                 }
@@ -569,7 +402,6 @@
 
             function updateTimeEstimation() {
                 const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
-                const targetRatingSlider = document.getElementById('id_target_rating');
                 const notesPerWeekSlider = document.getElementById('id_notes_per_week');
 
                 // Update current stats displays
@@ -578,12 +410,6 @@
                         CURRENT_RATING.toFixed(2) + ' <i class="fa-solid fa-star text-warning ms-1"></i>';
                 } else {
                     document.getElementById('current-rating-display').textContent = 'N/A';
-                }
-
-                if (targetRatingSlider) {
-                    const targetRating = parseFloat(targetRatingSlider.value);
-                    document.getElementById('target-rating-display').innerHTML =
-                        targetRating.toFixed(1) + ' <i class="fa-solid fa-star text-primary ms-1"></i>';
                 }
 
                 document.getElementById('total-reviews-display').textContent = TOTAL_REVIEWS || '0';
@@ -604,13 +430,13 @@
                     return;
                 }
 
-                if (!checkedRadio || !targetRatingSlider || !notesPerWeekSlider) {
+                if (!checkedRadio || !notesPerWeekSlider) {
                     return;
                 }
 
                 const selectedThreshold = parseThreshold(checkedRadio.value);
-                const targetRating = parseFloat(targetRatingSlider.value);
                 const notesPerWeek = parseInt(notesPerWeekSlider.value, 10);
+                const targetRating = {% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %};
 
                 // Calculate estimations
                 const results = estimations(CURRENT_RATING, TOTAL_REVIEWS, targetRating, notesPerWeek);
@@ -644,14 +470,7 @@
             function initialize() {
                 const radios = document.querySelectorAll('input[name="review_threshold"]');
                 const checkedRadio = document.querySelector('input[name="review_threshold"]:checked');
-                const canvas = document.getElementById('distributionChart');
                 const notesPerWeekSlider = document.getElementById('id_notes_per_week');
-
-                // Get initial notes per week value
-                let notesPerWeek = 20;
-                if (notesPerWeekSlider) {
-                    notesPerWeek = parseInt(notesPerWeekSlider.value, 10);
-                }
 
                 // Initialize threshold visualization
                 if (checkedRadio) {
@@ -659,33 +478,17 @@
                     updateCardHeights(initialThreshold);
                 }
 
-                // Initialize chart if canvas exists
-                let distributionChart = null;
-                if (canvas && window.Chart) {
-                    if (checkedRadio) {
-                        const initialThreshold = parseThreshold(checkedRadio.value);
-                        distributionChart = createChart(canvas, initialThreshold, notesPerWeek);
-                    }
-                }
-
                 // Setup threshold change handlers
                 radios.forEach(radio => {
                     radio.addEventListener('change', function() {
                         const threshold = parseThreshold(this.value);
                         updateCardHeights(threshold);
-                        if (distributionChart && notesPerWeekSlider) {
-                            const currentNotesPerWeek = parseInt(notesPerWeekSlider.value, 10);
-                            updateDistributionChart(distributionChart, threshold, currentNotesPerWeek);
-                        }
                         updateTimeEstimation();
                     });
                 });
 
-                // Initialize target rating slider
-                initializeTargetRatingSlider();
-
                 // Initialize notes per week slider
-                initializeNotesPerWeekSlider(distributionChart);
+                initializeNotesPerWeekSlider();
 
                 // Initialize time estimation
                 updateTimeEstimation();

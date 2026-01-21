@@ -26,16 +26,14 @@ def threshold_settings_view(request):
         form = ThresholdObjectiveForm(request.POST)
         if form.is_valid():
             etablissement.review_threshold = int(form.cleaned_data["review_threshold"])
-            etablissement.target_rating = form.cleaned_data.get("target_rating")
             etablissement.save()
 
-            messages.success(request, "Seuil et objectif mis à jour avec succès.")
+            messages.success(request, "Seuil mis à jour avec succès.")
             return redirect("dashboard:etablissement:filtre:threshold")
     else:
         form = ThresholdObjectiveForm(
             initial={
                 "review_threshold": etablissement.review_threshold,
-                "target_rating": etablissement.target_rating,
             }
         )
 

@@ -9,12 +9,11 @@
     <div class="d-flex flex-column h-100">
         <div class="mb-3">
             <h1 class="h4 fw-bold text-body-emphasis mb-1">Paramètres</h1>
-            <p class="text-muted mb-0 small">Gérez les paramètres généraux de votre établissement et configurez le comportement des avis.</p>
+            <p class="text-muted mb-0 small">Gérez les paramètres généraux de votre établissement.</p>
         </div>
 
         <div class="row g-3">
-            <!-- General Settings -->
-            <div class="col-lg-6">
+            <div class="col-lg-6 mx-auto">
                 <div class="card shadow-sm border rounded-4 overflow-hidden">
                     <div class="card-header bg-primary border-bottom px-4 py-3">
                         <h2 class="h6 fw-semibold mb-0 text-white">Informations générales</h2>
@@ -48,35 +47,73 @@
                             </div>
 
                             <div class="mb-4">
-                                <label for="id_review_threshold" class="form-label fw-semibold">
-                                    Seuil de redirection
+                                <label for="id_target_rating" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-bullseye me-2"></i>
+                                    Objectif
                                 </label>
-                                <select class="form-select"
-                                        id="id_review_threshold"
-                                        name="review_threshold"
-                                        required>
-                                    {% for value, label in form.review_threshold.field.choices %}
-                                        <option value="{{ value }}" {% if etablissement.review_threshold == value %}selected{% endif %}>
-                                            {{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <div class="form-text">Note minimale pour redirection Google.</div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="range"
+                                           class="form-range flex-grow-1"
+                                           id="id_target_rating"
+                                           name="target_rating"
+                                           value="{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}"
+                                           step="0.1"
+                                           min="3.5"
+                                           max="4.9">
+                                    <div class="text-primary fw-bold d-flex align-items-center gap-1" style="min-width: 60px; justify-content: center;">
+                                        <span id="target_rating_display">{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}</span>
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="form-text">Note cible que vous souhaitez atteindre à l'avenir.</div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-filter fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <label for="id_review_filtering_enabled" class="form-label fw-semibold mb-0">
+                                                Filtrage d'avis
+                                            </label>
+                                            <div class="form-text small mb-0">Activez le filtrage des avis selon le seuil de redirection.</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="id_review_filtering_enabled"
+                                               name="review_filtering_enabled"
+                                               {% if etablissement.review_filtering_enabled %}checked{% endif %}>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-4">
-                                <label for="id_target_rating" class="form-label fw-semibold">
-                                    Note cible
-                                </label>
-                                <input type="number"
-                                       class="form-control"
-                                       id="id_target_rating"
-                                       name="target_rating"
-                                       value="{{ etablissement.target_rating|stringformat:'.2f' }}"
-                                       step="0.1"
-                                       min="0"
-                                       max="5">
-                                <div class="form-text">Note cible que vous souhaitez atteindre à l'avenir.</div>
+                                <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-circle-notch fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <label for="id_roulette_enabled" class="form-label fw-semibold mb-0">
+                                                Roulette
+                                            </label>
+                                            <div class="form-text small mb-0">Activez la roue de la fortune pour vos clients.</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="id_roulette_enabled"
+                                               name="roulette_enabled"
+                                               {% if etablissement.roulette_enabled %}checked{% endif %}>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="d-grid">
@@ -89,70 +126,27 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Navigation Cards -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm border rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">Paramètres avancés</h2>
-                    </div>
-                    <div class="card-body px-4 py-4">
-                        <div class="d-grid gap-3">
-                            <a href="{% url 'dashboard:etablissement:filtre:threshold' %}"
-                               class="card text-decoration-none border rounded-3 p-3 hover-shadow">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center me-3"
-                                         style="width: 48px; height: 48px;">
-                                        <i class="fa-solid fa-calculator fa-lg"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h3 class="h6 fw-semibold mb-1 text-body-emphasis">Calculateur de seuil et objectif</h3>
-                                        <p class="text-muted mb-0 small">Trouvez le seuil de redirection et l'objectif de note optimaux.</p>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-right text-muted"></i>
-                                </div>
-                            </a>
-                            <a href="{% url 'dashboard:etablissement:filtre:personalisation' %}"
-                               class="card text-decoration-none border rounded-3 p-3 hover-shadow">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3"
-                                         style="width: 48px; height: 48px;">
-                                        <i class="fa-solid fa-palette fa-lg"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h3 class="h6 fw-semibold mb-1 text-body-emphasis">Personnalisation des formulaires</h3>
-                                        <p class="text-muted mb-0 small">Personnalisez l'apparence de votre page de collecte d'avis.</p>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-right text-muted"></i>
-                                </div>
-                            </a>
-                            <a href="{% url 'dashboard:etablissement:filtre:qrcode' %}"
-                               class="card text-decoration-none border rounded-3 p-3 hover-shadow">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center me-3"
-                                         style="width: 48px; height: 48px;">
-                                        <i class="fa-solid fa-qrcode fa-lg"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h3 class="h6 fw-semibold mb-1 text-body-emphasis">QR Code</h3>
-                                        <p class="text-muted mb-0 small">Personnalisez et téléchargez votre QR code pour collecter des avis.</p>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-right text-muted"></i>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <style>
-        .hover-shadow {
-            transition: box-shadow 0.2s ease;
+    <script>
+        // Initialize target rating slider
+        function initializeTargetRatingSlider() {
+            const slider = document.getElementById('id_target_rating');
+            const display = document.getElementById('target_rating_display');
+
+            if (slider && display) {
+                // Update display value while dragging
+                slider.addEventListener('input', function() {
+                    const value = parseFloat(this.value).toFixed(1);
+                    display.textContent = value;
+                });
+            }
         }
-        .hover-shadow:hover {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
-        }
-    </style>
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTargetRatingSlider();
+        });
+    </script>
 {% endblock dashboard_content %}

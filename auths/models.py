@@ -369,6 +369,10 @@ class Etablissement(models.Model):
         validators=[MinValueValidator(3), MaxValueValidator(5)],
         help_text="Note minimale pour redirection Google.",
     )
+    review_filtering_enabled = models.BooleanField(
+        default=True,
+        help_text="Activer le filtrage d'avis basé sur le seuil de redirection.",
+    )
     target_rating = models.DecimalField(
         max_digits=3,
         decimal_places=2,

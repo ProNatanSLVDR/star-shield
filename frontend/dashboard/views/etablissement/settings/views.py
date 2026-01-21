@@ -17,8 +17,9 @@ def settings_view(request):
         form = EtablissementSettingsForm(request.POST)
         if form.is_valid():
             etablissement.title = form.cleaned_data["title"]
-            etablissement.review_threshold = int(form.cleaned_data["review_threshold"])
             etablissement.target_rating = form.cleaned_data.get("target_rating")
+            etablissement.review_filtering_enabled = form.cleaned_data.get("review_filtering_enabled", False)
+            etablissement.roulette_enabled = form.cleaned_data.get("roulette_enabled", False)
             etablissement.save()
 
             messages.success(request, "Paramètres mis à jour avec succès.")
@@ -27,8 +28,9 @@ def settings_view(request):
         form = EtablissementSettingsForm(
             initial={
                 "title": etablissement.title,
-                "review_threshold": etablissement.review_threshold,
                 "target_rating": etablissement.target_rating,
+                "review_filtering_enabled": etablissement.review_filtering_enabled,
+                "roulette_enabled": etablissement.roulette_enabled,
             }
         )
 

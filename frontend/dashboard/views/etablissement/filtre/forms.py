@@ -8,12 +8,6 @@ class ThresholdObjectiveForm(forms.Form):
         choices=[(i, f"{i}★") for i in range(3, 6)],
         required=True,
     )
-    target_rating = forms.DecimalField(
-        max_digits=3,
-        decimal_places=2,
-        required=False,
-        validators=[MinValueValidator(0), MaxValueValidator(5)],
-    )
 
 
 class ReviewSettingsForm(forms.Form):

@@ -7,13 +7,15 @@ class EtablissementSettingsForm(forms.Form):
         max_length=255,
         required=True,
     )
-    review_threshold = forms.ChoiceField(
-        choices=[(i, f"{i}★") for i in range(3, 6)],
-        required=True,
-    )
     target_rating = forms.DecimalField(
         max_digits=3,
         decimal_places=2,
         required=False,
-        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        validators=[MinValueValidator(3), MaxValueValidator(5)],
+    )
+    review_filtering_enabled = forms.BooleanField(
+        required=False,
+    )
+    roulette_enabled = forms.BooleanField(
+        required=False,
     )

@@ -30,6 +30,13 @@
         page_name="avis"
         current_page=current_page / %}
 
+        {% component "navlink"
+        link="dashboard:etablissement:settings:settings"
+        icon="fa-solid fa-gear"
+        text="Paramètres"
+        page_name="etablissement_settings"
+        current_page=current_page / %}
+
     <!-- Filtrage Section -->
         {% component "collapse_navlink"
         icon="fa-solid fa-filter"
