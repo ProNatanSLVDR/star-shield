@@ -28,4 +28,4 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-.devcontainer/dev.env
+*.env
