@@ -8,7 +8,12 @@
             <i class="{{ icon }} pe-1"></i>
             {{ text }}
         </span>
-        <i class="fa-solid fa-chevron-down small" id="{{ collapse_id }}-chevron"></i>
+        <div id="{{ collapse_id }}-chevron-down" class="d-none">
+            <i class="fa-solid fa-chevron-down small"></i>
+        </div>
+        <div id="{{ collapse_id }}-chevron-up">
+            <i class="fa-solid fa-chevron-up small"></i>
+        </div>
     </button>
     <div class="collapse" id="{{ collapse_id }}" data-collapse-state="closed">
         <ul class="nav nav-pills flex-column ps-3">
@@ -22,20 +27,22 @@
         const collapseId = "{{ collapse_id }}";
         const collapse = document.getElementById(collapseId);
         const trigger = document.getElementById(collapseId + "-trigger");
-        const chevron = document.getElementById(collapseId + "-chevron");
+        const chevronDown = document.getElementById(collapseId + "-chevron-down");
+        const chevronUp = document.getElementById(collapseId + "-chevron-up");
 
-        if (!collapse || !trigger || !chevron) {
+        if (!collapse || !trigger) {
             return;
         }
 
     // Function to update chevron based on state
         function updateChevron(isOpen) {
+            console.log('updateChevron', isOpen);
             if (isOpen) {
-                chevron.classList.remove('fa-chevron-down');
-                chevron.classList.add('fa-chevron-up');
+                chevronDown.classList.add('d-none');
+                chevronUp.classList.remove('d-none');
             } else {
-                chevron.classList.remove('fa-chevron-up');
-                chevron.classList.add('fa-chevron-down');
+                chevronUp.classList.add('d-none');
+                chevronDown.classList.remove('d-none');
             }
         }
 
@@ -44,18 +51,18 @@
             const state = collapse.getAttribute('data-collapse-state');
             const isOpen = state === 'open';
 
+            console.log('syncCollapseState', state, isOpen);
+
             if (isOpen) {
                 collapse.classList.add('show');
-                trigger.setAttribute('aria-expanded', 'true');
                 updateChevron(true);
             } else if (!isOpen) {
                 collapse.classList.remove('show');
-                trigger.setAttribute('aria-expanded', 'false');
                 updateChevron(false);
             }
         }
 
-        
+
 
     // Handle Bootstrap collapse events
         collapse.addEventListener('show.bs.collapse', function() {
@@ -70,5 +77,15 @@
 
     // Initial sync
         syncCollapseState();
+
+    // Watch for data-collapse-state changes
+        const observer = new MutationObserver(function() {
+            syncCollapseState();
+            console.log('data-collapse-state changed');
+        });
+        observer.observe(collapse, {
+            attributes: true,
+            attributeFilter: ['data-collapse-state']
+        });
     })();
 </script>
