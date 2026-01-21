@@ -6,7 +6,7 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from ..settings.forms import ReviewSettingsForm
+from .forms import ReviewSettingsForm
 
 
 @google_gmb_connected_required

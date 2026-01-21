@@ -7,7 +7,7 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from ..settings.forms import QRCodeSettingsForm
+from .forms import QRCodeSettingsForm
 
 
 @login_required

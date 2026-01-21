@@ -5,7 +5,7 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from ..settings.forms import ThresholdObjectiveForm
+from .forms import ThresholdObjectiveForm
 
 
 @google_gmb_connected_required

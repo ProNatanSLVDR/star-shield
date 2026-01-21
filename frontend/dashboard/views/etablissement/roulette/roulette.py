@@ -6,7 +6,7 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from ..settings.forms import RouletteSettingsForm, ROULETTE_ICON_CHOICES
+from .forms import RouletteSettingsForm, ROULETTE_ICON_CHOICES
 from frontend.roulette.models import RoulettePrize
 
 
