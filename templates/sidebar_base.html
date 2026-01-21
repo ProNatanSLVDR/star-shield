@@ -28,13 +28,16 @@
         {% endblock %}
     </div>
     {% if request.etablissement and not request.etablissement.active %}
-        <a href="{% url 'dashboard:etablissements:list' %}" class="alert alert-warning d-flex flex-column align-items-center text-center p-3 m-2 rounded-4 fa-beat-fade mb-3 text-decoration-none" role="alert" style="--fa-beat-fade-opacity: 0.67; --fa-beat-fade-scale: 1.025; cursor: pointer;">
+        <a href="{% url 'dashboard:etablissements:list' %}"
+           class="alert alert-warning d-flex flex-column align-items-center text-center p-2 m-2 rounded-4 fa-beat-fade  text-decoration-none"
+           role="alert"
+           style="--fa-beat-fade-opacity: 0.67; --fa-beat-fade-scale: 1.025; cursor: pointer;">
             <div class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation fa-lg text-warning"></i>
+                <i class="fa-solid fa-triangle-exclamation text-warning"></i>
                 <strong>Établissement désactivé</strong>
             </div>
-            <p class="mb-0 mt-2 small">Aucun avis n'est collecté. <br>
-                <span class="text-warning text-decoration-underline fw-bold">Cliquez ici pour continuer.</span>
+            <p class="mb-0 mt-1 small fw-bold text-warning text-decoration-underline">
+                Aucun avis n'est collecté.
             </p>
         </a>
     {% endif %}
