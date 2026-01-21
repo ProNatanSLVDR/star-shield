@@ -30,20 +30,103 @@
     page_name="avis"
     current_page=current_page / %}
 
-    {% component "navlink"
-    link="dashboard:etablissement:filtre:threshold"
-    icon="fa-solid fa-filter"
-    text="Filtre"
-    page_name="filtre"
-    current_page=current_page / %}
+    <!-- Filtrage Section -->
+    <li class="nav-item">
+        <button class="nav-link px-3 w-100 text-start border-0 bg-transparent d-flex align-items-center justify-content-between" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#collapseFiltrage" 
+                aria-expanded="false" 
+                aria-controls="collapseFiltrage">
+            <span>
+                <i class="fa-solid fa-filter pe-1"></i>
+                Filtrage
+            </span>
+            <i class="fa-solid fa-chevron-down small"></i>
+        </button>
+    </li>
+    <div class="collapse" id="collapseFiltrage">
+        <ul class="nav nav-pills flex-column ps-3">
+            {% component "navlink"
+            link="dashboard:etablissement:filtre:threshold"
+            icon="fa-solid fa-chart-line"
+            text="Seuil et Objectif"
+            page_name="seuil_et_objectif"
+            current_page=current_page / %}
 
-    {% component "navlink"
-    link="dashboard:etablissement:roulette:roulette"
-    icon="fa-solid fa-circle-notch"
-    text="Roulette"
-    page_name="roulette"
-    current_page=current_page / %}
+            {% component "navlink"
+            link="dashboard:etablissement:filtre:personalisation"
+            icon="fa-solid fa-palette"
+            text="Personalisation"
+            page_name="personalisation"
+            current_page=current_page / %}
 
+            {% component "navlink"
+            link="dashboard:etablissement:filtre:qrcode"
+            icon="fa-solid fa-qrcode"
+            text="QR Code"
+            page_name="qr_code"
+            current_page=current_page / %}
+        </ul>
+    </div>
 
+    <!-- Roulette Section -->
+    <li class="nav-item">
+        <button class="nav-link px-3 w-100 text-start border-0 bg-transparent d-flex align-items-center justify-content-between" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#collapseRoulette" 
+                aria-expanded="false" 
+                aria-controls="collapseRoulette">
+            <span>
+                <i class="fa-solid fa-circle-notch pe-1"></i>
+                Roulette
+            </span>
+            <i class="fa-solid fa-chevron-down small"></i>
+        </button>
+    </li>
+    <div class="collapse" id="collapseRoulette">
+        <ul class="nav nav-pills flex-column ps-3">
+            {% component "navlink"
+            link="dashboard:etablissement:roulette:roulette"
+            icon="fa-solid fa-circle-notch"
+            text="Roue de la fortune"
+            page_name="roulette"
+            current_page=current_page / %}
+        </ul>
+    </div>
 
 </ul>
+
+<script>
+// Handle chevron icon rotation when collapses are toggled
+document.addEventListener('DOMContentLoaded', function() {
+    const collapseElements = document.querySelectorAll('#collapseFiltrage, #collapseRoulette');
+    
+    collapseElements.forEach(function(collapse) {
+        collapse.addEventListener('show.bs.collapse', function() {
+            const collapseId = this.getAttribute('id');
+            const trigger = document.querySelector(`[data-bs-target="#${collapseId}"]`);
+            if (trigger) {
+                const chevron = trigger.querySelector('.fa-chevron-down, .fa-chevron-up');
+                if (chevron) {
+                    chevron.classList.remove('fa-chevron-down');
+                    chevron.classList.add('fa-chevron-up');
+                }
+            }
+        });
+        
+        collapse.addEventListener('hide.bs.collapse', function() {
+            const collapseId = this.getAttribute('id');
+            const trigger = document.querySelector(`[data-bs-target="#${collapseId}"]`);
+            if (trigger) {
+                const chevron = trigger.querySelector('.fa-chevron-down, .fa-chevron-up');
+                if (chevron) {
+                    chevron.classList.remove('fa-chevron-up');
+                    chevron.classList.add('fa-chevron-down');
+                }
+            }
+        });
+    });
+});
+</script>

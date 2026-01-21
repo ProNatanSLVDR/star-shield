@@ -14,18 +14,23 @@
     page_name="etablissements"
     current_page=current_page / %}
 
+    {% component "navlink"
+    link="dashboard:facturation:facturation"
+    icon="fa-solid fa-receipt"
+    text="Facturation"
+    page_name="facturation"
+    current_page=current_page / %}
+
     <hr>
 
     {% component "etablissement_selector" / %}
 
+    <div class="alert alert-primary d-flex flex-column align-items-center text-center p-3 mb-0 mt-3" role="alert">
+        <i class="fa-solid fa-arrow-up fa-lg mb-2 text-primary-subtle"></i>
+        <strong>Sélectionnez un établissement</strong>
+        <p class="mb-0 mt-2 small">Cliquez sur le bouton ci-dessus pour sélectionner un établissement et accéder à ses pages.</p>
+    </div>
 
-    {% if not request.etablissement %}
-        <div class="alert alert-primary d-flex flex-column align-items-center text-center p-3 mb-0 mt-3" role="alert">
-            <i class="fa-solid fa-arrow-up fa-lg mb-2 text-primary-subtle"></i>
-            <strong>Sélectionnez un établissement</strong>
-            <p class="mb-0 mt-2 small">Cliquez sur le bouton ci-dessus pour sélectionner un établissement et accéder à ses pages.</p>
-        </div>
-    {% endif %}
 
 
 </ul>
