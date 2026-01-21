@@ -4,60 +4,18 @@
         {{text}}
     </a>
 </li>
-<script>
-    (function() {
-        function expandParentCollapse(navLink) {
-            if (!navLink || !navLink.classList.contains('active')) {
-                return;
-            }
 
-        // Find the closest parent collapse element
-            let parentCollapse = navLink.closest('.collapse');
-            if (!parentCollapse) {
-            // If not directly inside collapse, check if parent ul is inside collapse
-                const parentUl = navLink.closest('ul');
-                if (parentUl) {
-                    parentCollapse = parentUl.closest('.collapse');
+{% if current_page == page_name %}
+    <script>
+        (function() {
+            const script = document.currentScript;
+            const navItem = script.previousElementSibling;
+            if (navItem) {
+                const collapse = navItem.closest('.collapse');
+                if (collapse) {
+                    collapse.classList.add('show');
                 }
             }
-
-            if (parentCollapse) {
-            // Open the collapse
-                parentCollapse.classList.add('show');
-                parentCollapse.setAttribute('aria-expanded', 'true');
-
-            // Find and update the collapse trigger button
-                const collapseId = parentCollapse.getAttribute('id');
-                if (collapseId) {
-                    const trigger = document.querySelector(`[data-bs-target="#${collapseId}"]`);
-                    if (trigger) {
-                        trigger.setAttribute('aria-expanded', 'true');
-                    // Update chevron icon
-                        const chevron = trigger.querySelector('.fa-chevron-down');
-                        if (chevron) {
-                            chevron.classList.remove('fa-chevron-down');
-                            chevron.classList.add('fa-chevron-up');
-                        }
-                    }
-                }
-            }
-        }
-
-    // Find the navlink element relative to this script
-        const script = document.currentScript;
-        const navItem = script.previousElementSibling;
-        if (navItem) {
-            const navLink = navItem.querySelector('.nav-link');
-            if (navLink) {
-            // Run immediately if DOM is ready, otherwise wait
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() {
-                        expandParentCollapse(navLink);
-                    });
-                } else {
-                    expandParentCollapse(navLink);
-                }
-            }
-        }
-    })();
-</script>
+        })();
+    </script>
+{% endif %}
