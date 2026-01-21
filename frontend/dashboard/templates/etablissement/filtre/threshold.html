@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block sidebar_content %}
-    {% include "etablissement/sidebar_etablissement.html" %}
+    {% include "etablissement/filtre/sidebar_filtre.html" %}
 {% endblock %}
 
 {% block dashboard_content %}
@@ -110,7 +110,7 @@
                             Cette visualisation représente le fonctionnement de la redirection des avis selon le seuil actuel.
                         </p>
 
-                        <form method="post" action="{% url 'dashboard:etablissement:settings:threshold' %}" class="mt-auto pt-4">
+                        <form method="post" action="{% url 'dashboard:etablissement:filtre:threshold' %}" class="mt-auto pt-4">
                             {% csrf_token %}
 
                             <div class="mb-4">

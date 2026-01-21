@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block sidebar_content %}
-    {% include "etablissement/sidebar_etablissement.html" %}
+    {% include "etablissement/filtre/sidebar_filtre.html" %}
 {% endblock %}
 
 {% block dashboard_content %}
@@ -371,7 +371,7 @@
                         // Create a hidden form to submit delete request
                         const deleteForm = document.createElement("form");
                         deleteForm.method = "POST";
-                        deleteForm.action = "{% url 'dashboard:etablissement:settings:qrcode' %}";
+                        deleteForm.action = "{% url 'dashboard:etablissement:filtre:qrcode' %}";
 
                         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
                         if (csrfToken) {

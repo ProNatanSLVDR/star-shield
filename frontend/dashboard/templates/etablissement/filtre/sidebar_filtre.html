@@ -1,0 +1,37 @@
+<ul class="nav nav-pills flex-column">
+
+    {% component "navlink"
+    link="dashboard:etablissement:overview"
+    icon="fa-solid fa-arrow-left"
+    text="Retour"
+    page_name=""
+    current_page=current_page / %}
+
+</ul>
+
+<hr>
+
+<ul class="nav nav-pills flex-column">
+
+    {% component "navlink"
+    link="dashboard:etablissement:filtre:threshold"
+    icon="fa-solid fa-chart-line"
+    text="Seuil et Objectif"
+    page_name="seuil_et_objectif"
+    current_page=current_page / %}
+
+    {% component "navlink"
+    link="dashboard:etablissement:filtre:personalisation"
+    icon="fa-solid fa-palette"
+    text="Personalisation"
+    page_name="personalisation"
+    current_page=current_page / %}
+
+    {% component "navlink"
+    link="dashboard:etablissement:filtre:qrcode"
+    icon="fa-solid fa-qrcode"
+    text="QR Code"
+    page_name="qr_code"
+    current_page=current_page / %}
+
+</ul>
