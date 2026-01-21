@@ -36,7 +36,6 @@
 
     // Function to update chevron based on state
         function updateChevron(isOpen) {
-            console.log('updateChevron', isOpen);
             if (isOpen) {
                 chevronDown.classList.add('d-none');
                 chevronUp.classList.remove('d-none');
@@ -50,8 +49,6 @@
         function syncCollapseState() {
             const state = collapse.getAttribute('data-collapse-state');
             const isOpen = state === 'open';
-
-            console.log('syncCollapseState', state, isOpen);
 
             if (isOpen) {
                 collapse.classList.add('show');
