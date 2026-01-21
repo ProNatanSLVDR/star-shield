@@ -13,7 +13,7 @@
             if (navItem) {
                 const collapse = navItem.closest('.collapse');
                 if (collapse) {
-                    collapse.classList.add('show');
+                    collapse.setAttribute('data-collapse-state', 'open');
                 }
             }
         })();
