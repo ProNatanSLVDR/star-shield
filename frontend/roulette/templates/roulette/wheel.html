@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body %}
+<section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <h1 class="h3 fw-bold mb-3">{{ etablissement.title }}</h1>
+                            <p class="text-muted mb-0">Tentez votre chance et gagnez un prix !</p>
+                        </div>
+
+                        {% if not can_spin %}
+                        <div class="alert alert-info mb-4" role="alert">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fa-solid fa-info-circle mt-1"></i>
+                                <div>
+                                    <strong>Comment participer :</strong>
+                                    <ol class="mb-0 mt-2 ps-3">
+                                        <li>Cliquez sur le lien ci-dessous pour laisser un avis 5 étoiles</li>
+                                        <li>Attendez 30 secondes après avoir cliqué sur le lien</li>
+                                        <li>Lancez la roue et découvrez votre prix !</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if review_url %}
+                        <div class="text-center mb-4">
+                            <a href="{{ review_url }}" 
+                               target="_blank" 
+                               rel="noopener" 
+                               class="btn btn-primary btn-lg rounded-pill px-4 py-3"
+                               id="reviewLinkBtn">
+                                <i class="fa-solid fa-star me-2"></i>
+                                Laisser un avis 5 étoiles
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <div class="alert alert-warning mb-0" role="alert" id="timerAlert">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                            <span id="timerMessage">{{ message }}</span>
+                        </div>
+                        
+                        <div id="timerContainer" class="text-center mt-3" style="display: none;">
+                            <div class="alert alert-success" role="alert">
+                                <i class="fa-solid fa-clock me-2"></i>
+                                <strong>Attendez :</strong> <span id="countdown">30</span> secondes avant de pouvoir lancer la roue
+                            </div>
+                        </div>
+                        {% else %}
+                        <!-- Hidden CSRF token for AJAX -->
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        
+                        <!-- Wheel Container -->
+                        <div id="wheelContainer" class="mb-4">
+                            <div class="text-center mb-4">
+                                <div id="wheel" class="position-relative mx-auto" style="width: 400px; height: 400px; max-width: 100%;">
+                                    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                                    <div id="wheelPointer" class="position-absolute top-0 start-50 translate-middle-x" style="z-index: 10; transform: translateX(-50%) translateY(-10px);">
+                                        <i class="fa-solid fa-caret-down fa-3x text-danger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button id="spinButton" class="btn btn-primary btn-lg rounded-pill px-5 py-3" onclick="spinWheel()">
+                                    <i class="fa-solid fa-play me-2"></i>
+                                    Lancer la roue
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Result Container (hidden initially) -->
+                        <div id="resultContainer" class="text-center" style="display: none;">
+                            <div id="resultContent"></div>
+                            <button class="btn btn-outline-secondary mt-3" onclick="resetWheel()">
+                                <i class="fa-solid fa-rotate-left me-2"></i>
+                                Revenir à la roue
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <p class="text-muted text-center mt-4 mb-0 small opacity-75">
+                    Proposé par Starshield
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+const prizes = [
+    {% for prize in prizes %}
+    {
+        id: {{ prize.id }},
+        name: "{{ prize.name|escapejs }}",
+        icon: "{{ prize.icon|escapejs }}",
+        probability: {{ prize.probability }},
+        isNothing: {{ prize.is_nothing_prize|yesno:"true,false" }}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+const spinUrl = "{{ spin_url }}";
+let isSpinning = false;
+
+function drawWheel() {
+    const canvas = document.getElementById('wheelCanvas');
+    if (!canvas || prizes.length === 0) return;
+    
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 10;
+    
+    const totalProbability = prizes.reduce((sum, p) => sum + parseFloat(p.probability), 0);
+    let currentAngle = -Math.PI / 2; // Start from top
+    
+    // Colors for segments
+    const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
+        '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
+    ];
+    
+    prizes.forEach((prize, index) => {
+        const angle = (parseFloat(prize.probability) / totalProbability) * 2 * Math.PI;
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + angle);
+        ctx.closePath();
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw text
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(currentAngle + angle / 2);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px Arial';
+        const textX = radius * 0.6;
+        ctx.fillText(prize.name, textX, 0);
+        ctx.restore();
+        
+        currentAngle += angle;
+    });
+}
+
+function spinWheel() {
+    if (isSpinning) return;
+    
+    // Validate timer client-side
+    const etablissementId = {{ etablissement.id }};
+    const storageKey = `roulette_review_clicked_${etablissementId}`;
+    const clickedTime = localStorage.getItem(storageKey);
+    
+    if (!clickedTime) {
+        alert('Veuillez d\'abord cliquer sur le lien pour laisser un avis.');
+        return;
+    }
+    
+    const elapsed = (Date.now() - parseInt(clickedTime)) / 1000;
+    if (elapsed < 30) {
+        const secondsRemaining = Math.ceil(30 - elapsed);
+        alert(`Veuillez attendre ${secondsRemaining} seconde(s) après avoir cliqué sur le lien d'avis.`);
+        return;
+    }
+    
+    const spinButton = document.getElementById('spinButton');
+    spinButton.disabled = true;
+    spinButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Lancement...';
+    isSpinning = true;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                      document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
+                      document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+    
+    fetch(spinUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            spinButton.disabled = false;
+            spinButton.innerHTML = '<i class="fa-solid fa-play me-2"></i>Lancer la roue';
+            isSpinning = false;
+            return;
+        }
+        
+        // Find the prize index
+        const prizeIndex = prizes.findIndex(p => p.id === data.prize?.id);
+        const selectedAngle = prizeIndex >= 0 ? 
+            prizes.slice(0, prizeIndex).reduce((sum, p) => sum + (parseFloat(p.probability) / 100) * 360, 0) + 
+            (parseFloat(prizes[prizeIndex].probability) / 100) * 360 / 2 :
+            0;
+        
+        // Animate spin
+        const canvas = document.getElementById('wheelCanvas');
+        let rotation = 0;
+        const targetRotation = 360 * 5 + (360 - selectedAngle); // 5 full spins + offset
+        const duration = 3000;
+        const startTime = Date.now();
+        
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            
+            rotation = targetRotation * easeOut;
+            
+            canvas.style.transform = `rotate(${rotation}deg)`;
+            canvas.style.transition = 'none';
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                showResult(data);
+            }
+        }
+        
+        animate();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Une erreur est survenue. Veuillez réessayer.');
+        spinButton.disabled = false;
+        spinButton.innerHTML = '<i class="fa-solid fa-play me-2"></i>Lancer la roue';
+        isSpinning = false;
+    });
+}
+
+function showResult(data) {
+    const wheelContainer = document.getElementById('wheelContainer');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultContent = document.getElementById('resultContent');
+    
+    wheelContainer.style.display = 'none';
+    resultContainer.style.display = 'block';
+    
+    if (data.prize_code) {
+        resultContent.innerHTML = `
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="fa-solid fa-trophy me-2"></i>Félicitations !</h4>
+                <p class="mb-2">Vous avez gagné : <strong>${data.prize_name}</strong></p>
+                <hr>
+                <p class="mb-0">
+                    <strong>Votre code :</strong><br>
+                    <code class="fs-4 fw-bold">${data.prize_code}</code>
+                </p>
+                <small class="d-block mt-2">Montrez ce code au restaurant pour réclamer votre prix.</small>
+            </div>
+        `;
+    } else {
+        resultContent.innerHTML = `
+            <div class="alert alert-info">
+                <h4 class="alert-heading"><i class="fa-solid fa-heart me-2"></i>Merci !</h4>
+                <p class="mb-0">${data.message}</p>
+            </div>
+        `;
+    }
+    
+    isSpinning = false;
+}
+
+function resetWheel() {
+    const wheelContainer = document.getElementById('wheelContainer');
+    const resultContainer = document.getElementById('resultContainer');
+    const canvas = document.getElementById('wheelCanvas');
+    const spinButton = document.getElementById('spinButton');
+    
+    wheelContainer.style.display = 'block';
+    resultContainer.style.display = 'none';
+    canvas.style.transform = 'rotate(0deg)';
+    spinButton.disabled = false;
+    spinButton.innerHTML = '<i class="fa-solid fa-play me-2"></i>Lancer la roue';
+}
+
+// Draw wheel on page load
+document.addEventListener('DOMContentLoaded', function() {
+    drawWheel();
+    
+    // Handle review link click - start timer (client-side only)
+    const reviewLinkBtn = document.getElementById('reviewLinkBtn');
+    const etablissementId = {{ etablissement.id }};
+    const storageKey = `roulette_review_clicked_${etablissementId}`;
+    
+    if (reviewLinkBtn) {
+        reviewLinkBtn.addEventListener('click', function() {
+            // Record click time in localStorage
+            localStorage.setItem(storageKey, Date.now().toString());
+            
+            // Show timer
+            const timerContainer = document.getElementById('timerContainer');
+            const timerAlert = document.getElementById('timerAlert');
+            const timerMessage = document.getElementById('timerMessage');
+            
+            if (timerContainer && timerAlert && timerMessage) {
+                timerAlert.style.display = 'none';
+                timerContainer.style.display = 'block';
+                
+                let secondsRemaining = 30;
+                const countdownEl = document.getElementById('countdown');
+                
+                const countdown = setInterval(function() {
+                    secondsRemaining--;
+                    if (countdownEl) {
+                        countdownEl.textContent = secondsRemaining;
+                    }
+                    
+                    if (secondsRemaining <= 0) {
+                        clearInterval(countdown);
+                        timerContainer.style.display = 'none';
+                        timerAlert.style.display = 'block';
+                        timerMessage.textContent = 'Vous pouvez maintenant lancer la roue !';
+                        timerAlert.className = 'alert alert-success mb-0';
+                        
+                        // Reload page to enable spin button
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                }, 1000);
+            }
+        });
+    }
+    
+    // Check if timer has elapsed on page load
+    const clickedTime = localStorage.getItem(storageKey);
+    if (clickedTime) {
+        const elapsed = (Date.now() - parseInt(clickedTime)) / 1000;
+        if (elapsed < 30) {
+            // Timer still running, show countdown
+            const timerContainer = document.getElementById('timerContainer');
+            const timerAlert = document.getElementById('timerAlert');
+            const timerMessage = document.getElementById('timerMessage');
+            
+            if (timerContainer && timerAlert && timerMessage) {
+                timerAlert.style.display = 'none';
+                timerContainer.style.display = 'block';
+                
+                let secondsRemaining = Math.ceil(30 - elapsed);
+                const countdownEl = document.getElementById('countdown');
+                
+                const countdown = setInterval(function() {
+                    secondsRemaining--;
+                    if (countdownEl) {
+                        countdownEl.textContent = secondsRemaining;
+                    }
+                    
+                    if (secondsRemaining <= 0) {
+                        clearInterval(countdown);
+                        timerContainer.style.display = 'none';
+                        timerAlert.style.display = 'block';
+                        timerMessage.textContent = 'Vous pouvez maintenant lancer la roue !';
+                        timerAlert.className = 'alert alert-success mb-0';
+                    }
+                }, 1000);
+            }
+        }
+    }
+});
+</script>
+
+<style>
+#wheel {
+    position: relative;
+}
+
+#wheelCanvas {
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s linear;
+}
+
+#wheelPointer {
+    pointer-events: none;
+}
+</style>
+{% endblock body %}

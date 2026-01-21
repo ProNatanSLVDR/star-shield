@@ -433,6 +433,17 @@ class Etablissement(models.Model):
         help_text="Logo à afficher au centre du QR code.",
     )
 
+    # Roulette settings
+    roulette_enabled = models.BooleanField(
+        default=False,
+        help_text="Enable roulette wheel for this establishment.",
+    )
+    roulette_spin_cooldown_days = models.PositiveSmallIntegerField(
+        default=14,
+        validators=[MinValueValidator(1), MaxValueValidator(180)],
+        help_text="Number of days between spins (cooldown period).",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_reviews_update = models.DateTimeField(blank=True, null=True)

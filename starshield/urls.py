@@ -15,6 +15,7 @@ urlpatterns = [
     # Apps
     path("", include(("frontend.dashboard.urls", "dashboard"))),
     path("reviews/", include(("frontend.reviews.urls", "reviews"))),
+    path("roulette/", include(("frontend.roulette.urls", "roulette"))),
     path("payments/", include("payments.urls")),
     # Errors
     path("error_preview/404/", errorviews.error_404_preview, name="error_404_preview"),
