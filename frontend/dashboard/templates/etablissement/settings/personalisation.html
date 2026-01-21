@@ -1,6 +1,10 @@
 {% extends "dashboard_base.html" %}
 {% load i18n %}
 
+{% block sidebar_content %}
+    {% include "etablissement/sidebar_etablissement.html" %}
+{% endblock %}
+
 {% block dashboard_content %}
     <style>
         .preview-disabled {

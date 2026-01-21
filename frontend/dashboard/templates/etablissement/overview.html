@@ -1,6 +1,10 @@
 {% extends "dashboard_base.html" %}
 {% load static %}
 
+{% block sidebar_content %}
+    {% include "etablissement/sidebar_etablissement.html" %}
+{% endblock %}
+
 {% block dashboard_content %}
 
     <div class="rounded-4 border bg-white shadow-sm p-3 w-100 mb-3">

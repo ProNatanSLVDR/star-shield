@@ -2,6 +2,10 @@
 {% load static %}
 {% load filters %}
 
+{% block sidebar_content %}
+    {% include "etablissement/sidebar_etablissement.html" %}
+{% endblock %}
+
 {% block dashboard_content %}
 
     <div class="mb-3">
