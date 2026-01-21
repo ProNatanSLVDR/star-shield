@@ -1,14 +1,14 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.urls import reverse
 from frontend.dashboard.render import starshield_render
 from frontend.reviews.models import ReviewAnalytics
 import logging
+from starshield.decorators import unselect_etablissement
 
 logger = logging.getLogger(__name__)
 
 
-@login_required
+@unselect_etablissement
 def accueil_view(request):
     # Redirect to onboarding if not completed
     if not request.user.onboarding_completed:

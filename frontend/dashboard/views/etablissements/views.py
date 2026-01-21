@@ -2,7 +2,7 @@ from allauth.account.decorators import reverse
 from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.http import require_POST, require_http_methods
 from auths.models import Etablissement
-from starshield.decorators import google_gmb_connected_required
+from starshield.decorators import google_gmb_connected_required, unselect_etablissement
 from frontend.dashboard.render import starshield_render
 from django.contrib import messages
 from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
@@ -17,6 +17,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @google_gmb_connected_required
+@unselect_etablissement
 def list_etablissements_view(request):
     if not request.htmx:
         return starshield_render(request, "etablissements/list.html", page_name="etablissements")
