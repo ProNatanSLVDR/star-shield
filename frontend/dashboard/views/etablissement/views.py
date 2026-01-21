@@ -2,10 +2,15 @@ from django.urls import reverse
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count, Case, When, IntegerField
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
 from datetime import timedelta, datetime
 import json
 from frontend.reviews.models import Review, ReviewAnalytics
 from frontend.dashboard.render import starshield_render
+from tasks_api.models import TaskExecution
+from tasks_api.services.queue_service import enqueue_refresh_task
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
@@ -301,3 +306,49 @@ def avis_view(request):
         context=context,
         page_name="avis",
     )
+
+
+@google_gmb_connected_required
+@selected_etablissement_required
+@require_POST
+def refresh_reviews_view(request):
+    """
+    Refresh reviews for the selected etablissement.
+    Checks if a refresh was done recently (within 30 minutes) and prevents
+    multiple refreshes in a short time period.
+    """
+    etablissement = request.etablissement
+
+    # Check for latest successful refresh task
+    latest_refresh = (
+        TaskExecution.objects.filter(
+            etablissement=etablissement,
+            task_type="fetch_reviews_refresh",
+            status="success",
+        )
+        .order_by("-completed_at")
+        .first()
+    )
+
+    # Rate limiting: 30 minutes between refreshes
+    if latest_refresh and latest_refresh.completed_at:
+        time_since_refresh = timezone.now() - latest_refresh.completed_at
+        if time_since_refresh < timedelta(minutes=30):
+            minutes_remaining = 30 - int(time_since_refresh.total_seconds() / 60)
+            messages.warning(
+                request,
+                f"Un rafraîchissement a déjà été effectué récemment. Veuillez attendre {minutes_remaining} minute(s) avant d'en demander un nouveau.",
+            )
+            return redirect("dashboard:etablissement:overview")
+
+    # Enqueue refresh task
+    try:
+        enqueue_refresh_task(etablissement.id)
+        messages.success(request, "Le rafraîchissement des avis a été demandé avec succès. Les données seront mises à jour sous peu.")
+    except Exception as e:
+        messages.error(
+            request,
+            "Une erreur est survenue lors de la demande de rafraîchissement. Veuillez réessayer plus tard.",
+        )
+
+    return redirect("dashboard:etablissement:overview")

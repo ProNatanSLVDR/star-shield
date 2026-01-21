@@ -99,6 +99,40 @@ def enqueue_full_import_task(etablissement_id: int) -> None:
         logger.error(f"Failed to enqueue full import task for etablissement {etablissement_id}: {e}", exc_info=True)
 
 
+def enqueue_refresh_task(etablissement_id: int) -> None:
+    """
+    Enqueue a refresh task for a single etablissement to Cloud Tasks queue.
+    This triggers a fetch-refresh operation that imports only new reviews and stats.
+
+    Args:
+        etablissement_id: ID of the Etablissement to process
+
+    Returns:
+        None (logs errors but doesn't raise)
+    """
+    queue_name = settings.TASKS_API_QUEUE_NAME
+    base_url = settings.TASKS_API_BASE_URL
+
+    try:
+        # Build target URL for fetch-refresh endpoint
+        target_url = f"{base_url.rstrip('/')}/v1/fetch-refresh"
+
+        # Create task payload
+        payload = {"etablissement_id": etablissement_id}
+
+        create_google_cloud_task(
+            queue=queue_name,
+            url=target_url,
+            payload=payload,
+            task_id=f"etablissement_{etablissement_id}_refresh",
+        )
+
+        logger.info(f"Enqueued refresh task for etablissement {etablissement_id}")
+
+    except Exception as e:
+        logger.error(f"Failed to enqueue refresh task for etablissement {etablissement_id}: {e}", exc_info=True)
+
+
 def enqueue_refresh_tasks() -> Dict[str, Any]:
     """
     Enqueue refresh tasks for all etablissements to Cloud Tasks queue.
