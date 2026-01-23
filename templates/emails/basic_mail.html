@@ -9,7 +9,7 @@
         <meta name="x-apple-disable-message-reformatting">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="format-detection" content="telephone=no">
-        <title>New Message 2</title><!--[if (mso 16)]>
+        <title>{% block title %}New Message 2{% endblock %}</title><!--[if (mso 16)]>
       <style type="text/css">
           a {
               text-decoration: none;
@@ -362,6 +362,7 @@
                                                                                style="mso-table-lspace:0pt;
                                                                                       mso-table-rspace:0pt;
                                                                                       border-spacing:0px">
+                                                                            {% block greeting %}
                                                                             <tr>
                                                                                 <td align="left" style="padding:0;Margin:0">
                                                                                     <p style="Margin:0;
@@ -375,9 +376,11 @@
                                                                                     </p>
                                                                                 </td>
                                                                             </tr>
+                                                                            {% endblock %}
                                                                             <tr>
                                                                                 <td align="center" height="30" style="padding:0;Margin:0;font-size:0"></td>
                                                                             </tr>
+                                                                            {% block content %}
                                                                             <tr>
                                                                                 <td align="center" style="padding:0;Margin:0">
                                                                                     <p style="Margin:0;
@@ -407,6 +410,7 @@
                                                                                     </p>
                                                                                 </td>
                                                                             </tr>
+                                                                            {% endblock %}
                                                                         </table>
                                                                     </td>
                                                                 </tr>
@@ -457,6 +461,7 @@
                                                                                style="mso-table-lspace:0pt;
                                                                                       mso-table-rspace:0pt;
                                                                                       border-spacing:0px">
+                                                                            {% block footer %}
                                                                             <tr>
                                                                                 <td align="center" style="padding:0;Margin:0">
                                                                                     <p style="Margin:0;
@@ -470,6 +475,7 @@
                                                                                     </p>
                                                                                 </td>
                                                                             </tr>
+                                                                            {% endblock %}
                                                                         </table>
                                                                     </td>
                                                                 </tr>
