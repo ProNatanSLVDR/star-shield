@@ -168,6 +168,9 @@ class Base(Configuration):
     # Account email verification by code instead of link
     ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
 
+    # Custom account adapter for email styling
+    ACCOUNT_ADAPTER = "starshield.account_adapter.CustomAccountAdapter"
+
     # Internationalization
     # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -191,7 +194,6 @@ class Base(Configuration):
     TASK_TIMEOUT_SECONDS = 300  # 5 minutes
 
     # Brevo Email Configuration
-    BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
     BREVO_SENDER_EMAIL = "noreply@starshield.pro"
     BREVO_SENDER_NAME = "StarShield"
     DEFAULT_FROM_EMAIL = BREVO_SENDER_EMAIL
@@ -213,6 +215,8 @@ class Dev(Base):
 
     # Email
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    # EMAIL_BACKEND = "starshield.email_backends.BrevoEmailBackend"
+    # BREVO_API_KEY = "keykey"
 
     # STRIPE (test keys)
     STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
@@ -366,6 +370,7 @@ class Prod(Base):
 
     # Email
     EMAIL_BACKEND = "starshield.email_backends.BrevoEmailBackend"
+    BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 
     # Stripe
     STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
