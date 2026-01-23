@@ -261,7 +261,8 @@
             extra_kwargs={
             "type": "submit",
             }
-            /%}
+            %}
+            {% endcomponent %}
         {% elif is_activation %}
             {% component "button"
             text="Continuer vers le paiement"
@@ -270,7 +271,8 @@
             extra_kwargs={
             "type": "submit",
             }
-            /%}
+            %}
+            {% endcomponent %}
         {% else %}
             {% component "button"
             text="Confirmer la désactivation"
@@ -279,7 +281,8 @@
             extra_kwargs={
             "type": "submit",
             }
-            /%}
+            %}
+            {% endcomponent %}
         {% endif %}
     </div>
 

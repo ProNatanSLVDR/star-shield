@@ -1,88 +1,80 @@
-
 <ul class="nav nav-pills flex-column">
-
     {% component "navlink"
-    link="dashboard:etablissements:unselect"
-    icon="fa-solid fa-door-open"
-    text="Retour a l'accueil" / %}
-
+        link="dashboard:etablissements:unselect"
+        icon="fa-solid fa-door-open"
+        text="Retour a l'accueil" %}
+    {% endcomponent %}
 </ul>
-
 <hr>
-
-{% component "etablissement_selector" / %}
-
-    <hr>
-
-    <ul class="nav nav-pills flex-column">
-
-        {% component "navlink"
+{% component "etablissement_selector" %}
+{% endcomponent %}
+<hr>
+<ul class="nav nav-pills flex-column">
+    {% component "navlink"
         link="dashboard:etablissement:overview"
         icon="fa-solid fa-chart-pie"
         text="Vue d'ensemble"
         page_name="etablissement"
-        current_page=current_page / %}
-
-        {% component "navlink"
+        current_page=current_page %}
+    {% endcomponent %}
+    {% component "navlink"
         link="dashboard:etablissement:avis"
         icon="fa-solid fa-comments"
         text="Avis"
         page_name="avis"
-        current_page=current_page / %}
-
-        {% component "navlink"
+        current_page=current_page %}
+    {% endcomponent %}
+    {% component "navlink"
         link="dashboard:etablissement:settings:settings"
         icon="fa-solid fa-gear"
         text="Paramètres"
         page_name="etablissement_settings"
-        current_page=current_page / %}
-
+        current_page=current_page %}
+    {% endcomponent %}
     <!-- Filtrage Section -->
-        {% component "collapse_navlink"
+    {% component "collapse_navlink"
         icon="fa-solid fa-filter"
         text="Filtrage"
         collapse_id="collapseFiltrage"
         %}
         {% fill navlinks %}
-
             {% component "navlink"
-            link="dashboard:etablissement:filtre:threshold"
-            icon="fa-solid fa-chart-line"
-            text="Seuil et Objectif"
-            page_name="seuil_et_objectif"
-            current_page=current_page / %}
-
+                link="dashboard:etablissement:filtre:threshold"
+                icon="fa-solid fa-chart-line"
+                text="Seuil et Objectif"
+                page_name="seuil_et_objectif"
+                current_page=current_page %}
+            {% endcomponent %}
             {% component "navlink"
-            link="dashboard:etablissement:filtre:personalisation"
-            icon="fa-solid fa-palette"
-            text="Personalisation"
-            page_name="personalisation"
-            current_page=current_page / %}
-
+                link="dashboard:etablissement:filtre:personalisation"
+                icon="fa-solid fa-palette"
+                text="Personalisation"
+                page_name="personalisation"
+                current_page=current_page %}
+            {% endcomponent %}
             {% component "navlink"
-            link="dashboard:etablissement:filtre:qrcode"
-            icon="fa-solid fa-qrcode"
-            text="QR Code"
-            page_name="qr_code"
-            current_page=current_page / %}
-
+                link="dashboard:etablissement:filtre:qrcode"
+                icon="fa-solid fa-qrcode"
+                text="QR Code"
+                page_name="qr_code"
+                current_page=current_page %}
+            {% endcomponent %}
         {% endfill %}
-{% endcomponent %}
-
+    {% endcomponent %}
     <!-- Roulette Section -->
-{% component "collapse_navlink"
-icon="fa-solid fa-circle-notch"
-text="Roulette"
-collapse_id="collapseRoulette"
-%}
-{% fill navlinks %}
-    {% component "navlink"
-    link="dashboard:etablissement:roulette:roulette"
-    icon="fa-solid fa-circle-notch"
-    text="Roue de la fortune"
-    page_name="roulette"
-    current_page=current_page / %}
-{% endfill %}
-{% endcomponent %}
-
+    {% component "collapse_navlink"
+        icon="fa-solid fa-circle-notch"
+        text="Roulette"
+        collapse_id="collapseRoulette"
+        %}
+        {% fill navlinks %}
+            {% component "navlink"
+                link="dashboard:etablissement:roulette:roulette"
+                icon="fa-solid fa-circle-notch"
+                text="Roue de la fortune"
+                page_name="roulette"
+                current_page=current_page %}
+            {% endcomponent %}
+        {% endfill %}
+    {% endcomponent %}
 </ul>

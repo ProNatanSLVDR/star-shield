@@ -5,25 +5,29 @@
     icon="fa-solid fa-house-user"
     text="Accueil"
     page_name="accueil"
-    current_page=current_page / %}
+    current_page=current_page %}
+    {% endcomponent %}
 
     {% component "navlink"
     link="dashboard:etablissements:list"
     icon="fa-solid fa-building"
     text="Vos établissements"
     page_name="etablissements"
-    current_page=current_page / %}
+    current_page=current_page %}
+    {% endcomponent %}
 
     {% component "navlink"
     link="dashboard:facturation:facturation"
     icon="fa-solid fa-receipt"
     text="Facturation"
     page_name="facturation"
-    current_page=current_page / %}
+    current_page=current_page %}
+    {% endcomponent %}
 
     <hr>
 
-    {% component "etablissement_selector" / %}
+    {% component "etablissement_selector" %}
+    {% endcomponent %}
 
     <div class="alert alert-primary d-flex flex-column align-items-center text-center p-3 mb-0 mt-3" role="alert">
         <i class="fa-solid fa-arrow-up fa-lg mb-2 text-primary-subtle"></i>

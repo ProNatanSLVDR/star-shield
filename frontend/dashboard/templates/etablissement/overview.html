@@ -132,7 +132,8 @@
                     {% if latest_reviews %}
                         <div class="d-flex flex-column gap-3 flex-grow-1" style="min-height: 0; overflow-y: auto;">
                             {% for review in latest_reviews %}
-                                {% component "review" review=review show_badge=True show_timestamp=True truncate_comment=True truncate_words=20 / %}
+                                {% component "review" review=review show_badge=True show_timestamp=True truncate_comment=True truncate_words=20 %}
+                                {% endcomponent %}
                             {% endfor %}
                         </div>
                     {% else %}

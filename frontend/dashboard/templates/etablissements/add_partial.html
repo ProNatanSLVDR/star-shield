@@ -139,7 +139,8 @@
                 "id": "import-btn",
                 "disabled": True,
                 }
-                /%}
+                %}
+                {% endcomponent %}
             {% else %}
                 {% component "button"
                 text="Fermer"
@@ -148,7 +149,8 @@
                 extra_kwargs={
                 "data-bs-dismiss": "modal",
                 }
-                /%}
+                %}
+                {% endcomponent %}
             {% endif %}
         {% else %}
             {% component "button"

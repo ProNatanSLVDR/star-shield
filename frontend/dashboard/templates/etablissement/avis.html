@@ -168,7 +168,8 @@
                 <div class="row g-3" data-masonry='{"percentPosition": true }'>
                     {% for review in reviews %}
                         <div class="col-12 col-md-6 col-lg-4">
-                            {% component "review" review=review show_badge=True show_timestamp=True truncate_comment=False / %}
+                            {% component "review" review=review show_badge=True show_timestamp=True truncate_comment=False %}
+                            {% endcomponent %}
                         </div>
                     {% endfor %}
                 </div>
