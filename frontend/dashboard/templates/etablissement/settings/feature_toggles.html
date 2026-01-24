@@ -1,3 +1,19 @@
+<style>
+     .feature-toggle-switch .form-check-input {
+          width: 2.5rem;
+          height: 1.5rem;
+          cursor: pointer;
+     }
+
+     .feature-toggle-switch .form-check-input:not(:checked) {
+          border-color: var(--bs-danger);
+     }
+
+     .feature-toggle-switch .form-check-input:checked {
+          background-color: var(--bs-success);
+          border-color: var(--bs-success);
+     }
+</style>
 <form hx-post="{% url 'dashboard:etablissement:settings:toggle_feature' %}"
       hx-confirm="Êtes-vous sûr de vouloir modifier les fonctionnalités ?"
       hx-target="#features-container"
@@ -39,7 +55,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-check form-switch d-flex align-items-center justify-content-end">
+                <div class="form-check form-switch feature-toggle-switch d-flex align-items-center justify-content-end">
                     <input type="checkbox"
                            class="form-check-input"
                            id="id_review_filtering_enabled"
@@ -83,7 +99,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-check form-switch d-flex align-items-center justify-content-end">
+                <div class="form-check form-switch feature-toggle-switch d-flex align-items-center justify-content-end">
                     <input type="checkbox"
                            class="form-check-input"
                            id="id_roulette_enabled"
