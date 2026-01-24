@@ -7,6 +7,24 @@
 {% endblock sidebar_content %}
 
 {% block dashboard_content %}
+    <style>
+         #stats-content {
+              transition: opacity 0.3s;
+         }
+
+         #stats-button {
+              opacity: 0;
+              transition: opacity 0.3s;
+         }
+
+         #general-stats-section:hover #stats-content {
+              opacity: 0.5;
+         }
+
+         #general-stats-section:hover #stats-button {
+              opacity: 1;
+         }
+    </style>
     <!-- Header Section -->
     <div class="rounded-4 border bg-white shadow-sm p-3 w-100 mb-3">
         <div class="row align-items-center h-100">
@@ -50,7 +68,8 @@
             <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3 position-relative"
                  id="general-stats-section">
                 <h2 class="h6 fw-semibold mb-3">Statistiques générales</h2>
-                <div class="row row-cols-1 row-cols-md-3 g-3">
+                <div class="row row-cols-1 row-cols-md-3 g-3"
+                     id="stats-content">
                     {% for stat in general_stats %}
                         <div class="col">
                             <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm h-100">
@@ -71,8 +90,6 @@
                 </div>
                 <!-- Hidden button that appears on hover -->
                 <div class="position-absolute top-50 start-50 translate-middle m-3"
-                     style="opacity: 0;
-                            transition: opacity 0.3s"
                      id="stats-button">
                     <a href="{% url 'dashboard:etablissement:stats' %}"
                        class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
@@ -140,21 +157,4 @@
             </div>
         </div>
     </div>
-    <script>
-        // Show stats button on hover
-        document.addEventListener('DOMContentLoaded', function() {
-            const statsSection = document.getElementById('general-stats-section');
-            const statsButton = document.getElementById('stats-button');
-
-            if (statsSection && statsButton) {
-                statsSection.addEventListener('mouseenter', function() {
-                    statsButton.style.opacity = '1';
-                });
-
-                statsSection.addEventListener('mouseleave', function() {
-                    statsButton.style.opacity = '0';
-                });
-            }
-        });
-    </script>
 {% endblock dashboard_content %}
