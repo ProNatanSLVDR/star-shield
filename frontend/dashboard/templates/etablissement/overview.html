@@ -35,20 +35,15 @@
             </div>
         </div>
     </div>
-
     <!-- Two Column Layout -->
     <div class="row g-3">
         <!-- Left Column: Features -->
         <div class="col-12 col-lg-5">
             <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3">
                 <h2 class="h6 fw-semibold mb-3">Fonctionnalités activées</h2>
-                <div class="d-flex flex-column g-3">
-                    {% include "etablissement/partials/feature_toggle.html" with feature="review_filtering_enabled" %}
-                    {% include "etablissement/partials/feature_toggle.html" with feature="roulette_enabled" %}
-                </div>
+                <div id="features-container">{% include "etablissement/partials/feature_toggle.html" %}</div>
             </div>
         </div>
-
         <!-- Right Column: Stats, Links, Settings -->
         <div class="col-12 col-lg-7">
             <!-- General Stats Section -->
@@ -86,7 +81,6 @@
                     </a>
                 </div>
             </div>
-
             <!-- Useful Links Section -->
             <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3">
                 <h2 class="h6 fw-semibold mb-3">Liens utiles</h2>
@@ -130,7 +124,6 @@
                     {% endif %}
                 </div>
             </div>
-
             <!-- Settings Link Section -->
             <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3">
                 <div class="d-flex align-items-center justify-content-between">

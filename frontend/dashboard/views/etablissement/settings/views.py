@@ -52,17 +52,16 @@ def settings_view(request):
 def toggle_feature_view(request):
     """HTMX endpoint to toggle etablissement features instantly."""
     etablissement = request.etablissement
-    
+
     # Create form with POST data
     form = ToggleFeatureForm(request.POST)
 
     if not form.is_valid():
         messages.error(request, "Données invalides.")
-        feature = request.POST.get("feature", "")
         return starshield_render(
             request,
             "etablissement/partials/feature_toggle.html",
-            context={"etablissement": etablissement, "feature": feature, "error": True},
+            context={"etablissement": etablissement},
         )
 
     feature = form.cleaned_data["feature"]
@@ -80,7 +79,7 @@ def toggle_feature_view(request):
         return starshield_render(
             request,
             "etablissement/partials/feature_toggle.html",
-            context={"etablissement": etablissement, "feature": feature, "error": True},
+            context={"etablissement": etablissement},
         )
 
     # Update the feature
@@ -90,9 +89,9 @@ def toggle_feature_view(request):
     # Refresh etablissement from DB to ensure we have latest state
     etablissement.refresh_from_db()
 
-    # Return the updated toggle partial
+    # Return the updated features partial with all features
     return starshield_render(
         request,
         "etablissement/partials/feature_toggle.html",
-        context={"etablissement": etablissement, "feature": feature},
+        context={"etablissement": etablissement},
     )

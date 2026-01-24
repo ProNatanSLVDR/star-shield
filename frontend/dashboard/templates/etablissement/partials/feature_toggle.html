@@ -1,4 +1,5 @@
-{% if feature == "review_filtering_enabled" %}
+<div class="d-flex flex-column g-3">
+    <!-- Review Filtering Feature -->
     <div class="mb-3">
         <div class="d-flex align-items-center justify-content-between p-3 border rounded-3
                     {% if etablissement.review_filtering_enabled %}
@@ -48,12 +49,12 @@
                        {% if etablissement.review_filtering_enabled %}checked{% endif %}
                        hx-post="{% url 'dashboard:etablissement:settings:toggle_feature' %}"
                        hx-confirm="Êtes-vous sûr de vouloir modifier le filtrage d'avis ?"
-                       hx-target="closest .mb-3"
-                       hx-swap="outerHTML">
+                       hx-target="#features-container"
+                       hx-swap="innerHTML">
             </div>
         </div>
     </div>
-{% elif feature == "roulette_enabled" %}
+    <!-- Roulette Feature -->
     <div class="mb-3">
         <div class="d-flex align-items-center justify-content-between p-3 border rounded-3
                     {% if etablissement.roulette_enabled %}
@@ -103,9 +104,9 @@
                        {% if etablissement.roulette_enabled %}checked{% endif %}
                        hx-post="{% url 'dashboard:etablissement:settings:toggle_feature' %}"
                        hx-confirm="Êtes-vous sûr de vouloir modifier la roulette ?"
-                       hx-target="closest .mb-3"
-                       hx-swap="outerHTML">
+                       hx-target="#features-container"
+                       hx-swap="innerHTML">
             </div>
         </div>
     </div>
-{% endif %}
+</div>
