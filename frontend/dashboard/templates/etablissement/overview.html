@@ -57,102 +57,130 @@
     <div class="row g-3">
         <!-- Left Column: Features -->
         <div class="col-12 col-lg-5">
-            <div class="rounded-4 border bg-white shadow-sm p-4 w-100 h-100 mb-3">
-                <h2 class="h6 fw-semibold mb-3">Fonctionnalités activées</h2>
-                <div id="features-container">{% include "etablissement/settings/feature_toggles.html" %}</div>
+            <div class="card shadow-sm border rounded-4 h-100 mb-3 overflow-hidden">
+                <div class="card-header bg-primary border-bottom px-4 py-3">
+                    <h2 class="h6 fw-semibold mb-0 text-white">
+                        <i class="fa-solid fa-toggle-on me-2"></i>
+                        Fonctionnalités activées
+                    </h2>
+                </div>
+                <div class="card-body px-4 py-4">
+                    <div id="features-container">{% include "etablissement/settings/feature_toggles.html" %}</div>
+                </div>
             </div>
         </div>
         <!-- Right Column: Stats, Links, Settings -->
         <div class="col-12 col-lg-7">
             <!-- General Stats Section -->
-            <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3 position-relative"
+            <div class="card shadow-sm border rounded-4 w-100 mb-3 position-relative overflow-hidden"
                  id="general-stats-section">
-                <h2 class="h6 fw-semibold mb-3">Statistiques générales</h2>
-                <div class="row row-cols-1 row-cols-md-3 g-3"
-                     id="stats-content">
-                    {% for stat in general_stats %}
-                        <div class="col">
-                            <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm h-100">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted small mb-1">{{ stat.label }}</p>
-                                    <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
-                                </div>
-                                <div class="align-self-center">
-                                    <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
-                                          style="width: 40px;
-                                                 height: 40px">
-                                        <i class="{{ stat.icon }}"></i>
-                                    </span>
+                <div class="card-header bg-primary border-bottom px-4 py-3">
+                    <h2 class="h6 fw-semibold mb-0 text-white">
+                        <i class="fa-solid fa-chart-line me-2"></i>
+                        Statistiques générales
+                    </h2>
+                </div>
+                <div class="card-body px-4 py-4">
+                    <div class="row row-cols-1 row-cols-md-3 g-3"
+                         id="stats-content">
+                        {% for stat in general_stats %}
+                            <div class="col">
+                                <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm h-100">
+                                    <div class="flex-grow-1">
+                                        <p class="text-muted small mb-1">{{ stat.label }}</p>
+                                        <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                              style="width: 40px;
+                                                     height: 40px">
+                                            <i class="{{ stat.icon }}"></i>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                <!-- Hidden button that appears on hover -->
-                <div class="position-absolute top-50 start-50 translate-middle m-3"
-                     id="stats-button">
-                    <a href="{% url 'dashboard:etablissement:stats' %}"
-                       class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
-                        <i class="fa-solid fa-chart-line"></i>
-                        <span>Voir les statistiques détaillées</span>
-                    </a>
+                        {% endfor %}
+                    </div>
+                    <!-- Hidden button that appears on hover -->
+                    <div class="position-absolute top-50 start-50 translate-middle m-3"
+                         id="stats-button">
+                        <a href="{% url 'dashboard:etablissement:stats' %}"
+                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Voir les statistiques détaillées</span>
+                        </a>
+                    </div>
                 </div>
             </div>
             <!-- Useful Links Section -->
-            <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3">
-                <h2 class="h6 fw-semibold mb-3">Liens utiles</h2>
-                <div class="row g-2">
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <a href="{% url 'dashboard:etablissement:avis' %}"
-                           class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                            <i class="fa-solid fa-comments"></i>
-                            <span>Avis</span>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <a href="{% url 'dashboard:etablissement:filtre:threshold' %}"
-                           class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                            <i class="fa-solid fa-chart-line"></i>
-                            <span>Seuil et Objectif</span>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <a href="{% url 'dashboard:etablissement:filtre:personalisation' %}"
-                           class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                            <i class="fa-solid fa-palette"></i>
-                            <span>Personnalisation</span>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <a href="{% url 'dashboard:etablissement:filtre:qrcode' %}"
-                           class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                            <i class="fa-solid fa-qrcode"></i>
-                            <span>QR Code</span>
-                        </a>
-                    </div>
-                    {% if etablissement.roulette_enabled %}
+            <div class="card shadow-sm border rounded-4 w-100 mb-3 overflow-hidden">
+                <div class="card-header bg-primary border-bottom px-4 py-3">
+                    <h2 class="h6 fw-semibold mb-0 text-white">
+                        <i class="fa-solid fa-link me-2"></i>
+                        Liens utiles
+                    </h2>
+                </div>
+                <div class="card-body px-4 py-4">
+                    <div class="row g-2">
                         <div class="col-12 col-md-6 col-lg-4">
-                            <a href="{% url 'dashboard:etablissement:roulette:roulette' %}"
+                            <a href="{% url 'dashboard:etablissement:avis' %}"
                                class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                                <i class="fa-solid fa-circle-notch"></i>
-                                <span>Roulette</span>
+                                <i class="fa-solid fa-comments"></i>
+                                <span>Avis</span>
                             </a>
                         </div>
-                    {% endif %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{% url 'dashboard:etablissement:filtre:threshold' %}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Seuil et Objectif</span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{% url 'dashboard:etablissement:filtre:personalisation' %}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="fa-solid fa-palette"></i>
+                                <span>Personnalisation</span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{% url 'dashboard:etablissement:filtre:qrcode' %}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="fa-solid fa-qrcode"></i>
+                                <span>QR Code</span>
+                            </a>
+                        </div>
+                        {% if etablissement.roulette_enabled %}
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <a href="{% url 'dashboard:etablissement:roulette:roulette' %}"
+                                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                    <i class="fa-solid fa-circle-notch"></i>
+                                    <span>Roulette</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             <!-- Settings Link Section -->
-            <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h2 class="h6 fw-semibold mb-1">Paramètres</h2>
-                        <p class="text-muted small mb-0">Gérez les paramètres généraux de votre établissement</p>
+            <div class="card shadow-sm border rounded-4 w-100 mb-3 overflow-hidden">
+                <div class="card-header bg-primary border-bottom px-4 py-3">
+                    <h2 class="h6 fw-semibold mb-0 text-white">
+                        <i class="fa-solid fa-gear me-2"></i>
+                        Paramètres
+                    </h2>
+                </div>
+                <div class="card-body px-4 py-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted small mb-0">Gérez les paramètres généraux de votre établissement</p>
+                        </div>
+                        <a href="{% url 'dashboard:etablissement:settings:settings' %}"
+                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Accéder aux paramètres</span>
+                        </a>
                     </div>
-                    <a href="{% url 'dashboard:etablissement:settings:settings' %}"
-                       class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Accéder aux paramètres</span>
-                    </a>
                 </div>
             </div>
         </div>
