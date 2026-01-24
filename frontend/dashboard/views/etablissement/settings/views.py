@@ -1,10 +1,12 @@
-from django.shortcuts import redirect
 from django.contrib import messages
+from django.shortcuts import redirect
+
 from frontend.dashboard.render import starshield_render
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
+
 from .forms import EtablissementSettingsForm
 
 

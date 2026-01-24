@@ -1,9 +1,10 @@
 import base64
+import logging
+
+from django.conf import settings
 
 # Import the client library.
 from google.cloud import kms
-from django.conf import settings
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -6,32 +6,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reviews', '0001_initial'),
+        ("reviews", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='googlecredentials',
-            name='is_valid',
+            model_name="googlecredentials",
+            name="is_valid",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='googlecredentials',
-            name='user',
+            model_name="googlecredentials",
+            name="user",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.CreateModel(
-            name='GoogleGMBAccount',
+            name="GoogleGMBAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('google_business_manager_account_id', models.CharField(max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('google_credentials', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='reviews.googlecredentials')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=255)),
+                ("google_business_manager_account_id", models.CharField(max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "google_credentials",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="reviews.googlecredentials"),
+                ),
             ],
         ),
     ]

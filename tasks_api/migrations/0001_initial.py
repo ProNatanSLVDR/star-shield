@@ -5,29 +5,63 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('auths', '0012_etablissement_last_reviews_update_and_more'),
+        ("auths", "0012_etablissement_last_reviews_update_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TaskExecution',
+            name="TaskExecution",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('task_type', models.CharField(choices=[('fetch_reviews_all', 'Fetch Reviews All'), ('fetch_reviews_refresh', 'Fetch Reviews Refresh'), ('fetch_stats', 'Fetch Stats'), ('fetch_reviews', 'Fetch Reviews')], max_length=50)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('running', 'Running'), ('success', 'Success'), ('error', 'Error')], default='pending', max_length=20)),
-                ('error_message', models.TextField(blank=True, null=True)),
-                ('started_at', models.DateTimeField(auto_now_add=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('metadata', models.JSONField(blank=True, default=dict)),
-                ('etablissement', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='task_executions', to='auths.etablissement')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "task_type",
+                    models.CharField(
+                        choices=[
+                            ("fetch_reviews_all", "Fetch Reviews All"),
+                            ("fetch_reviews_refresh", "Fetch Reviews Refresh"),
+                            ("fetch_stats", "Fetch Stats"),
+                            ("fetch_reviews", "Fetch Reviews"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("running", "Running"),
+                            ("success", "Success"),
+                            ("error", "Error"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("error_message", models.TextField(blank=True, null=True)),
+                ("started_at", models.DateTimeField(auto_now_add=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("metadata", models.JSONField(blank=True, default=dict)),
+                (
+                    "etablissement",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="task_executions",
+                        to="auths.etablissement",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-started_at'],
-                'indexes': [models.Index(fields=['task_type', 'status'], name='tasks_api_t_task_ty_3ee6e8_idx'), models.Index(fields=['etablissement', '-started_at'], name='tasks_api_t_etablis_9ab951_idx')],
+                "ordering": ["-started_at"],
+                "indexes": [
+                    models.Index(fields=["task_type", "status"], name="tasks_api_t_task_ty_3ee6e8_idx"),
+                    models.Index(fields=["etablissement", "-started_at"], name="tasks_api_t_etablis_9ab951_idx"),
+                ],
             },
         ),
     ]

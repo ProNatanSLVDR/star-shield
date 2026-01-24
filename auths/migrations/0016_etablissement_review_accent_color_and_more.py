@@ -4,20 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0015_etablissement_target_rating'),
+        ("auths", "0015_etablissement_target_rating"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='review_accent_color',
-            field=models.CharField(default='#0b5ed7', help_text="Couleur d'accent pour la page de feedback (format hexadécimal).", max_length=7),
+            model_name="etablissement",
+            name="review_accent_color",
+            field=models.CharField(
+                default="#0b5ed7",
+                help_text="Couleur d'accent pour la page de feedback (format hexadécimal).",
+                max_length=7,
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='review_show_etablissement_pill',
-            field=models.BooleanField(default=True, help_text="Afficher ou masquer le badge avec le nom de l'établissement."),
+            model_name="etablissement",
+            name="review_show_etablissement_pill",
+            field=models.BooleanField(
+                default=True, help_text="Afficher ou masquer le badge avec le nom de l'établissement."
+            ),
         ),
     ]

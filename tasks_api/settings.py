@@ -9,7 +9,11 @@ from pathlib import Path
 # Import base settings from starshield
 from starshield.settings import (
     Base as StarshieldBase,
+)
+from starshield.settings import (
     Dev as StarshieldDev,
+)
+from starshield.settings import (
     Prod as StarshieldProd,
 )
 

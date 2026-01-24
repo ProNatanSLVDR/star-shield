@@ -5,7 +5,8 @@ and error tracking.
 """
 
 import logging
-from typing import Callable, List, Optional, Dict, Any
+from collections.abc import Callable
+from typing import Any
 
 from auths.models import Etablissement
 from tasks_api.models import TaskExecution
@@ -24,7 +25,7 @@ class TaskTracker:
         self,
         task_type: str,
         etablissement_id: int,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """
         Initialize task tracker.
@@ -38,12 +39,12 @@ class TaskTracker:
         self.etablissement_id = etablissement_id
         self.metadata = metadata or {}
         self.metadata["etablissement_id"] = etablissement_id
-        self.task_execution: Optional[TaskExecution] = None
-        self.etablissement: Optional[Etablissement] = None
+        self.task_execution: TaskExecution | None = None
+        self.etablissement: Etablissement | None = None
 
     def execute(
         self,
-        task_functions: List[Callable[[Etablissement], None]],
+        task_functions: list[Callable[[Etablissement], None]],
     ) -> None:
         """
         Execute a list of functions with full task tracking.

@@ -1,15 +1,23 @@
-from allauth.account.decorators import reverse
-from django.shortcuts import redirect, get_object_or_404
-from django.views.decorators.http import require_POST, require_http_methods
-from auths.models import Etablissement
-from starshield.decorators import google_gmb_connected_required, unselect_etablissement
-from frontend.dashboard.render import starshield_render
-from django.contrib import messages
-from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
-from payments.services import sync_stripe_data, cancel_subscription_for_etablissement, reactivate_subscription_for_etablissement, check_existing_subscription_for_etablissement
 import logging
+
 import stripe
+from allauth.account.decorators import reverse
 from django.conf import settings
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from django.views.decorators.http import require_http_methods, require_POST
+
+from auths.models import Etablissement
+from frontend.dashboard.render import starshield_render
+from payments.services import (
+    cancel_subscription_for_etablissement,
+    check_existing_subscription_for_etablissement,
+    reactivate_subscription_for_etablissement,
+    sync_stripe_data,
+)
+from starshield.decorators import google_gmb_connected_required, unselect_etablissement
+
+from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
 
 logger = logging.getLogger(__name__)
 
@@ -109,10 +117,14 @@ def list_etablissements_view(request):
             delete_button["extra_kwargs"]["disabled"] = True
             delete_button["extra_kwargs"]["data-bs-toggle"] = "tooltip"
             delete_button["extra_kwargs"]["data-bs-placement"] = "top"
-            delete_button["extra_kwargs"]["title"] = "Vous devez d'abord désactiver l'établissement avant de le supprimer"
+            delete_button["extra_kwargs"]["title"] = (
+                "Vous devez d'abord désactiver l'établissement avant de le supprimer"
+            )
         else:
             delete_button["extra_kwargs"]["hx_modal_toggle"] = True
-            delete_button["extra_kwargs"]["hx-get"] = reverse("dashboard:etablissements:delete_partial", args=[etablissement.id])
+            delete_button["extra_kwargs"]["hx-get"] = reverse(
+                "dashboard:etablissements:delete_partial", args=[etablissement.id]
+            )
 
         buttons.append(delete_button)
 
@@ -202,7 +214,9 @@ def import_etablissement_partial(request):
             for location_name in selected_locations:
                 location = locations_dict.get(location_name)
                 if location:
-                    google_credential.create_etablissement_from_location(account_id=location["account_id"], location_id=location_name)
+                    google_credential.create_etablissement_from_location(
+                        account_id=location["account_id"], location_id=location_name
+                    )
 
             messages.success(request, "Établissements importés avec succès!")
             hx_triggers["etablissements-updated"] = True
@@ -283,9 +297,8 @@ def select_etablissement(request, id):
     if etablissement:
         request.session["selected_etablissement"] = etablissement.id
         return redirect("dashboard:etablissement:overview")
-    else:
-        messages.error(request, "Établissement non trouvé.")
-        return redirect("dashboard:etablissements:list")
+    messages.error(request, "Établissement non trouvé.")
+    return redirect("dashboard:etablissements:list")
 
 
 @google_gmb_connected_required
@@ -531,10 +544,14 @@ def toggle_etablissement_status(request, id):
             if reactivated_subscription:
                 # Sync Stripe data to update local database with reactivation status
                 sync_stripe_data(request.user)
-                messages.success(request, f"L'abonnement de l'établissement {etablissement.title} a été réactivé avec succès.")
+                messages.success(
+                    request, f"L'abonnement de l'établissement {etablissement.title} a été réactivé avec succès."
+                )
                 hx_triggers["etablissements-updated"] = True
             else:
-                messages.error(request, f"Impossible de réactiver l'abonnement de l'établissement {etablissement.title}.")
+                messages.error(
+                    request, f"Impossible de réactiver l'abonnement de l'établissement {etablissement.title}."
+                )
         except Exception as e:
             logger.error(f"Error reactivating subscription for etablissement {etablissement.id}: {e}")
             messages.error(
@@ -562,9 +579,8 @@ def toggle_etablissement_status(request, id):
                 request.session["price_id"] = price_id
                 request.session["etablissement_id"] = etablissement.id
                 return redirect("payments:create_checkout_session")
-            else:
-                print(form.errors)
-                messages.error(request, "Une erreur est survenue lors de la sélection du plan d'abonnement.")
+            print(form.errors)
+            messages.error(request, "Une erreur est survenue lors de la sélection du plan d'abonnement.")
 
     # Désactivation
     else:
@@ -575,7 +591,10 @@ def toggle_etablissement_status(request, id):
                 if cancelled_subscription:
                     # Sync Stripe data to update local database with cancellation status
                     sync_stripe_data(request.user)
-                    messages.success(request, f"L'établissement {etablissement.title} a été désactivé. Votre abonnement continuera jusqu'à la fin de la période en cours.")
+                    messages.success(
+                        request,
+                        f"L'établissement {etablissement.title} a été désactivé. Votre abonnement continuera jusqu'à la fin de la période en cours.",
+                    )
                 else:
                     # Subscription not found or already cancelled, proceed with deactivation
                     messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")

@@ -5,15 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0014_remove_etablissement_review_text_and_more'),
+        ("auths", "0014_remove_etablissement_review_text_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='target_rating',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text="Note cible que vous souhaitez atteindre à l'avenir.", max_digits=3, null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(5)]),
+            model_name="etablissement",
+            name="target_rating",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                help_text="Note cible que vous souhaitez atteindre à l'avenir.",
+                max_digits=3,
+                null=True,
+                validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(5)],
+            ),
         ),
     ]

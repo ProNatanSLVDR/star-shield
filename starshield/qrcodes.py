@@ -2,9 +2,20 @@ import io
 
 import qrcode
 from PIL import Image
-from qrcode.image.styles.moduledrawers import SquareModuleDrawer, GappedSquareModuleDrawer, RoundedModuleDrawer, CircleModuleDrawer
-from qrcode.image.styles.colormasks import SolidFillColorMask, RadialGradiantColorMask, SquareGradiantColorMask, HorizontalGradiantColorMask, VerticalGradiantColorMask
 from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.colormasks import (
+    HorizontalGradiantColorMask,
+    RadialGradiantColorMask,
+    SolidFillColorMask,
+    SquareGradiantColorMask,
+    VerticalGradiantColorMask,
+)
+from qrcode.image.styles.moduledrawers import (
+    CircleModuleDrawer,
+    GappedSquareModuleDrawer,
+    RoundedModuleDrawer,
+    SquareModuleDrawer,
+)
 
 
 def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
@@ -55,8 +66,12 @@ def generate_qrcode_png(
         "solid": SolidFillColorMask(back_color=color_bg, front_color=color_f),
         "round_radial": RadialGradiantColorMask(back_color=color_bg, center_color=color_f_sec, edge_color=color_f),
         "square_radial": SquareGradiantColorMask(back_color=color_bg, center_color=color_f_sec, edge_color=color_f),
-        "horizontal_gradiant": HorizontalGradiantColorMask(back_color=color_bg, left_color=color_f_sec, right_color=color_f),
-        "vertical_gradiant": VerticalGradiantColorMask(back_color=color_bg, top_color=color_f_sec, bottom_color=color_f),
+        "horizontal_gradiant": HorizontalGradiantColorMask(
+            back_color=color_bg, left_color=color_f_sec, right_color=color_f
+        ),
+        "vertical_gradiant": VerticalGradiantColorMask(
+            back_color=color_bg, top_color=color_f_sec, bottom_color=color_f
+        ),
     }
 
     # Create QR code

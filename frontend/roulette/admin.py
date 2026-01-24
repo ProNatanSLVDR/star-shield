@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import RoulettePrize, RouletteSpin, RouletteAnalytics
+
+from .models import RouletteAnalytics, RoulettePrize, RouletteSpin
 
 
 @admin.register(RoulettePrize)

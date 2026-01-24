@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0006_remove_etablissement_google_business_manager_account_id_and_more'),
+        ("auths", "0006_remove_etablissement_google_business_manager_account_id_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='etablissement',
-            name='name',
+            model_name="etablissement",
+            name="name",
         ),
     ]

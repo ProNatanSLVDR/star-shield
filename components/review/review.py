@@ -1,7 +1,8 @@
-from typing_extensions import Any
-from django_components import Component, Default, register
 from typing import NamedTuple
-from django.template.defaultfilters import truncatewords, timesince
+
+from django.template.defaultfilters import timesince, truncatewords
+from django_components import Component, Default, register
+from typing_extensions import Any
 
 
 @register("review")

@@ -6,36 +6,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0004_googlecredentials_etablissement'),
-        ('reviews', '0003_alter_googlecredentials_user_and_more'),
+        ("auths", "0004_googlecredentials_etablissement"),
+        ("reviews", "0003_alter_googlecredentials_user_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='review',
-            name='etablissement',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='auths.etablissement'),
+            model_name="review",
+            name="etablissement",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="auths.etablissement"),
         ),
         migrations.RemoveField(
-            model_name='googlecredentials',
-            name='user',
+            model_name="googlecredentials",
+            name="user",
         ),
         migrations.AlterField(
-            model_name='review',
-            name='comment',
+            model_name="review",
+            name="comment",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='review',
-            name='rating',
-            field=models.IntegerField(validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)]),
+            model_name="review",
+            name="rating",
+            field=models.IntegerField(
+                validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)]
+            ),
         ),
         migrations.DeleteModel(
-            name='Etablissement',
+            name="Etablissement",
         ),
         migrations.DeleteModel(
-            name='GoogleCredentials',
+            name="GoogleCredentials",
         ),
     ]

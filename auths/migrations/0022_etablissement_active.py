@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0021_user_stripe_customer_id'),
+        ("auths", "0021_user_stripe_customer_id"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='active',
+            model_name="etablissement",
+            name="active",
             field=models.BooleanField(default=False),
         ),
     ]

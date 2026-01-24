@@ -9,9 +9,9 @@ from auths.models import Entreprise
 
 
 class Command(BaseCommand):
-    help = "Create the default entreprise if it does not exist."  # noqa: A003 - Django uses 'help'
+    help = "Create the default entreprise if it does not exist."
 
-    def handle(self, *args: Any, **options: Any) -> None:  # noqa: ANN002, ANN003 - Django signature
+    def handle(self, *args: Any, **options: Any) -> None:
         try:
             with transaction.atomic():
                 entreprise, created = Entreprise.objects.get_or_create(nom="default")
@@ -23,4 +23,3 @@ class Command(BaseCommand):
             return
 
         self.stdout.write("Entreprise named 'default' already exists.")
-

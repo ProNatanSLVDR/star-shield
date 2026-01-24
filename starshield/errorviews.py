@@ -24,4 +24,3 @@ def error_500(request: HttpRequest) -> HttpResponse:
 
 def error_500_preview(request: HttpRequest) -> HttpResponse:
     return render(request, "500.html", status=200)
-

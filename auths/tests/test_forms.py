@@ -22,5 +22,3 @@ class UserLoginFormTests(SimpleTestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("password", form.errors)
-
-

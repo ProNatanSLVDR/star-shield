@@ -1,20 +1,22 @@
+import json
+from datetime import datetime, timedelta
+
+from django.contrib import messages
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Case, Count, IntegerField, Q, When
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Count, Case, When, IntegerField
-from django.shortcuts import redirect
-from django.contrib import messages
 from django.views.decorators.http import require_POST
-from datetime import timedelta, datetime
-import json
-from frontend.reviews.models import Review, ReviewAnalytics
+
 from frontend.dashboard.render import starshield_render
-from tasks_api.models import TaskExecution
-from tasks_api.services.queue_service import enqueue_refresh_task
+from frontend.reviews.models import Review, ReviewAnalytics
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
+from tasks_api.models import TaskExecution
+from tasks_api.services.queue_service import enqueue_refresh_task
 
 
 @google_gmb_connected_required
@@ -194,12 +196,20 @@ def avis_view(request):
             date_to = today.strftime("%Y-%m-%d")
         elif date_preset == "all_time":
             all_reviews = Review.objects.filter(etablissement=etablissement)
-            oldest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("review_date").first()
+            oldest_review = (
+                all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"})
+                .order_by("review_date")
+                .first()
+            )
             if oldest_review:
                 review_date = oldest_review.writen_at or oldest_review.created_at
                 if review_date:
                     date_from = review_date.date().strftime("%Y-%m-%d")
-            newest_review = all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"}).order_by("-review_date").first()
+            newest_review = (
+                all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"})
+                .order_by("-review_date")
+                .first()
+            )
             if newest_review:
                 review_date = newest_review.writen_at or newest_review.created_at
                 if review_date:
@@ -226,7 +236,9 @@ def avis_view(request):
         try:
             date_from_obj = datetime.strptime(date_from, "%Y-%m-%d").date()
             date_from_dt = timezone.make_aware(datetime.combine(date_from_obj, datetime.min.time()))
-            reviews_queryset = reviews_queryset.filter(Q(writen_at__gte=date_from_dt) | (Q(writen_at__isnull=True) & Q(created_at__gte=date_from_dt)))
+            reviews_queryset = reviews_queryset.filter(
+                Q(writen_at__gte=date_from_dt) | (Q(writen_at__isnull=True) & Q(created_at__gte=date_from_dt))
+            )
         except ValueError:
             pass
 
@@ -234,7 +246,9 @@ def avis_view(request):
         try:
             date_to_obj = datetime.strptime(date_to, "%Y-%m-%d").date()
             date_to_dt = timezone.make_aware(datetime.combine(date_to_obj, datetime.max.time()))
-            reviews_queryset = reviews_queryset.filter(Q(writen_at__lte=date_to_dt) | (Q(writen_at__isnull=True) & Q(created_at__lte=date_to_dt)))
+            reviews_queryset = reviews_queryset.filter(
+                Q(writen_at__lte=date_to_dt) | (Q(writen_at__isnull=True) & Q(created_at__lte=date_to_dt))
+            )
         except ValueError:
             pass
 
@@ -246,9 +260,13 @@ def avis_view(request):
             reviews_queryset = reviews_queryset.order_by("-rating", "-writen_at", "-created_at")
     else:  # order_by == "date"
         if order_dir == "asc":
-            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by("sort_date")
+            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by(
+                "sort_date"
+            )
         else:
-            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by("-sort_date")
+            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by(
+                "-sort_date"
+            )
 
     # Pagination
     paginator = Paginator(reviews_queryset, 50)
@@ -344,8 +362,10 @@ def refresh_reviews_view(request):
     # Enqueue refresh task
     try:
         enqueue_refresh_task(etablissement.id)
-        messages.success(request, "Le rafraîchissement des avis a été demandé avec succès. Les données seront mises à jour sous peu.")
-    except Exception as e:
+        messages.success(
+            request, "Le rafraîchissement des avis a été demandé avec succès. Les données seront mises à jour sous peu."
+        )
+    except Exception:
         messages.error(
             request,
             "Une erreur est survenue lors de la demande de rafraîchissement. Veuillez réessayer plus tard.",

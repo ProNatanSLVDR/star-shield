@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0019_googlecredentials_has_invalid_grants'),
+        ("auths", "0019_googlecredentials_has_invalid_grants"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='onboarding_completed',
+            model_name="user",
+            name="onboarding_completed",
             field=models.BooleanField(default=False),
         ),
     ]

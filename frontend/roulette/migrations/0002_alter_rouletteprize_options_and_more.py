@@ -5,27 +5,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('roulette', '0001_initial'),
+        ("roulette", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='rouletteprize',
-            options={'ordering': ['created_at']},
+            name="rouletteprize",
+            options={"ordering": ["created_at"]},
         ),
         migrations.AlterUniqueTogether(
-            name='rouletteprize',
+            name="rouletteprize",
             unique_together=set(),
         ),
         migrations.AlterField(
-            model_name='rouletteprize',
-            name='probability',
-            field=models.IntegerField(help_text='Probability percentage (min 1%)', validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(100)]),
+            model_name="rouletteprize",
+            name="probability",
+            field=models.IntegerField(
+                help_text="Probability percentage (min 1%)",
+                validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(100)],
+            ),
         ),
         migrations.RemoveField(
-            model_name='rouletteprize',
-            name='order',
+            model_name="rouletteprize",
+            name="order",
         ),
     ]

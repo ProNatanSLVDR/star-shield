@@ -28,4 +28,3 @@ class FeedbackForm(forms.Form):
     def clean_comment(self):
         comment = self.cleaned_data.get("comment", "")
         return comment.strip()
-

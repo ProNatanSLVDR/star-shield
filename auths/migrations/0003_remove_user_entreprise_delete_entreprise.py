@@ -4,17 +4,16 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0002_user_groups_user_is_superuser_user_user_permissions'),
+        ("auths", "0002_user_groups_user_is_superuser_user_user_permissions"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='entreprise',
+            model_name="user",
+            name="entreprise",
         ),
         migrations.DeleteModel(
-            name='Entreprise',
+            name="Entreprise",
         ),
     ]

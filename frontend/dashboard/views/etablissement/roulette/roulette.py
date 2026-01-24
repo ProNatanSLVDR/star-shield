@@ -1,13 +1,15 @@
-from django.shortcuts import redirect
 from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse
+
 from frontend.dashboard.render import starshield_render
+from frontend.roulette.models import RoulettePrize
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from .forms import RouletteSettingsForm, ROULETTE_ICON_CHOICES
-from frontend.roulette.models import RoulettePrize
+
+from .forms import ROULETTE_ICON_CHOICES, RouletteSettingsForm
 
 
 @google_gmb_connected_required

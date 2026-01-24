@@ -1,4 +1,4 @@
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from django_components import Component, register
 
@@ -9,7 +9,7 @@ class EmptyModal(Component):
 
     class Kwargs(NamedTuple):
         modal_id: str
-        size: Optional[str] = None
+        size: str | None = None
 
     class Defaults:
         size = "xl"
@@ -27,4 +27,3 @@ class EmptyModal(Component):
             "modal_id": kwargs.modal_id,
             "size": size,
         }
-

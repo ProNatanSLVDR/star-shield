@@ -6,20 +6,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0007_remove_etablissement_name'),
+        ("auths", "0007_remove_etablissement_name"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='etablissement',
-            old_name='google_credentials',
-            new_name='google_credential',
+            model_name="etablissement",
+            old_name="google_credentials",
+            new_name="google_credential",
         ),
         migrations.AlterField(
-            model_name='googlecredentials',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='google_credential', to=settings.AUTH_USER_MODEL),
+            model_name="googlecredentials",
+            name="user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="google_credential",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

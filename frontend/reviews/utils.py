@@ -1,10 +1,11 @@
-from django.urls import reverse
-from auths.models import Etablissement
+from datetime import timedelta
+
 from django.http import Http404
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from datetime import timedelta
-from .models import ReviewAnalytics
+
+from auths.models import Etablissement
 
 
 def calcul_objectif(noteactu: float, nb_notes: int, objectif: float) -> float:
@@ -62,16 +63,15 @@ def google_stars_to_number(stars: str) -> int:
 
     if stars == "ONE":
         return 1
-    elif stars == "TWO":
+    if stars == "TWO":
         return 2
-    elif stars == "THREE":
+    if stars == "THREE":
         return 3
-    elif stars == "FOUR":
+    if stars == "FOUR":
         return 4
-    elif stars == "FIVE":
+    if stars == "FIVE":
         return 5
-    else:
-        return 0
+    return 0
 
 
 def get_etablissement_by_identifier(identifier: str) -> Etablissement | None:

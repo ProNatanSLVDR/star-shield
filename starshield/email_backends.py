@@ -59,25 +59,28 @@ class BrevoEmailBackend(BaseEmailBackend):
 
         if not self.api_key:
             if not self.fail_silently:
-                raise ValueError("BREVO_API_KEY is not configured")
+                msg = "BREVO_API_KEY is not configured"
+                raise ValueError(msg)
             logger.warning("BREVO_API_KEY not set, skipping email send")
             return 0
 
         if not self._api_instance:
             if not self.fail_silently:
-                raise ValueError("Brevo API client not initialized")
+                msg = "Brevo API client not initialized"
+                raise ValueError(msg)
             logger.warning("Brevo API client not initialized, skipping email send")
             return 0
 
         num_sent = 0
-        for message in email_messages:
-            try:
+
+        try:
+            for message in email_messages:
                 self._send_single_message(message)
                 num_sent += 1
-            except Exception as e:
-                logger.error(f"Failed to send email: {e}")
-                if not self.fail_silently:
-                    raise
+        except Exception as e:
+            logger.error(f"Failed to send email: {e}")
+            if not self.fail_silently:
+                raise
 
         return num_sent
 
@@ -141,7 +144,7 @@ class BrevoEmailBackend(BaseEmailBackend):
             attachments = []
             for attachment in message.attachments:
                 if len(attachment) == 3:
-                    filename, content, mimetype = attachment
+                    filename, content, _mimetype = attachment
                     # Brevo requires base64-encoded content
                     if isinstance(content, str):
                         content_bytes = content.encode("utf-8")

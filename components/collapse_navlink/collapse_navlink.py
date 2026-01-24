@@ -1,5 +1,5 @@
 import uuid
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from django_components import Component, register
 
@@ -11,10 +11,10 @@ class CollapseNavlink(Component):
     class Kwargs(NamedTuple):
         icon: str
         text: str
-        collapse_id: Optional[str] = None
+        collapse_id: str | None = None
 
     class Defaults:
-        collapse_id: Optional[str] = None
+        collapse_id: str | None = None
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         if not kwargs.icon:

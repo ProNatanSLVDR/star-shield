@@ -1,6 +1,7 @@
-from typing import Any, Dict, List, Optional, Union
-from typing_extensions import TypedDict, NotRequired
+from typing import Any
+
 from django_components import component
+from typing_extensions import NotRequired, TypedDict
 
 
 class HeaderConfig(TypedDict, total=False):
@@ -10,7 +11,7 @@ class HeaderConfig(TypedDict, total=False):
     key: str
     orderable: bool
     searchable: bool
-    icon: Optional[str]
+    icon: str | None
     centered: bool
     popover_if_long: bool
     popover_threshold: int
@@ -22,17 +23,17 @@ class CellData(TypedDict, total=False):
     type: str
     value: Any
     variant: str
-    tooltip: Optional[str]
-    sort_value: Optional[Any]
-    centered: Union[bool, str]
+    tooltip: str | None
+    sort_value: Any | None
+    centered: bool | str
     popover_if_long: bool
     popover_threshold: int
     is_long: NotRequired[bool]
-    buttons: NotRequired[List[Dict[str, Any]]]
-    icon: NotRequired[Optional[str]]
+    buttons: NotRequired[list[dict[str, Any]]]
+    icon: NotRequired[str | None]
 
 
-def normalize_header(header: Union[str, Dict[str, Any]]) -> HeaderConfig:
+def normalize_header(header: str | dict[str, Any]) -> HeaderConfig:
     """Convert header input to normalized HeaderConfig.
 
     Args:
@@ -159,7 +160,7 @@ def process_cell(cell_data: Any, header: HeaderConfig) -> CellData:
     }
 
 
-def process_row(row: Dict[str, Any], headers: List[HeaderConfig]) -> Dict[str, Any]:
+def process_row(row: dict[str, Any], headers: list[HeaderConfig]) -> dict[str, Any]:
     """Convert raw row data to processed row with cells.
 
     Args:
@@ -182,7 +183,7 @@ def process_row(row: Dict[str, Any], headers: List[HeaderConfig]) -> Dict[str, A
 
     return {
         "cells": cells,
-        "modal_link": row.get("modal_link", None),
+        "modal_link": row.get("modal_link"),
         "has_buttons": has_buttons,
     }
 
@@ -193,12 +194,12 @@ class Table(component.Component):
 
     def get_context_data(
         self,
-        headers: Optional[List[Union[str, Dict[str, Any]]]] = None,
-        rows: Optional[List[Dict[str, Any]]] = None,
-        title: Optional[str] = None,
-        modal_size: Optional[str] = None,
+        headers: list[str | dict[str, Any]] | None = None,
+        rows: list[dict[str, Any]] | None = None,
+        title: str | None = None,
+        modal_size: str | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Process table data and return context for template.
 
         Args:

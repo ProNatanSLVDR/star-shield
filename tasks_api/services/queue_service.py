@@ -2,14 +2,14 @@
 Queue service for enqueuing refresh tasks to Cloud Tasks.
 """
 
+import datetime
 import json
 import logging
-from typing import Dict, Any
+from typing import Any
 
 from django.conf import settings
 from google.cloud import tasks_v2
 from google.protobuf import duration_pb2, timestamp_pb2
-import datetime
 
 from auths.models import Etablissement
 
@@ -133,7 +133,7 @@ def enqueue_refresh_task(etablissement_id: int) -> None:
         logger.error(f"Failed to enqueue refresh task for etablissement {etablissement_id}: {e}", exc_info=True)
 
 
-def enqueue_refresh_tasks() -> Dict[str, Any]:
+def enqueue_refresh_tasks() -> dict[str, Any]:
     """
     Enqueue refresh tasks for all etablissements to Cloud Tasks queue.
 

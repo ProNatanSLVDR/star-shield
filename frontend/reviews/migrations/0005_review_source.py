@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reviews', '0004_alter_review_etablissement_and_more'),
+        ("reviews", "0004_alter_review_etablissement_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='review',
-            name='source',
-            field=models.CharField(choices=[('internal', 'Internal'), ('google', 'Google')], default='internal', max_length=10),
+            model_name="review",
+            name="source",
+            field=models.CharField(
+                choices=[("internal", "Internal"), ("google", "Google")], default="internal", max_length=10
+            ),
         ),
     ]

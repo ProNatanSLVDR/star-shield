@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,18 +14,21 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='GoogleCredentials',
+            name="GoogleCredentials",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.TextField()),
-                ('refresh_token', models.TextField(blank=True, null=True)),
-                ('token_uri', models.TextField()),
-                ('client_id', models.TextField()),
-                ('client_secret', models.TextField()),
-                ('scopes', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("token", models.TextField()),
+                ("refresh_token", models.TextField(blank=True, null=True)),
+                ("token_uri", models.TextField()),
+                ("client_id", models.TextField()),
+                ("client_secret", models.TextField()),
+                ("scopes", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+                ),
             ],
         ),
     ]

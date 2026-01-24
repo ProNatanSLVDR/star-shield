@@ -5,20 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0012_etablissement_last_reviews_update_and_more'),
+        ("auths", "0012_etablissement_last_reviews_update_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='review_text',
-            field=models.CharField(default='Votre avis nous aide à offrir un meilleur service.', help_text='Texte à afficher sur la page de feedback.', max_length=255),
+            model_name="etablissement",
+            name="review_text",
+            field=models.CharField(
+                default="Votre avis nous aide à offrir un meilleur service.",
+                help_text="Texte à afficher sur la page de feedback.",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='etablissement',
-            name='review_threshold',
-            field=models.PositiveSmallIntegerField(default=4, help_text='Note minimale pour redirection Google.', validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)]),
+            model_name="etablissement",
+            name="review_threshold",
+            field=models.PositiveSmallIntegerField(
+                default=4,
+                help_text="Note minimale pour redirection Google.",
+                validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)],
+            ),
         ),
     ]

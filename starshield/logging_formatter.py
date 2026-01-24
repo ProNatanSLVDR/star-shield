@@ -2,8 +2,8 @@
 Custom logging formatters for the starshield project.
 """
 
-import sys
 import logging
+import sys
 
 
 class ColoredFormatter(logging.Formatter):

@@ -6,56 +6,103 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('auths', '0024_etablissement_roulette_enabled_and_more'),
+        ("auths", "0024_etablissement_roulette_enabled_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='RouletteAnalytics',
+            name="RouletteAnalytics",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('roulette_viewed', 'Roulette Viewed'), ('roulette_spun', 'Roulette Spun'), ('prize_won', 'Prize Won'), ('no_prize', 'No Prize')], max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('etablissement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='roulette_analytics', to='auths.etablissement')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("roulette_viewed", "Roulette Viewed"),
+                            ("roulette_spun", "Roulette Spun"),
+                            ("prize_won", "Prize Won"),
+                            ("no_prize", "No Prize"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "etablissement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="roulette_analytics",
+                        to="auths.etablissement",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='RoulettePrize',
+            name="RoulettePrize",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('icon', models.CharField(max_length=50)),
-                ('probability', models.DecimalField(decimal_places=2, help_text='Probability percentage (min 1%)', max_digits=5, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(100)])),
-                ('is_nothing_prize', models.BooleanField(default=False, help_text="Marks the 'no prize' option")),
-                ('order', models.PositiveSmallIntegerField(default=0, help_text='Display order on wheel')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('etablissement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='roulette_prizes', to='auths.etablissement')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=255)),
+                ("icon", models.CharField(max_length=50)),
+                (
+                    "probability",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Probability percentage (min 1%)",
+                        max_digits=5,
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(100),
+                        ],
+                    ),
+                ),
+                ("is_nothing_prize", models.BooleanField(default=False, help_text="Marks the 'no prize' option")),
+                ("order", models.PositiveSmallIntegerField(default=0, help_text="Display order on wheel")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "etablissement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="roulette_prizes",
+                        to="auths.etablissement",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order', 'created_at'],
-                'unique_together': {('etablissement', 'order')},
+                "ordering": ["order", "created_at"],
+                "unique_together": {("etablissement", "order")},
             },
         ),
         migrations.CreateModel(
-            name='RouletteSpin',
+            name="RouletteSpin",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('prize_code', models.CharField(max_length=50, unique=True)),
-                ('is_used', models.BooleanField(default=False, help_text='Whether code was redeemed')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('etablissement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='roulette_spins', to='auths.etablissement')),
-                ('prize', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='spins', to='roulette.rouletteprize')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("prize_code", models.CharField(max_length=50, unique=True)),
+                ("is_used", models.BooleanField(default=False, help_text="Whether code was redeemed")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "etablissement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="roulette_spins",
+                        to="auths.etablissement",
+                    ),
+                ),
+                (
+                    "prize",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="spins", to="roulette.rouletteprize"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

@@ -4,24 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0013_etablissement_review_text_and_more'),
+        ("auths", "0013_etablissement_review_text_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='etablissement',
-            name='review_text',
+            model_name="etablissement",
+            name="review_text",
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='review_page_label',
-            field=models.CharField(blank=True, help_text="Nom pour l'établissement sur la page de feedback.", max_length=255, null=True),
+            model_name="etablissement",
+            name="review_page_label",
+            field=models.CharField(
+                blank=True, help_text="Nom pour l'établissement sur la page de feedback.", max_length=255, null=True
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='review_page_text',
-            field=models.CharField(default='Votre avis nous aide à offrir un meilleur service !', help_text='Texte à afficher sur la page de feedback.', max_length=255),
+            model_name="etablissement",
+            name="review_page_text",
+            field=models.CharField(
+                default="Votre avis nous aide à offrir un meilleur service !",
+                help_text="Texte à afficher sur la page de feedback.",
+                max_length=255,
+            ),
         ),
     ]

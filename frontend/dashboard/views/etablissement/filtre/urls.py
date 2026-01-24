@@ -1,5 +1,6 @@
 from django.urls import path
-from . import threshold, personalisation, qrcode
+
+from . import personalisation, qrcode, threshold
 
 app_name = "filtre"
 

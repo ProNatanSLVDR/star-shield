@@ -6,36 +6,47 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0023_googlecredentials_google_account_email'),
-        ('payments', '0001_initial'),
+        ("auths", "0023_googlecredentials_google_account_email"),
+        ("payments", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='stripesubscription',
-            name='etablissement',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='stripe_subscriptions', to='auths.etablissement'),
+            model_name="stripesubscription",
+            name="etablissement",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stripe_subscriptions",
+                to="auths.etablissement",
+            ),
         ),
         migrations.AddField(
-            model_name='stripesubscription',
-            name='grace_period_end',
-            field=models.DateTimeField(blank=True, help_text='When cancelled subscription should deactivate etablissement', null=True),
+            model_name="stripesubscription",
+            name="grace_period_end",
+            field=models.DateTimeField(
+                blank=True, help_text="When cancelled subscription should deactivate etablissement", null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='stripesubscription',
-            name='subscription_id',
+            model_name="stripesubscription",
+            name="subscription_id",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='stripesubscription',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stripe_subscriptions', to=settings.AUTH_USER_MODEL),
+            model_name="stripesubscription",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stripe_subscriptions",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='stripesubscription',
-            unique_together={('etablissement', 'subscription_id')},
+            name="stripesubscription",
+            unique_together={("etablissement", "subscription_id")},
         ),
     ]

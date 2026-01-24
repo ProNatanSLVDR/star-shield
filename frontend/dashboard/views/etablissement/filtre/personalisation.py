@@ -1,11 +1,13 @@
-from django.shortcuts import redirect
 from django.contrib import messages
+from django.shortcuts import redirect
+
 from frontend.dashboard.render import starshield_render
 from frontend.reviews.utils import build_feedback_context
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
+
 from .forms import ReviewSettingsForm
 
 

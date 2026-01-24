@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reviews', '0005_review_source'),
+        ("reviews", "0005_review_source"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='review',
-            name='google_review_id',
+            model_name="review",
+            name="google_review_id",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='review',
-            name='google_reviewer_data',
+            model_name="review",
+            name="google_reviewer_data",
             field=models.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='review',
-            name='writen_at',
+            model_name="review",
+            name="writen_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

@@ -35,7 +35,9 @@ class LoginViewTests(TestCase):
         self.assertTemplateUsed(response, "auths/login.html")
 
     def test_post_invalid_data_shows_error(self):
-        response = self.client.post(self.login_url, data={"email": "user@example.com", "password": "wrong"}, follow=True)
+        response = self.client.post(
+            self.login_url, data={"email": "user@example.com", "password": "wrong"}, follow=True
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "auths/login.html")
@@ -83,5 +85,3 @@ class LogoutViewTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse("auths:login")))
-
-

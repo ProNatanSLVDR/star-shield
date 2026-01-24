@@ -1,8 +1,10 @@
+import logging
+
 from django.shortcuts import redirect
 from django.urls import reverse
+
 from frontend.dashboard.render import starshield_render
 from frontend.reviews.models import ReviewAnalytics
-import logging
 from starshield.decorators import unselect_etablissement
 
 logger = logging.getLogger(__name__)
@@ -42,7 +44,9 @@ def accueil_view(request):
             average_rating = sum(ratings_list) / len(ratings_list)
 
         # Total QR consultations across all establishments
-        total_qr_consultations = ReviewAnalytics.objects.filter(etablissement__in=etablissements, type="feedback_viewed").count()
+        total_qr_consultations = ReviewAnalytics.objects.filter(
+            etablissement__in=etablissements, type="feedback_viewed"
+        ).count()
 
     context = {
         "total_etablissements": total_etablissements,

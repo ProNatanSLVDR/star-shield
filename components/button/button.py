@@ -1,6 +1,8 @@
-from typing_extensions import Dict, Any
-from django_components import Component, Default, register
 from typing import NamedTuple
+
+from django_components import Component, Default, register
+from typing_extensions import Any
+
 
 @register("button")
 class Button(Component):
@@ -11,12 +13,11 @@ class Button(Component):
         icon: str
         text: str
         href: str
-        extra_kwargs: Dict[str, Any]
+        extra_kwargs: dict[str, Any]
 
     class Defaults:
         href: str = None
         extra_kwargs = Default(dict)
-
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         extra_kwargs = kwargs.extra_kwargs.copy()
@@ -25,7 +26,7 @@ class Button(Component):
         hx_modal_toggle = extra_kwargs.pop("hx_modal_toggle", None)
         hx_modal_target = extra_kwargs.pop("hx_modal_target", None)
         modal_close = extra_kwargs.pop("modal_close", None)
-        
+
         disabled = extra_kwargs.pop("disabled", None)
 
         return {
@@ -33,9 +34,7 @@ class Button(Component):
             "icon": kwargs.icon,
             "text": kwargs.text,
             "extra_kwargs": extra_kwargs,
-
             "disabled": disabled,
-
             # Modals
             "hx_modal_toggle": hx_modal_toggle,
             "hx_modal_target": hx_modal_target,

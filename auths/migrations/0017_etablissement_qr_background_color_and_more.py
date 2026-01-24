@@ -5,40 +5,58 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0016_etablissement_review_accent_color_and_more'),
+        ("auths", "0016_etablissement_review_accent_color_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='qr_background_color',
-            field=models.CharField(default='#FFFFFF', help_text='Couleur de fond du QR code (format hexadécimal).', max_length=7),
+            model_name="etablissement",
+            name="qr_background_color",
+            field=models.CharField(
+                default="#FFFFFF", help_text="Couleur de fond du QR code (format hexadécimal).", max_length=7
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='qr_fill_color',
-            field=models.CharField(default='#000000', help_text='Couleur de remplissage du QR code (format hexadécimal).', max_length=7),
+            model_name="etablissement",
+            name="qr_fill_color",
+            field=models.CharField(
+                default="#000000", help_text="Couleur de remplissage du QR code (format hexadécimal).", max_length=7
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='qr_logo',
-            field=models.ImageField(blank=True, help_text='Logo à afficher au centre du QR code.', null=True, upload_to='qr_logos/'),
+            model_name="etablissement",
+            name="qr_logo",
+            field=models.ImageField(
+                blank=True, help_text="Logo à afficher au centre du QR code.", null=True, upload_to="qr_logos/"
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='qr_style',
-            field=models.CharField(choices=[('square', 'Carré'), ('rounded', 'Arrondi')], default='square', help_text='Style du QR code (carré ou arrondi).', max_length=10),
+            model_name="etablissement",
+            name="qr_style",
+            field=models.CharField(
+                choices=[("square", "Carré"), ("rounded", "Arrondi")],
+                default="square",
+                help_text="Style du QR code (carré ou arrondi).",
+                max_length=10,
+            ),
         ),
         migrations.AlterField(
-            model_name='etablissement',
-            name='review_accent_color',
-            field=models.CharField(default='#0066ff', help_text="Couleur d'accent pour la page de feedback (format hexadécimal).", max_length=7),
+            model_name="etablissement",
+            name="review_accent_color",
+            field=models.CharField(
+                default="#0066ff",
+                help_text="Couleur d'accent pour la page de feedback (format hexadécimal).",
+                max_length=7,
+            ),
         ),
         migrations.AlterField(
-            model_name='etablissement',
-            name='review_threshold',
-            field=models.PositiveSmallIntegerField(default=4, help_text='Note minimale pour redirection Google.', validators=[django.core.validators.MinValueValidator(3), django.core.validators.MaxValueValidator(5)]),
+            model_name="etablissement",
+            name="review_threshold",
+            field=models.PositiveSmallIntegerField(
+                default=4,
+                help_text="Note minimale pour redirection Google.",
+                validators=[django.core.validators.MinValueValidator(3), django.core.validators.MaxValueValidator(5)],
+            ),
         ),
     ]

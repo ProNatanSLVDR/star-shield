@@ -1,7 +1,8 @@
 from functools import wraps
+
+from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.contrib import messages
 from django.utils.translation import gettext as _
 
 

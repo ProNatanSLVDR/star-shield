@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0023_googlecredentials_google_account_email'),
+        ("auths", "0023_googlecredentials_google_account_email"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='roulette_enabled',
-            field=models.BooleanField(default=False, help_text='Enable roulette wheel for this establishment.'),
+            model_name="etablissement",
+            name="roulette_enabled",
+            field=models.BooleanField(default=False, help_text="Enable roulette wheel for this establishment."),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='roulette_spin_cooldown_days',
-            field=models.PositiveSmallIntegerField(default=14, help_text='Number of days between spins (cooldown period).', validators=[django.core.validators.MinValueValidator(1)]),
+            model_name="etablissement",
+            name="roulette_spin_cooldown_days",
+            field=models.PositiveSmallIntegerField(
+                default=14,
+                help_text="Number of days between spins (cooldown period).",
+                validators=[django.core.validators.MinValueValidator(1)],
+            ),
         ),
     ]

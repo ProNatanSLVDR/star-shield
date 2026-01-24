@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0024_etablissement_roulette_enabled_and_more'),
+        ("auths", "0024_etablissement_roulette_enabled_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='etablissement',
-            name='roulette_spin_cooldown_days',
-            field=models.PositiveSmallIntegerField(default=14, help_text='Number of days between spins (cooldown period).', validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(180)]),
+            model_name="etablissement",
+            name="roulette_spin_cooldown_days",
+            field=models.PositiveSmallIntegerField(
+                default=14,
+                help_text="Number of days between spins (cooldown period).",
+                validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(180)],
+            ),
         ),
     ]

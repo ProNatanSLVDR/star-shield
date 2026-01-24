@@ -67,4 +67,3 @@ class TaskExecution(models.Model):
         """Mark task as running."""
         self.status = "running"
         self.save(update_fields=["status"])
-

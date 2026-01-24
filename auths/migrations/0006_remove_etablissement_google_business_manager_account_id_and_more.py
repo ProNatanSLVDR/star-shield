@@ -4,47 +4,46 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0005_alter_etablissement_google_credentials'),
+        ("auths", "0005_alter_etablissement_google_credentials"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='etablissement',
-            name='google_business_manager_account_id',
+            model_name="etablissement",
+            name="google_business_manager_account_id",
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='account_id',
+            model_name="etablissement",
+            name="account_id",
             field=models.CharField(default=None, max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='location_id',
+            model_name="etablissement",
+            name="location_id",
             field=models.CharField(default=None, max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='maps_uri',
+            model_name="etablissement",
+            name="maps_uri",
             field=models.URLField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='new_reviews_uri',
+            model_name="etablissement",
+            name="new_reviews_uri",
             field=models.URLField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='title',
+            model_name="etablissement",
+            name="title",
             field=models.CharField(default=None, max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='website_uri',
+            model_name="etablissement",
+            name="website_uri",
             field=models.URLField(blank=True, max_length=255, null=True),
         ),
     ]

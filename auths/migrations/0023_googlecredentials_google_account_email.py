@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0022_etablissement_active'),
+        ("auths", "0022_etablissement_active"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='googlecredentials',
-            name='google_account_email',
-            field=models.EmailField(blank=True, help_text='Email of the connected Google account', max_length=254, null=True),
+            model_name="googlecredentials",
+            name="google_account_email",
+            field=models.EmailField(
+                blank=True, help_text="Email of the connected Google account", max_length=254, null=True
+            ),
         ),
     ]

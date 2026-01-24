@@ -1,12 +1,14 @@
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from django.urls import reverse
+
 from frontend.dashboard.render import starshield_render
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
+
 from .forms import QRCodeSettingsForm
 
 

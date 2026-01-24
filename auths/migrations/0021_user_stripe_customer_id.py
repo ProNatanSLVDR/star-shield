@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0020_add_onboarding_completed_to_user'),
+        ("auths", "0020_add_onboarding_completed_to_user"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='stripe_customer_id',
+            model_name="user",
+            name="stripe_customer_id",
             field=models.CharField(blank=True, max_length=255, null=True, unique=True),
         ),
     ]

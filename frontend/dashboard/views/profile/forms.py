@@ -17,4 +17,3 @@ class UserProfileForm(forms.Form):
         label="Photo de profil",
         help_text="Téléchargez une nouvelle photo de profil.",
     )
-

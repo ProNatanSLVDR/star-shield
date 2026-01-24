@@ -22,11 +22,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     """
 
     def render_mail(
-        self,
-        template_prefix: str,
-        email: str,
-        context: dict[str, Any],
-        **kwargs: Any
+        self, template_prefix: str, email: str, context: dict[str, Any], **kwargs: Any
     ) -> EmailMultiAlternatives:
         """
         Render email using custom StarShield template.
@@ -65,16 +61,14 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             # Email verification
             code = context.get("code", "")
             activate_url = context.get("activate_url", "")
-            
+
             if code:
                 # Code-based verification
                 custom_context["text"] = (
                     "Merci de vous être inscrit sur StarShield. "
                     "Pour finaliser votre inscription, veuillez utiliser le code de vérification suivant :"
                 )
-                custom_context["text2"] = mark_safe(
-                    f"<strong style='font-size: 24px; color: #0b6efd;'>{code}</strong>"
-                )
+                custom_context["text2"] = mark_safe(f"<strong style='font-size: 24px; color: #0b6efd;'>{code}</strong>")
             elif activate_url:
                 # Link-based verification
                 custom_context["text"] = (
@@ -93,7 +87,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         elif "password_reset" in template_prefix:
             # Password reset
             password_reset_url = context.get("password_reset_url", "")
-            
+
             if password_reset_url:
                 custom_context["text"] = (
                     "Vous avez demandé la réinitialisation de votre mot de passe sur StarShield. "
@@ -112,7 +106,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             # Email change confirmation
             new_email = context.get("new_email", "")
             activate_url = context.get("activate_url", "")
-            
+
             if activate_url:
                 custom_context["text"] = (
                     f"Vous avez demandé de changer votre adresse e-mail pour {new_email}. "
@@ -130,7 +124,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         elif "password_set" in template_prefix:
             # Password set (for social accounts)
             password_set_url = context.get("password_set_url", "")
-            
+
             if password_set_url:
                 custom_context["text"] = (
                     "Pour sécuriser votre compte StarShield, veuillez définir un mot de passe. "
@@ -140,9 +134,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
                     f'<a href="{password_set_url}" style="color: #0b6efd; text-decoration: none;">Définir mon mot de passe</a>'
                 )
             else:
-                custom_context["text"] = (
-                    "Pour sécuriser votre compte StarShield, veuillez définir un mot de passe."
-                )
+                custom_context["text"] = "Pour sécuriser votre compte StarShield, veuillez définir un mot de passe."
 
         else:
             # Generic fallback - try to extract message from context
@@ -156,10 +148,10 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         try:
             # First, get the default email message to extract subject and other metadata
             default_msg = super().render_mail(template_prefix, email, context, **kwargs)
-            
+
             # Render custom HTML content
             html_content = render_to_string("emails/basic_mail.html", custom_context)
-            
+
             # Create new EmailMultiAlternatives with custom HTML
             msg = EmailMultiAlternatives(
                 subject=default_msg.subject,
@@ -167,16 +159,16 @@ class CustomAccountAdapter(DefaultAccountAdapter):
                 from_email=default_msg.from_email or self.get_from_email(),
                 to=default_msg.to,
             )
-            
+
             # Copy any additional recipients
             if hasattr(default_msg, "cc") and default_msg.cc:
                 msg.cc = default_msg.cc
             if hasattr(default_msg, "bcc") and default_msg.bcc:
                 msg.bcc = default_msg.bcc
-            
+
             # Attach HTML content
             msg.attach_alternative(html_content, "text/html")
-            
+
             return msg
         except Exception as e:
             logger.error(f"Failed to render custom email template: {e}", exc_info=True)

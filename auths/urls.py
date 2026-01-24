@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import google_gmb_start, google_gmb_callback
+from .views import google_gmb_callback, google_gmb_start
 
 app_name = "auths"
 

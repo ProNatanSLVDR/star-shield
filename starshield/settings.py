@@ -10,10 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
-from configurations import Configuration
 import os
+from pathlib import Path
+
+from configurations import Configuration
 from django_components import ComponentsSettings
+
 from starshield.logging_formatter import ColoredFormatter
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -219,8 +221,12 @@ class Dev(Base):
     # BREVO_API_KEY = "keykey"
 
     # STRIPE (test keys)
-    STRIPE_PUBLIC_KEY = "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
-    STRIPE_SECRET_KEY = "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
+    STRIPE_PUBLIC_KEY = (
+        "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
+    )
+    STRIPE_SECRET_KEY = (
+        "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
+    )
     STRIPE_WEBHOOK_SECRET = "whsec_1a33b01f5f912d07f415cce17a6a55572f51f681e91ae2a077a78d57335078ba"
 
     # Google OAuth

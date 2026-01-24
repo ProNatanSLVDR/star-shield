@@ -19,7 +19,7 @@ class Command(BaseCommand):
             help="Email address of the user to make admin",
         )
 
-    def handle(self, *args: Any, **options: Any) -> None:  # noqa: ANN002, ANN003 - Django signature
+    def handle(self, *args: Any, **options: Any) -> None:
         email = options["email"]
 
         # Normalize email to lowercase (matching UserManager behavior)
@@ -35,9 +35,7 @@ class Command(BaseCommand):
         # Check if user is already an admin
         if user.is_staff and user.is_superuser:
             self.stdout.write(
-                self.style.WARNING(
-                    f"User '{user.email}' is already an admin (is_staff=True, is_superuser=True)."
-                )
+                self.style.WARNING(f"User '{user.email}' is already an admin (is_staff=True, is_superuser=True).")
             )
             return
 
@@ -50,13 +48,5 @@ class Command(BaseCommand):
             raise CommandError(f"Failed to update user admin status: {exc}") from exc
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Successfully made user '{user.email}' an admin (is_staff=True, is_superuser=True)."
-            )
+            self.style.SUCCESS(f"Successfully made user '{user.email}' an admin (is_staff=True, is_superuser=True).")
         )
-
-
-
-
-
-

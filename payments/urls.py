@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
-from . import webhooks
+
+from . import views, webhooks
 
 app_name = "payments"
 
@@ -11,4 +11,3 @@ urlpatterns = [
     path("customer-portal/", views.stripe_customer_portal, name="stripe_customer_portal"),
     path("webhook/", webhooks.stripe_webhook, name="stripe_webhook"),
 ]
-

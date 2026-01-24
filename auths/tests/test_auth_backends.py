@@ -77,5 +77,3 @@ class EmailBackendTests(TestCase):
         fetched = self.backend.get_user(user.pk)
 
         self.assertIsNone(fetched)
-
-

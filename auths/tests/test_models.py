@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from auths.models import Entreprise
-from allauth.account.models import EmailAddress
 
 
 class EntrepriseModelTests(TestCase):
@@ -100,5 +100,3 @@ class UserModelTests(TestCase):
         self.assertIsNotNone(email_address)
         self.assertTrue(email_address.verified)
         self.assertTrue(email_address.primary)
-
-

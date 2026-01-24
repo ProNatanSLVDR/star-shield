@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0004_googlecredentials_etablissement'),
+        ("auths", "0004_googlecredentials_etablissement"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='etablissement',
-            name='google_credentials',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='etablissements', to='auths.googlecredentials'),
+            model_name="etablissement",
+            name="google_credentials",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="etablissements", to="auths.googlecredentials"
+            ),
         ),
     ]

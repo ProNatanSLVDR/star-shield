@@ -1,9 +1,11 @@
+import logging
+
 import stripe
 from django.conf import settings
 
 from auths.models import Etablissement
+
 from .models import StripeSubscription
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -181,14 +183,20 @@ def sync_stripe_data(user):
     # on fetch les abonnements de l'utilisateur
     try:
         all_subscriptions_data = []
-        subscriptions_response = stripe.Subscription.list(customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"])
+        subscriptions_response = stripe.Subscription.list(
+            customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"]
+        )
         all_subscriptions_data.extend(subscriptions_response.data)
 
         # Handle pagination to fetch all subscriptions
         while subscriptions_response.has_more:
             last_subscription_id = subscriptions_response.data[-1].id
             subscriptions_response = stripe.Subscription.list(
-                customer=user.stripe_customer_id, limit=100, status="all", expand=["data.items.data.price"], starting_after=last_subscription_id
+                customer=user.stripe_customer_id,
+                limit=100,
+                status="all",
+                expand=["data.items.data.price"],
+                starting_after=last_subscription_id,
             )
             all_subscriptions_data.extend(subscriptions_response.data)
 
@@ -288,16 +296,22 @@ def sync_stripe_data(user):
                 if etablissement.active:
                     etablissement.active = False
                     etablissement.save()
-                    logger.info(f"Deactivated etablissement {etablissement.id} for inactive subscription {subscription_id}")
+                    logger.info(
+                        f"Deactivated etablissement {etablissement.id} for inactive subscription {subscription_id}"
+                    )
             else:
                 logger.warning(f"Subscription {subscription_id} has unknown status: {subscription_status}")
         except Exception as e:
-            logger.error(f"Failed to update etablissement {etablissement.id} status for subscription {subscription_id}: {e}")
+            logger.error(
+                f"Failed to update etablissement {etablissement.id} status for subscription {subscription_id}: {e}"
+            )
             continue
 
     # on désactive les etablissements qui n'ont pas d'abonnement actif
     try:
-        etablissements_to_deactivate = Etablissement.objects.filter(google_credential__user=user, active=True).exclude(id__in=processed_etablissements_ids)
+        etablissements_to_deactivate = Etablissement.objects.filter(google_credential__user=user, active=True).exclude(
+            id__in=processed_etablissements_ids
+        )
         for etablissement in etablissements_to_deactivate:
             try:
                 etablissement.active = False

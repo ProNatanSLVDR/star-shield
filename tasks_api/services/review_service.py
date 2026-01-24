@@ -141,12 +141,16 @@ def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
         total_new_count += page_new_count
         total_existing_count += page_existing_count
 
-        logger.info(f"[{etablissement.id}] Page {page_number} processed: {page_new_count} new, {page_existing_count} existing")
+        logger.info(
+            f"[{etablissement.id}] Page {page_number} processed: {page_new_count} new, {page_existing_count} existing"
+        )
         # For new_only mode: stop if we've encountered enough consecutive existing reviews
         # This ensures we don't miss newer reviews due to gaps in the database
         if new_only and consecutive_existing_count >= EXISTING_REVIEW_THRESHOLD:
             continue_import = False
-            logger.info(f"[{etablissement.id}] {consecutive_existing_count} consecutive existing reviews, stopping import")
+            logger.info(
+                f"[{etablissement.id}] {consecutive_existing_count} consecutive existing reviews, stopping import"
+            )
             break
 
         # Check if there's a next page
@@ -154,4 +158,6 @@ def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
         if next_page_token is None or not continue_import:
             break
 
-    logger.info(f"[{etablissement.id}] Completed review import: {total_new_count} new, {total_existing_count} existing reviews across {page_number} pages")
+    logger.info(
+        f"[{etablissement.id}] Completed review import: {total_new_count} new, {total_existing_count} existing reviews across {page_number} pages"
+    )

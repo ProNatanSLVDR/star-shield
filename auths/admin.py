@@ -1,8 +1,8 @@
+from allauth.account.decorators import secure_admin_login
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from .models import User, GoogleCredentials, Etablissement, RatingHistory
-from django.contrib import admin
-from allauth.account.decorators import secure_admin_login
+
+from .models import Etablissement, GoogleCredentials, RatingHistory, User
 
 admin.autodiscover()
 admin.site.login = secure_admin_login(admin.site.login)

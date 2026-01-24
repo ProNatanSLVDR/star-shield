@@ -5,16 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0023_googlecredentials_google_account_email'),
-        ('payments', '0003_alter_stripesubscription_unique_together_and_more'),
+        ("auths", "0023_googlecredentials_google_account_email"),
+        ("payments", "0003_alter_stripesubscription_unique_together_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='stripesubscription',
-            name='etablissement',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='stripe_subscription', to='auths.etablissement'),
+            model_name="stripesubscription",
+            name="etablissement",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stripe_subscription",
+                to="auths.etablissement",
+            ),
         ),
     ]

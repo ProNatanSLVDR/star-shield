@@ -1,18 +1,17 @@
-from django.conf import settings
 import logging
-import requests
-import warnings
 
+import requests
+from django.conf import settings
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from google_auth_oauthlib.flow import Flow
-from django.contrib import messages
+
 from starshield.kms import encrypt_symmetric
 
 from .models import GoogleCredentials
-
 
 logger = logging.getLogger(__name__)
 

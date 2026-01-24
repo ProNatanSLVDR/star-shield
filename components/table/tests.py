@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+
 from django.test import SimpleTestCase
 
 from components.table.table import (
-    normalize_header,
+    CellData,
+    HeaderConfig,
     check_text_is_long,
+    normalize_header,
     process_cell,
     process_row,
-    HeaderConfig,
-    CellData,
 )
 
 
@@ -18,7 +19,7 @@ class NormalizeHeaderTests(SimpleTestCase):
 
     def test_normalize_dict_header_with_all_fields(self) -> None:
         """Test normalizing dict header with all configuration fields."""
-        header: Dict[str, Any] = {
+        header: dict[str, Any] = {
             "label": "User Name",
             "key": "user_name",
             "orderable": True,
@@ -42,7 +43,7 @@ class NormalizeHeaderTests(SimpleTestCase):
 
     def test_normalize_dict_header_with_minimal_fields(self) -> None:
         """Test normalizing dict header with only required fields."""
-        header: Dict[str, Any] = {
+        header: dict[str, Any] = {
             "label": "Status",
             "key": "status",
         }
@@ -60,7 +61,7 @@ class NormalizeHeaderTests(SimpleTestCase):
 
     def test_normalize_dict_header_label_fallback_to_key(self) -> None:
         """Test that label falls back to key if label not provided."""
-        header: Dict[str, Any] = {
+        header: dict[str, Any] = {
             "key": "email",
         }
 
@@ -98,7 +99,7 @@ class NormalizeHeaderTests(SimpleTestCase):
 
     def test_normalize_dict_header_key_auto_generation_from_label(self) -> None:
         """Test that key is auto-generated from label if key not provided."""
-        header: Dict[str, Any] = {
+        header: dict[str, Any] = {
             "label": "Product Name",
         }
 
@@ -234,7 +235,7 @@ class ProcessCellTests(SimpleTestCase):
     def test_process_badge_cell_complete(self) -> None:
         """Test processing badge cell with all fields."""
         header: HeaderConfig = self._get_default_header()
-        cell_data: Dict[str, Any] = {
+        cell_data: dict[str, Any] = {
             "type": "badge",
             "value": "Active",
             "variant": "success",
@@ -253,7 +254,7 @@ class ProcessCellTests(SimpleTestCase):
     def test_process_badge_cell_minimal(self) -> None:
         """Test processing badge cell with minimal fields."""
         header: HeaderConfig = self._get_default_header()
-        cell_data: Dict[str, Any] = {
+        cell_data: dict[str, Any] = {
             "type": "badge",
             "value": "Pending",
         }
@@ -269,14 +270,14 @@ class ProcessCellTests(SimpleTestCase):
     def test_process_button_cell(self) -> None:
         """Test processing button cell."""
         header: HeaderConfig = self._get_default_header()
-        buttons: List[Dict[str, Any]] = [
+        buttons: list[dict[str, Any]] = [
             {
                 "text": "Edit",
                 "classes": "btn-sm btn-primary",
                 "icon": "fa-solid fa-pen",
             }
         ]
-        cell_data: Dict[str, Any] = {
+        cell_data: dict[str, Any] = {
             "type": "buttons",
             "buttons": buttons,
         }
@@ -290,7 +291,7 @@ class ProcessCellTests(SimpleTestCase):
     def test_process_html_cell(self) -> None:
         """Test processing HTML cell."""
         header: HeaderConfig = self._get_default_header()
-        cell_data: Dict[str, Any] = {
+        cell_data: dict[str, Any] = {
             "type": "html",
             "value": "<strong>Bold</strong>",
             "tooltip": "HTML content",
@@ -305,7 +306,7 @@ class ProcessCellTests(SimpleTestCase):
     def test_process_dict_cell_with_value_key(self) -> None:
         """Test processing dict cell with value key (defaults to text type)."""
         header: HeaderConfig = self._get_default_header()
-        cell_data: Dict[str, Any] = {
+        cell_data: dict[str, Any] = {
             "value": "Description",
             "tooltip": "Full description",
             "sort_value": "D",
@@ -340,7 +341,7 @@ class ProcessCellTests(SimpleTestCase):
     def test_process_cell_missing_value_in_dict(self) -> None:
         """Test that dict cell without value key gets empty string."""
         header: HeaderConfig = self._get_default_header()
-        cell_data: Dict[str, Any] = {
+        cell_data: dict[str, Any] = {
             "type": "text",
             "tooltip": "No value provided",
         }
@@ -354,7 +355,7 @@ class ProcessCellTests(SimpleTestCase):
 class ProcessRowTests(SimpleTestCase):
     """Test process_row function for complete row processing."""
 
-    def _get_headers(self) -> List[HeaderConfig]:
+    def _get_headers(self) -> list[HeaderConfig]:
         """Helper to get default headers for testing."""
         return [
             {
@@ -381,13 +382,13 @@ class ProcessRowTests(SimpleTestCase):
 
     def test_process_row_with_simple_text_cells(self) -> None:
         """Test processing row with simple text values."""
-        headers: List[HeaderConfig] = self._get_headers()
-        row: Dict[str, Any] = {
+        headers: list[HeaderConfig] = self._get_headers()
+        row: dict[str, Any] = {
             "name": "John Doe",
             "status": "Active",
         }
 
-        result: Dict[str, Any] = process_row(row, headers)
+        result: dict[str, Any] = process_row(row, headers)
 
         self.assertEqual(len(result["cells"]), 2)
         self.assertEqual(result["cells"][0]["value"], "John Doe")
@@ -396,8 +397,8 @@ class ProcessRowTests(SimpleTestCase):
 
     def test_process_row_with_mixed_cell_types(self) -> None:
         """Test processing row with different cell types."""
-        headers: List[HeaderConfig] = self._get_headers()
-        row: Dict[str, Any] = {
+        headers: list[HeaderConfig] = self._get_headers()
+        row: dict[str, Any] = {
             "name": "Jane Smith",
             "status": {
                 "type": "badge",
@@ -406,7 +407,7 @@ class ProcessRowTests(SimpleTestCase):
             },
         }
 
-        result: Dict[str, Any] = process_row(row, headers)
+        result: dict[str, Any] = process_row(row, headers)
 
         self.assertEqual(len(result["cells"]), 2)
         self.assertEqual(result["cells"][0]["type"], "text")
@@ -415,8 +416,8 @@ class ProcessRowTests(SimpleTestCase):
 
     def test_process_row_with_button_cell_sets_flag(self) -> None:
         """Test that has_buttons flag is set when buttons cell exists."""
-        headers: List[HeaderConfig] = self._get_headers()
-        row: Dict[str, Any] = {
+        headers: list[HeaderConfig] = self._get_headers()
+        row: dict[str, Any] = {
             "name": "Bob Wilson",
             "status": {
                 "type": "buttons",
@@ -424,33 +425,33 @@ class ProcessRowTests(SimpleTestCase):
             },
         }
 
-        result: Dict[str, Any] = process_row(row, headers)
+        result: dict[str, Any] = process_row(row, headers)
 
         self.assertTrue(result["has_buttons"])
         self.assertEqual(result["cells"][1]["type"], "buttons")
 
     def test_process_row_with_modal_link(self) -> None:
         """Test that modal_link is preserved in processed row."""
-        headers: List[HeaderConfig] = self._get_headers()
-        row: Dict[str, Any] = {
+        headers: list[HeaderConfig] = self._get_headers()
+        row: dict[str, Any] = {
             "name": "Alice Brown",
             "status": "Pending",
             "modal_link": "/api/user/123/details/",
         }
 
-        result: Dict[str, Any] = process_row(row, headers)
+        result: dict[str, Any] = process_row(row, headers)
 
         self.assertEqual(result["modal_link"], "/api/user/123/details/")
 
     def test_process_row_with_missing_column_key(self) -> None:
         """Test row processing when row is missing a key that header expects."""
-        headers: List[HeaderConfig] = self._get_headers()
-        row: Dict[str, Any] = {
+        headers: list[HeaderConfig] = self._get_headers()
+        row: dict[str, Any] = {
             "name": "Charlie Davis",
             # Missing 'status' key
         }
 
-        result: Dict[str, Any] = process_row(row, headers)
+        result: dict[str, Any] = process_row(row, headers)
 
         self.assertEqual(len(result["cells"]), 2)
         self.assertEqual(result["cells"][0]["value"], "Charlie Davis")
@@ -459,33 +460,35 @@ class ProcessRowTests(SimpleTestCase):
 
     def test_process_row_with_extra_columns_in_data(self) -> None:
         """Test that extra columns in row data are ignored."""
-        headers: List[HeaderConfig] = self._get_headers()
-        row: Dict[str, Any] = {
+        headers: list[HeaderConfig] = self._get_headers()
+        row: dict[str, Any] = {
             "name": "Eva Green",
             "status": "Active",
             "extra_field": "Should be ignored",
         }
 
-        result: Dict[str, Any] = process_row(row, headers)
+        result: dict[str, Any] = process_row(row, headers)
 
         # Should only have cells for defined headers
         self.assertEqual(len(result["cells"]), 2)
 
     def test_process_row_multiple_button_types_sets_flag_once(self) -> None:
         """Test has_buttons flag is set correctly even with multiple button cells."""
-        headers_with_buttons: List[HeaderConfig] = self._get_headers()
-        headers_with_buttons.append({
-            "label": "Actions",
-            "key": "actions",
-            "orderable": False,
-            "searchable": False,
-            "icon": None,
-            "centered": True,
-            "popover_if_long": False,
-            "popover_threshold": 15,
-        })
+        headers_with_buttons: list[HeaderConfig] = self._get_headers()
+        headers_with_buttons.append(
+            {
+                "label": "Actions",
+                "key": "actions",
+                "orderable": False,
+                "searchable": False,
+                "icon": None,
+                "centered": True,
+                "popover_if_long": False,
+                "popover_threshold": 15,
+            }
+        )
 
-        row: Dict[str, Any] = {
+        row: dict[str, Any] = {
             "name": "Frank Miller",
             "status": "Active",
             "actions": {
@@ -494,7 +497,7 @@ class ProcessRowTests(SimpleTestCase):
             },
         }
 
-        result: Dict[str, Any] = process_row(row, headers_with_buttons)
+        result: dict[str, Any] = process_row(row, headers_with_buttons)
 
         self.assertTrue(result["has_buttons"])
 
@@ -504,7 +507,7 @@ class TableContextDataEdgeCasesTests(SimpleTestCase):
 
     def test_normalize_header_with_dict_missing_label_uses_key(self) -> None:
         """Test header normalization when label is missing but key is present."""
-        header: Dict[str, Any] = {"key": "id", "orderable": True}
+        header: dict[str, Any] = {"key": "id", "orderable": True}
 
         result: HeaderConfig = normalize_header(header)
 
@@ -524,7 +527,7 @@ class TableContextDataEdgeCasesTests(SimpleTestCase):
             "popover_if_long": False,
             "popover_threshold": 15,
         }
-        cell_data: Dict[str, Any] = {"type": "badge"}
+        cell_data: dict[str, Any] = {"type": "badge"}
 
         result: CellData = process_cell(cell_data, header)
 
@@ -544,7 +547,7 @@ class TableContextDataEdgeCasesTests(SimpleTestCase):
             "popover_threshold": 15,
         }
         html_content: str = "<img src='test.jpg' /> <script>alert('test')</script>"
-        cell_data: Dict[str, Any] = {"type": "html", "value": html_content}
+        cell_data: dict[str, Any] = {"type": "html", "value": html_content}
 
         result: CellData = process_cell(cell_data, header)
 
@@ -553,7 +556,7 @@ class TableContextDataEdgeCasesTests(SimpleTestCase):
 
     def test_process_row_with_numeric_header_key(self) -> None:
         """Test processing row where header key doesn't exist in row."""
-        headers: List[HeaderConfig] = [
+        headers: list[HeaderConfig] = [
             {
                 "label": "ID",
                 "key": "id",
@@ -565,9 +568,9 @@ class TableContextDataEdgeCasesTests(SimpleTestCase):
                 "popover_threshold": 15,
             }
         ]
-        row: Dict[str, Any] = {}
+        row: dict[str, Any] = {}
 
-        result: Dict[str, Any] = process_row(row, headers)
+        result: dict[str, Any] = process_row(row, headers)
 
         self.assertEqual(len(result["cells"]), 1)
         self.assertEqual(result["cells"][0]["value"], "")

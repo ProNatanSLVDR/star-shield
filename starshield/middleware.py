@@ -1,8 +1,8 @@
-from django.contrib import messages
-from django.contrib.messages import get_messages
-from django.shortcuts import reverse
-from django.utils.deprecation import MiddlewareMixin
 import json
+
+from django.contrib.messages import get_messages
+from django.utils.deprecation import MiddlewareMixin
+
 from auths.models import Etablissement
 
 

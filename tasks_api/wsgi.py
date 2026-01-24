@@ -1,6 +1,7 @@
 import os
-from gevent import monkey
+
 import grpc.experimental.gevent as grpc_gevent
+from gevent import monkey
 
 grpc_gevent.init_gevent()
 monkey.patch_all()

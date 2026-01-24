@@ -16,6 +16,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from starshield.kms import decrypt_symmetric, encrypt_symmetric
+
 from . import choices
 
 logger = logging.getLogger(__name__)
@@ -254,11 +255,16 @@ class GoogleCredentials(models.Model):
 
         try:
             # Récupération des informations de la location
-            location = locations_service.locations().get(name=location_id, readMask="name,title,metadata,websiteUri").execute()
+            location = (
+                locations_service.locations().get(name=location_id, readMask="name,title,metadata,websiteUri").execute()
+            )
 
             metadata = location.get("metadata", {})
         except Exception as e:
-            logger.error(f"Erreur lors de la création de l'établissement pour {location_id} (user {self.user_id}): {e}", exc_info=True)
+            logger.error(
+                f"Erreur lors de la création de l'établissement pour {location_id} (user {self.user_id}): {e}",
+                exc_info=True,
+            )
             self._check_and_set_invalid_grant(e)
             return None
 
@@ -283,12 +289,17 @@ class GoogleCredentials(models.Model):
 
                     enqueue_full_import_task(etablissement.id)
                 except Exception as e:
-                    logger.warning(f"Failed to enqueue full import task for etablissement {etablissement.id}: {e}", exc_info=True)
+                    logger.warning(
+                        f"Failed to enqueue full import task for etablissement {etablissement.id}: {e}", exc_info=True
+                    )
 
             return etablissement
 
         except Exception as e:
-            logger.error(f"Erreur lors de la création de l'établissement pour {location_id} (user {self.user_id}): {e}", exc_info=True)
+            logger.error(
+                f"Erreur lors de la création de l'établissement pour {location_id} (user {self.user_id}): {e}",
+                exc_info=True,
+            )
             return None
 
     def list_available_locations(self):
@@ -323,7 +334,10 @@ class GoogleCredentials(models.Model):
                         .execute()
                     )
                 except Exception as e:
-                    logger.error(f"Error fetching locations for account {account['name']} (user {self.user_id}): {e}", exc_info=True)
+                    logger.error(
+                        f"Error fetching locations for account {account['name']} (user {self.user_id}): {e}",
+                        exc_info=True,
+                    )
                     self._check_and_set_invalid_grant(e)
                     break
 

@@ -1,8 +1,9 @@
-from django.urls import path, include
+from django.urls import include, path
+
 from . import views
-from .settings import urls as settings_urls
 from .filtre import urls as filtre_urls
 from .roulette import urls as roulette_urls
+from .settings import urls as settings_urls
 
 app_name = "etablissement"
 

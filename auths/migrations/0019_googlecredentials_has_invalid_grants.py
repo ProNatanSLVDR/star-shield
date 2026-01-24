@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0018_etablissement_qr_color_mask_and_more'),
+        ("auths", "0018_etablissement_qr_color_mask_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='googlecredentials',
-            name='has_invalid_grants',
+            model_name="googlecredentials",
+            name="has_invalid_grants",
             field=models.BooleanField(default=False),
         ),
     ]

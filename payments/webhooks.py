@@ -1,13 +1,15 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.http import HttpResponse
+import json
+import logging
+
+import stripe
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_not_required
-import stripe
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
 from .services import sync_stripe_data
-import logging
-import json
 
 logger = logging.getLogger(__name__)
 

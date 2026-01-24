@@ -5,21 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0012_etablissement_last_reviews_update_and_more'),
-        ('reviews', '0006_review_google_review_id_review_google_reviewer_data_and_more'),
+        ("auths", "0012_etablissement_last_reviews_update_and_more"),
+        ("reviews", "0006_review_google_review_id_review_google_reviewer_data_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ReviewAnalytics',
+            name="ReviewAnalytics",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('review_page_consulted', 'Review Page Consulted'), ('google_redirect', 'Redirected to Google'), ('internal_feedback', 'Internal Feedback')], max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('etablissement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='auths.etablissement')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("review_page_consulted", "Review Page Consulted"),
+                            ("google_redirect", "Redirected to Google"),
+                            ("internal_feedback", "Internal Feedback"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "etablissement",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="auths.etablissement"),
+                ),
             ],
         ),
     ]

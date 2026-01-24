@@ -1,11 +1,11 @@
-from django.urls import path, include
-from .views import accueil
+from django.urls import include, path
 
-from .views.etablissements.urls import urlpatterns as etablissements_urls
+from .views import accueil
 from .views.etablissement.urls import urlpatterns as etablissement_urls
+from .views.etablissements.urls import urlpatterns as etablissements_urls
+from .views.facturation.urls import urlpatterns as facturation_urls
 from .views.onboarding.urls import urlpatterns as onboarding_urls
 from .views.profile.urls import urlpatterns as profile_urls
-from .views.facturation.urls import urlpatterns as facturation_urls
 
 app_name = "dashboard"
 

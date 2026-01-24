@@ -1,13 +1,15 @@
+import logging
+
+import stripe
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http.response import Http404
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
-from django.views.decorators.http import require_POST, require_GET, require_http_methods
-import stripe
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from auths.models import Etablissement
-from .services import get_or_create_stripe_customer, sync_stripe_data, check_existing_subscription_for_etablissement
-import logging
+
+from .services import check_existing_subscription_for_etablissement, get_or_create_stripe_customer, sync_stripe_data
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +53,16 @@ def create_checkout_session(request):
         if existing_subscription_db:
             existing_subscription_db.refresh_from_db()
             if existing_subscription_db.status == "active":
-                logger.warning(f"Etablissement {etablissement_id} already has an active subscription {existing_subscription_db.subscription_id}")
+                logger.warning(
+                    f"Etablissement {etablissement_id} already has an active subscription {existing_subscription_db.subscription_id}"
+                )
                 raise Http404("Cet établissement a déjà un abonnement actif")
 
         # Also check Stripe subscription status
         if existing_subscription_stripe and existing_subscription_stripe.status == "active":
-            logger.warning(f"Etablissement {etablissement_id} already has an active subscription in Stripe {existing_subscription_stripe.id}")
+            logger.warning(
+                f"Etablissement {etablissement_id} already has an active subscription in Stripe {existing_subscription_stripe.id}"
+            )
             raise Http404("Cet établissement a déjà un abonnement actif")
 
     try:

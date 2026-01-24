@@ -20,4 +20,3 @@ class TaskExecutionAdmin(admin.ModelAdmin):
     search_fields = ("etablissement__title", "error_message")
     readonly_fields = ("started_at", "completed_at")
     date_hierarchy = "started_at"
-

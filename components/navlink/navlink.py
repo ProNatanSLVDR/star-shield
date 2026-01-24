@@ -1,4 +1,4 @@
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from django_components import Component, register
 
@@ -11,12 +11,12 @@ class Navlink(Component):
         link: str
         icon: str
         text: str
-        page_name: Optional[str] = None
-        current_page: Optional[str] = None
+        page_name: str | None = None
+        current_page: str | None = None
 
     class Defaults:
-        page_name: Optional[str] = None
-        current_page: Optional[str] = None
+        page_name: str | None = None
+        current_page: str | None = None
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         if not kwargs.link:

@@ -6,22 +6,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0008_rename_google_credentials_etablissement_google_credential_and_more'),
+        ("auths", "0008_rename_google_credentials_etablissement_google_credential_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='RatingHistory',
+            name="RatingHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('rating', models.DecimalField(decimal_places=2, max_digits=3, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(5)])),
-                ('total_reviews', models.PositiveIntegerField(default=0)),
-                ('google_rating', models.DecimalField(blank=True, decimal_places=2, max_digits=3, null=True)),
-                ('google_review_count', models.PositiveIntegerField(blank=True, null=True)),
-                ('recorded_at', models.DateTimeField(auto_now_add=True)),
-                ('etablissement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rating_history', to='auths.etablissement')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "rating",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=3,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(5),
+                        ],
+                    ),
+                ),
+                ("total_reviews", models.PositiveIntegerField(default=0)),
+                ("google_rating", models.DecimalField(blank=True, decimal_places=2, max_digits=3, null=True)),
+                ("google_review_count", models.PositiveIntegerField(blank=True, null=True)),
+                ("recorded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "etablissement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="rating_history",
+                        to="auths.etablissement",
+                    ),
+                ),
             ],
         ),
     ]

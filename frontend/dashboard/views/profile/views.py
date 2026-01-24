@@ -1,8 +1,10 @@
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
+
 from frontend.dashboard.render import starshield_render
+
 from .forms import UserProfileForm
 
 

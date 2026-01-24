@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0025_alter_etablissement_roulette_spin_cooldown_days'),
+        ("auths", "0025_alter_etablissement_roulette_spin_cooldown_days"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='review_filtering_enabled',
-            field=models.BooleanField(default=True, help_text="Activer le filtrage d'avis basé sur le seuil de redirection."),
+            model_name="etablissement",
+            name="review_filtering_enabled",
+            field=models.BooleanField(
+                default=True, help_text="Activer le filtrage d'avis basé sur le seuil de redirection."
+            ),
         ),
     ]

@@ -1,6 +1,5 @@
 from django import forms
 
-
 # FontAwesome icon choices for roulette prizes
 ROULETTE_ICON_CHOICES = [
     ("fa-solid fa-gift", "Cadeau"),
@@ -113,7 +112,9 @@ class RouletteSettingsForm(forms.Form):
         # Validate probabilities sum to 100%
         total_probability = sum(p["probability"] for p in prizes)
         if prizes and abs(total_probability - 100.0) > 0.01:  # Allow small floating point errors
-            raise forms.ValidationError(f"La somme des probabilités doit être exactement 100%. Actuellement: {total_probability}%")
+            raise forms.ValidationError(
+                f"La somme des probabilités doit être exactement 100%. Actuellement: {total_probability}%"
+            )
 
         cleaned_data["prizes"] = prizes
         return cleaned_data

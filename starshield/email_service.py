@@ -6,7 +6,6 @@ using Django templates and the Brevo email backend.
 """
 
 import logging
-from typing import Optional
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -19,8 +18,8 @@ def send_email(
     to: list[str] | str,
     subject: str,
     template_name: str = "emails/basic_mail.html",
-    context: Optional[dict] = None,
-    from_email: Optional[str] = None,
+    context: dict | None = None,
+    from_email: str | None = None,
     fail_silently: bool = False,
 ) -> None:
     """
@@ -103,7 +102,7 @@ def send_email(
         logger.info(f"Email sent successfully to {recipient_list} with subject: {subject}")
 
     except Exception as e:
-        error_msg = f"Failed to send email to {recipient_list}: {str(e)}"
+        error_msg = f"Failed to send email to {recipient_list}: {e!s}"
         logger.error(error_msg, exc_info=True)
         if not fail_silently:
             raise Exception(error_msg) from e

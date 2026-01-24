@@ -1,15 +1,18 @@
 import logging
 import random
 import string
+
 from django.contrib.admin.sites import login_not_required
-from django.http import JsonResponse, Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
+
 from auths.models import Etablissement
 from frontend.reviews.utils import get_etablissement_by_identifier, get_valid_session_key, set_valid_session_key
-from .models import RoulettePrize, RouletteSpin, RouletteAnalytics
+
+from .models import RouletteAnalytics, RoulettePrize, RouletteSpin
 
 logger = logging.getLogger(__name__)
 

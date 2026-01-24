@@ -2,7 +2,9 @@ from django.db import models
 
 
 class StripeSubscription(models.Model):
-    etablissement = models.ForeignKey("auths.Etablissement", on_delete=models.CASCADE, related_name="stripe_subscription", null=True, blank=True)
+    etablissement = models.ForeignKey(
+        "auths.Etablissement", on_delete=models.CASCADE, related_name="stripe_subscription", null=True, blank=True
+    )
     subscription_id = models.CharField(max_length=255, unique=True)
 
     status = models.CharField(max_length=50)

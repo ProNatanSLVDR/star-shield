@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0010_rename_recorded_at_ratinghistory_created_at_and_more'),
+        ("auths", "0010_rename_recorded_at_ratinghistory_created_at_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='ratinghistory',
-            name='google_rating',
+            model_name="ratinghistory",
+            name="google_rating",
         ),
         migrations.RemoveField(
-            model_name='ratinghistory',
-            name='google_review_count',
+            model_name="ratinghistory",
+            name="google_review_count",
         ),
     ]

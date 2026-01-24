@@ -5,20 +5,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0009_ratinghistory'),
+        ("auths", "0009_ratinghistory"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='ratinghistory',
-            old_name='recorded_at',
-            new_name='created_at',
+            model_name="ratinghistory",
+            old_name="recorded_at",
+            new_name="created_at",
         ),
         migrations.AlterField(
-            model_name='ratinghistory',
-            name='google_rating',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=3, null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(5)]),
+            model_name="ratinghistory",
+            name="google_rating",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                max_digits=3,
+                null=True,
+                validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(5)],
+            ),
         ),
     ]

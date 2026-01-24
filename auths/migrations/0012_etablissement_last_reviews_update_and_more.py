@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0011_remove_ratinghistory_google_rating_and_more'),
+        ("auths", "0011_remove_ratinghistory_google_rating_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='last_reviews_update',
+            model_name="etablissement",
+            name="last_reviews_update",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='profile_picture',
-            field=models.ImageField(blank=True, null=True, upload_to='profile_pictures/'),
+            model_name="user",
+            name="profile_picture",
+            field=models.ImageField(blank=True, null=True, upload_to="profile_pictures/"),
         ),
     ]

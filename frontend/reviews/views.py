@@ -1,17 +1,20 @@
 import logging
+
 from django.contrib.admin.sites import login_not_required
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.http import HttpResponse
-from .models import ReviewAnalytics, Review
+
+from starshield.qrcodes import generate_qrcode_png
+
 from .forms import FeedbackForm
+from .models import Review, ReviewAnalytics
 from .utils import (
-    get_etablissement_by_identifier,
     build_feedback_context,
+    get_etablissement_by_identifier,
     get_valid_session_key,
     set_valid_session_key,
 )
-from starshield.qrcodes import generate_qrcode_png
 
 logger = logging.getLogger(__name__)
 
@@ -101,9 +104,8 @@ def internal_feedback_view(request, identifier=None):
                 review_object.save()
 
             return redirect(reverse("reviews:feedback_thanks", args=[identifier]))
-        else:
-            prefilled_rating = form.data.get("rating")
-            prefilled_rating = int(prefilled_rating) if prefilled_rating else None
+        prefilled_rating = form.data.get("rating")
+        prefilled_rating = int(prefilled_rating) if prefilled_rating else None
 
     else:
         rating_param = request.GET.get("rating")

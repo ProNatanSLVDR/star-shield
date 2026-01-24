@@ -5,49 +5,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0023_googlecredentials_google_account_email'),
-        ('payments', '0002_change_stripe_subscription_to_etablissement'),
+        ("auths", "0023_googlecredentials_google_account_email"),
+        ("payments", "0002_change_stripe_subscription_to_etablissement"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='stripesubscription',
+            name="stripesubscription",
             unique_together=set(),
         ),
         migrations.AlterField(
-            model_name='stripesubscription',
-            name='etablissement',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='stripe_subscription', to='auths.etablissement'),
+            model_name="stripesubscription",
+            name="etablissement",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stripe_subscription",
+                to="auths.etablissement",
+            ),
         ),
         migrations.AlterField(
-            model_name='stripesubscription',
-            name='subscription_id',
+            model_name="stripesubscription",
+            name="subscription_id",
             field=models.CharField(max_length=255, unique=True),
         ),
         migrations.RemoveField(
-            model_name='stripesubscription',
-            name='current_period_end',
+            model_name="stripesubscription",
+            name="current_period_end",
         ),
         migrations.RemoveField(
-            model_name='stripesubscription',
-            name='current_period_start',
+            model_name="stripesubscription",
+            name="current_period_start",
         ),
         migrations.RemoveField(
-            model_name='stripesubscription',
-            name='grace_period_end',
+            model_name="stripesubscription",
+            name="grace_period_end",
         ),
         migrations.RemoveField(
-            model_name='stripesubscription',
-            name='payment_method_brand',
+            model_name="stripesubscription",
+            name="payment_method_brand",
         ),
         migrations.RemoveField(
-            model_name='stripesubscription',
-            name='payment_method_last4',
+            model_name="stripesubscription",
+            name="payment_method_last4",
         ),
         migrations.RemoveField(
-            model_name='stripesubscription',
-            name='user',
+            model_name="stripesubscription",
+            name="user",
         ),
     ]

@@ -4,15 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reviews', '0007_reviewanalytics'),
+        ("reviews", "0007_reviewanalytics"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='reviewanalytics',
-            name='type',
-            field=models.CharField(choices=[('review_page_consulted', 'Review Page Consulted'), ('external_feedback', 'External Feedback'), ('internal_feedback', 'Internal Feedback')], max_length=255),
+            model_name="reviewanalytics",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("review_page_consulted", "Review Page Consulted"),
+                    ("external_feedback", "External Feedback"),
+                    ("internal_feedback", "Internal Feedback"),
+                ],
+                max_length=255,
+            ),
         ),
     ]

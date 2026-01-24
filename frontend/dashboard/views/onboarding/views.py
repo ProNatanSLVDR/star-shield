@@ -1,12 +1,12 @@
 from functools import wraps
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.contrib import messages
 from django.utils.translation import gettext as _
 
 from frontend.dashboard.render import starshield_render
-from auths.models import GoogleCredentials
 
 
 def check_onboarding_completed(view_func):
@@ -104,7 +104,9 @@ def import_etablissements_view(request):
             for location_name in selected_locations:
                 location = locations_dict.get(location_name)
                 if location:
-                    etablissement = google_credential.create_etablissement_from_location(account_id=location["account_id"], location_id=location_name)
+                    etablissement = google_credential.create_etablissement_from_location(
+                        account_id=location["account_id"], location_id=location_name
+                    )
                     if etablissement:
                         imported_count += 1
 
@@ -112,8 +114,7 @@ def import_etablissements_view(request):
                 messages.success(request, _("{} établissement(s) importé(s) avec succès!").format(imported_count))
                 request.session.pop("available_locations", None)
                 return redirect(reverse("dashboard:onboarding:complete"))
-            else:
-                messages.error(request, _("Aucun établissement n'a pu être importé."))
+            messages.error(request, _("Aucun établissement n'a pu être importé."))
 
     available_locations = google_credential.list_available_locations()
     request.session["available_locations"] = available_locations
@@ -171,7 +172,7 @@ def reconnect_google_view(request):
     """
     has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
     google_credential = getattr(request.user, "google_credential", None)
-    
+
     # Determine the reason for reconnection
     reason = None
     if not has_credential:
@@ -180,9 +181,9 @@ def reconnect_google_view(request):
         reason = "invalid_grants"
     elif google_credential and not google_credential.is_valid:
         reason = "expired"
-    
+
     previous_email = google_credential.google_account_email if google_credential else None
-    
+
     context = {
         "has_credential": has_credential,
         "previous_email": previous_email,
