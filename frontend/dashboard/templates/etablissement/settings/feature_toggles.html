@@ -1,0 +1,97 @@
+<form hx-post="{% url 'dashboard:etablissement:settings:toggle_feature' %}"
+      hx-confirm="Êtes-vous sûr de vouloir modifier les fonctionnalités ?"
+      hx-target="#features-container"
+      hx-swap="innerHTML"
+      hx-trigger="change">
+    {% csrf_token %}
+    <div class="d-flex flex-column g-3">
+        <!-- Review Filtering Feature -->
+        <div class="mb-3">
+            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 border border-2
+                        {% if etablissement.review_filtering_enabled %}
+                            bg-success-subtle border-success
+                        {% else %}
+                            bg-danger-subtle border-danger
+                        {% endif %}">
+                <div class="d-flex align-items-center gap-3">
+                    <div>
+                        <div class="rounded-circle
+                                    {% if etablissement.review_filtering_enabled %}
+                                        bg-success
+                                    {% else %}
+                                        bg-danger
+                                    {% endif %}
+                                    text-white d-flex align-items-center justify-content-center"
+                             style="width: 48px;
+                                    height: 48px">
+                            <i class="fa-solid fa-filter fa-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="id_review_filtering_enabled"
+                               class="form-label fw-semibold mb-0">Filtrage d'avis</label>
+                        <div class="form-text small mb-0">
+                            {% if etablissement.review_filtering_enabled %}
+                                <span class="text-success">Activé</span> - Les avis sont filtrés
+                            {% else %}
+                                <span class="text-danger">Désactivé</span> - Aucun avis n'est filtré
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-check form-switch">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           id="id_review_filtering_enabled"
+                           name="review_filtering_enabled"
+                           value="on"
+                           {% if etablissement.review_filtering_enabled %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+        <!-- Roulette Feature -->
+        <div class="mb-3">
+            <div class="d-flex align-items-center justify-content-between p-3 border border-2 rounded-3
+                        {% if etablissement.roulette_enabled %}
+                            bg-success-subtle border-success
+                        {% else %}
+                            bg-danger-subtle border-danger
+                        {% endif %}">
+                <div class="d-flex align-items-center gap-3">
+                    <div>
+                        <div class="rounded-circle
+                                    {% if etablissement.roulette_enabled %}
+                                        bg-success
+                                    {% else %}
+                                        bg-danger
+                                    {% endif %}
+                                    text-white d-flex align-items-center justify-content-center"
+                             style="width: 48px;
+                                    height: 48px">
+                            <i class="fa-solid fa-circle-notch fa-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="id_roulette_enabled"
+                               class="form-label fw-semibold mb-0">Roulette</label>
+                        <div class="form-text small mb-0">
+                            {% if etablissement.roulette_enabled %}
+                                <span class="text-success">Activé</span> - Les clients peuvent jouer à la roulette
+                            {% else %}
+                                <span class="text-danger">Désactivé</span> - Aucun client ne peut jouer
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-check form-switch">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           id="id_roulette_enabled"
+                           name="roulette_enabled"
+                           value="on"
+                           {% if etablissement.roulette_enabled %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

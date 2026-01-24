@@ -57,33 +57,23 @@ def toggle_feature_view(request):
     form = ToggleFeatureForm(request.POST)
 
     if not form.is_valid():
-        messages.error(request, "Données invalides.")
+        messages.error(request, "Erreur lors de la modification des fonctionnalités.")
         return starshield_render(
             request,
-            "etablissement/partials/feature_toggle.html",
+            "etablissement/settings/feature_toggles.html",
             context={"etablissement": etablissement},
         )
 
-    feature = form.cleaned_data["feature"]
+    # List of known feature fields
+    feature_fields = ["review_filtering_enabled", "roulette_enabled"]
 
-    # Get the new state from the form
-    # For checkboxes, if checked they send "on", if unchecked they don't send the field
-    # So we check if the feature field exists in POST and equals "on"
-    if feature == "review_filtering_enabled":
+    # Process all features: enable if present in POST and equals "on", otherwise disable
+    for feature_field in feature_fields:
         # Checkbox sends "on" when checked, or nothing when unchecked
-        new_state = request.POST.get("review_filtering_enabled") == "on"
-    elif feature == "roulette_enabled":
-        new_state = request.POST.get("roulette_enabled") == "on"
-    else:
-        messages.error(request, "Fonctionnalité invalide.")
-        return starshield_render(
-            request,
-            "etablissement/partials/feature_toggle.html",
-            context={"etablissement": etablissement},
-        )
+        new_state = request.POST.get(feature_field) == "on"
+        setattr(etablissement, feature_field, new_state)
 
-    # Update the feature
-    setattr(etablissement, feature, new_state)
+    # Save all changes at once
     etablissement.save()
 
     # Refresh etablissement from DB to ensure we have latest state
@@ -92,6 +82,6 @@ def toggle_feature_view(request):
     # Return the updated features partial with all features
     return starshield_render(
         request,
-        "etablissement/partials/feature_toggle.html",
+        "etablissement/settings/feature_toggles.html",
         context={"etablissement": etablissement},
     )

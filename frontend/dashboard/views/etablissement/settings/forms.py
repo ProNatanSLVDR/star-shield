@@ -16,13 +16,6 @@ class EtablissementSettingsForm(forms.Form):
 
 
 class ToggleFeatureForm(forms.Form):
-    feature = forms.ChoiceField(
-        choices=[
-            ("review_filtering_enabled", "Filtrage d'avis"),
-            ("roulette_enabled", "Roulette"),
-        ],
-        required=True,
-    )
     # These fields are optional - they're only present when checkboxes are checked
     # We'll check them directly from POST data since unchecked checkboxes don't send values
     review_filtering_enabled = forms.CharField(required=False)
