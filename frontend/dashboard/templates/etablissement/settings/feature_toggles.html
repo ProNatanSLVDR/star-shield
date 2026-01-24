@@ -28,7 +28,8 @@
       hx-confirm="Êtes-vous sûr de vouloir modifier les fonctionnalités ?"
       hx-target="#features-container"
       hx-swap="innerHTML"
-      hx-trigger="change">
+      hx-trigger="change"
+      hx-confirm-cancel-reload="true">
     {% csrf_token %}
     <div class="d-flex flex-column g-3">
         <!-- Review Filtering Feature -->

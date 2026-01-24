@@ -64,6 +64,7 @@
 
             // Get reopen behavior from the triggering element
             const shouldReopen = evt.detail.elt.getAttribute('hx-confirm-reopen') !== 'false';
+            const shouldReloadAfterCancel = evt.detail.elt.getAttribute('hx-confirm-cancel-reload') === 'true';
 
             // Set the confirmation message
             messageEl.textContent = evt.detail.question;
@@ -76,7 +77,9 @@
 
             // Handle modal close button
             closeBtn.onclick = function() {
-                if (previousModal && shouldReopen) {
+                if (shouldReloadAfterCancel) {
+                    window.location.reload();
+                } else if (previousModal && shouldReopen) {
                     previousModal.show();
                     previousModal = null;
                 }
