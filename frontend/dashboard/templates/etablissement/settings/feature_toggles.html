@@ -7,7 +7,7 @@
     <div class="d-flex flex-column g-3">
         <!-- Review Filtering Feature -->
         <div class="mb-3">
-            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 border border-2
+            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 border
                         {% if etablissement.review_filtering_enabled %}
                             bg-success-subtle border-success
                         {% else %}
@@ -39,7 +39,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-check form-switch">
+                <div class="form-check form-switch d-flex align-items-center justify-content-end">
                     <input type="checkbox"
                            class="form-check-input"
                            id="id_review_filtering_enabled"
@@ -51,7 +51,7 @@
         </div>
         <!-- Roulette Feature -->
         <div class="mb-3">
-            <div class="d-flex align-items-center justify-content-between p-3 border border-2 rounded-3
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border
                         {% if etablissement.roulette_enabled %}
                             bg-success-subtle border-success
                         {% else %}
@@ -83,7 +83,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-check form-switch">
+                <div class="form-check form-switch d-flex align-items-center justify-content-end">
                     <input type="checkbox"
                            class="form-check-input"
                            id="id_roulette_enabled"
