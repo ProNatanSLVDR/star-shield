@@ -39,7 +39,7 @@
     <div class="row g-3">
         <!-- Left Column: Features -->
         <div class="col-12 col-lg-5">
-            <div class="rounded-4 border bg-white shadow-sm p-4 w-100 mb-3">
+            <div class="rounded-4 border bg-white shadow-sm p-4 w-100 h-100 mb-3">
                 <h2 class="h6 fw-semibold mb-3">Fonctionnalités activées</h2>
                 <div id="features-container">{% include "etablissement/settings/feature_toggles.html" %}</div>
             </div>
@@ -70,7 +70,7 @@
                     {% endfor %}
                 </div>
                 <!-- Hidden button that appears on hover -->
-                <div class="position-absolute top-0 end-0 m-3"
+                <div class="position-absolute top-50 start-50 translate-middle m-3"
                      style="opacity: 0;
                             transition: opacity 0.3s"
                      id="stats-button">
