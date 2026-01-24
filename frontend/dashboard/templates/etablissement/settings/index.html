@@ -1,9 +1,10 @@
 {% extends "dashboard_base.html" %}
+
 {% load i18n %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
-{% endblock %}
+{% endblock sidebar_content %}
 
 {% block dashboard_content %}
     <div class="d-flex flex-column h-100">
@@ -11,7 +12,6 @@
             <h1 class="h4 fw-bold text-body-emphasis mb-1">Paramètres</h1>
             <p class="text-muted mb-0 small">Gérez les paramètres généraux de votre établissement.</p>
         </div>
-
         <div class="row g-3">
             <div class="col-lg-6 mx-auto">
                 <div class="card shadow-sm border rounded-4 overflow-hidden">
@@ -19,23 +19,20 @@
                         <h2 class="h6 fw-semibold mb-0 text-white">Informations générales</h2>
                     </div>
                     <div class="card-body px-4 py-4">
-                        <form method="post" id="settingsForm">
+                        <form method="post"
+                              id="settingsForm">
                             {% csrf_token %}
-
                             {% if form.errors %}
-                                <div class="alert alert-danger" role="alert">
+                                <div class="alert alert-danger"
+                                     role="alert">
                                     {% for field, errors in form.errors.items %}
-                                        {% for error in errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
+                                        {% for error in errors %}<div>{{ error }}</div>{% endfor %}
                                     {% endfor %}
                                 </div>
                             {% endif %}
-
                             <div class="mb-4">
-                                <label for="id_title" class="form-label fw-semibold">
-                                    Nom de l'établissement
-                                </label>
+                                <label for="id_title"
+                                       class="form-label fw-semibold">Nom de l'établissement</label>
                                 <input type="text"
                                        class="form-control"
                                        id="id_title"
@@ -45,9 +42,9 @@
                                        required>
                                 <div class="form-text">Nom de l'établissement.</div>
                             </div>
-
                             <div class="mb-4">
-                                <label for="id_target_rating" class="form-label fw-semibold">
+                                <label for="id_target_rating"
+                                       class="form-label fw-semibold">
                                     <i class="fa-solid fa-bullseye me-2"></i>
                                     Objectif
                                 </label>
@@ -56,68 +53,32 @@
                                            class="form-range flex-grow-1"
                                            id="id_target_rating"
                                            name="target_rating"
-                                           value="{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}"
+                                           value="{% if etablissement.target_rating %}
+                                                      {{ etablissement.target_rating|stringformat:'.1f' }}
+                                                  {% else %}
+                                                      3.5
+                                                  {% endif %}"
                                            step="0.1"
                                            min="3.5"
                                            max="4.9">
-                                    <div class="text-primary fw-bold d-flex align-items-center gap-1" style="min-width: 60px; justify-content: center;">
-                                        <span id="target_rating_display">{% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %}3.5{% endif %}</span>
+                                    <div class="text-primary fw-bold d-flex align-items-center gap-1"
+                                         style="min-width: 60px;
+                                                justify-content: center">
+                                        <span id="target_rating_display">
+                                            {% if etablissement.target_rating %}
+                                                {{ etablissement.target_rating|stringformat:'.1f' }}
+                                            {% else %}
+                                                3.5
+                                            {% endif %}
+                                        </span>
                                         <i class="fa-solid fa-star"></i>
                                     </div>
                                 </div>
                                 <div class="form-text">Note cible que vous souhaitez atteindre à l'avenir.</div>
                             </div>
-
-                            <hr class="my-4">
-
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                            <i class="fa-solid fa-filter fa-lg"></i>
-                                        </div>
-                                        <div>
-                                            <label for="id_review_filtering_enabled" class="form-label fw-semibold mb-0">
-                                                Filtrage d'avis
-                                            </label>
-                                            <div class="form-text small mb-0">Activez le filtrage des avis selon le seuil de redirection.</div>
-                                        </div>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               id="id_review_filtering_enabled"
-                                               name="review_filtering_enabled"
-                                               {% if etablissement.review_filtering_enabled %}checked{% endif %}>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                            <i class="fa-solid fa-circle-notch fa-lg"></i>
-                                        </div>
-                                        <div>
-                                            <label for="id_roulette_enabled" class="form-label fw-semibold mb-0">
-                                                Roulette
-                                            </label>
-                                            <div class="form-text small mb-0">Activez la roue de la fortune pour vos clients.</div>
-                                        </div>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               id="id_roulette_enabled"
-                                               name="roulette_enabled"
-                                               {% if etablissement.roulette_enabled %}checked{% endif %}>
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit"
+                                        class="btn btn-primary">
                                     <i class="fa-solid fa-save me-2"></i>
                                     Enregistrer les modifications
                                 </button>
@@ -128,7 +89,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Initialize target rating slider
         function initializeTargetRatingSlider() {

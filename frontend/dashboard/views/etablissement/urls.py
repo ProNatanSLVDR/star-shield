@@ -9,6 +9,7 @@ app_name = "etablissement"
 
 urlpatterns = [
     path("", views.overview_view, name="overview"),
+    path("stats/", views.stats_view, name="stats"),
     path("avis/", views.avis_view, name="avis"),
     path("refresh/", views.refresh_reviews_view, name="refresh"),
     path("settings/", include(settings_urls)),

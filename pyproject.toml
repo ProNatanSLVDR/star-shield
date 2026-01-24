@@ -47,10 +47,10 @@ select = [
     "PERF",
     "RUF"
 ]
-extend-safe-fixes = ["I"]
 
 ignore = [
-    "SIM108"
+    "SIM108",
+    "DJ001",
 ]
 
 

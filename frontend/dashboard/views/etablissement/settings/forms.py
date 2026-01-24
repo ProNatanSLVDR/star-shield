@@ -13,9 +13,17 @@ class EtablissementSettingsForm(forms.Form):
         required=False,
         validators=[MinValueValidator(3), MaxValueValidator(5)],
     )
-    review_filtering_enabled = forms.BooleanField(
-        required=False,
+
+
+class ToggleFeatureForm(forms.Form):
+    feature = forms.ChoiceField(
+        choices=[
+            ("review_filtering_enabled", "Filtrage d'avis"),
+            ("roulette_enabled", "Roulette"),
+        ],
+        required=True,
     )
-    roulette_enabled = forms.BooleanField(
-        required=False,
-    )
+    # These fields are optional - they're only present when checkboxes are checked
+    # We'll check them directly from POST data since unchecked checkboxes don't send values
+    review_filtering_enabled = forms.CharField(required=False)
+    roulette_enabled = forms.CharField(required=False)

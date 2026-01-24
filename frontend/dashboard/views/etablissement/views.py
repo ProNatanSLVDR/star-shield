@@ -22,6 +22,67 @@ from tasks_api.services.queue_service import enqueue_refresh_task
 @google_gmb_connected_required
 @selected_etablissement_required
 def overview_view(request):
+    """New overview page with features, general stats, and useful links."""
+    etablissement = request.etablissement
+
+    # Get basic stats for the general stats section
+    reviews_queryset = Review.objects.filter(etablissement=etablissement)
+    total_reviews = reviews_queryset.count()
+
+    rating_history_qs = etablissement.rating_history.order_by("created_at")
+    rating_history_points: list[dict] = []
+    for entry in rating_history_qs:
+        rating_history_points.append(
+            {
+                "date": entry.created_at.strftime("%Y-%m-%d"),
+                "label": entry.created_at.strftime("%d %b %Y"),
+                "rating": float(entry.rating),
+                "total_reviews": entry.total_reviews,
+            }
+        )
+
+    current_rating = rating_history_points[-1]["rating"] if rating_history_points else None
+
+    analytics_queryset = ReviewAnalytics.objects.filter(etablissement=etablissement)
+    qr_page_visits = analytics_queryset.filter(type="feedback_viewed").count()
+
+    # General stats for hover section (key metrics only)
+    general_stats = [
+        {
+            "label": "Note actuelle",
+            "value": f"{current_rating:.1f}" if current_rating else "-",
+            "icon": "fa-solid fa-gauge-high",
+        },
+        {
+            "label": "Avis Total",
+            "value": total_reviews if total_reviews else "-",
+            "icon": "fa-solid fa-star",
+        },
+        {
+            "label": "Visites QR Code",
+            "value": qr_page_visits if qr_page_visits else "-",
+            "icon": "fa-solid fa-qrcode",
+        },
+    ]
+
+    context = {
+        "etablissement": etablissement,
+        "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
+        "general_stats": general_stats,
+    }
+
+    return starshield_render(
+        request,
+        "etablissement/overview.html",
+        context=context,
+        page_name="etablissement",
+    )
+
+
+@google_gmb_connected_required
+@selected_etablissement_required
+def stats_view(request):
+    """Stats page with detailed overview (chart, stats, rating distribution, recent reviews)."""
     etablissement = request.etablissement
 
     rating_history_qs = etablissement.rating_history.order_by("created_at")
@@ -145,7 +206,6 @@ def overview_view(request):
         "etablissement": etablissement,
         "chart_payload_json": json.dumps(chart_payload),
         "stats_items": stats_items,
-        "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
         "range_8": list(range(8)),
         "latest_reviews": list(latest_reviews),
         "total_reviews": total_reviews,
@@ -154,9 +214,9 @@ def overview_view(request):
 
     return starshield_render(
         request,
-        "etablissement/overview.html",
+        "etablissement/stats.html",
         context=context,
-        page_name="etablissement",
+        page_name="etablissement_stats",
     )
 
 

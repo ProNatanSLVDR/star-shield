@@ -18,6 +18,13 @@
         current_page=current_page %}
     {% endcomponent %}
     {% component "navlink"
+        link="dashboard:etablissement:stats"
+        icon="fa-solid fa-chart-line"
+        text="Statistiques"
+        page_name="etablissement_stats"
+        current_page=current_page %}
+    {% endcomponent %}
+    {% component "navlink"
         link="dashboard:etablissement:avis"
         icon="fa-solid fa-comments"
         text="Avis"

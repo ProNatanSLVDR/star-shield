@@ -1,0 +1,259 @@
+{% extends "dashboard_base.html" %}
+
+{% load static %}
+
+{% block sidebar_content %}
+    {% include "etablissement/sidebar_etablissement.html" %}
+{% endblock sidebar_content %}
+
+{% block dashboard_content %}
+    <div class="rounded-4 border bg-white shadow-sm p-3 row g-0 w-100 mb-3">
+        <div class="col-12 col-xl-6 p-2">
+            <div class="bg-body-tertiary rounded-4 p-2 d-flex align-items-center h-100">
+                <canvas id="ratingHistoryChart"
+                        class="w-100 h-100"></canvas>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6 p-2">
+            <div class="row row-cols-1 row-cols-md-2 g-2">
+                {% for stat in stats_items %}
+                    <div class="col">
+                        <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm">
+                            <div class="flex-grow-1">
+                                <p class="text-muted small mb-1">{{ stat.label }}</p>
+                                <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
+                            </div>
+                            <div class="align-self-center">
+                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                      style="width: 40px;
+                                             height: 40px">
+                                    <i class="{{ stat.icon }}"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="w-100">
+        <div class="rounded-4 border bg-white shadow-sm p-3 row g-0">
+            <div class="col-12 col-xl-5 p-2 h-100">
+                <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                        <h3 class="h6 fw-semibold mb-0">Répartition des notes</h3>
+                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ total_reviews }} avis</span>
+                    </div>
+                    {% if rating_distribution %}
+                        <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-center"
+                             style="min-height: 0">
+                            {% for item in rating_distribution %}
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-semibold small">{{ item.rating }}★</span>
+                                        <span class="text-muted small">{{ item.count }} avis</span>
+                                    </div>
+                                    {% widthratio item.google_count total_reviews 100 as google_percentage %}
+                                    {% widthratio item.internal_count total_reviews 100 as internal_percentage %}
+                                    <div class="progress-stacked"
+                                         style="height: 8px">
+                                        {% if item.google_count > 0 %}
+                                            <div class="progress"
+                                                 role="progressbar"
+                                                 style="min-width: 1%;
+                                                        width: {{ google_percentage }}%">
+                                                <div class="progress-bar bg-success"
+                                                     data-bs-toggle="tooltip"
+                                                     data-bs-title="{{ item.google_count }} avis Google"></div>
+                                            </div>
+                                        {% endif %}
+                                        {% if item.internal_count > 0 %}
+                                            <div class="progress"
+                                                 role="progressbar"
+                                                 style="min-width: 1%;
+                                                        width: {{ internal_percentage }}%">
+                                                <div class="progress-bar bg-danger"
+                                                     data-bs-toggle="tooltip"
+                                                     data-bs-title="{{ item.internal_count }} avis internes"></div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                            <p class="text-muted mb-0 small">Aucunes données pour le moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-12 col-xl-7 p-2">
+                <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                        <div>
+                            <h3 class="h6 fw-semibold mb-0">Avis récents</h3>
+                            <p class="small text-muted mb-0 mt-1"
+                               style="font-size: 0.7rem">Derniers 15 jours</p>
+                        </div>
+                        {% if latest_reviews %}
+                            <span class="badge rounded-pill bg-primary-subtle text-primary"
+                                  style="font-size: 0.7rem">{{ latest_reviews|length }} avis</span>
+                        {% endif %}
+                    </div>
+                    {% if latest_reviews %}
+                        <div class="d-flex flex-column gap-3 flex-grow-1"
+                             style="min-height: 0;
+                                    overflow-y: auto">
+                            {% for review in latest_reviews %}
+                                {% component "review" review=review show_badge=True show_timestamp=True truncate_comment=True truncate_words=20 %}
+                                {% endcomponent %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                            <p class="text-muted mb-0 small">Aucun avis pour le moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'chartjs.min.js' %}"></script>
+    <script>
+        (function() {
+            const canvas = document.getElementById('ratingHistoryChart');
+            if (!canvas) {
+                return;
+            }
+
+            let parsedPayload;
+            try {
+                parsedPayload = JSON.parse('{{ chart_payload_json|escapejs }}');
+            } catch (error) {
+                console.error('Unable to parse rating history payload', error);
+                return;
+            }
+
+            if (!parsedPayload || (!parsedPayload.history.length && !parsedPayload.goal.length)) {
+                const context = canvas.getContext('2d');
+                if (!context) {
+                    return;
+                }
+                context.font = '20px "Inter", system-ui';
+                context.fillStyle = '#6c757d';
+                context.textAlign = 'center';
+                context.fillText('Les données de note apparaîtront dès la première synchronisation.', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            const historyMap = {};
+            parsedPayload.history.forEach(function(point) {
+                historyMap[point.date] = point.rating;
+            });
+
+            const goalMap = {};
+            parsedPayload.goal.forEach(function(point) {
+                goalMap[point.date] = point.rating;
+            });
+
+            const labelsSet = new Set();
+            parsedPayload.history.forEach(function(point) {
+                labelsSet.add(point.date);
+            });
+            parsedPayload.goal.forEach(function(point) {
+                labelsSet.add(point.date);
+            });
+
+            const labels = Array.from(labelsSet).sort();
+
+            const historyData = labels.map(function(date) {
+                return historyMap[date] ?? null;
+            });
+
+            const formatLabel = function(isoDate) {
+                const parsed = new Date(isoDate + 'T00:00:00');
+                if (Number.isNaN(parsed.getTime())) {
+                    return isoDate;
+                }
+                return parsed.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: 'short'
+                });
+            };
+
+            const datasets = [{
+                label: 'Note moyenne',
+                data: historyData,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.08)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                spanGaps: true,
+            }];
+
+            if (parsedPayload.goal.length) {
+                const goalData = labels.map(function(date) {
+                    return goalMap[date] ?? null;
+                });
+                datasets.push({
+                    label: 'Objectif à 6 mois',
+                    data: goalData,
+                    borderColor: '#6c757d',
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: false,
+                });
+            }
+
+            new window.Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels.map(formatLabel),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 5,
+                            ticks: {
+                                stepSize: 0.5,
+                            },
+                            grid: {
+                                color: 'rgba(108, 117, 125, 0.15)',
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: true,
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    if (!context.length) {
+                                        return '';
+                                    }
+                                    const label = labels[context[0].dataIndex];
+                                    return formatLabel(label);
+                                },
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + (context.formattedValue || '—') + ' ★';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+{% endblock dashboard_content %}
