@@ -1,6 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% load static %}
+{% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
@@ -57,30 +58,17 @@
     <div class="row g-3">
         <!-- Left Column: Features -->
         <div class="col-12 col-lg-5">
-            <div class="card shadow-sm border rounded-4 h-100 mb-3 overflow-hidden">
-                <div class="card-header bg-primary border-bottom px-4 py-3">
-                    <h2 class="h6 fw-semibold mb-0 text-white">
-                        <i class="fa-solid fa-toggle-on me-2"></i>
-                        Fonctionnalités activées
-                    </h2>
-                </div>
-                <div class="card-body px-4 py-4">
+            {% component "card" title="Fonctionnalités activées" icon="fa-solid fa-toggle-on" card_classes="h-100 mb-3 overflow-hidden" %}
+                {% slot body %}
                     <div id="features-container">{% include "etablissement/settings/feature_toggles.html" %}</div>
-                </div>
-            </div>
+                {% endslot %}
+            {% endcomponent %}
         </div>
         <!-- Right Column: Stats, Links, Settings -->
         <div class="col-12 col-lg-7">
             <!-- General Stats Section -->
-            <div class="card shadow-sm border rounded-4 w-100 mb-3 position-relative overflow-hidden"
-                 id="general-stats-section">
-                <div class="card-header bg-primary border-bottom px-4 py-3">
-                    <h2 class="h6 fw-semibold mb-0 text-white">
-                        <i class="fa-solid fa-chart-line me-2"></i>
-                        Statistiques générales
-                    </h2>
-                </div>
-                <div class="card-body px-4 py-4">
+            {% component "card" title="Statistiques générales" icon="fa-solid fa-chart-line" card_classes="w-100 mb-3 position-relative overflow-hidden" card_id="general-stats-section" %}
+                {% slot body %}
                     <div class="row row-cols-1 row-cols-md-3 g-3"
                          id="stats-content">
                         {% for stat in general_stats %}
@@ -110,17 +98,11 @@
                             <span>Voir les statistiques détaillées</span>
                         </a>
                     </div>
-                </div>
-            </div>
+                {% endslot %}
+            {% endcomponent %}
             <!-- Useful Links Section -->
-            <div class="card shadow-sm border rounded-4 w-100 mb-3 overflow-hidden">
-                <div class="card-header bg-primary border-bottom px-4 py-3">
-                    <h2 class="h6 fw-semibold mb-0 text-white">
-                        <i class="fa-solid fa-link me-2"></i>
-                        Liens utiles
-                    </h2>
-                </div>
-                <div class="card-body px-4 py-4">
+            {% component "card" title="Liens utiles" icon="fa-solid fa-link" card_classes="w-100 mb-3 overflow-hidden" %}
+                {% slot body %}
                     <div class="row g-2">
                         <div class="col-12 col-md-6 col-lg-4">
                             <a href="{% url 'dashboard:etablissement:avis' %}"
@@ -160,17 +142,11 @@
                             </div>
                         {% endif %}
                     </div>
-                </div>
-            </div>
+                {% endslot %}
+            {% endcomponent %}
             <!-- Settings Link Section -->
-            <div class="card shadow-sm border rounded-4 w-100 mb-3 overflow-hidden">
-                <div class="card-header bg-primary border-bottom px-4 py-3">
-                    <h2 class="h6 fw-semibold mb-0 text-white">
-                        <i class="fa-solid fa-gear me-2"></i>
-                        Paramètres
-                    </h2>
-                </div>
-                <div class="card-body px-4 py-4">
+            {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="w-100 mb-3 overflow-hidden" %}
+                {% slot body %}
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <p class="text-muted small mb-0">Gérez les paramètres généraux de votre établissement</p>
@@ -181,8 +157,8 @@
                             <span>Accéder aux paramètres</span>
                         </a>
                     </div>
-                </div>
-            </div>
+                {% endslot %}
+            {% endcomponent %}
         </div>
     </div>
 {% endblock dashboard_content %}

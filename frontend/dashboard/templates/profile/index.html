@@ -1,5 +1,6 @@
 {% extends "dashboard_base.html" %}
 {% load i18n %}
+{% load component_tags %}
 
 {% block dashboard_content %}
     <div class="d-flex flex-column h-100">
@@ -14,14 +15,8 @@
         <div class="row g-3">
             <!-- Profile Form -->
             <div class="col-lg-6">
-                <div class="card shadow-sm border rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-user-pen me-2"></i>
-                            Informations personnelles
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-4">
+                {% component "card" title="Informations personnelles" icon="fa-solid fa-user-pen" card_classes="overflow-hidden" %}
+                    {% slot body %}
                         <form method="post" enctype="multipart/form-data" id="profileForm">
                             {% csrf_token %}
 
@@ -68,22 +63,16 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
 
             <!-- Profile Preview & Account Actions -->
             <div class="col-lg-6">
                 {% include "profile/profile_picture_partial.html" %}
 
-                <div class="card shadow-sm border rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-gear me-2"></i>
-                            Paramètres du compte
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-4">
+                {% component "card" title="Paramètres du compte" icon="fa-solid fa-gear" card_classes="overflow-hidden" %}
+                    {% slot body %}
                         <div class="d-grid gap-3">
                             <a href="{% url 'account_email' %}"
                                class="card text-decoration-none border rounded-3 p-3 hover-shadow">
@@ -114,8 +103,8 @@
                                 </div>
                             </a>
                         </div>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
         </div>
     </div>

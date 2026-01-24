@@ -1,0 +1,10 @@
+<div {% if card_id %}id="{{ card_id }}"{% endif %}
+     class="{{ card_classes }}">
+    <div class="{{ header_classes }}">
+        <h2 class="h6 fw-semibold mb-0 text-white">
+            {% if icon %}<i class="{{ icon }} me-2"></i>{% endif %}
+            {{ title }}
+        </h2>
+    </div>
+    <div class="{{ body_classes }}">{% slot "body" default %}{% endslot %}</div>
+</div>

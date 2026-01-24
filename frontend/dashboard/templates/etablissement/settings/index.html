@@ -1,6 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% load i18n %}
+{% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
@@ -19,11 +20,8 @@
         </div>
         <div class="row g-3">
             <div class="col-lg-6 mx-auto">
-                <div class="card shadow-sm border rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">Informations générales</h2>
-                    </div>
-                    <div class="card-body px-4 py-4">
+                {% component "card" title="Informations générales" card_classes="overflow-hidden" %}
+                    {% slot body %}
                         <form method="post"
                               id="settingsForm">
                             {% csrf_token %}
@@ -89,8 +87,8 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
         </div>
     </div>

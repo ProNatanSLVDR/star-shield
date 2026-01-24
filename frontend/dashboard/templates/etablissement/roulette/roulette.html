@@ -1,5 +1,6 @@
 {% extends "dashboard_base.html" %}
 {% load i18n %}
+{% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
@@ -18,14 +19,8 @@
         <div class="row g-3 flex-grow-1">
             <!-- Settings Form -->
             <div class="col-lg-8 d-flex flex-column">
-                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-gear me-2"></i>
-                            Configuration
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
+                {% component "card" title="Configuration" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
+                    {% slot body %}
                         <form method="post" id="rouletteSettingsForm">
                             {% csrf_token %}
 
@@ -170,20 +165,14 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
 
             <!-- Preview -->
             <div class="col-lg-4 d-flex flex-column">
-                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-eye me-2"></i>
-                            Aperçu
-                        </h2>
-                    </div>
-                    <div class="card-body p-4 flex-grow-1 overflow-auto">
+                {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="p-4 flex-grow-1 overflow-auto" %}
+                    {% slot body %}
                         {% if etablissement.roulette_enabled %}
                             <div class="text-center mb-3">
                                 <p class="text-muted small mb-2">Lien de la roue :</p>
@@ -198,8 +187,8 @@
                                 Activez la roue pour voir l'aperçu.
                             </div>
                         {% endif %}
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
         </div>
     </div>

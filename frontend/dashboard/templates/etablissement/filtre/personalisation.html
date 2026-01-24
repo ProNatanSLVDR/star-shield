@@ -1,5 +1,6 @@
 {% extends "dashboard_base.html" %}
 {% load i18n %}
+{% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
@@ -28,14 +29,8 @@
         <div class="row g-3 flex-grow-1">
             <!-- Settings Form -->
             <div class="col-lg-6 d-flex flex-column">
-                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-gear me-2"></i>
-                            Configuration
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-4 flex-grow-1 overflow-auto">
+                {% component "card" title="Configuration" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
+                    {% slot body %}
                         <form method="post" id="reviewSettingsForm">
                             {% csrf_token %}
 
@@ -126,20 +121,14 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
 
             <!-- Preview -->
             <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
-                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden" style="min-height: 0;">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-eye me-2"></i>
-                            Aperçu
-                        </h2>
-                    </div>
-                    <div class="card-body p-0 flex-grow-1 overflow-auto preview-disabled" style="min-height: 0;">
+                {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="p-0 flex-grow-1 overflow-auto preview-disabled" %}
+                    {% slot body %}
                         <section class="h-100 d-flex align-items-center justify-content-center bg-light">
                             <div class="container">
                                 <div class="row justify-content-center">
@@ -151,8 +140,8 @@
                                 </div>
                             </div>
                         </section>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
         </div>
     </div>

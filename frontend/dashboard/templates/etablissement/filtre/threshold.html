@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load static %}
+{% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
@@ -21,14 +22,8 @@
         <div class="row g-3">
             <!-- Left Column: Threshold Selection -->
             <div class="col-lg-6 d-flex flex-column">
-                <div class="card shadow-sm border rounded-4 d-flex flex-column overflow-hidden">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-sliders me-2"></i>
-                            Paramètres de seuil
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-3 d-flex flex-column">
+                {% component "card" title="Paramètres de seuil" icon="fa-solid fa-sliders" card_classes="d-flex flex-column overflow-hidden" body_classes="px-4 py-3 d-flex flex-column" %}
+                    {% slot body %}
                         <div class="row  position-relative"
                              style="min-height: 400px">
                             <div id="threshold-line"
@@ -164,20 +159,13 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
             <!-- Right Column: Configuration -->
             <div class="col-lg-6 d-flex flex-column">
-                <div class="card shadow-sm border rounded-4 h-100 d-flex flex-column overflow-hidden"
-                     style="min-height: 0">
-                    <div class="card-header bg-primary border-bottom px-4 py-3">
-                        <h2 class="h6 fw-semibold mb-0 text-white">
-                            <i class="fa-solid fa-calculator me-2"></i>
-                            Estimations et prévisions
-                        </h2>
-                    </div>
-                    <div class="card-body px-4 py-3 d-flex flex-column flex-grow-1 overflow-auto">
+                {% component "card" title="Estimations et prévisions" icon="fa-solid fa-calculator" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="px-4 py-3 d-flex flex-column flex-grow-1 overflow-auto" %}
+                    {% slot body %}
                         <div class="mb-3">
                             <label for="id_notes_per_week"
                                    class="form-label fw-semibold">
@@ -286,8 +274,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
         </div>
     </div>

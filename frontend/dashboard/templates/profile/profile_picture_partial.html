@@ -1,11 +1,6 @@
-<div id="profile-picture-card" class="card shadow-sm border rounded-4 overflow-hidden mb-3">
-    <div class="card-header bg-primary border-bottom px-4 py-3">
-        <h2 class="h6 fw-semibold mb-0 text-white">
-            <i class="fa-solid fa-image me-2"></i>
-            Photo de profil
-        </h2>
-    </div>
-    <div class="card-body px-4 py-4 text-center">
+{% load component_tags %}
+{% component "card" title="Photo de profil" icon="fa-solid fa-image" card_classes="overflow-hidden mb-3" body_classes="text-center" card_id="profile-picture-card" %}
+    {% slot body %}
         {% if user.profile_picture %}
             <img src="{{ user.profile_picture.url }}"
                  alt="Photo de profil"
@@ -59,6 +54,6 @@
                 </button>
             {% endif %}
         </form>
-    </div>
-</div>
+    {% endslot %}
+{% endcomponent %}
 
