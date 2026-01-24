@@ -13,6 +13,16 @@
           background-color: var(--bs-success);
           border-color: var(--bs-success);
      }
+
+     .feature-card {
+          cursor: pointer;
+          transition: transform 0.1s ease, box-shadow 0.1s ease;
+     }
+
+     .feature-card:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+     }
 </style>
 <form hx-post="{% url 'dashboard:etablissement:settings:toggle_feature' %}"
       hx-confirm="Êtes-vous sûr de vouloir modifier les fonctionnalités ?"
