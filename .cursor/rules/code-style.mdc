@@ -1,0 +1,27 @@
+---
+description: Always mimic the existing code style of this project
+alwaysApply: true
+---
+
+# Code Style
+
+Always analyze and mimic the existing code style when writing or modifying code in this project.
+
+## Django Patterns
+
+- Follow Django conventions for models, views, URLs, and middleware
+- Use django-components for reusable UI components
+- Use django-htmx for dynamic interactions
+- Use descriptive model field names with appropriate `help_text`
+
+## General Principles
+
+- **Failproof code**: Always try to catch errors when necessary, especially for external API calls. Write failproof code, always try to catch errors (when necessary).
+- **Simplicity**: Prefer simple solutions over complex ones. It's very important to never overcomplicate things, the simple way is the best way. DO NOT OVERCOMPLICATE ANYTHING. Always build things simple, complexify if the user asks for it.
+- **Descriptive names**: Use clear, descriptive variable and function names
+- **Error context**: Include relevant context in error messages and logs (user IDs, object IDs, etc.)
+- **Complex conditions**: To maintain code clarity and readability, avoid complex conditions within a single `if` statement. Break down complex conditions when it becomes hard to read.
+
+## Django Commands
+
+- **Migrations**: You should never run migrations, you can run makemigrations if needed. No migrate command.

@@ -23,6 +23,7 @@ node_modules/
 .idea/
 .vscode/
 *.swp
+.ruff_cache/
 
 # OS generated files
 .DS_Store
