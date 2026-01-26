@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from . import views
+from . import qrcode, views
 from .filtre import urls as filtre_urls
 from .roulette import urls as roulette_urls
 from .settings import urls as settings_urls
@@ -15,4 +15,7 @@ urlpatterns = [
     path("settings/", include(settings_urls)),
     path("filtre/", include(filtre_urls)),
     path("roulette/", include(roulette_urls)),
+    path("qrcode/", qrcode.qr_code_management_view, name="qrcode"),
+    path("qrcode/create/", qrcode.qr_code_create_view, name="qrcode_create"),
+    path("qrcode/<int:qr_code_id>/delete/", qrcode.qr_code_delete_view, name="qrcode_delete"),
 ]

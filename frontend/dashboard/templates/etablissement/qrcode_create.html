@@ -1,0 +1,85 @@
+{% extends "dashboard_base.html" %}
+{% load i18n %}
+{% load component_tags %}
+
+{% block sidebar_content %}
+    {% include "etablissement/sidebar_etablissement.html" %}
+{% endblock %}
+
+{% block dashboard_content %}
+    <div class="d-flex flex-column h-100">
+        <div class="mb-3">
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                <i class="fa-solid fa-plus me-2"></i>
+                Créer un QR Code
+            </h1>
+            <p class="text-muted mb-0 small">Créez un nouveau QR code en spécifiant son nom et sa destination.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                {% component "card" title="Nouveau QR Code" icon="fa-solid fa-qrcode" %}
+                    {% slot body %}
+                        <form method="post">
+                            {% csrf_token %}
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label for="id_name" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-tag me-2"></i>
+                                    {{ form.name.label }}
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="id_name"
+                                       name="name"
+                                       value="{{ form.name.value|default:'' }}"
+                                       required>
+                                {% if form.name.help_text %}
+                                    <div class="form-text">{{ form.name.help_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_routing" class="form-label fw-semibold d-block mb-2">
+                                    <i class="fa-solid fa-route me-2"></i>
+                                    {{ form.routing.label }}
+                                </label>
+                                <select class="form-select" id="id_routing" name="routing" required>
+                                    {% for value, label in form.routing.field.choices %}
+                                        <option value="{{ value }}" {% if form.routing.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.routing.help_text %}
+                                    <div class="form-text">{{ form.routing.help_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'dashboard:etablissement:qrcode' %}" class="btn btn-outline-secondary">
+                                    <i class="fa-solid fa-times me-2"></i>
+                                    Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-check me-2"></i>
+                                    Créer le QR code
+                                </button>
+                            </div>
+                        </form>
+                    {% endslot %}
+                {% endcomponent %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

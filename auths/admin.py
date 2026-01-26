@@ -2,7 +2,7 @@ from allauth.account.decorators import secure_admin_login
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Etablissement, GoogleCredentials, RatingHistory, User
+from .models import Etablissement, GoogleCredentials, QRCode, RatingHistory, User
 
 admin.autodiscover()
 admin.site.login = secure_admin_login(admin.site.login)
@@ -85,19 +85,6 @@ class EtablissementAdmin(admin.ModelAdmin):
             },
         ),
         (
-            _("QR Code Settings"),
-            {
-                "fields": (
-                    "qr_fill_color",
-                    "qr_fill_color_secondary",
-                    "qr_background_color",
-                    "qr_style",
-                    "qr_color_mask",
-                    "qr_logo",
-                )
-            },
-        ),
-        (
             _("URLs"),
             {
                 "fields": (
@@ -119,6 +106,48 @@ class EtablissementAdmin(admin.ModelAdmin):
         ),
     )
     readonly_fields = ("uuid", "created_at", "updated_at", "last_reviews_update")
+
+
+@admin.register(QRCode)
+class QRCodeAdmin(admin.ModelAdmin):
+    list_display = ("name", "etablissement", "routing", "created_at")
+    search_fields = ("name", "etablissement__title")
+    list_filter = ("routing", "created_at")
+    fieldsets = (
+        (
+            _("Basic Information"),
+            {
+                "fields": (
+                    "etablissement",
+                    "name",
+                    "routing",
+                )
+            },
+        ),
+        (
+            _("QR Code Customization"),
+            {
+                "fields": (
+                    "qr_fill_color",
+                    "qr_fill_color_secondary",
+                    "qr_background_color",
+                    "qr_style",
+                    "qr_color_mask",
+                    "qr_logo",
+                )
+            },
+        ),
+        (
+            _("Important dates"),
+            {
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+    )
+    readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(RatingHistory)

@@ -18,3 +18,9 @@ QR_COLOR_MASK_CHOICES = [
     ("horizontal_gradiant", "Dégradé horizontal"),
     ("vertical_gradiant", "Dégradé vertical"),
 ]
+
+# QR Code Routing Choices
+QR_ROUTING_CHOICES = [
+    ("feedback", "Feedback"),
+    ("roulette", "Roulette"),
+]

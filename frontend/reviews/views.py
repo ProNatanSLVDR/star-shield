@@ -151,31 +151,60 @@ def feedback_thanks_view(request, identifier=None):
 @login_not_required
 def qr_code_image_view(request, identifier=None):
     """Generate and return QR code image as PNG."""
+    from auths.models import QRCode
+    
     etablissement = get_etablissement_by_identifier(identifier)
 
-    # Build the feedback URL
-    feedback_url = request.build_absolute_uri(reverse("reviews:feedback", args=[identifier]))
-
-    # Get customization parameters from query string (for preview) or database
-    fill_color = request.GET.get("fill_color") or etablissement.qr_fill_color or "#000000"
-    fill_color_secondary = request.GET.get("fill_color_secondary") or etablissement.qr_fill_color_secondary or "#000000"
-    background_color = request.GET.get("background_color") or etablissement.qr_background_color or "#FFFFFF"
-    style = request.GET.get("style") or etablissement.qr_style or "square"
-    color_mask = request.GET.get("color_mask") or etablissement.qr_color_mask or "solid"
-
-    # Get logo file if exists (using Django's .open() which works for both local and cloud storage)
-    logo_file = None
-    if etablissement.qr_logo:
+    # Try to get QRCode from query parameter
+    qr_code_id = request.GET.get("qr_code_id")
+    qr_code = None
+    
+    if qr_code_id:
         try:
-            logo_file = etablissement.qr_logo.open()
+            qr_code = QRCode.objects.filter(id=qr_code_id, etablissement=etablissement).first()
         except Exception as e:
-            logger.debug(f"Could not open QR logo file for etablissement {etablissement.id}: {e}")
-            logo_file = None
+            logger.debug(f"Could not find QRCode {qr_code_id} for etablissement {etablissement.id}: {e}")
+    
+    # If no QRCode found, try first one
+    if not qr_code:
+        qr_code = etablissement.qr_codes.first()
+    
+    # Build target URL based on QRCode routing or fallback to feedback
+    if qr_code:
+        target_url = qr_code.get_target_url(identifier)
+        target_url = request.build_absolute_uri(target_url)
+        
+        # Get customization parameters from query string (for preview) or QRCode
+        fill_color = request.GET.get("fill_color") or qr_code.qr_fill_color or "#000000"
+        fill_color_secondary = request.GET.get("fill_color_secondary") or qr_code.qr_fill_color_secondary or "#000000"
+        background_color = request.GET.get("background_color") or qr_code.qr_background_color or "#FFFFFF"
+        style = request.GET.get("style") or qr_code.qr_style or "square"
+        color_mask = request.GET.get("color_mask") or qr_code.qr_color_mask or "solid"
+        
+        # Get logo file if exists
+        logo_file = None
+        if qr_code.qr_logo:
+            try:
+                logo_file = qr_code.qr_logo.open()
+            except Exception as e:
+                logger.debug(f"Could not open QR logo file for QRCode {qr_code.id}: {e}")
+                logo_file = None
+    else:
+        # Fallback to default values if no QRCode exists
+        target_url = request.build_absolute_uri(reverse("reviews:feedback", args=[identifier]))
+        
+        fill_color = request.GET.get("fill_color") or "#000000"
+        fill_color_secondary = request.GET.get("fill_color_secondary") or "#000000"
+        background_color = request.GET.get("background_color") or "#FFFFFF"
+        style = request.GET.get("style") or "square"
+        color_mask = request.GET.get("color_mask") or "solid"
+        
+        logo_file = None
 
     # Generate QR code PNG
     try:
         qr_image_bytes = generate_qrcode_png(
-            link=feedback_url,
+            link=target_url,
             fill_color=fill_color,
             fill_color_secondary=fill_color_secondary,
             background_color=background_color,
@@ -191,7 +220,7 @@ def qr_code_image_view(request, identifier=None):
         # Return a simple error response or default QR code
         try:
             qr_image_bytes = generate_qrcode_png(
-                link=feedback_url,
+                link=target_url,
                 fill_color="#000000",
                 fill_color_secondary="#000000",
                 background_color="#FFFFFF",

@@ -38,6 +38,13 @@
         page_name="etablissement_settings"
         current_page=current_page %}
     {% endcomponent %}
+    {% component "navlink"
+        link="dashboard:etablissement:qrcode"
+        icon="fa-solid fa-qrcode"
+        text="QR Code"
+        page_name="qr_code"
+        current_page=current_page %}
+    {% endcomponent %}
     <!-- Filtrage Section -->
     {% component "collapse_navlink"
         icon="fa-solid fa-filter"
@@ -57,13 +64,6 @@
                 icon="fa-solid fa-palette"
                 text="Personalisation"
                 page_name="personalisation"
-                current_page=current_page %}
-            {% endcomponent %}
-            {% component "navlink"
-                link="dashboard:etablissement:filtre:qrcode"
-                icon="fa-solid fa-qrcode"
-                text="QR Code"
-                page_name="qr_code"
                 current_page=current_page %}
             {% endcomponent %}
         {% endfill %}

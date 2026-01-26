@@ -369,24 +369,6 @@ class Etablissement(models.Model):
     maps_uri = models.URLField(max_length=255, blank=True, null=True)
     new_reviews_uri = models.URLField(max_length=255, blank=True, null=True)
 
-    # for billing
-    active = models.BooleanField(default=False)
-
-    # access
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
-
-    # settings
-
-    review_threshold = models.PositiveSmallIntegerField(
-        default=4,
-        validators=[MinValueValidator(3), MaxValueValidator(5)],
-        help_text="Note minimale pour redirection Google.",
-    )
-    review_filtering_enabled = models.BooleanField(
-        default=True,
-        help_text="Activer le filtrage d'avis basé sur le seuil de redirection.",
-    )
     target_rating = models.DecimalField(
         max_digits=3,
         decimal_places=2,
@@ -394,6 +376,24 @@ class Etablissement(models.Model):
         null=True,
         validators=[MinValueValidator(0), MaxValueValidator(5)],
         help_text="Note cible que vous souhaitez atteindre à l'avenir.",
+    )
+
+    # for billing
+    active = models.BooleanField(default=False)
+
+    # access
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
+
+    # filtrage settings
+    review_filtering_enabled = models.BooleanField(
+        default=True,
+        help_text="Activer le filtrage d'avis basé sur le seuil de redirection.",
+    )
+    review_threshold = models.PositiveSmallIntegerField(
+        default=4,
+        validators=[MinValueValidator(3), MaxValueValidator(5)],
+        help_text="Note minimale pour redirection Google.",
     )
     review_page_label = models.CharField(
         max_length=255,
@@ -416,7 +416,50 @@ class Etablissement(models.Model):
         help_text="Afficher ou masquer le badge avec le nom de l'établissement.",
     )
 
-    # QR code settings
+    # Roulette settings
+    roulette_enabled = models.BooleanField(
+        default=False,
+        help_text="Enable roulette wheel for this establishment.",
+    )
+    roulette_spin_cooldown_days = models.PositiveSmallIntegerField(
+        default=14,
+        validators=[MinValueValidator(1), MaxValueValidator(180)],
+        help_text="Number of days between spins (cooldown period).",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_reviews_update = models.DateTimeField(blank=True, null=True)
+
+    def has_active_subscription(self):
+        """Check if the establishment has an active Stripe subscription."""
+        return self.stripe_subscription.filter(status="active").exists()
+
+    def __str__(self):
+        return self.title
+
+
+class QRCode(models.Model):
+    """QR Code model for storing multiple QR codes per establishment."""
+
+    etablissement = models.ForeignKey(
+        Etablissement,
+        on_delete=models.CASCADE,
+        related_name="qr_codes",
+        help_text="Établissement associé à ce QR code.",
+    )
+    name = models.CharField(
+        max_length=255,
+        help_text="Nom du QR code pour l'identifier facilement.",
+    )
+    routing = models.CharField(
+        max_length=20,
+        choices=choices.QR_ROUTING_CHOICES,
+        default="feedback",
+        help_text="Destination du QR code (feedback ou roulette).",
+    )
+
+    # QR code customization settings
     qr_fill_color = models.CharField(
         max_length=7,
         default="#000000",
@@ -451,27 +494,26 @@ class Etablissement(models.Model):
         help_text="Logo à afficher au centre du QR code.",
     )
 
-    # Roulette settings
-    roulette_enabled = models.BooleanField(
-        default=False,
-        help_text="Enable roulette wheel for this establishment.",
-    )
-    roulette_spin_cooldown_days = models.PositiveSmallIntegerField(
-        default=14,
-        validators=[MinValueValidator(1), MaxValueValidator(180)],
-        help_text="Number of days between spins (cooldown period).",
-    )
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_reviews_update = models.DateTimeField(blank=True, null=True)
 
-    def has_active_subscription(self):
-        """Check if the establishment has an active Stripe subscription."""
-        return self.stripe_subscription.filter(status="active").exists()
+    class Meta:
+        verbose_name = "QR Code"
+        verbose_name_plural = "QR Codes"
 
     def __str__(self):
-        return self.title
+        return f"{self.name} ({self.get_routing_display()})"
+
+    def get_target_url(self, identifier):
+        """Return the target URL based on routing choice."""
+        from django.urls import reverse
+
+        if self.routing == "roulette":
+            return reverse("roulette:wheel", args=[identifier])
+        if self.routing == "feedback":  # feedback
+            return reverse("reviews:feedback", args=[identifier])
+
+        return None
 
 
 class RatingHistory(models.Model):
@@ -513,24 +555,24 @@ def delete_old_profile_picture(sender, instance, **kwargs):
             )
 
 
-@receiver(pre_save, sender=Etablissement)
+@receiver(pre_save, sender=QRCode)
 def delete_old_qr_logo(sender, instance, **kwargs):
     """
     Signal handler to delete old QR logo from storage when a new one is uploaded.
     """
     if instance.pk:
         try:
-            old_instance = Etablissement.objects.get(pk=instance.pk)
+            old_instance = QRCode.objects.get(pk=instance.pk)
             if old_instance.qr_logo and old_instance.qr_logo != instance.qr_logo:
                 if old_instance.qr_logo.name:
                     try:
                         old_instance.qr_logo.delete(save=False)
                     except Exception as e:
-                        logger.warning(f"Failed to delete old QR logo for etablissement {instance.pk}: {e}")
-        except Etablissement.DoesNotExist:
+                        logger.warning(f"Failed to delete old QR logo for QRCode {instance.pk}: {e}")
+        except QRCode.DoesNotExist:
             pass
         except Exception as e:
             logger.error(
-                f"Error deleting old QR logo for etablissement {instance.pk}: {e}",
+                f"Error deleting old QR logo for QRCode {instance.pk}: {e}",
                 exc_info=True,
             )
