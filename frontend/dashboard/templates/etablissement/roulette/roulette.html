@@ -1,10 +1,11 @@
 {% extends "dashboard_base.html" %}
+
 {% load i18n %}
 {% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
-{% endblock %}
+{% endblock sidebar_content %}
 
 {% block dashboard_content %}
     <div class="d-flex flex-column h-100">
@@ -13,192 +14,221 @@
                 <i class="fa-solid fa-circle-notch me-2"></i>
                 Roue de la fortune
             </h1>
-            <p class="text-muted mb-0 small">Configurez votre roue de la fortune pour inciter les clients à laisser des avis.</p>
+            <p class="text-muted mb-0 small">
+                Configurez votre roue de la fortune pour inciter les clients à laisser des avis.
+            </p>
         </div>
-
         <div class="row g-3 flex-grow-1">
-            <!-- Settings Form -->
-            <div class="col-lg-8 d-flex flex-column">
-                {% component "card" title="Configuration" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
+            <!-- Left Column: Settings -->
+            <div class="col-12 col-lg-5 d-flex flex-column">
+                {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
                     {% slot body %}
-                        <form method="post" id="rouletteSettingsForm">
-                            {% csrf_token %}
-
-                            {% if form.errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    {% for field, errors in form.errors.items %}
-                                        {% if field != '__all__' %}
-                                            {% for error in errors %}
-                                                <div>{{ field }}: {{ error }}</div>
-                                            {% endfor %}
-                                        {% else %}
-                                            {% for error in errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            <div class="mb-4">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input"
-                                           type="checkbox"
-                                           id="roulette_enabled"
-                                           name="roulette_enabled"
-                                           {% if form.roulette_enabled.value %}checked{% endif %}>
-                                    <label class="form-check-label fw-semibold" for="roulette_enabled">
-                                        Activer la roue de la fortune
-                                    </label>
-                                </div>
-                                <div class="form-text">Activez cette option pour permettre aux clients de jouer à la roue.</div>
+                    <form method="post" id="rouletteSettingsForm">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for field, errors in form.errors.items %}
+                                    {% if field != '__all__' %}
+                                        {% for error in errors %}<div>{{ field }}: {{ error }}</div>{% endfor %}
+                                    {% else %}
+                                        {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+                                    {% endif %}
+                                {% endfor %}
                             </div>
-
-                            <div class="mb-4">
-                                <label for="roulette_spin_cooldown_days" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-clock me-2"></i>
-                                    Délai entre deux spins (en jours)
+                        {% endif %}
+                        
+                        <!-- Enable Toggle -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       id="roulette_enabled"
+                                       name="roulette_enabled"
+                                       {% if form.roulette_enabled.value %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="roulette_enabled">
+                                    Activer la roue de la fortune
                                 </label>
-                                <input type="number"
-                                       class="form-control"
-                                       id="roulette_spin_cooldown_days"
-                                       name="roulette_spin_cooldown_days"
-                                       value="{{ form.roulette_spin_cooldown_days.value|default:14 }}"
-                                       min="1"
-                                       required>
-                                <div class="form-text">Nombre de jours d'attente entre deux spins pour le même utilisateur.</div>
                             </div>
+                            <div class="form-text">
+                                Activez cette option pour permettre aux clients de jouer à la roue.
+                            </div>
+                        </div>
 
-                            <div class="mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <label class="form-label fw-semibold mb-0">
-                                        <i class="fa-solid fa-gift me-2"></i>
-                                        Prix (maximum 8)
-                                    </label>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addPrizeBtn" {% if existing_prizes|length >= 8 %}disabled{% endif %}>
-                                        <i class="fa-solid fa-plus me-1"></i>
-                                        Ajouter un prix
-                                    </button>
+                        <!-- Cooldown Setting -->
+                        <div class="mb-4">
+                            <label for="roulette_spin_cooldown_days" class="form-label fw-semibold">
+                                <i class="fa-solid fa-clock me-2"></i>
+                                Délai entre deux spins (en jours)
+                            </label>
+                            <input type="number"
+                                   class="form-control"
+                                   id="roulette_spin_cooldown_days"
+                                   name="roulette_spin_cooldown_days"
+                                   value="{{ form.roulette_spin_cooldown_days.value|default:14 }}"
+                                   min="1"
+                                   required>
+                            <div class="form-text">
+                                Nombre de jours d'attente entre deux spins pour le même utilisateur.
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields for prizes (will be populated by prize list) -->
+                        <div id="prizesHiddenFields"></div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-save me-2"></i>
+                                Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                {% endslot %}
+            {% endcomponent %}
+            </div>
+
+            <!-- Right Column: Prizes List -->
+            <div class="col-12 col-lg-7 d-flex flex-column">
+                {% component "card" title="Prix" icon="fa-solid fa-gift" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
+                    {% slot body %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <p class="text-muted small mb-0">
+                            Configurez les prix de votre roue (maximum 8)
+                        </p>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                id="addPrizeBtn"
+                                {% if existing_prizes|length >= 8 %}disabled{% endif %}>
+                            <i class="fa-solid fa-plus me-1"></i>
+                            Ajouter un prix
+                        </button>
+                    </div>
+
+                    <!-- Prizes List -->
+                    <div id="prizesList" class="prizes-list">
+                        {% for prize in existing_prizes %}
+                            <div class="prize-item border rounded p-3 mb-3" data-prize-id="{{ prize.id }}">
+                                <div class="prize-display">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                            <i class="{{ prize.icon }} fa-lg text-primary"></i>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0 fw-semibold">
+                                                    {{ prize.name }}
+                                                    {% if prize.is_nothing_prize %}
+                                                        <span class="badge bg-secondary ms-2">Rien</span>
+                                                    {% endif %}
+                                                </h6>
+                                                <small class="text-muted">Probabilité: {{ prize.probability }}%</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary edit-prize-btn" data-prize-id="{{ prize.id }}">
+                                                <i class="fa-solid fa-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-prize-btn" data-prize-id="{{ prize.id }}">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                <div id="prizesContainer">
-                                    {% for prize in existing_prizes %}
-                                        <div class="card mb-3 prize-item" data-prize-index="{{ forloop.counter0 }}">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                                    <h6 class="mb-0">Prix {{ forloop.counter }}</h6>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-prize-btn">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
+                                <div class="prize-edit" style="display: none;">
+                                    <form class="prize-edit-form" data-prize-id="{{ prize.id }}">
+                                        <input type="hidden" name="prize_id" value="{{ prize.id }}">
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <label class="form-label small fw-semibold">Nom du prix</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm"
+                                                       name="prize_name"
+                                                       value="{{ prize.name }}"
+                                                       placeholder="Ex: Repas gratuit"
+                                                       required>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label class="form-label small fw-semibold">Icône</label>
+                                                <select class="form-select form-select-sm" name="prize_icon" required>
+                                                    {% for icon_value, icon_label in icon_choices %}
+                                                        <option value="{{ icon_value }}" {% if prize.icon == icon_value %}selected{% endif %}>
+                                                            {{ icon_label }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label class="form-label small fw-semibold">Probabilité (%)</label>
+                                                <input type="number"
+                                                       class="form-control form-control-sm probability-input"
+                                                       name="prize_probability"
+                                                       value="{{ prize.probability }}"
+                                                       min="1"
+                                                       max="100"
+                                                       step="0.01"
+                                                       required>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           type="checkbox"
+                                                           name="prize_is_nothing"
+                                                           id="prize_is_nothing_{{ prize.id }}"
+                                                           {% if prize.is_nothing_prize %}checked{% endif %}>
+                                                    <label class="form-check-label" for="prize_is_nothing_{{ prize.id }}">
+                                                        Marquer comme "Rien" (pas de prix)
+                                                    </label>
                                                 </div>
-
-                                                <input type="hidden" name="prize_{{ forloop.counter0 }}_id" value="{{ prize.id }}">
-                                                <input type="hidden" name="prize_{{ forloop.counter0 }}_order" value="{{ forloop.counter0 }}">
-
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label small fw-semibold">Nom du prix</label>
-                                                        <input type="text"
-                                                               class="form-control"
-                                                               name="prize_{{ forloop.counter0 }}_name"
-                                                               value="{{ prize.name }}"
-                                                               placeholder="Ex: Repas gratuit"
-                                                               required>
-                                                    </div>
-
-                                                    <div class="col-md-6">
-                                                        <label class="form-label small fw-semibold">Icône</label>
-                                                        <select class="form-select"
-                                                                name="prize_{{ forloop.counter0 }}_icon"
-                                                                required>
-                                                            {% for icon_value, icon_label in icon_choices %}
-                                                                <option value="{{ icon_value }}" {% if prize.icon == icon_value %}selected{% endif %}>
-                                                                    {{ icon_label }}
-                                                                </option>
-                                                            {% endfor %}
-                                                        </select>
-                                                    </div>
-
-                                                    <div class="col-md-6">
-                                                        <label class="form-label small fw-semibold">Probabilité (%)</label>
-                                                        <input type="number"
-                                                               class="form-control probability-input"
-                                                               name="prize_{{ forloop.counter0 }}_probability"
-                                                               value="{{ prize.probability }}"
-                                                               min="1"
-                                                               max="100"
-                                                               step="0.01"
-                                                               required>
-                                                    </div>
-
-                                                    <div class="col-md-6">
-                                                        <div class="form-check mt-4">
-                                                            <input class="form-check-input"
-                                                                   type="checkbox"
-                                                                   name="prize_{{ forloop.counter0 }}_is_nothing"
-                                                                   id="prize_{{ forloop.counter0 }}_is_nothing"
-                                                                   {% if prize.is_nothing_prize %}checked{% endif %}>
-                                                            <label class="form-check-label" for="prize_{{ forloop.counter0 }}_is_nothing">
-                                                                Marquer comme "Rien" (pas de prix)
-                                                            </label>
-                                                        </div>
-                                                    </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary cancel-edit-btn">
+                                                        Annuler
+                                                    </button>
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        Enregistrer
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-                                    {% endfor %}
-                                </div>
-
-                                <div class="alert alert-info mt-3" role="alert">
-                                    <i class="fa-solid fa-info-circle me-2"></i>
-                                    <strong>Total des probabilités :</strong> <span id="totalProbability">0</span>%
-                                    <div class="mt-2">
-                                        <small>La somme des probabilités doit être exactement 100%.</small>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
+                        {% empty %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-gift fa-2x mb-3 opacity-50"></i>
+                                <p class="mb-0">Aucun prix configuré</p>
+                                <small>Cliquez sur "Ajouter un prix" pour commencer</small>
+                            </div>
+                        {% endfor %}
+                    </div>
 
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa-solid fa-save me-2"></i>
-                                    Enregistrer les modifications
-                                </button>
+                    <!-- Probability Total -->
+                    {% if existing_prizes %}
+                        <div class="alert alert-info mt-3" role="alert">
+                            <i class="fa-solid fa-info-circle me-2"></i>
+                            <strong>Total des probabilités :</strong> <span id="totalProbability">0</span>%
+                            <div class="mt-2">
+                                <small>La somme des probabilités doit être exactement 100%.</small>
                             </div>
-                        </form>
-                    {% endslot %}
-                {% endcomponent %}
-            </div>
-
-            <!-- Preview -->
-            <div class="col-lg-4 d-flex flex-column">
-                {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="p-4 flex-grow-1 overflow-auto" %}
-                    {% slot body %}
-                        {% if etablissement.roulette_enabled %}
-                            <div class="text-center mb-3">
-                                <p class="text-muted small mb-2">Lien de la roue :</p>
-                                <a href="{{ roulette_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="fa-solid fa-external-link me-1"></i>
-                                    Ouvrir la roue
-                                </a>
-                            </div>
-                        {% else %}
-                            <div class="alert alert-warning mb-0" role="alert">
-                                <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                Activez la roue pour voir l'aperçu.
-                            </div>
-                        {% endif %}
-                    {% endslot %}
-                {% endcomponent %}
+                        </div>
+                    {% endif %}
+                {% endslot %}
+            {% endcomponent %}
             </div>
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const prizesContainer = document.getElementById('prizesContainer');
+            const prizesList = document.getElementById('prizesList');
             const addPrizeBtn = document.getElementById('addPrizeBtn');
+            const settingsForm = document.getElementById('rouletteSettingsForm');
+            const prizesHiddenFields = document.getElementById('prizesHiddenFields');
             let prizeCount = {{ existing_prizes|length }};
-            const iconChoices = {{ icon_choices|safe }};
+            let nextPrizeIndex = prizeCount;
+
+            const iconChoices = [
+                {% for icon_value, icon_label in icon_choices %}['{{ icon_value }}', '{{ icon_label }}']{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            ];
 
             // Calculate total probability
             function updateTotalProbability() {
@@ -208,12 +238,119 @@
                     const value = parseFloat(input.value) || 0;
                     total += value;
                 });
-                document.getElementById('totalProbability').textContent = total.toFixed(2);
-
-                // Update button state
-                if (addPrizeBtn) {
-                    addPrizeBtn.disabled = prizeCount >= 8;
+                const totalEl = document.getElementById('totalProbability');
+                if (totalEl) {
+                    totalEl.textContent = total.toFixed(2);
                 }
+            }
+
+            // Update hidden fields for form submission
+            function updateHiddenFields() {
+                prizesHiddenFields.innerHTML = '';
+                const prizeItems = prizesList.querySelectorAll('.prize-item');
+                prizeItems.forEach((item, index) => {
+                    const prizeId = item.dataset.prizeId || '';
+                    const form = item.querySelector('.prize-edit-form');
+                    if (form) {
+                        const name = form.querySelector('[name="prize_name"]').value;
+                        const icon = form.querySelector('[name="prize_icon"]').value;
+                        const probability = form.querySelector('[name="prize_probability"]').value;
+                        const isNothing = form.querySelector('[name="prize_is_nothing"]').checked;
+
+                        let hiddenFields = `
+                            <input type="hidden" name="prize_${index}_id" value="${prizeId}">
+                            <input type="hidden" name="prize_${index}_name" value="${name}">
+                            <input type="hidden" name="prize_${index}_icon" value="${icon}">
+                            <input type="hidden" name="prize_${index}_probability" value="${probability}">
+                        `;
+                        if (isNothing) {
+                            hiddenFields += `<input type="hidden" name="prize_${index}_is_nothing" value="on">`;
+                        }
+                        hiddenFields += `<input type="hidden" name="prize_${index}_order" value="${index}">`;
+                        prizesHiddenFields.innerHTML += hiddenFields;
+                    } else {
+                        // Use display values if form is not visible
+                        const display = item.querySelector('.prize-display');
+                        if (display) {
+                            const nameEl = display.querySelector('h6');
+                            const probEl = display.querySelector('small');
+                            // Extract name without badge
+                            let name = '';
+                            if (nameEl) {
+                                const badgeEl = nameEl.querySelector('.badge');
+                                if (badgeEl) {
+                                    name = nameEl.cloneNode(true);
+                                    name.querySelector('.badge').remove();
+                                    name = name.textContent.trim();
+                                } else {
+                                    name = nameEl.textContent.trim();
+                                }
+                            }
+                            const probMatch = probEl ? probEl.textContent.match(/(\d+(?:\.\d+)?)/) : null;
+                            const probability = probMatch ? probMatch[1] : '0';
+                            const icon = item.querySelector('i') ? item.querySelector('i').className.replace('fa-lg text-primary', '').trim() : '';
+                            const isNothing = display.querySelector('.badge') !== null;
+
+                            let hiddenFields = `
+                                <input type="hidden" name="prize_${index}_id" value="${prizeId}">
+                                <input type="hidden" name="prize_${index}_name" value="${name}">
+                                <input type="hidden" name="prize_${index}_icon" value="${icon}">
+                                <input type="hidden" name="prize_${index}_probability" value="${probability}">
+                            `;
+                            if (isNothing) {
+                                hiddenFields += `<input type="hidden" name="prize_${index}_is_nothing" value="on">`;
+                            }
+                            hiddenFields += `<input type="hidden" name="prize_${index}_order" value="${index}">`;
+                            prizesHiddenFields.innerHTML += hiddenFields;
+                        }
+                    }
+                });
+            }
+
+            // Toggle edit mode
+            function toggleEditMode(prizeItem, showEdit) {
+                const display = prizeItem.querySelector('.prize-display');
+                const edit = prizeItem.querySelector('.prize-edit');
+                if (showEdit) {
+                    display.style.display = 'none';
+                    edit.style.display = 'block';
+                } else {
+                    display.style.display = 'block';
+                    edit.style.display = 'none';
+                }
+            }
+
+            // Update display from form
+            function updateDisplay(prizeItem) {
+                const form = prizeItem.querySelector('.prize-edit-form');
+                const display = prizeItem.querySelector('.prize-display');
+                if (!form || !display) return;
+
+                const name = form.querySelector('[name="prize_name"]').value;
+                const icon = form.querySelector('[name="prize_icon"]').value;
+                const probability = form.querySelector('[name="prize_probability"]').value;
+                const isNothing = form.querySelector('[name="prize_is_nothing"]').checked;
+
+                const iconEl = display.querySelector('i');
+                const nameEl = display.querySelector('h6');
+                const probEl = display.querySelector('small');
+                const badgeEl = display.querySelector('.badge');
+
+                if (iconEl) iconEl.className = `${icon} fa-lg text-primary`;
+                if (nameEl) {
+                    nameEl.textContent = name;
+                    if (isNothing) {
+                        if (!badgeEl) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge bg-secondary ms-2';
+                            badge.textContent = 'Rien';
+                            nameEl.appendChild(badge);
+                        }
+                    } else if (badgeEl) {
+                        badgeEl.remove();
+                    }
+                }
+                if (probEl) probEl.textContent = `Probabilité: ${probability}%`;
             }
 
             // Add prize
@@ -221,145 +358,194 @@
                 addPrizeBtn.addEventListener('click', function() {
                     if (prizeCount >= 8) return;
 
-                    const prizeIndex = prizeCount;
-                    const prizeCard = document.createElement('div');
-                    prizeCard.className = 'card mb-3 prize-item';
-                    prizeCard.setAttribute('data-prize-index', prizeIndex);
+                    const prizeIndex = nextPrizeIndex++;
+                    const prizeItem = document.createElement('div');
+                    prizeItem.className = 'prize-item border rounded p-3 mb-3';
+                    prizeItem.dataset.prizeId = '';
 
                     let iconOptions = '';
-                    const iconChoices = [
-                        {% for icon_value, icon_label in icon_choices %}
-                            ['{{ icon_value }}', '{{ icon_label }}']{% if not forloop.last %},{% endif %}
-                        {% endfor %}
-                    ];
                     iconChoices.forEach(function(choice) {
-                        iconOptions += '<option value="' + choice[0] + '">' + choice[1] + '</option>';
+                        iconOptions += `<option value="${choice[0]}">${choice[1]}</option>`;
                     });
 
-                    prizeCard.innerHTML = `
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h6 class="mb-0">Prix ${prizeCount + 1}</h6>
-                                <button type="button" class="btn btn-sm btn-outline-danger remove-prize-btn">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                            
-                            <input type="hidden" name="prize_${prizeIndex}_id" value="">
-                            <input type="hidden" name="prize_${prizeIndex}_order" value="${prizeIndex}">
-                            
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Nom du prix</label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           name="prize_${prizeIndex}_name"
-                                           placeholder="Ex: Repas gratuit"
-                                           required>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Icône</label>
-                                    <select class="form-select" 
-                                            name="prize_${prizeIndex}_icon"
-                                            required>
-                                        ${iconOptions}
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">Probabilité (%)</label>
-                                    <input type="number" 
-                                           class="form-control probability-input" 
-                                           name="prize_${prizeIndex}_probability"
-                                           value="0"
-                                           min="1"
-                                           max="100"
-                                           step="0.01"
-                                           required>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="form-check mt-4">
-                                        <input class="form-check-input" 
-                                               type="checkbox" 
-                                               name="prize_${prizeIndex}_is_nothing"
-                                               id="prize_${prizeIndex}_is_nothing">
-                                        <label class="form-check-label" for="prize_${prizeIndex}_is_nothing">
-                                            Marquer comme "Rien" (pas de prix)
-                                        </label>
+                    prizeItem.innerHTML = `
+                        <div class="prize-display" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                    <i class="fa-solid fa-gift fa-lg text-primary"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 fw-semibold">Nouveau prix</h6>
+                                        <small class="text-muted">Probabilité: 0%</small>
                                     </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-prize-btn">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-prize-btn">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
+                        <div class="prize-edit">
+                            <form class="prize-edit-form">
+                                <input type="hidden" name="prize_id" value="">
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold">Nom du prix</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               name="prize_name"
+                                               placeholder="Ex: Repas gratuit"
+                                               required>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label small fw-semibold">Icône</label>
+                                        <select class="form-select form-select-sm" name="prize_icon" required>
+                                            ${iconOptions}
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label small fw-semibold">Probabilité (%)</label>
+                                        <input type="number"
+                                               class="form-control form-control-sm probability-input"
+                                               name="prize_probability"
+                                               value="0"
+                                               min="1"
+                                               max="100"
+                                               step="0.01"
+                                               required>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   name="prize_is_nothing"
+                                                   id="prize_is_nothing_new_${prizeIndex}">
+                                            <label class="form-check-label" for="prize_is_nothing_new_${prizeIndex}">
+                                                Marquer comme "Rien" (pas de prix)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary cancel-edit-btn">
+                                                Annuler
+                                            </button>
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                Enregistrer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     `;
 
-                    prizesContainer.appendChild(prizeCard);
+                    prizesList.appendChild(prizeItem);
                     prizeCount++;
+                    toggleEditMode(prizeItem, true);
                     updateTotalProbability();
 
-                    // Attach remove handler
-                    const removeBtn = prizeCard.querySelector('.remove-prize-btn');
+                    // Show probability alert if hidden
+                    const alertEl = prizesList.parentElement.querySelector('.alert-info');
+                    if (alertEl) alertEl.style.display = 'block';
+
+                    // Attach handlers
+                    attachPrizeHandlers(prizeItem);
+                });
+            }
+
+            // Attach handlers to prize item
+            function attachPrizeHandlers(prizeItem) {
+                const editBtn = prizeItem.querySelector('.edit-prize-btn');
+                const removeBtn = prizeItem.querySelector('.remove-prize-btn');
+                const cancelBtn = prizeItem.querySelector('.cancel-edit-btn');
+                const form = prizeItem.querySelector('.prize-edit-form');
+
+                if (editBtn) {
+                    editBtn.addEventListener('click', function() {
+                        toggleEditMode(prizeItem, true);
+                    });
+                }
+
+                if (removeBtn) {
                     removeBtn.addEventListener('click', function() {
-                        prizeCard.remove();
-                        prizeCount--;
-                        updateTotalProbability();
-                        renumberPrizes();
+                        if (confirm('Êtes-vous sûr de vouloir supprimer ce prix ?')) {
+                            prizeItem.remove();
+                            prizeCount--;
+                            updateTotalProbability();
+                            updateHiddenFields();
+                            if (addPrizeBtn) addPrizeBtn.disabled = prizeCount >= 8;
+                        }
                     });
+                }
+
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function() {
+                        const prizeId = prizeItem.dataset.prizeId;
+                        if (!prizeId) {
+                            // New prize, remove it
+                            prizeItem.remove();
+                            prizeCount--;
+                            updateTotalProbability();
+                            updateHiddenFields();
+                            if (addPrizeBtn) addPrizeBtn.disabled = prizeCount >= 8;
+                        } else {
+                            // Existing prize, cancel edit
+                            toggleEditMode(prizeItem, false);
+                        }
+                    });
+                }
+
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        updateDisplay(prizeItem);
+                        toggleEditMode(prizeItem, false);
+                        updateTotalProbability();
+                        updateHiddenFields();
+                    });
+                }
+            }
+
+            // Attach handlers to existing prizes
+            prizesList.querySelectorAll('.prize-item').forEach(item => {
+                attachPrizeHandlers(item);
+            });
+
+            // Update probability on change
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('probability-input')) {
+                    updateTotalProbability();
+                    updateHiddenFields();
+                }
+            });
+
+            // Update hidden fields before form submission
+            if (settingsForm) {
+                settingsForm.addEventListener('submit', function() {
+                    updateHiddenFields();
                 });
             }
 
-            // Remove prize handlers
-            document.querySelectorAll('.remove-prize-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (confirm('Êtes-vous sûr de vouloir supprimer ce prix ?')) {
-                        this.closest('.prize-item').remove();
-                        prizeCount--;
-                        updateTotalProbability();
-                        renumberPrizes();
-                    }
-                });
-            });
-
-            // Renumber prizes
-            function renumberPrizes() {
-                const items = prizesContainer.querySelectorAll('.prize-item');
-                items.forEach((item, index) => {
-                    const title = item.querySelector('h6');
-                    if (title) {
-                        title.textContent = `Prix ${index + 1}`;
-                    }
-                    item.setAttribute('data-prize-index', index);
-
-                    // Update all input names
-                    item.querySelectorAll('input, select').forEach(input => {
-                        const name = input.getAttribute('name');
-                        if (name) {
-                            const newName = name.replace(/prize_\d+_/, `prize_${index}_`);
-                            input.setAttribute('name', newName);
-                            if (input.id) {
-                                input.id = input.id.replace(/prize_\d+_/, `prize_${index}_`);
-                            }
-                        }
-                    });
-
-                    // Update labels
-                    item.querySelectorAll('label').forEach(label => {
-                        const forAttr = label.getAttribute('for');
-                        if (forAttr) {
-                            label.setAttribute('for', forAttr.replace(/prize_\d+_/, `prize_${index}_`));
-                        }
-                    });
-                });
-            }
-
-            // Update total on probability change
-            document.querySelectorAll('.probability-input').forEach(input => {
-                input.addEventListener('input', updateTotalProbability);
-            });
-
-            // Initial calculation
+            // Initial calculations
             updateTotalProbability();
+            updateHiddenFields();
+            if (addPrizeBtn) addPrizeBtn.disabled = prizeCount >= 8;
         });
     </script>
+
+    <style>
+        .prizes-list {
+            min-height: 200px;
+        }
+        .prize-item {
+            transition: all 0.2s ease;
+        }
+        .prize-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
 {% endblock dashboard_content %}
