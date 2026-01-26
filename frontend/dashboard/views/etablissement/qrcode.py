@@ -1,5 +1,8 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 
@@ -100,7 +103,7 @@ def qr_code_management_view(request):
 
     return starshield_render(
         request,
-        "etablissement/qrcode.html",
+        "etablissement/qrcode/qrcode.html",
         context=context,
         page_name="qr_code",
     )
@@ -121,8 +124,6 @@ def qr_code_create_view(request):
             )
             messages.success(request, "QR code créé avec succès.")
             # Return empty response to close modal and redirect
-            from django.http import HttpResponse
-            import json
             response = HttpResponse()
             response["HX-Trigger"] = json.dumps({"close-modal": True})
             response["HX-Redirect"] = f"{reverse('dashboard:etablissement:qrcode')}?qr_code_id={new_qr_code.id}"
@@ -137,7 +138,7 @@ def qr_code_create_view(request):
 
     return starshield_render(
         request,
-        "etablissement/qrcode_create_partial.html",
+        "etablissement/qrcode/create_partial.html",
         context=context,
     )
 
