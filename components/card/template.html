@@ -6,7 +6,8 @@
             {{ title }}
         </h2>
     </div>
-    <div class="card-body px-4 py-4 {{ body_classes }}">
-        {% slot "body" default %}{% endslot %}
+    <div class="card-body p-4 g-0 {{ body_classes }}">
+        {% slot "body" default %}
+        {% endslot %}
     </div>
 </div>

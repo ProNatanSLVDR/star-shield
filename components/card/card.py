@@ -1,6 +1,6 @@
 from typing import NamedTuple
 
-from django_components import Component, Default, register
+from django_components import Component, register
 
 
 @register("card")
@@ -10,9 +10,9 @@ class Card(Component):
     class Kwargs(NamedTuple):
         title: str
         icon: str | None = None
-        card_classes: str = Default("")
-        body_classes: str = Default("")
-        header_classes: str = Default("")
+        card_classes: str = ""
+        body_classes: str = ""
+        header_classes: str = ""
         card_id: str | None = None
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
