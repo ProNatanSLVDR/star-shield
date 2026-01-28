@@ -65,10 +65,15 @@ def overview_view(request):
         },
     ]
 
+    # Recent reviews (last 15 days)
+    ordered_reviews = reviews_queryset.order_by("-writen_at", "-created_at")
+    latest_reviews = ordered_reviews.filter(writen_at__gte=timezone.now() - timedelta(days=15))
+
     context = {
         "etablissement": etablissement,
         "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
         "general_stats": general_stats,
+        "latest_reviews": list(latest_reviews),
     }
 
     return starshield_render(
