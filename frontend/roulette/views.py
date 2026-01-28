@@ -29,7 +29,7 @@ def generate_prize_code(etablissement: Etablissement) -> str:
 
 def calculate_prize(etablissement: Etablissement) -> RoulettePrize | None:
     """Calculate which prize should be won based on probabilities."""
-    prizes = etablissement.roulette_prizes.all().order_by("order")
+    prizes = etablissement.roulette_prizes.all()
 
     if not prizes.exists():
         return None
@@ -106,7 +106,7 @@ def roulette_view(request, identifier=None):
     can_spin_now, message = can_spin(request, etablissement)
 
     # Get prizes for wheel display
-    prizes = etablissement.roulette_prizes.all().order_by("order")
+    prizes = etablissement.roulette_prizes.all()
 
     # Build review URL (simple, no return parameter)
     review_url = etablissement.new_reviews_uri
