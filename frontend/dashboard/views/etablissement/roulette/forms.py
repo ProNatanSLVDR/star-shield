@@ -40,7 +40,7 @@ class RouletteSettingsForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         if prizes_data:
-            for i, prize in enumerate(prizes_data):
+            for i, _prize in enumerate(prizes_data):
                 self.fields[f"prize_{i}_id"] = forms.IntegerField(
                     required=False,
                     widget=forms.HiddenInput(),
@@ -86,11 +86,14 @@ class RouletteSettingsForm(forms.Form):
                 order = cleaned_data.get(f"prize_{i}_order", i)
 
                 if not icon:
-                    raise forms.ValidationError(f"L'icône est requise pour le prix '{name}'.")
+                    msg = f"L'icône est requise pour le prix '{name}'."
+                    raise forms.ValidationError(msg)
                 if probability is None:
-                    raise forms.ValidationError(f"La probabilité est requise pour le prix '{name}'.")
+                    msg = f"La probabilité est requise pour le prix '{name}'."
+                    raise forms.ValidationError(msg)
                 if probability < 1:
-                    raise forms.ValidationError(f"La probabilité doit être d'au moins 1% pour le prix '{name}'.")
+                    msg = f"La probabilité doit être d'au moins 1% pour le prix '{name}'."
+                    raise forms.ValidationError(msg)
 
                 prizes.append(
                     {
@@ -107,14 +110,14 @@ class RouletteSettingsForm(forms.Form):
 
         # Validate max 8 prizes
         if prize_count > 8:
-            raise forms.ValidationError("Le maximum de 8 prix est autorisé (y compris le prix 'Rien').")
+            msg = "Le maximum de 8 prix est autorisé (y compris le prix 'Rien')."
+            raise forms.ValidationError(msg)
 
         # Validate probabilities sum to 100%
         total_probability = sum(p["probability"] for p in prizes)
         if prizes and abs(total_probability - 100.0) > 0.01:  # Allow small floating point errors
-            raise forms.ValidationError(
-                f"La somme des probabilités doit être exactement 100%. Actuellement: {total_probability}%"
-            )
+            msg = f"La somme des probabilités doit être exactement 100%. Actuellement: {total_probability}%"
+            raise forms.ValidationError(msg)
 
         cleaned_data["prizes"] = prizes
         return cleaned_data

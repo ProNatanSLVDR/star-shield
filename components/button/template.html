@@ -1,39 +1,22 @@
 {% if extra_kwargs.href %}
-    <a href=" {{ extra_kwargs.href }} " class="btn {{classes}} {% if disabled %}disabled{% endif %}"
-       {% for key, value in extra_kwargs.items %}
-           {{ key }}="{{ value }}"
-       {% endfor %}
-    >
-        {% if icon %}
-            <i class="{{icon}}"></i>
-        {% endif %}
-        {% if text %}
-            {{text|safe}}
-        {% endif %}
+    <a href=" {{ extra_kwargs.href }} "
+       class="btn {{ classes }}
+              {% if disabled %}disabled{% endif %}"
+       {% for key, value in extra_kwargs.items %}{{ key }}="{{ value }}"{% endfor %}>
+        {% if icon %}<i class="{{ icon }}"></i>{% endif %}
+        {% if text %}{{ text|safe }}{% endif %}
     </a>
 {% else %}
-    <button class="btn {{classes}} {% if disabled %}disabled{% endif %}"
+    <button class="btn {{ classes }}
+                   {% if disabled %}disabled{% endif %}"
             {% if disabled %}disabled{% endif %}
-            {% for key, value in extra_kwargs.items %}
-                {{ key }}="{{ value }}"
-            {% endfor %}
+            {% for key, value in extra_kwargs.items %}{{ key }}="{{ value }}"{% endfor %}
             {% if hx_modal_toggle and not disabled %}
-                hx-target="#dynamicModal .modal-content"
-                data-bs-toggle="modal"
-                data-bs-target="#dynamicModal"
+                hx-target="#dynamicModal .modal-content" data-bs-toggle="modal" data-bs-target="#dynamicModal"
             {% endif %}
-            {% if hx_modal_target %}
-                hx-target="#dynamicModal .modal-content"
-            {% endif %}
-            {% if modal_close %}
-                data-bs-dismiss="modal"
-            {% endif %}
-    >
-        {% if icon %}
-            <i class="{{icon}}"></i>
-        {% endif %}
-        {% if text %}
-            {{text|safe}}
-        {% endif %}
+            {% if hx_modal_target %}hx-target="#dynamicModal .modal-content"{% endif %}
+            {% if modal_close %}data-bs-dismiss="modal"{% endif %}>
+        {% if icon %}<i class="{{ icon }}"></i>{% endif %}
+        {% if text %}{{ text|safe }}{% endif %}
     </button>
 {% endif %}

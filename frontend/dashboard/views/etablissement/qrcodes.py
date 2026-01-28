@@ -65,7 +65,7 @@ def qr_code_management_view(request):
 
                 selected_qr_code.save()
                 messages.success(request, "Paramètres du QR code mis à jour avec succès.")
-                return redirect(f"{reverse('dashboard:etablissement:qrcode')}?qr_code_id={selected_qr_code.id}")
+                return redirect(f"{reverse('dashboard:etablissement:qrcodes')}?qr_code_id={selected_qr_code.id}")
         else:
             form = QRCodeSettingsForm(request.POST, request.FILES)
     else:
@@ -93,12 +93,26 @@ def qr_code_management_view(request):
     else:
         qr_code_url = reverse("reviews:qr_code", args=[identifier])
 
+    qr_code_count = qr_codes.count()
+    max_qr_codes = 8
+    empty_slots_count = max(0, max_qr_codes - qr_code_count)
+
+    # Create a list of slots: actual QR codes + empty slots
+    qr_codes_list = list(qr_codes)
+    empty_slots_list = [None] * empty_slots_count
+    all_slots = qr_codes_list + empty_slots_list
+
     context = {
         "etablissement": etablissement,
         "qr_codes": qr_codes,
         "selected_qr_code": selected_qr_code,
         "form": form,
         "qr_code_url": qr_code_url,
+        "qr_code_count": qr_code_count,
+        "max_qr_codes": max_qr_codes,
+        "empty_slots_count": empty_slots_count,
+        "limit_reached": qr_code_count >= max_qr_codes,
+        "all_slots": all_slots,
     }
 
     return starshield_render(
@@ -116,24 +130,37 @@ def qr_code_create_view(request):
     """View for creating a new QR code (HTMX modal)."""
     etablissement = request.etablissement
 
+    # Check if limit of 8 QR codes has been reached
+    qr_code_count = etablissement.qr_codes.count()
+    limit_reached = qr_code_count >= 8
+
     if request.method == "POST":
-        form = QRCodeCreateForm(request.POST)
-        if form.is_valid():
-            new_qr_code = QRCode.objects.create(
-                etablissement=etablissement, name=form.cleaned_data["name"], routing=form.cleaned_data["routing"]
+        if limit_reached:
+            form = QRCodeCreateForm(request.POST)
+            form.add_error(
+                None,
+                "Vous avez atteint la limite de 8 QR codes. Supprimez un QR code existant pour en créer un nouveau.",
             )
-            messages.success(request, "QR code créé avec succès.")
-            # Return empty response to close modal and redirect
-            response = HttpResponse()
-            response["HX-Trigger"] = json.dumps({"close-modal": True})
-            response["HX-Redirect"] = f"{reverse('dashboard:etablissement:qrcodes')}?qr_code_id={new_qr_code.id}"
-            return response
+        else:
+            form = QRCodeCreateForm(request.POST)
+            if form.is_valid():
+                new_qr_code = QRCode.objects.create(
+                    etablissement=etablissement, name=form.cleaned_data["name"], routing=form.cleaned_data["routing"]
+                )
+                messages.success(request, "QR code créé avec succès.")
+                # Return empty response to close modal and redirect
+                response = HttpResponse()
+                response["HX-Trigger"] = json.dumps({"close-modal": True})
+                response["HX-Redirect"] = f"{reverse('dashboard:etablissement:qrcodes')}?qr_code_id={new_qr_code.id}"
+                return response
     else:
         form = QRCodeCreateForm()
 
     context = {
         "etablissement": etablissement,
         "form": form,
+        "limit_reached": limit_reached,
+        "qr_code_count": qr_code_count,
     }
 
     return starshield_render(

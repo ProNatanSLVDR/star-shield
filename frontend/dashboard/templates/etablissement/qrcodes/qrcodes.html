@@ -8,7 +8,7 @@
 {% endblock sidebar_content %}
 
 {% block dashboard_content %}
-    <div class="d-flex flex-column">
+    <div class="d-flex flex-column h-100">
         <div class="mb-3">
             <h1 class="h4 fw-bold text-body-emphasis mb-1">
                 <i class="fa-solid fa-qrcode me-2"></i>
@@ -18,12 +18,23 @@
                 Gérez et personnalisez vos QR codes pour collecter des avis ou diriger vers la roulette.
             </p>
         </div>
-        <div class="flex-grow-1">
-            <div class="row g-3">
-                <!-- QR Codes List -->
-                <div class="col-lg-3 d-flex flex-column">
-                    {% component "card" title="Mes QR Codes" icon="fa-solid fa-list" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto p-3" %}
-                        <div class="d-grid gap-2 mb-3">
+        <div class="row g-3 flex-grow-1">
+            <!-- QR Codes List -->
+            <div class="col-lg-3 d-flex flex-column">
+                {% component "card" title="Mes QR Codes" icon="fa-solid fa-list" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto p-3" %}
+                    <div class="d-grid gap-2 mb-3">
+                        {% if limit_reached %}
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    disabled>
+                                <i class="fa-solid fa-plus me-2"></i>
+                                Créer un QR Code
+                            </button>
+                            <small class="text-muted text-center">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                Limite de {{ max_qr_codes }} QR codes atteinte
+                            </small>
+                        {% else %}
                             {% component "button"
                                 text="Créer un QR Code"
                                 classes="btn-primary"
@@ -37,328 +48,374 @@
                                 }
                                 %}
                             {% endcomponent %}
-                        </div>
-                        <div class="list-group">
-                            {% for qr_code in qr_codes %}
-                                <a href="?qr_code_id={{ qr_code.id }}"
+                        {% endif %}
+                    </div>
+                    <div class="list-group">
+                        {% for slot in all_slots %}
+                            {% if slot %}
+                                <a href="?qr_code_id={{ slot.id }}"
                                    class="list-group-item list-group-item-action
-                                          {% if selected_qr_code.id == qr_code.id %}active text-white{% endif %}">
+                                          {% if selected_qr_code and selected_qr_code.id == slot.id %}
+                                              active text-white
+                                          {% endif %}">
                                     <div class="d-flex w-100 justify-content-between align-items-start">
                                         <div class="flex-grow-1">
-                                            <h6 class="mb-1 fw-bold">{{ qr_code.name }}</h6>
-                                            <small class="{% if selected_qr_code.id == qr_code.id %}
+                                            <h6 class="mb-1 fw-bold">{{ slot.name }}</h6>
+                                            <small class="{% if selected_qr_code and selected_qr_code.id == slot.id %}
                                                               text-white
                                                           {% else %}
                                                               text-muted
                                                           {% endif %}">
                                                 <i class="fa-solid
-                                                          {% if qr_code.routing == 'roulette' %}
+                                                          {% if slot.routing == 'roulette' %}
                                                               fa-circle-notch
                                                           {% else %}
                                                               fa-comment-dots
                                                           {% endif %}
                                                           me-1"></i>
-                                                {{ qr_code.get_routing_display }}
+                                                {{ slot.get_routing_display }}
                                             </small>
                                         </div>
-                                        {% if selected_qr_code.id == qr_code.id %}
+                                        {% if selected_qr_code and selected_qr_code.id == slot.id %}
                                             <i class="fa-solid fa-check-circle"></i>
                                         {% endif %}
                                     </div>
                                 </a>
-                            {% empty %}
-                                <div class="text-muted text-center py-3">
-                                    <i class="fa-solid fa-inbox fa-2x mb-2"></i>
-                                    <p class="mb-0">Aucun QR code</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endcomponent %}
-                </div>
-                <!-- Settings Form and Preview -->
-                <div class="col-lg-9 d-flex flex-column">
-                    {% component "card" title="Configuration" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
-                        {% if selected_qr_code %}
-                            <form method="post"
-                                  enctype="multipart/form-data"
-                                  id="qrCodeSettingsForm"
-                                  class="h-100 g-0">
-                                {% csrf_token %}
-                                <div class="row h-100">
-                                    <!-- Settings Form -->
-                                    <div class="col-md-7 d-flex flex-column">
-                                        <div class="mb-3">
-                                            <label for="name"
-                                                   class="form-label fw-semibold">
-                                                <i class="fa-solid fa-tag me-2"></i>
-                                                Nom du QR code
-                                            </label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   id="name"
-                                                   name="name"
-                                                   value="{{ form.name.value|default:selected_qr_code.name }}"
-                                                   required>
+                            {% else %}
+                                <div class="list-group-item text-muted"
+                                     style="opacity: 0.5;
+                                            cursor: default">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 fw-normal"
+                                                style="font-size: 0.9rem">
+                                                <i class="fa-solid fa-square me-2"></i>
+                                                Emplacement vide
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="fa-solid fa-plus me-1"></i>
+                                                Créez un QR code pour remplir cet emplacement
+                                            </small>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="routing"
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% empty %}
+                            <div class="text-muted text-center py-3">
+                                <i class="fa-solid fa-inbox fa-2x mb-2"></i>
+                                <p class="mb-0">Aucun QR code créé</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endcomponent %}
+            </div>
+            <!-- Settings Form and Preview -->
+            <div class="col-lg-9 d-flex flex-column">
+                {% component "card" title="Configuration" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="d-flex flex-column flex-grow-1 overflow-auto" %}
+                    {% if selected_qr_code %}
+                        <form method="post"
+                              enctype="multipart/form-data"
+                              id="qrCodeSettingsForm"
+                              class="flex-grow-1 g-0">
+                            {% csrf_token %}
+                            <div class="row flex-grow-1">
+                                <!-- Settings Form -->
+                                <div class="col-md-7 d-flex flex-column">
+                                    <div class="mb-3">
+                                        <label for="name"
+                                               class="form-label fw-semibold">
+                                            <i class="fa-solid fa-tag me-2"></i>
+                                            Nom du QR code
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="name"
+                                               name="name"
+                                               value="{{ form.name.value|default:selected_qr_code.name }}"
+                                               required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="routing"
+                                               class="form-label fw-semibold d-block mb-2">
+                                            <i class="fa-solid fa-route me-2"></i>
+                                            Destination
+                                        </label>
+                                        <select class="form-select"
+                                                id="routing"
+                                                name="routing">
+                                            <option value="feedback"
+                                                    {% if form.routing.value|default:selected_qr_code.routing == "feedback" %}
+                                                        selected
+                                                    {% endif %}>
+                                                Feedback
+                                            </option>
+                                            <option value="roulette"
+                                                    {% if form.routing.value|default:selected_qr_code.routing == "roulette" %}
+                                                        selected
+                                                    {% endif %}>
+                                                Roulette
+                                            </option>
+                                        </select>
+                                        <div class="form-text">Où ce QR code redirige les utilisateurs.</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="qr_style"
                                                    class="form-label fw-semibold d-block mb-2">
-                                                <i class="fa-solid fa-route me-2"></i>
-                                                Destination
+                                                <i class="fa-solid fa-shapes me-2"></i>
+                                                Style du QR code
                                             </label>
                                             <select class="form-select"
-                                                    id="routing"
-                                                    name="routing">
-                                                <option value="feedback"
-                                                        {% if form.routing.value|default:selected_qr_code.routing == "feedback" %}
+                                                    id="qr_style"
+                                                    name="qr_style">
+                                                <option value="square"
+                                                        {% if form.qr_style.value|default:selected_qr_code.qr_style == "square" %}
                                                             selected
                                                         {% endif %}>
-                                                    Feedback
+                                                    Carré
                                                 </option>
-                                                <option value="roulette"
-                                                        {% if form.routing.value|default:selected_qr_code.routing == "roulette" %}
+                                                <option value="square_spaced"
+                                                        {% if form.qr_style.value|default:selected_qr_code.qr_style == "square_spaced" %}
                                                             selected
                                                         {% endif %}>
-                                                    Roulette
+                                                    Carré espacé
+                                                </option>
+                                                <option value="rounded"
+                                                        {% if form.qr_style.value|default:selected_qr_code.qr_style == "rounded" %}
+                                                            selected
+                                                        {% endif %}>
+                                                    Arrondi
+                                                </option>
+                                                <option value="circle"
+                                                        {% if form.qr_style.value|default:selected_qr_code.qr_style == "circle" %}
+                                                            selected
+                                                        {% endif %}>
+                                                    Cercle
                                                 </option>
                                             </select>
-                                            <div class="form-text">Où ce QR code redirige les utilisateurs.</div>
+                                            <div class="form-text">Style des modules du QR code.</div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label for="qr_style"
-                                                       class="form-label fw-semibold d-block mb-2">
-                                                    <i class="fa-solid fa-shapes me-2"></i>
-                                                    Style du QR code
-                                                </label>
-                                                <select class="form-select"
-                                                        id="qr_style"
-                                                        name="qr_style">
-                                                    <option value="square"
-                                                            {% if form.qr_style.value|default:selected_qr_code.qr_style == "square" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Carré
-                                                    </option>
-                                                    <option value="square_spaced"
-                                                            {% if form.qr_style.value|default:selected_qr_code.qr_style == "square_spaced" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Carré espacé
-                                                    </option>
-                                                    <option value="rounded"
-                                                            {% if form.qr_style.value|default:selected_qr_code.qr_style == "rounded" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Arrondi
-                                                    </option>
-                                                    <option value="circle"
-                                                            {% if form.qr_style.value|default:selected_qr_code.qr_style == "circle" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Cercle
-                                                    </option>
-                                                </select>
-                                                <div class="form-text">Style des modules du QR code.</div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label for="qr_color_mask"
-                                                       class="form-label fw-semibold d-block mb-2">
-                                                    <i class="fa-solid fa-mask me-2"></i>
-                                                    Style de couleur
-                                                </label>
-                                                <select class="form-select"
-                                                        id="qr_color_mask"
-                                                        name="qr_color_mask">
-                                                    <option value="solid"
-                                                            {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "solid" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Solide
-                                                    </option>
-                                                    <option value="round_radial"
-                                                            {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "round_radial" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Dégradé radial rond
-                                                    </option>
-                                                    <option value="square_radial"
-                                                            {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "square_radial" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Dégradé radial carré
-                                                    </option>
-                                                    <option value="horizontal_gradiant"
-                                                            {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "horizontal_gradiant" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Dégradé horizontal
-                                                    </option>
-                                                    <option value="vertical_gradiant"
-                                                            {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "vertical_gradiant" %}
-                                                                selected
-                                                            {% endif %}>
-                                                        Dégradé vertical
-                                                    </option>
-                                                </select>
-                                                <div class="form-text">Style de masque de couleur pour le QR code.</div>
-                                            </div>
-                                        </div>
-                                        <div class="mb-4">
-                                            <label for="qr_logo"
-                                                   class="form-label fw-semibold">
-                                                <i class="fa-solid fa-image me-2"></i>
-                                                Logo
+                                        <div class="col-md-6">
+                                            <label for="qr_color_mask"
+                                                   class="form-label fw-semibold d-block mb-2">
+                                                <i class="fa-solid fa-mask me-2"></i>
+                                                Style de couleur
                                             </label>
-                                            <div class="input-group">
-                                                <input type="file"
-                                                       class="form-control"
-                                                       id="qr_logo"
-                                                       name="qr_logo"
-                                                       accept="image/*">
-                                                {% if selected_qr_code.qr_logo %}
-                                                    <button type="button"
-                                                            class="btn btn-outline-danger"
-                                                            id="deleteLogoBtn"
-                                                            title="Supprimer le logo">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                {% endif %}
-                                            </div>
-                                            <div class="form-text">Logo à afficher au centre du QR code (optionnel).</div>
-                                        </div>
-                                        <div class="d-grid gap-2 mt-auto">
-                                            <button type="button"
-                                                    class="btn btn-outline-secondary"
-                                                    id="resetToDefaultsBtn">
-                                                <i class="fa-solid fa-rotate-left me-2"></i>
-                                                Réinitialiser aux valeurs par défaut
-                                            </button>
-                                            <button type="submit"
-                                                    class="btn btn-primary">
-                                                <i class="fa-solid fa-save me-2"></i>
-                                                Enregistrer les modifications
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-danger w-100"
-                                                    hx-confirm="Êtes-vous sûr de vouloir supprimer ce QR code ?">
-                                                <i class="fa-solid fa-trash me-2"></i>
-                                                Supprimer
-                                            </button>
+                                            <select class="form-select"
+                                                    id="qr_color_mask"
+                                                    name="qr_color_mask">
+                                                <option value="solid"
+                                                        {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "solid" %}
+                                                            selected
+                                                        {% endif %}>
+                                                    Solide
+                                                </option>
+                                                <option value="round_radial"
+                                                        {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "round_radial" %}
+                                                            selected
+                                                        {% endif %}>
+                                                    Dégradé radial rond
+                                                </option>
+                                                <option value="square_radial"
+                                                        {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "square_radial" %}
+                                                            selected
+                                                        {% endif %}>
+                                                    Dégradé radial carré
+                                                </option>
+                                                <option value="horizontal_gradiant"
+                                                        {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "horizontal_gradiant" %}
+                                                            selected
+                                                        {% endif %}>
+                                                    Dégradé horizontal
+                                                </option>
+                                                <option value="vertical_gradiant"
+                                                        {% if form.qr_color_mask.value|default:selected_qr_code.qr_color_mask == "vertical_gradiant" %}
+                                                            selected
+                                                        {% endif %}>
+                                                    Dégradé vertical
+                                                </option>
+                                            </select>
+                                            <div class="form-text">Style de masque de couleur pour le QR code.</div>
                                         </div>
                                     </div>
-                                    <!-- Preview -->
-                                    <div class="col-md-5 d-flex flex-column">
-                                        <div class="mb-4">
-                                            <label class="form-label fw-semibold mb-3">
-                                                <i class="fa-solid fa-palette me-2"></i>
-                                                Couleurs
+                                    <div class="mb-4">
+                                        <label for="qr_logo"
+                                               class="form-label fw-semibold">
+                                            <i class="fa-solid fa-image me-2"></i>
+                                            Logo
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="file"
+                                                   class="form-control"
+                                                   id="qr_logo"
+                                                   name="qr_logo"
+                                                   accept="image/*">
+                                            {% if selected_qr_code.qr_logo %}
+                                                <button type="button"
+                                                        class="btn btn-outline-danger"
+                                                        id="deleteLogoBtn"
+                                                        title="Supprimer le logo">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-text">Logo à afficher au centre du QR code (optionnel).</div>
+                                    </div>
+                                    <div class="d-grid gap-2 mt-auto">
+                                        {% component "button"
+                                            text="Enregistrer les modifications"
+                                            classes="btn-primary"
+                                            icon="fa-solid fa-save"
+                                            extra_kwargs={
+                                            "type": "submit"
+                                            }
+                                            %}
+                                        {% endcomponent %}
+                                    </div>
+                                </div>
+                                <!-- Preview -->
+                                <div class="col-md-5 d-flex flex-column">
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold mb-3">
+                                            <i class="fa-solid fa-palette me-2"></i>
+                                            Couleurs
+                                        </label>
+                                        <div class="row mb-3">
+                                            <label for="qr_fill_color"
+                                                   class="form-label fw-semibold small">
+                                                <i class="fa-solid fa-circle me-1"></i>
+                                                Primaire
                                             </label>
-                                            <div class="row mb-3">
-                                                <label for="qr_fill_color"
-                                                       class="form-label fw-semibold small">
-                                                    <i class="fa-solid fa-circle me-1"></i>
-                                                    Primaire
-                                                </label>
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <input type="color"
-                                                           class="form-control"
-                                                           id="qr_fill_color"
-                                                           name="qr_fill_color"
-                                                           value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
-                                                           style="width: 80px;
-                                                                  height: 40px;
-                                                                  cursor: pointer;
-                                                                  padding: 2px">
-                                                    <input type="text"
-                                                           class="form-control"
-                                                           id="fillColorText"
-                                                           value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
-                                                           pattern="^#[0-9A-Fa-f]{6}$"
-                                                           placeholder="#000000">
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="qr_fill_color_secondary"
-                                                       class="form-label fw-semibold small">
-                                                    <i class="fa-solid fa-circle-half-stroke me-1"></i>
-                                                    Secondaire
-                                                </label>
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <input type="color"
-                                                           class="form-control"
-                                                           id="qr_fill_color_secondary"
-                                                           name="qr_fill_color_secondary"
-                                                           value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
-                                                           style="width: 80px;
-                                                                  height: 40px;
-                                                                  cursor: pointer;
-                                                                  padding: 2px">
-                                                    <input type="text"
-                                                           class="form-control"
-                                                           id="fillColorSecondaryText"
-                                                           value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
-                                                           pattern="^#[0-9A-Fa-f]{6}$"
-                                                           placeholder="#000000">
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="qr_background_color"
-                                                       class="form-label fw-semibold small">
-                                                    <i class="fa-solid fa-square me-1"></i>
-                                                    Fond
-                                                </label>
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <input type="color"
-                                                           class="form-control"
-                                                           id="qr_background_color"
-                                                           name="qr_background_color"
-                                                           value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
-                                                           style="width: 80px;
-                                                                  height: 40px;
-                                                                  cursor: pointer;
-                                                                  padding: 2px">
-                                                    <input type="text"
-                                                           class="form-control"
-                                                           id="backgroundColorText"
-                                                           value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
-                                                           pattern="^#[0-9A-Fa-f]{6}$"
-                                                           placeholder="#FFFFFF">
-                                                </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <input type="color"
+                                                       class="form-control"
+                                                       id="qr_fill_color"
+                                                       name="qr_fill_color"
+                                                       value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
+                                                       style="width: 80px;
+                                                              height: 40px;
+                                                              cursor: pointer;
+                                                              padding: 2px">
+                                                <input type="text"
+                                                       class="form-control"
+                                                       id="fillColorText"
+                                                       value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
+                                                       pattern="^#[0-9A-Fa-f]{6}$"
+                                                       placeholder="#000000">
                                             </div>
                                         </div>
-                                        <div class="text-center d-flex justify-content-center flex-grow-1 align-items-center">
-                                            <div>
-                                                <img id="qrCodePreview"
-                                                     src="{{ qr_code_url }}"
-                                                     alt="QR Code Preview"
-                                                     width="200"
-                                                     height="200"
-                                                     class="img-fluid shadow-sm rounded"
-                                                     style="width: 200px;
-                                                            height: 200px">
-                                                <div class="mt-3">
-                                                    <a href="{{ qr_code_url }}"
-                                                       download="qr-code-{{ selected_qr_code.name|slugify }}.png"
-                                                       class="btn btn-primary">
-                                                        <i class="fa-solid fa-download me-2"></i>
-                                                        Télécharger le QR code
-                                                    </a>
-                                                </div>
+                                        <div class="row mb-3">
+                                            <label for="qr_fill_color_secondary"
+                                                   class="form-label fw-semibold small">
+                                                <i class="fa-solid fa-circle-half-stroke me-1"></i>
+                                                Secondaire
+                                            </label>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <input type="color"
+                                                       class="form-control"
+                                                       id="qr_fill_color_secondary"
+                                                       name="qr_fill_color_secondary"
+                                                       value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
+                                                       style="width: 80px;
+                                                              height: 40px;
+                                                              cursor: pointer;
+                                                              padding: 2px">
+                                                <input type="text"
+                                                       class="form-control"
+                                                       id="fillColorSecondaryText"
+                                                       value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
+                                                       pattern="^#[0-9A-Fa-f]{6}$"
+                                                       placeholder="#000000">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="qr_background_color"
+                                                   class="form-label fw-semibold small">
+                                                <i class="fa-solid fa-square me-1"></i>
+                                                Fond
+                                            </label>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <input type="color"
+                                                       class="form-control"
+                                                       id="qr_background_color"
+                                                       name="qr_background_color"
+                                                       value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
+                                                       style="width: 80px;
+                                                              height: 40px;
+                                                              cursor: pointer;
+                                                              padding: 2px">
+                                                <input type="text"
+                                                       class="form-control"
+                                                       id="backgroundColorText"
+                                                       value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
+                                                       pattern="^#[0-9A-Fa-f]{6}$"
+                                                       placeholder="#FFFFFF">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center d-flex justify-content-center flex-grow-1 align-items-center">
+                                        <div>
+                                            <img id="qrCodePreview"
+                                                 src="{{ qr_code_url }}"
+                                                 alt="QR Code Preview"
+                                                 width="200"
+                                                 height="200"
+                                                 class="img-fluid shadow-sm rounded"
+                                                 style="width: 200px;
+                                                        height: 200px">
+                                            <div class="mt-3">
+                                                <a href="{{ qr_code_url }}"
+                                                   download="qr-code-{{ selected_qr_code.name|slugify }}.png"
+                                                   class="btn btn-primary">
+                                                    <i class="fa-solid fa-download me-2"></i>
+                                                    Télécharger le QR code
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </form>
-                        {% else %}
-                            <div class="col-12">
-                                <p class="text-muted mb-0">
-                                    Sélectionnez un QR code dans la liste pour commencer à le modifier, ou créez-en un nouveau.
-                                </p>
                             </div>
-                        {% endif %}
-                    {% endcomponent %}
-                </div>
+                        </form>
+                        <div class="gap-2">
+                            {% component "button"
+                                text="Réinitialiser aux valeurs par défaut"
+                                classes="btn-outline-secondary"
+                                icon="fa-solid fa-rotate-left"
+                                extra_kwargs={
+                                "id": "resetToDefaultsBtn",
+                                "type": "button"
+                                }
+                                %}
+                            {% endcomponent %}
+                            {% component "button"
+                                text="Supprimer"
+                                icon="fa-solid fa-trash"
+                                classes="btn-outline-danger w-100"
+                                extra_kwargs={
+                                "data-bs-toggle": "modal",
+                                "data-bs-target": "#deleteQrCodeModal",
+                                "type": "button"
+                                }
+                                %}
+                            {% endcomponent %}
+                            {% component "empty_modal" modal_id="deleteQrCodeModal" size="sm" %}
+                                {% fill title %}
+                                    <i class="fa-solid fa-trash pe-2"></i>
+                                    Supprimer le QR code
+                                {% endfill %}
+                                {% fill body %}
+                                    <p>Êtes-vous sûr de vouloir supprimer ce QR code ?</p>
+                                {% endfill %}
+                            {% endcomponent %}
+                        </div>
+                    {% else %}
+                        <div class="col-12">
+                            <p class="text-muted mb-0">
+                                Sélectionnez un QR code dans la liste pour commencer à le modifier, ou créez-en un nouveau.
+                            </p>
+                        </div>
+                    {% endif %}
+                {% endcomponent %}
             </div>
         </div>
     </div>

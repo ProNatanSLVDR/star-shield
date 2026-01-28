@@ -16,11 +16,13 @@ class EmptyModal(Component):
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         if not kwargs.modal_id:
-            raise ValueError("EmptyModal component requires a non-empty 'modal_id'.")
+            msg = "EmptyModal component requires a non-empty 'modal_id'."
+            raise ValueError(msg)
 
-        allowed_sizes = {None, "sm", "lg", "xl"}
+        allowed_sizes = {None, "sm", "lg", "xl", "md"}
         if kwargs.size not in allowed_sizes:
-            raise ValueError("EmptyModal size must be one of: 'sm', 'lg', 'xl'.")
+            msg = "EmptyModal size must be one of: 'sm', 'lg', 'xl', 'md'."
+            raise ValueError(msg)
 
         size = kwargs.size or "xl"
         return {
