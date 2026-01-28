@@ -62,109 +62,109 @@
         <div class="col-12 col-lg-5">
             {% component "card" title="Fonctionnalités activées" icon="fa-solid fa-toggle-on" card_classes="h-100 mb-3 overflow-hidden" %}
                 {% slot body %}
-                <div id="features-container">
-                    {% include "etablissement/settings/feature_toggles.html" %}
-                </div>
-            {% endslot %}
-        {% endcomponent %}
-    </div>
-    <!-- Right Column: Stats, Links, Settings -->
-    <div class="col-12 col-lg-7">
-        <!-- General Stats Section -->
-        {% component "card" title="Statistiques générales" icon="fa-solid fa-chart-line" card_classes="w-100 mb-3 position-relative overflow-hidden" card_id="general-stats-section" %}
-            {% slot body %}
-            <div class="row row-cols-1 row-cols-md-3 g-3"
-                 id="stats-content">
-                {% for stat in general_stats %}
-                    <div class="col">
-                        <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm h-100">
-                            <div class="flex-grow-1">
-                                <p class="text-muted small mb-1">{{ stat.label }}</p>
-                                <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
-                            </div>
-                            <div class="align-self-center">
-                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
-                                      style="width: 40px;
-                                             height: 40px">
-                                    <i class="{{ stat.icon }}"></i>
-                                </span>
-                            </div>
-                        </div>
+                    <div id="features-container">
+                        {% include "etablissement/settings/feature_toggles.html" %}
                     </div>
-                {% endfor %}
-            </div>
-            <!-- Hidden button that appears on hover -->
-            <div class="position-absolute top-50 start-50 translate-middle m-3"
-                 id="stats-button">
-                <a href="{% url 'dashboard:etablissement:stats' %}"
-                   class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Voir les statistiques détaillées</span>
-                </a>
-            </div>
-        {% endslot %}
-    {% endcomponent %}
-    <!-- Useful Links Section -->
-    {% component "card" title="Liens utiles" icon="fa-solid fa-link" card_classes="w-100 mb-3 overflow-hidden" %}
-        {% slot body %}
-        <div class="row g-2">
-            <div class="col-12 col-md-6 col-lg-4">
-                <a href="{% url 'dashboard:etablissement:avis' %}"
-                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                    <i class="fa-solid fa-comments"></i>
-                    <span>Avis</span>
-                </a>
-            </div>
-            <div class="col-12 col-md-6 col-lg-4">
-                <a href="{% url 'dashboard:etablissement:filtre:threshold' %}"
-                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Seuil et Objectif</span>
-                </a>
-            </div>
-            <div class="col-12 col-md-6 col-lg-4">
-                <a href="{% url 'dashboard:etablissement:filtre:personalisation' %}"
-                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                    <i class="fa-solid fa-palette"></i>
-                    <span>Personnalisation</span>
-                </a>
-            </div>
-            <div class="col-12 col-md-6 col-lg-4">
-                <a href="{% url 'dashboard:etablissement:qrcode' %}"
-                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                    <i class="fa-solid fa-qrcode"></i>
-                    <span>QR Code</span>
-                </a>
-            </div>
-            {% if etablissement.roulette_enabled %}
-                <div class="col-12 col-md-6 col-lg-4">
-                    <a href="{% url 'dashboard:etablissement:roulette:roulette' %}"
-                       class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                        <i class="fa-solid fa-circle-notch"></i>
-                        <span>Roulette</span>
-                    </a>
-                </div>
-            {% endif %}
+                {% endslot %}
+            {% endcomponent %}
         </div>
-    {% endslot %}
-{% endcomponent %}
-<!-- Settings Link Section -->
-{% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="w-100 overflow-hidden" %}
-    {% slot body %}
-    <div class="d-flex align-items-center justify-content-between">
-        <div>
-            <p class="text-muted small mb-0">
-                Gérez les paramètres généraux de votre établissement
-            </p>
+        <!-- Right Column: Stats, Links, Settings -->
+        <div class="col-12 col-lg-7">
+            <!-- General Stats Section -->
+            {% component "card" title="Statistiques générales" icon="fa-solid fa-chart-line" card_classes="w-100 mb-3 position-relative overflow-hidden" card_id="general-stats-section" %}
+                {% slot body %}
+                    <div class="row row-cols-1 row-cols-md-3 g-3"
+                         id="stats-content">
+                        {% for stat in general_stats %}
+                            <div class="col">
+                                <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm h-100">
+                                    <div class="flex-grow-1">
+                                        <p class="text-muted small mb-1">{{ stat.label }}</p>
+                                        <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                              style="width: 40px;
+                                                     height: 40px">
+                                            <i class="{{ stat.icon }}"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Hidden button that appears on hover -->
+                    <div class="position-absolute top-50 start-50 translate-middle m-3"
+                         id="stats-button">
+                        <a href="{% url 'dashboard:etablissement:stats' %}"
+                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Voir les statistiques détaillées</span>
+                        </a>
+                    </div>
+                {% endslot %}
+            {% endcomponent %}
+            <!-- Useful Links Section -->
+            {% component "card" title="Liens utiles" icon="fa-solid fa-link" card_classes="w-100 mb-3 overflow-hidden" %}
+                {% slot body %}
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{% url 'dashboard:etablissement:avis' %}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="fa-solid fa-comments"></i>
+                                <span>Avis</span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{% url 'dashboard:etablissement:filtre:threshold' %}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Seuil et Objectif</span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{% url 'dashboard:etablissement:filtre:personalisation' %}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="fa-solid fa-palette"></i>
+                                <span>Personnalisation</span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{% url 'dashboard:etablissement:qrcodes' %}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="fa-solid fa-qrcode"></i>
+                                <span>QR Code</span>
+                            </a>
+                        </div>
+                        {% if etablissement.roulette_enabled %}
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <a href="{% url 'dashboard:etablissement:roulette:roulette' %}"
+                                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                    <i class="fa-solid fa-circle-notch"></i>
+                                    <span>Roulette</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endslot %}
+            {% endcomponent %}
+            <!-- Settings Link Section -->
+            {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="w-100 overflow-hidden" %}
+                {% slot body %}
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted small mb-0">
+                                Gérez les paramètres généraux de votre établissement
+                            </p>
+                        </div>
+                        <a href="{% url 'dashboard:etablissement:settings:settings' %}"
+                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Accéder aux paramètres</span>
+                        </a>
+                    </div>
+                {% endslot %}
+            {% endcomponent %}
         </div>
-        <a href="{% url 'dashboard:etablissement:settings:settings' %}"
-           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold">
-            <i class="fa-solid fa-gear"></i>
-            <span>Accéder aux paramètres</span>
-        </a>
     </div>
-{% endslot %}
-{% endcomponent %}
-</div>
-</div>
 {% endblock dashboard_content %}

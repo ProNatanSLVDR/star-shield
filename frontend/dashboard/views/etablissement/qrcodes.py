@@ -103,9 +103,9 @@ def qr_code_management_view(request):
 
     return starshield_render(
         request,
-        "etablissement/qrcode/qrcode.html",
+        "etablissement/qrcodes/qrcodes.html",
         context=context,
-        page_name="qr_code",
+        page_name="qrcodes",
     )
 
 
@@ -126,7 +126,7 @@ def qr_code_create_view(request):
             # Return empty response to close modal and redirect
             response = HttpResponse()
             response["HX-Trigger"] = json.dumps({"close-modal": True})
-            response["HX-Redirect"] = f"{reverse('dashboard:etablissement:qrcode')}?qr_code_id={new_qr_code.id}"
+            response["HX-Redirect"] = f"{reverse('dashboard:etablissement:qrcodes')}?qr_code_id={new_qr_code.id}"
             return response
     else:
         form = QRCodeCreateForm()
@@ -138,7 +138,7 @@ def qr_code_create_view(request):
 
     return starshield_render(
         request,
-        "etablissement/qrcode/create_partial.html",
+        "etablissement/qrcodes/create_partial.html",
         context=context,
     )
 
@@ -156,4 +156,4 @@ def qr_code_delete_view(request, qr_code_id):
         qr_code.delete()
         messages.success(request, "QR code supprimé avec succès.")
 
-    return redirect("dashboard:etablissement:qrcode")
+    return redirect("dashboard:etablissement:qrcodes")
