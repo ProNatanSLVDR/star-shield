@@ -1,0 +1,54 @@
+<!-- Delete Confirmation Modal -->
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="fa-solid fa-trash pe-2"></i>
+        Supprimer le QR code <strong>{{ qr_code_name }}</strong>
+    </h5>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div class="alert alert-danger mb-3"
+         role="alert">
+        <i class="fa-solid fa-exclamation-triangle pe-2"></i>
+        <strong>Attention !</strong>
+        <div class="mt-2">
+            <p class="mb-2">
+                Ce QR code sera supprimé définitivement. Cette action ne peut pas être annulée.
+            </p>
+            <p class="mb-0">
+                <strong>Conséquences :</strong>
+            </p>
+            <ul class="mb-0 mt-1">
+                <li>
+                    Le QR code ne fonctionnera plus et ne redirigera plus vers votre établissement
+                </li>
+                <li>
+                    Tous les liens et scans existants de ce QR code cesseront de fonctionner
+                </li>
+                <li>Vous devrez créer un nouveau QR code si vous souhaitez le remplacer</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal">
+        <i class="fa-solid fa-times me-2"></i>
+        Annuler
+    </button>
+    {% component "button"
+        text="Supprimer"
+        classes="btn-danger"
+        icon="fa-solid fa-trash"
+        extra_kwargs={
+        "hx-post": "{{ delete_url }}",
+        "hx-target": "body",
+        "hx-swap": "none",
+        }
+        %}
+    {% endcomponent %}
+</div>

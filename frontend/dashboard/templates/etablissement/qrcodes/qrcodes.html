@@ -58,8 +58,8 @@
                                           {% if selected_qr_code and selected_qr_code.id == slot.id %}
                                               active text-white
                                           {% endif %}">
-                                    <div class="d-flex w-100 justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
+                                    <div class="row">
+                                        <div class="col-auto me-auto">
                                             <h6 class="mb-1 fw-bold">{{ slot.name }}</h6>
                                             <small class="{% if selected_qr_code and selected_qr_code.id == slot.id %}
                                                               text-white
@@ -76,9 +76,22 @@
                                                 {{ slot.get_routing_display }}
                                             </small>
                                         </div>
-                                        {% if selected_qr_code and selected_qr_code.id == slot.id %}
-                                            <i class="fa-solid fa-check-circle"></i>
-                                        {% endif %}
+                                        <div class="col-auto h-100">
+                                            {% component "button"
+                                                text=""
+                                                icon="fa-solid fa-trash"
+                                                classes=" btn-sm text-danger"
+                                                extra_kwargs={
+                                                "hx-get": "{% url 'dashboard:etablissement:qrcode_delete_confirm' slot.id %}",
+                                                "hx-target": "#dynamicModal-inner-content",
+                                                "hx-swap": "innerHTML",
+                                                "data-bs-toggle": "modal",
+                                                "data-bs-target": "#dynamicModal",
+                                                "type": "button"
+                                                }
+                                                %}
+                                            {% endcomponent %}
+                                        </div>
                                     </div>
                                 </a>
                             {% else %}
@@ -89,13 +102,10 @@
                                         <div class="flex-grow-1">
                                             <h6 class="mb-1 fw-normal"
                                                 style="font-size: 0.9rem">
-                                                <i class="fa-solid fa-square me-2"></i>
+                                                <i class="fa-solid fa-qrcode me-2"></i>
                                                 Emplacement vide
                                             </h6>
-                                            <small class="text-muted">
-                                                <i class="fa-solid fa-plus me-1"></i>
-                                                Créez un QR code pour remplir cet emplacement
-                                            </small>
+                                            <small class="text-muted">&nbsp;</small>
                                         </div>
                                     </div>
                                 </div>
@@ -118,7 +128,7 @@
                               id="qrCodeSettingsForm"
                               class="flex-grow-1 g-0">
                             {% csrf_token %}
-                            <div class="row flex-grow-1">
+                            <div class="row h-100">
                                 <!-- Settings Form -->
                                 <div class="col-md-7 d-flex flex-column">
                                     <div class="mb-3">
@@ -271,6 +281,16 @@
                                             }
                                             %}
                                         {% endcomponent %}
+                                        {% component "button"
+                                            text="Réinitialiser aux valeurs par défaut"
+                                            classes="btn-outline-secondary"
+                                            icon="fa-solid fa-rotate-left"
+                                            extra_kwargs={
+                                            "id": "resetToDefaultsBtn",
+                                            "type": "button"
+                                            }
+                                            %}
+                                        {% endcomponent %}
                                     </div>
                                 </div>
                                 <!-- Preview -->
@@ -376,38 +396,6 @@
                                 </div>
                             </div>
                         </form>
-                        <div class="gap-2">
-                            {% component "button"
-                                text="Réinitialiser aux valeurs par défaut"
-                                classes="btn-outline-secondary"
-                                icon="fa-solid fa-rotate-left"
-                                extra_kwargs={
-                                "id": "resetToDefaultsBtn",
-                                "type": "button"
-                                }
-                                %}
-                            {% endcomponent %}
-                            {% component "button"
-                                text="Supprimer"
-                                icon="fa-solid fa-trash"
-                                classes="btn-outline-danger w-100"
-                                extra_kwargs={
-                                "data-bs-toggle": "modal",
-                                "data-bs-target": "#deleteQrCodeModal",
-                                "type": "button"
-                                }
-                                %}
-                            {% endcomponent %}
-                            {% component "empty_modal" modal_id="deleteQrCodeModal" size="sm" %}
-                                {% fill title %}
-                                    <i class="fa-solid fa-trash pe-2"></i>
-                                    Supprimer le QR code
-                                {% endfill %}
-                                {% fill body %}
-                                    <p>Êtes-vous sûr de vouloir supprimer ce QR code ?</p>
-                                {% endfill %}
-                            {% endcomponent %}
-                        </div>
                     {% else %}
                         <div class="col-12">
                             <p class="text-muted mb-0">

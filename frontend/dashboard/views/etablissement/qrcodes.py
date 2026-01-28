@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.views.decorators.http import require_http_methods
 
 from auths.models import QRCode
 from frontend.dashboard.render import starshield_render
@@ -167,6 +168,53 @@ def qr_code_create_view(request):
         request,
         "etablissement/qrcodes/create_partial.html",
         context=context,
+    )
+
+
+@login_required
+@google_gmb_connected_required
+@selected_etablissement_required
+@require_http_methods(["GET", "POST"])
+def qr_code_delete_confirmation_partial(request, qr_code_id):
+    """
+    Pour supprimer un QR code
+    Double confirmation la suppression (modal + hx-confirm)
+    """
+    etablissement = request.etablissement
+
+    hx_triggers = {}
+    context = {
+        "qr_code_name": None,
+        "delete_url": None,
+    }
+
+    qr_code = QRCode.objects.filter(id=qr_code_id, etablissement=etablissement).first()
+
+    if qr_code:
+        context["qr_code_name"] = qr_code.name
+        context["delete_url"] = reverse("dashboard:etablissement:qrcode_delete_confirm", args=[qr_code.id])
+
+        if request.method == "POST":
+            qr_code.delete()
+            messages.success(request, f"Le QR code {qr_code.name} a été supprimé avec succès.")
+            hx_triggers["close-modal"] = True
+            response = HttpResponse()
+            response["HX-Trigger"] = json.dumps(hx_triggers)
+            response["HX-Redirect"] = reverse("dashboard:etablissement:qrcodes")
+            return response
+    else:
+        messages.error(request, "QR code non trouvé.")
+        hx_triggers["close-modal"] = True
+        response = HttpResponse()
+        response["HX-Trigger"] = json.dumps(hx_triggers)
+        response["HX-Redirect"] = reverse("dashboard:etablissement:qrcodes")
+        return response
+
+    return starshield_render(
+        request,
+        "etablissement/qrcodes/delete_partial.html",
+        context=context,
+        hx_triggers=hx_triggers,
     )
 
 
