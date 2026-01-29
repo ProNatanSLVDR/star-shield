@@ -5,6 +5,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from auths.models import QRCode, QRCodeScan
 from starshield.qrcodes import generate_qrcode_png
 
 from .forms import FeedbackForm
@@ -151,26 +152,24 @@ def feedback_thanks_view(request, identifier=None):
 @login_not_required
 def qr_code_redirect_view(request, identifier=None, short_code=None):
     """Handle QR code scan and redirect to target based on routing."""
-    from auths.models import QRCode, QRCodeScan
 
     etablissement = get_etablissement_by_identifier(identifier)
 
     if not short_code:
         logger.warning(f"QR code redirect called without short_code for etablissement {etablissement.id}")
-        return Http404()
+        raise Http404()
 
     try:
         qr_code = QRCode.objects.get(short_code=short_code, etablissement=etablissement)
-    except QRCode.DoesNotExist:
+    except QRCode.DoesNotExist as err:
         logger.warning(f"QR code not found: short_code={short_code}, etablissement={etablissement.id}")
-        return Http404()
+        raise Http404() from err
 
     # Track the scan
     try:
         QRCodeScan.objects.create(qr_code=qr_code)
     except Exception as e:
         logger.debug(f"Could not create QRCodeScan record: {e}")
-        raise
 
     # Redirect to target based on routing
     target_url = qr_code.get_target_url(identifier)
@@ -184,21 +183,23 @@ def qr_code_image_view(request, identifier=None):
 
     etablissement = get_etablissement_by_identifier(identifier)
 
-    # Try to get QRCode from query parameter
-    qr_code_id = request.GET.get("qr_code_id")
+    # Get QRCode from short_code query parameter
+    short_code = request.GET.get("short_code")
     qr_code = None
 
-    if qr_code_id:
+    if short_code:
         try:
-            qr_code = QRCode.objects.filter(id=qr_code_id, etablissement=etablissement).first()
+            qr_code = QRCode.objects.filter(short_code=short_code, etablissement=etablissement).first()
         except Exception as e:
-            logger.debug(f"Could not find QRCode {qr_code_id} for etablissement {etablissement.id}: {e}")
+            logger.debug(
+                f"Could not find QRCode with short_code {short_code} for etablissement {etablissement.id}: {e}"
+            )
 
     # If no QRCode found, try first one
     if not qr_code:
         qr_code = etablissement.qr_codes.first()
 
-    # Build redirect URL for QR code
+    # Build redirect URL for QR code - must have short_code
     if qr_code and qr_code.short_code:
         redirect_url = reverse("reviews:qr_code_redirect", args=[identifier, qr_code.short_code])
         target_url = request.build_absolute_uri(redirect_url)
