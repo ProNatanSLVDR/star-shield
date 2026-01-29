@@ -24,10 +24,6 @@ ROULETTE_ICON_CHOICES = [
 
 
 class RouletteSettingsForm(forms.Form):
-    roulette_enabled = forms.BooleanField(
-        required=False,
-        label="Activer la roue de la fortune",
-    )
     roulette_spin_cooldown_days = forms.IntegerField(
         min_value=1,
         required=True,

@@ -26,7 +26,6 @@ def roulette_settings_view(request):
 
         if form.is_valid():
             # Update etablissement settings
-            etablissement.roulette_enabled = form.cleaned_data.get("roulette_enabled", False)
             etablissement.roulette_spin_cooldown_days = form.cleaned_data["roulette_spin_cooldown_days"]
             etablissement.save()
 
@@ -68,7 +67,6 @@ def roulette_settings_view(request):
     else:
         # Build initial data
         initial_data = {
-            "roulette_enabled": etablissement.roulette_enabled,
             "roulette_spin_cooldown_days": etablissement.roulette_spin_cooldown_days,
         }
 
