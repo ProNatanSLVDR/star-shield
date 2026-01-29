@@ -390,6 +390,16 @@
                                                     <i class="fa-solid fa-download me-2"></i>
                                                     Télécharger le QR code
                                                 </a>
+                                                {% component "button"
+                                                    text="Copier le lien"
+                                                    classes="btn-primary"
+                                                    icon="fa-solid fa-copy"
+                                                    extra_kwargs={
+                                                    "type": "button",
+                                                    "onclick": "navigator.clipboard.writeText('{{ qr_code_url }}')"
+                                                    }
+                                                    %}
+                                                {% endcomponent %}
                                             </div>
                                         </div>
                                     </div>

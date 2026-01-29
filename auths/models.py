@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import secrets
 import uuid
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -452,6 +453,14 @@ class QRCode(models.Model):
         max_length=255,
         help_text="Nom du QR code pour l'identifier facilement.",
     )
+    short_code = models.CharField(
+        max_length=8,
+        unique=True,
+        db_index=True,
+        blank=True,
+        null=True,
+        help_text="Code court unique pour identifier ce QR code dans les URLs.",
+    )
     routing = models.CharField(
         max_length=20,
         choices=choices.QR_ROUTING_CHOICES,
@@ -504,6 +513,26 @@ class QRCode(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_routing_display()})"
 
+    def save(self, *args, **kwargs):
+        """Generate short_code if not set."""
+        if not self.short_code:
+            self.short_code = self._generate_unique_short_code()
+        super().save(*args, **kwargs)
+
+    def _generate_unique_short_code(self):
+        """Generate a unique short code (6-8 alphanumeric characters)."""
+        import string
+
+        characters = string.ascii_letters + string.digits
+        max_attempts = 100
+
+        for _ in range(max_attempts):
+            code = "".join(secrets.choice(characters) for _ in range(8))
+            if not QRCode.objects.filter(short_code=code).exists():
+                return code
+
+        raise ValueError("Could not generate unique short_code after multiple attempts")
+
     def get_target_url(self, identifier):
         """Return the target URL based on routing choice."""
         from django.urls import reverse
@@ -514,6 +543,49 @@ class QRCode(models.Model):
             return reverse("reviews:feedback", args=[identifier])
 
         return None
+
+    def scan_count(self):
+        """Return total number of scans for this QR code."""
+        return self.scans.count()
+
+    def scans_today(self):
+        """Return number of scans today."""
+        from django.utils import timezone
+
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        return self.scans.filter(created_at__gte=today_start).count()
+
+    def scans_this_week(self):
+        """Return number of scans this week."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        week_start = timezone.now() - timedelta(days=timezone.now().weekday())
+        week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        return self.scans.filter(created_at__gte=week_start).count()
+
+    def scans_this_month(self):
+        """Return number of scans this month."""
+        from django.utils import timezone
+
+        month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        return self.scans.filter(created_at__gte=month_start).count()
+
+
+class QRCodeScan(models.Model):
+    """Track QR code scan events for analytics."""
+
+    qr_code = models.ForeignKey(
+        QRCode,
+        on_delete=models.CASCADE,
+        related_name="scans",
+        help_text="QR code qui a été scanné.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Scan de {self.qr_code.name} le {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class RatingHistory(models.Model):

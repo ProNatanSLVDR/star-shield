@@ -22,4 +22,5 @@ urlpatterns = [
         name="feedback_thanks",
     ),
     path("qr/<str:identifier>/", views.qr_code_image_view, name="qr_code"),
+    path("qr/<str:identifier>/<str:short_code>/", views.qr_code_redirect_view, name="qr_code_redirect"),
 ]

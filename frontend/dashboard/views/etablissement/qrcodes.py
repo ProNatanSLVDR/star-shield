@@ -89,7 +89,10 @@ def qr_code_management_view(request):
     # Build QR code image URL
     identifier = str(etablissement.uuid)
     qr_code_url = None
-    if selected_qr_code:
+    if selected_qr_code and selected_qr_code.short_code:
+        qr_code_url = reverse("reviews:qr_code", args=[identifier]) + f"?short_code={selected_qr_code.short_code}"
+    elif selected_qr_code:
+        # Fallback for QR codes without short_code (shouldn't happen after migration)
         qr_code_url = reverse("reviews:qr_code", args=[identifier]) + f"?qr_code_id={selected_qr_code.id}"
     else:
         qr_code_url = reverse("reviews:qr_code", args=[identifier])

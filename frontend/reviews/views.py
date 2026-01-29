@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.admin.sites import login_not_required
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -149,38 +149,71 @@ def feedback_thanks_view(request, identifier=None):
 
 
 @login_not_required
+def qr_code_redirect_view(request, identifier=None, short_code=None):
+    """Handle QR code scan and redirect to target based on routing."""
+    from auths.models import QRCode, QRCodeScan
+
+    etablissement = get_etablissement_by_identifier(identifier)
+
+    if not short_code:
+        logger.warning(f"QR code redirect called without short_code for etablissement {etablissement.id}")
+        return Http404()
+
+    try:
+        qr_code = QRCode.objects.get(short_code=short_code, etablissement=etablissement)
+    except QRCode.DoesNotExist:
+        logger.warning(f"QR code not found: short_code={short_code}, etablissement={etablissement.id}")
+        return Http404()
+
+    # Track the scan
+    try:
+        QRCodeScan.objects.create(qr_code=qr_code)
+    except Exception as e:
+        logger.debug(f"Could not create QRCodeScan record: {e}")
+        raise
+
+    # Redirect to target based on routing
+    target_url = qr_code.get_target_url(identifier)
+    return redirect(target_url)
+
+
+@login_not_required
 def qr_code_image_view(request, identifier=None):
     """Generate and return QR code image as PNG."""
     from auths.models import QRCode
-    
+
     etablissement = get_etablissement_by_identifier(identifier)
 
     # Try to get QRCode from query parameter
     qr_code_id = request.GET.get("qr_code_id")
     qr_code = None
-    
+
     if qr_code_id:
         try:
             qr_code = QRCode.objects.filter(id=qr_code_id, etablissement=etablissement).first()
         except Exception as e:
             logger.debug(f"Could not find QRCode {qr_code_id} for etablissement {etablissement.id}: {e}")
-    
+
     # If no QRCode found, try first one
     if not qr_code:
         qr_code = etablissement.qr_codes.first()
-    
-    # Build target URL based on QRCode routing or fallback to feedback
+
+    # Build redirect URL for QR code
+    if qr_code and qr_code.short_code:
+        redirect_url = reverse("reviews:qr_code_redirect", args=[identifier, qr_code.short_code])
+        target_url = request.build_absolute_uri(redirect_url)
+    else:
+        # Fallback to feedback if no QR code or no short_code
+        target_url = request.build_absolute_uri(reverse("reviews:feedback", args=[identifier]))
+
+    # Get customization parameters from query string (for preview) or QRCode
     if qr_code:
-        target_url = qr_code.get_target_url(identifier)
-        target_url = request.build_absolute_uri(target_url)
-        
-        # Get customization parameters from query string (for preview) or QRCode
         fill_color = request.GET.get("fill_color") or qr_code.qr_fill_color or "#000000"
         fill_color_secondary = request.GET.get("fill_color_secondary") or qr_code.qr_fill_color_secondary or "#000000"
         background_color = request.GET.get("background_color") or qr_code.qr_background_color or "#FFFFFF"
         style = request.GET.get("style") or qr_code.qr_style or "square"
         color_mask = request.GET.get("color_mask") or qr_code.qr_color_mask or "solid"
-        
+
         # Get logo file if exists
         logo_file = None
         if qr_code.qr_logo:
@@ -191,14 +224,11 @@ def qr_code_image_view(request, identifier=None):
                 logo_file = None
     else:
         # Fallback to default values if no QRCode exists
-        target_url = request.build_absolute_uri(reverse("reviews:feedback", args=[identifier]))
-        
         fill_color = request.GET.get("fill_color") or "#000000"
         fill_color_secondary = request.GET.get("fill_color_secondary") or "#000000"
         background_color = request.GET.get("background_color") or "#FFFFFF"
         style = request.GET.get("style") or "square"
         color_mask = request.GET.get("color_mask") or "solid"
-        
         logo_file = None
 
     # Generate QR code PNG
@@ -213,8 +243,7 @@ def qr_code_image_view(request, identifier=None):
             logo_file=logo_file,
         )
 
-        response = HttpResponse(qr_image_bytes, content_type="image/png")
-        return response
+        return HttpResponse(qr_image_bytes, content_type="image/png")
     except Exception as e:
         logger.error(f"Error generating QR code for etablissement {etablissement.id}: {e}", exc_info=True)
         # Return a simple error response or default QR code
@@ -227,8 +256,7 @@ def qr_code_image_view(request, identifier=None):
                 style="square",
                 color_mask="solid",
             )
-            response = HttpResponse(qr_image_bytes, content_type="image/png")
-            return response
+            return HttpResponse(qr_image_bytes, content_type="image/png")
         except Exception:
             # If even default fails, return 500
             return HttpResponse("Error generating QR code", status=500)
