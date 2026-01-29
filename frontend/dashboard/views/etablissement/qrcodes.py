@@ -25,19 +25,18 @@ logger = logging.getLogger(__name__)
 @login_required
 @google_gmb_connected_required
 @selected_etablissement_required
-def qr_code_management_view(request):
+def qr_code_management_view(request, short_code=None):
     etablissement = request.etablissement
 
     # Get all QR codes for this establishment
     qr_codes = etablissement.qr_codes.all()
 
-    # Get selected QR code ID from query parameter
-    selected_qr_code_id = request.GET.get("qr_code_id")
+    # Get selected QR code from short_code path parameter
     selected_qr_code = None
 
-    if selected_qr_code_id:
+    if short_code:
         try:
-            selected_qr_code = get_object_or_404(QRCode, id=selected_qr_code_id, etablissement=etablissement)
+            selected_qr_code = QRCode.objects.filter(short_code=short_code, etablissement=etablissement).first()
         except Exception:
             selected_qr_code = None
 
@@ -56,7 +55,9 @@ def qr_code_management_view(request):
                     selected_qr_code.qr_logo = None
                     selected_qr_code.save()
                     messages.success(request, "Logo supprimé avec succès.")
-                    return redirect(f"{reverse('dashboard:etablissement:qrcode')}?qr_code_id={selected_qr_code.id}")
+                    if selected_qr_code.short_code:
+                        return redirect(reverse("dashboard:etablissement:qrcodes", args=[selected_qr_code.short_code]))
+                    return redirect("dashboard:etablissement:qrcodes")
 
                 selected_qr_code.name = form.cleaned_data["name"]
                 selected_qr_code.routing = form.cleaned_data["routing"]
@@ -71,7 +72,9 @@ def qr_code_management_view(request):
 
                 selected_qr_code.save()
                 messages.success(request, "Paramètres du QR code mis à jour avec succès.")
-                return redirect(f"{reverse('dashboard:etablissement:qrcodes')}?qr_code_id={selected_qr_code.id}")
+                if selected_qr_code.short_code:
+                    return redirect(reverse("dashboard:etablissement:qrcodes", args=[selected_qr_code.short_code]))
+                return redirect("dashboard:etablissement:qrcodes")
         else:
             form = QRCodeSettingsForm(request.POST, request.FILES)
     else:
@@ -95,15 +98,18 @@ def qr_code_management_view(request):
     identifier = str(etablissement.uuid)
     qr_code_url = None
     if selected_qr_code and selected_qr_code.short_code:
-        qr_code_url = (
-            reverse("dashboard:etablissement:qr_code", args=[identifier]) + f"?short_code={selected_qr_code.short_code}"
-        )
-    else:
-        qr_code_url = reverse("dashboard:etablissement:qr_code", args=[identifier])
+        qr_code_url = reverse("dashboard:etablissement:qr_code", args=[identifier, selected_qr_code.short_code])
+    elif qr_codes.exists():
+        # Fallback: if no QR code selected or no short_code, use first QR code's short_code
+        first_qr = qr_codes.first()
+        if first_qr and first_qr.short_code:
+            qr_code_url = reverse("dashboard:etablissement:qr_code", args=[identifier, first_qr.short_code])
 
-    full_qr_code_url = request.build_absolute_uri(
-        reverse("routing:qr_code_redirect", args=[identifier, selected_qr_code.short_code])
-    )
+    full_qr_code_url = None
+    if selected_qr_code and selected_qr_code.short_code:
+        full_qr_code_url = request.build_absolute_uri(
+            reverse("routing:qr_code_redirect", args=[identifier, selected_qr_code.short_code])
+        )
 
     qr_code_count = qr_codes.count()
     max_qr_codes = 8
@@ -164,7 +170,10 @@ def qr_code_create_view(request):
                 # Return empty response to close modal and redirect
                 response = HttpResponse()
                 response["HX-Trigger"] = json.dumps({"close-modal": True})
-                response["HX-Redirect"] = f"{reverse('dashboard:etablissement:qrcodes')}?qr_code_id={new_qr_code.id}"
+                if new_qr_code.short_code:
+                    response["HX-Redirect"] = reverse("dashboard:etablissement:qrcodes", args=[new_qr_code.short_code])
+                else:
+                    response["HX-Redirect"] = reverse("dashboard:etablissement:qrcodes")
                 return response
     else:
         form = QRCodeCreateForm()
@@ -187,13 +196,13 @@ def qr_code_create_view(request):
 @google_gmb_connected_required
 @selected_etablissement_required
 @require_http_methods(["GET", "POST"])
-def qr_code_delete_partial(request, qr_code_id):
+def qr_code_delete_partial(request, short_code):
     """
     Partial view for deleting a QR code.
     """
     etablissement = request.etablissement
 
-    qr_code = get_object_or_404(QRCode, id=qr_code_id, etablissement=etablissement)
+    qr_code = get_object_or_404(QRCode, short_code=short_code, etablissement=etablissement)
     qr_code_name = qr_code.name
 
     if request.method == "POST":
@@ -204,7 +213,7 @@ def qr_code_delete_partial(request, qr_code_id):
     # GET request - show the form
     context = {
         "qr_code_name": qr_code_name,
-        "delete_url": reverse("dashboard:etablissement:qrcode_delete_partial", args=[qr_code.id]),
+        "delete_url": reverse("dashboard:etablissement:qrcode_delete_partial", args=[qr_code.short_code]),
     }
 
     return starshield_render(
@@ -215,12 +224,11 @@ def qr_code_delete_partial(request, qr_code_id):
 
 
 @login_required
-def qr_code_image_view(request, identifier=None):
+def qr_code_image_view(request, identifier=None, short_code=None):
     """Generate and return QR code image as PNG."""
     etablissement = get_etablissement_by_identifier(identifier)
 
-    # Get QRCode from short_code query parameter
-    short_code = request.GET.get("short_code")
+    # Get QRCode from short_code path parameter
     qr_code = None
 
     if short_code:

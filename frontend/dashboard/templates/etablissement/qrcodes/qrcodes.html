@@ -50,7 +50,7 @@
                     <div class="list-group">
                         {% for slot in all_slots %}
                             {% if slot %}
-                                <a href="?qr_code_id={{ slot.id }}"
+                                <a href="{% if slot.short_code %}{% url 'dashboard:etablissement:qrcodes' slot.short_code %}{% else %}{% url 'dashboard:etablissement:qrcodes' %}{% endif %}"
                                    class="list-group-item list-group-item-action
                                           {% if selected_qr_code and selected_qr_code.id == slot.id %}
                                               active text-white
@@ -283,7 +283,7 @@
                                                     extra_kwargs={
                                                     "hx_modal_toggle": True,
                                                     "type": "button",
-                                                    "hx-get": "{% url 'dashboard:etablissement:qrcode_delete_partial' selected_qr_code.id %}",
+                                                    "hx-get": "{% url 'dashboard:etablissement:qrcode_delete_partial' selected_qr_code.short_code %}",
                                                     "hx-trigger": "click",
                                                     }
                                                     %}
@@ -377,10 +377,15 @@
                             </div>
                         </form>
                     {% else %}
-                        <div class="col-12">
-                            <p class="text-muted mb-0">
-                                Sélectionnez un QR code dans la liste pour commencer à le modifier, ou créez-en un nouveau.
-                            </p>
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                            <div class="text-center">
+                                <i class="fa-solid fa-inbox fa-2x mb-2"></i>
+                                <p class="text-muted mb-0">
+                                    Sélectionnez un QR code dans la liste
+                                    <br>
+                                    pour commencer à le modifier, ou créez-en un nouveau.
+                                </p>
+                            </div>
                         </div>
                     {% endif %}
                 {% endcomponent %}
@@ -469,6 +474,9 @@
 
                     // Update preview with query parameters for real-time preview
                     const baseUrl = "{{ qr_code_url|safe }}";
+                    if (!baseUrl) {
+                        return;
+                    }
                     const url = new URL(baseUrl, window.location.origin);
                     url.searchParams.set("fill_color", fillColor);
                     url.searchParams.set("fill_color_secondary", fillColorSecondary);
