@@ -159,6 +159,23 @@ def stats_view(request):
     # Last review update time
     latest_reviews = ordered_reviews.filter(writen_at__gte=timezone.now() - timedelta(days=15))
 
+    # QR Code statistics
+    qr_codes = etablissement.qr_codes.all()
+    qr_codes_stats = []
+    for qr_code in qr_codes:
+        qr_codes_stats.append(
+            {
+                "name": qr_code.name,
+                "routing": qr_code.routing,
+                "routing_display": qr_code.get_routing_display(),
+                "total_scans": qr_code.scan_count(),
+                "scans_today": qr_code.scans_today(),
+                "scans_this_week": qr_code.scans_this_week(),
+                "scans_this_month": qr_code.scans_this_month(),
+                "created_at": qr_code.created_at,
+            }
+        )
+
     chart_payload = {
         "history": rating_history_points,
         "goal": goal_projection_points,
@@ -215,6 +232,7 @@ def stats_view(request):
         "latest_reviews": list(latest_reviews),
         "total_reviews": total_reviews,
         "rating_distribution": rating_distribution,
+        "qr_codes_stats": qr_codes_stats,
     }
 
     return starshield_render(

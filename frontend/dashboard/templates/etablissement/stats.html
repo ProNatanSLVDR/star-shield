@@ -18,88 +18,160 @@
             </p>
         </div>
         <div class="rounded-4 border bg-white shadow-sm p-3 row g-0 w-100 mb-3">
-        <div class="col-12 col-xl-6 p-2">
-            <div class="bg-body-tertiary rounded-4 p-2 d-flex align-items-center h-100">
-                <canvas id="ratingHistoryChart"
-                        class="w-100 h-100"></canvas>
+            <div class="col-12 col-xl-6 p-2">
+                <div class="bg-body-tertiary rounded-4 p-2 d-flex align-items-center h-100">
+                    <canvas id="ratingHistoryChart"
+                            class="w-100 h-100"></canvas>
+                </div>
             </div>
-        </div>
-        <div class="col-12 col-xl-6 p-2">
-            <div class="row row-cols-1 row-cols-md-2 g-2">
-                {% for stat in stats_items %}
-                    <div class="col">
-                        <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm">
-                            <div class="flex-grow-1">
-                                <p class="text-muted small mb-1">{{ stat.label }}</p>
-                                <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
-                            </div>
-                            <div class="align-self-center">
-                                <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
-                                      style="width: 40px;
-                                             height: 40px">
-                                    <i class="{{ stat.icon }}"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    <div class="w-100">
-        <div class="rounded-4 border bg-white shadow-sm p-3 row g-0">
-            <div class="col-12 col-xl-12 p-2 h-100">
-                <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-                        <h3 class="h6 fw-semibold mb-0">Répartition des notes</h3>
-                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ total_reviews }} avis</span>
-                    </div>
-                    {% if rating_distribution %}
-                        <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-center"
-                             style="min-height: 0">
-                            {% for item in rating_distribution %}
-                                <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="fw-semibold small">{{ item.rating }}★</span>
-                                        <span class="text-muted small">{{ item.count }} avis</span>
-                                    </div>
-                                    {% widthratio item.google_count total_reviews 100 as google_percentage %}
-                                    {% widthratio item.internal_count total_reviews 100 as internal_percentage %}
-                                    <div class="progress-stacked"
-                                         style="height: 8px">
-                                        {% if item.google_count > 0 %}
-                                            <div class="progress"
-                                                 role="progressbar"
-                                                 style="min-width: 1%;
-                                                        width: {{ google_percentage }}%">
-                                                <div class="progress-bar bg-success"
-                                                     data-bs-toggle="tooltip"
-                                                     data-bs-title="{{ item.google_count }} avis Google"></div>
-                                            </div>
-                                        {% endif %}
-                                        {% if item.internal_count > 0 %}
-                                            <div class="progress"
-                                                 role="progressbar"
-                                                 style="min-width: 1%;
-                                                        width: {{ internal_percentage }}%">
-                                                <div class="progress-bar bg-danger"
-                                                     data-bs-toggle="tooltip"
-                                                     data-bs-title="{{ item.internal_count }} avis internes"></div>
-                                            </div>
-                                        {% endif %}
-                                    </div>
+            <div class="col-12 col-xl-6 p-2">
+                <div class="row row-cols-1 row-cols-md-2 g-2">
+                    {% for stat in stats_items %}
+                        <div class="col">
+                            <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted small mb-1">{{ stat.label }}</p>
+                                    <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
                                 </div>
-                            {% endfor %}
+                                <div class="align-self-center">
+                                    <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                          style="width: 40px;
+                                                 height: 40px">
+                                        <i class="{{ stat.icon }}"></i>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    {% else %}
-                        <div class="d-flex align-items-center justify-content-center flex-grow-1">
-                            <p class="text-muted mb-0 small">Aucunes données pour le moment.</p>
-                        </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
-    </div>
+        <div class="w-100 mb-3">
+            <div class="rounded-4 border bg-white shadow-sm p-3 row g-0">
+                <div class="col-12 col-xl-12 p-2 h-100">
+                    <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                            <h3 class="h6 fw-semibold mb-0">Répartition des notes</h3>
+                            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ total_reviews }} avis</span>
+                        </div>
+                        {% if rating_distribution %}
+                            <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-center"
+                                 style="min-height: 0">
+                                {% for item in rating_distribution %}
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-semibold small">{{ item.rating }}★</span>
+                                            <span class="text-muted small">{{ item.count }} avis</span>
+                                        </div>
+                                        {% widthratio item.google_count total_reviews 100 as google_percentage %}
+                                        {% widthratio item.internal_count total_reviews 100 as internal_percentage %}
+                                        <div class="progress-stacked"
+                                             style="height: 8px">
+                                            {% if item.google_count > 0 %}
+                                                <div class="progress"
+                                                     role="progressbar"
+                                                     style="min-width: 1%;
+                                                            width: {{ google_percentage }}%">
+                                                    <div class="progress-bar bg-success"
+                                                         data-bs-toggle="tooltip"
+                                                         data-bs-title="{{ item.google_count }} avis Google">
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% if item.internal_count > 0 %}
+                                                <div class="progress"
+                                                     role="progressbar"
+                                                     style="min-width: 1%;
+                                                            width: {{ internal_percentage }}%">
+                                                    <div class="progress-bar bg-danger"
+                                                         data-bs-toggle="tooltip"
+                                                         data-bs-title="{{ item.internal_count }} avis internes">
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                                <p class="text-muted mb-0 small">Aucunes données pour le moment.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-100 mb-3">
+            <div class="rounded-4 border bg-white shadow-sm p-3 row g-0">
+                <div class="col-12 p-2 h-100">
+                    <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                            <h3 class="h6 fw-semibold mb-0">
+                                <i class="fa-solid fa-qrcode me-2"></i>
+                                Statistiques par QR Code
+                            </h3>
+                        </div>
+                        {% if qr_codes_stats %}
+                            <div class="row row-cols-1 row-cols-md-2 g-3 flex-grow-1">
+                                {% for qr_stat in qr_codes_stats %}
+                                    <div class="col">
+                                        <div class="border rounded-4 p-3 bg-white h-100">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <h6 class="fw-semibold mb-1">{{ qr_stat.name }}</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fa-solid
+                                                                  {% if qr_stat.routing == 'roulette' %}
+                                                                      fa-circle-notch
+                                                                  {% else %}
+                                                                      fa-comment-dots
+                                                                  {% endif %}
+                                                                  me-1"></i>
+                                                        {{ qr_stat.routing_display }}
+                                                    </small>
+                                                </div>
+                                                <small class="text-muted">Créé le {{ qr_stat.created_at|date:"d/m/Y" }}</small>
+                                            </div>
+                                            <div class="row row-cols-2 row-cols-md-4 g-2">
+                                                <div class="col">
+                                                    <div class="border rounded-3 p-2 text-center">
+                                                        <p class="text-muted small mb-1">Total</p>
+                                                        <h6 class="fw-semibold mb-0">{{ qr_stat.total_scans }}</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="border rounded-3 p-2 text-center">
+                                                        <p class="text-muted small mb-1">Aujourd'hui</p>
+                                                        <h6 class="fw-semibold mb-0">{{ qr_stat.scans_today }}</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="border rounded-3 p-2 text-center">
+                                                        <p class="text-muted small mb-1">Cette semaine</p>
+                                                        <h6 class="fw-semibold mb-0">{{ qr_stat.scans_this_week }}</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="border rounded-3 p-2 text-center">
+                                                        <p class="text-muted small mb-1">Ce mois</p>
+                                                        <h6 class="fw-semibold mb-0">{{ qr_stat.scans_this_month }}</h6>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                                <p class="text-muted mb-0 small">Aucun QR code créé pour le moment.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="{% static 'chartjs.min.js' %}"></script>
     <script>
