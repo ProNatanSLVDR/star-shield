@@ -5,6 +5,7 @@ from auths import choices
 
 class QRCodeCreateForm(forms.Form):
     """Form for creating a new QR code (only name and routing)."""
+
     name = forms.CharField(
         max_length=255,
         required=True,
@@ -21,6 +22,7 @@ class QRCodeCreateForm(forms.Form):
 
 class QRCodeSettingsForm(forms.Form):
     """Form for editing an existing QR code."""
+
     name = forms.CharField(
         max_length=255,
         required=True,

@@ -41,10 +41,7 @@
                                 icon="fa-solid fa-plus"
                                 extra_kwargs={
                                 "hx-get": "{% url 'dashboard:etablissement:qrcode_create' %}",
-                                "hx-target": "#dynamicModal-inner-content",
-                                "hx-swap": "innerHTML",
-                                "data-bs-toggle": "modal",
-                                "data-bs-target": "#dynamicModal",
+                                "hx_modal_toggle": True,
                                 }
                                 %}
                             {% endcomponent %}
@@ -75,22 +72,6 @@
                                                           me-1"></i>
                                                 {{ slot.get_routing_display }}
                                             </small>
-                                        </div>
-                                        <div class="col-auto h-100">
-                                            {% component "button"
-                                                text=""
-                                                icon="fa-solid fa-trash"
-                                                classes=" btn-sm text-danger"
-                                                extra_kwargs={
-                                                "hx-get": "{% url 'dashboard:etablissement:qrcode_delete_confirm' slot.id %}",
-                                                "hx-target": "#dynamicModal-inner-content",
-                                                "hx-swap": "innerHTML",
-                                                "data-bs-toggle": "modal",
-                                                "data-bs-target": "#dynamicModal",
-                                                "type": "button"
-                                                }
-                                                %}
-                                            {% endcomponent %}
                                         </div>
                                     </div>
                                 </a>
@@ -281,126 +262,115 @@
                                             }
                                             %}
                                         {% endcomponent %}
-                                        {% component "button"
-                                            text="Réinitialiser aux valeurs par défaut"
-                                            classes="btn-outline-secondary"
-                                            icon="fa-solid fa-rotate-left"
-                                            extra_kwargs={
-                                            "id": "resetToDefaultsBtn",
-                                            "type": "button"
-                                            }
-                                            %}
-                                        {% endcomponent %}
-                                    </div>
-                                </div>
-                                <!-- Preview -->
-                                <div class="col-md-5 d-flex flex-column">
-                                    <div class="mb-4">
-                                        <label class="form-label fw-semibold mb-3">
-                                            <i class="fa-solid fa-palette me-2"></i>
-                                            Couleurs
-                                        </label>
-                                        <div class="row mb-3">
-                                            <label for="qr_fill_color"
-                                                   class="form-label fw-semibold small">
-                                                <i class="fa-solid fa-circle me-1"></i>
-                                                Primaire
-                                            </label>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <input type="color"
-                                                       class="form-control"
-                                                       id="qr_fill_color"
-                                                       name="qr_fill_color"
-                                                       value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
-                                                       style="width: 80px;
-                                                              height: 40px;
-                                                              cursor: pointer;
-                                                              padding: 2px">
-                                                <input type="text"
-                                                       class="form-control"
-                                                       id="fillColorText"
-                                                       value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
-                                                       pattern="^#[0-9A-Fa-f]{6}$"
-                                                       placeholder="#000000">
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <label for="qr_fill_color_secondary"
-                                                   class="form-label fw-semibold small">
-                                                <i class="fa-solid fa-circle-half-stroke me-1"></i>
-                                                Secondaire
-                                            </label>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <input type="color"
-                                                       class="form-control"
-                                                       id="qr_fill_color_secondary"
-                                                       name="qr_fill_color_secondary"
-                                                       value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
-                                                       style="width: 80px;
-                                                              height: 40px;
-                                                              cursor: pointer;
-                                                              padding: 2px">
-                                                <input type="text"
-                                                       class="form-control"
-                                                       id="fillColorSecondaryText"
-                                                       value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
-                                                       pattern="^#[0-9A-Fa-f]{6}$"
-                                                       placeholder="#000000">
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <label for="qr_background_color"
-                                                   class="form-label fw-semibold small">
-                                                <i class="fa-solid fa-square me-1"></i>
-                                                Fond
-                                            </label>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <input type="color"
-                                                       class="form-control"
-                                                       id="qr_background_color"
-                                                       name="qr_background_color"
-                                                       value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
-                                                       style="width: 80px;
-                                                              height: 40px;
-                                                              cursor: pointer;
-                                                              padding: 2px">
-                                                <input type="text"
-                                                       class="form-control"
-                                                       id="backgroundColorText"
-                                                       value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
-                                                       pattern="^#[0-9A-Fa-f]{6}$"
-                                                       placeholder="#FFFFFF">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-center d-flex justify-content-center flex-grow-1 align-items-center">
-                                        <div>
-                                            <img id="qrCodePreview"
-                                                 src="{{ qr_code_url }}"
-                                                 alt="QR Code Preview"
-                                                 width="200"
-                                                 height="200"
-                                                 class="img-fluid shadow-sm rounded"
-                                                 style="width: 200px;
-                                                        height: 200px">
-                                            <div class="mt-3">
-                                                <a href="{{ qr_code_url }}"
-                                                   download="qr-code-{{ selected_qr_code.name|slugify }}.png"
-                                                   class="btn btn-primary">
-                                                    <i class="fa-solid fa-download me-2"></i>
-                                                    Télécharger le QR code
-                                                </a>
+                                        <div class="row g-2">
+                                            <div class="col-md-6">
                                                 {% component "button"
-                                                    text="Copier le lien"
-                                                    classes="btn-primary"
-                                                    icon="fa-solid fa-copy"
+                                                    text="Réinitialiser"
+                                                    classes="btn-outline-secondary w-100"
+                                                    icon="fa-solid fa-rotate-left"
                                                     extra_kwargs={
-                                                    "type": "button",
-                                                    "onclick": "navigator.clipboard.writeText('{{ qr_code_url }}')"
+                                                    "id": "resetToDefaultsBtn",
+                                                    "type": "button"
                                                     }
                                                     %}
                                                 {% endcomponent %}
                                             </div>
+                                            <div class="col-md-6">
+                                                {% component "button"
+                                                    text="Supprimer"
+                                                    classes="btn-outline-danger w-100"
+                                                    icon="fa-solid fa-trash"
+                                                    extra_kwargs={
+                                                    "hx_modal_toggle": True,
+                                                    "type": "button",
+                                                    "hx-get": "{% url 'dashboard:etablissement:qrcode_delete_partial' selected_qr_code.id %}",
+                                                    "hx-trigger": "click",
+                                                    }
+                                                    %}
+                                                {% endcomponent %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Preview -->
+                                <div class="col-md-5 d-flex flex-column">
+                                    <div>
+                                        <label class="form-label fw-semibold">
+                                            <i class="fa-solid fa-palette me-2"></i>
+                                            Couleurs
+                                        </label>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text mb-0 w-50 text-center">
+                                                <i class="fa-solid fa-circle me-2"></i>
+                                                Primaire
+                                            </span>
+                                            <input type="color"
+                                                   class="form-control"
+                                                   id="qr_fill_color"
+                                                   name="qr_fill_color_secondary"
+                                                   value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
+                                                   style="width: 80px;
+                                                          height: 40px;
+                                                          cursor: pointer;
+                                                          padding: 2px">
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text mb-0 w-50 text-center">
+                                                <i class="fa-solid fa-circle-half-stroke me-2"></i>
+                                                Secondaire
+                                            </span>
+                                            <input type="color"
+                                                   class="form-control"
+                                                   id="qr_fill_color_secondary"
+                                                   name="qr_fill_color_secondary"
+                                                   value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
+                                                   style="width: 80px;
+                                                          height: 40px;
+                                                          cursor: pointer;
+                                                          padding: 2px">
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text mb-0 w-50 text-center">
+                                                <i class="fa-solid fa-square me-2"></i>
+                                                Fond
+                                            </span>
+                                            <input type="color"
+                                                   class="form-control"
+                                                   id="qr_background_color"
+                                                   name="qr_background_color"
+                                                   value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
+                                                   style="width: 80px;
+                                                          height: 40px;
+                                                          cursor: pointer;
+                                                          padding: 2px">
+                                        </div>
+                                    </div>
+                                    <div class="w-100 flex-grow-1 d-flex flex-column">
+                                        <div class="text-center flex-grow-1 d-flex align-items-center justify-content-center p-3">
+                                            <img id="qrCodePreview"
+                                                 src="{{ qr_code_url }}"
+                                                 alt="QR Code Preview"
+                                                 class="img-fluid shadow rounded border">
+                                        </div>
+                                        <div class="row">
+                                            <a href="{{ qr_code_url }}"
+                                               download="qr-code-{{ selected_qr_code.name|slugify }}.png"
+                                               class="btn btn-primary w-100">
+                                                <i class="fa-solid fa-download me-2"></i>
+                                                Télécharger
+                                            </a>
+                                        </div>
+                                        <div class="row mt-2">
+                                            {% component "button"
+                                                text="Copier le lien"
+                                                classes="btn-primary w-100"
+                                                icon="fa-solid fa-copy"
+                                                extra_kwargs={
+                                                "type": "button",
+                                                "onclick": "navigator.clipboard.writeText('{{ full_qr_code_url }}')"
+                                                }
+                                                %}
+                                            {% endcomponent %}
                                         </div>
                                     </div>
                                 </div>
@@ -440,39 +410,22 @@
             const deleteLogoBtn = document.getElementById("deleteLogoBtn");
 
             // Sync color pickers with text inputs
-            if (fillColorInput && fillColorTextInput) {
+            if (fillColorInput) {
                 fillColorInput.addEventListener("input", function() {
-                    fillColorTextInput.value = this.value;
                     updatePreview();
-                });
-
-                fillColorTextInput.addEventListener("input", function() {
-                    const value = this.value;
-                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-                        fillColorInput.value = value;
-                        updatePreview();
-                    }
+                    console.log(this.value);
                 });
             }
 
-            if (backgroundColorInput && backgroundColorTextInput) {
+            if (backgroundColorInput) {
                 backgroundColorInput.addEventListener("input", function() {
-                    backgroundColorTextInput.value = this.value;
                     updatePreview();
-                });
-
-                backgroundColorTextInput.addEventListener("input", function() {
-                    const value = this.value;
-                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-                        backgroundColorInput.value = value;
-                        updatePreview();
-                    }
+                    console.log(this.value);
                 });
             }
 
-            if (fillColorSecondaryInput && fillColorSecondaryTextInput) {
+            if (fillColorSecondaryInput) {
                 fillColorSecondaryInput.addEventListener("input", function() {
-                    fillColorSecondaryTextInput.value = this.value;
                     if (colorMaskSelect && colorMaskSelect.value === "solid") {
                         const primaryColor = fillColorInput ? fillColorInput.value : "#000000";
                         if (this.value !== primaryColor) {
@@ -480,20 +433,6 @@
                         }
                     }
                     updatePreview();
-                });
-
-                fillColorSecondaryTextInput.addEventListener("input", function() {
-                    const value = this.value;
-                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-                        fillColorSecondaryInput.value = value;
-                        if (colorMaskSelect && colorMaskSelect.value === "solid") {
-                            const primaryColor = fillColorInput ? fillColorInput.value : "#000000";
-                            if (value !== primaryColor) {
-                                colorMaskSelect.value = "square_radial";
-                            }
-                        }
-                        updatePreview();
-                    }
                 });
             }
 
@@ -551,11 +490,8 @@
                     const defaultBackgroundColor = "#FFFFFF";
 
                     if (fillColorInput) fillColorInput.value = defaultFillColor;
-                    if (fillColorTextInput) fillColorTextInput.value = defaultFillColor;
                     if (fillColorSecondaryInput) fillColorSecondaryInput.value = defaultFillColorSecondary;
-                    if (fillColorSecondaryTextInput) fillColorSecondaryTextInput.value = defaultFillColorSecondary;
                     if (backgroundColorInput) backgroundColorInput.value = defaultBackgroundColor;
-                    if (backgroundColorTextInput) backgroundColorTextInput.value = defaultBackgroundColor;
                     if (styleSelect) styleSelect.value = "square";
                     if (colorMaskSelect) colorMaskSelect.value = "solid";
 

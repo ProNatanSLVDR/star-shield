@@ -94,6 +94,8 @@ def qr_code_management_view(request):
     else:
         qr_code_url = reverse("reviews:qr_code", args=[identifier])
 
+    full_qr_code_url = request.build_absolute_uri(qr_code_url)
+
     qr_code_count = qr_codes.count()
     max_qr_codes = 8
     empty_slots_count = max(0, max_qr_codes - qr_code_count)
@@ -109,6 +111,7 @@ def qr_code_management_view(request):
         "selected_qr_code": selected_qr_code,
         "form": form,
         "qr_code_url": qr_code_url,
+        "full_qr_code_url": full_qr_code_url,
         "qr_code_count": qr_code_count,
         "max_qr_codes": max_qr_codes,
         "empty_slots_count": empty_slots_count,
@@ -175,60 +178,28 @@ def qr_code_create_view(request):
 @google_gmb_connected_required
 @selected_etablissement_required
 @require_http_methods(["GET", "POST"])
-def qr_code_delete_confirmation_partial(request, qr_code_id):
+def qr_code_delete_partial(request, qr_code_id):
     """
-    Pour supprimer un QR code
-    Double confirmation la suppression (modal + hx-confirm)
+    Partial view for deleting a QR code.
     """
     etablissement = request.etablissement
 
-    hx_triggers = {}
+    qr_code = get_object_or_404(QRCode, id=qr_code_id, etablissement=etablissement)
+    qr_code_name = qr_code.name
+
+    if request.method == "POST":
+        qr_code.delete()
+        messages.success(request, f"Le QR code {qr_code_name} a été supprimé avec succès.")
+        return redirect("dashboard:etablissement:qrcodes")
+
+    # GET request - show the form
     context = {
-        "qr_code_name": None,
-        "delete_url": None,
+        "qr_code_name": qr_code_name,
+        "delete_url": reverse("dashboard:etablissement:qrcode_delete_partial", args=[qr_code.id]),
     }
-
-    qr_code = QRCode.objects.filter(id=qr_code_id, etablissement=etablissement).first()
-
-    if qr_code:
-        context["qr_code_name"] = qr_code.name
-        context["delete_url"] = reverse("dashboard:etablissement:qrcode_delete_confirm", args=[qr_code.id])
-
-        if request.method == "POST":
-            qr_code.delete()
-            messages.success(request, f"Le QR code {qr_code.name} a été supprimé avec succès.")
-            hx_triggers["close-modal"] = True
-            response = HttpResponse()
-            response["HX-Trigger"] = json.dumps(hx_triggers)
-            response["HX-Redirect"] = reverse("dashboard:etablissement:qrcodes")
-            return response
-    else:
-        messages.error(request, "QR code non trouvé.")
-        hx_triggers["close-modal"] = True
-        response = HttpResponse()
-        response["HX-Trigger"] = json.dumps(hx_triggers)
-        response["HX-Redirect"] = reverse("dashboard:etablissement:qrcodes")
-        return response
 
     return starshield_render(
         request,
         "etablissement/qrcodes/delete_partial.html",
         context=context,
-        hx_triggers=hx_triggers,
     )
-
-
-@login_required
-@google_gmb_connected_required
-@selected_etablissement_required
-def qr_code_delete_view(request, qr_code_id):
-    """View for deleting a QR code."""
-    etablissement = request.etablissement
-
-    qr_code = get_object_or_404(QRCode, id=qr_code_id, etablissement=etablissement)
-
-    if request.method == "POST":
-        qr_code.delete()
-        messages.success(request, "QR code supprimé avec succès.")
-
-    return redirect("dashboard:etablissement:qrcodes")
