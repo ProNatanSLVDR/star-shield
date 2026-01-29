@@ -94,7 +94,9 @@ def qr_code_management_view(request):
     else:
         qr_code_url = reverse("reviews:qr_code", args=[identifier])
 
-    full_qr_code_url = request.build_absolute_uri(qr_code_url)
+    full_qr_code_url = request.build_absolute_uri(
+        reverse("routing:qr_code_redirect", args=[identifier, selected_qr_code.short_code])
+    )
 
     qr_code_count = qr_codes.count()
     max_qr_codes = 8
