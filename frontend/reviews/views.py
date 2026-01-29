@@ -1,11 +1,11 @@
 import logging
 
 from django.contrib.admin.sites import login_not_required
-from django.http import Http404, HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from auths.models import QRCode, QRCodeScan
 from starshield.qrcodes import generate_qrcode_png
 
 from .forms import FeedbackForm
@@ -149,34 +149,7 @@ def feedback_thanks_view(request, identifier=None):
     )
 
 
-@login_not_required
-def qr_code_redirect_view(request, identifier=None, short_code=None):
-    """Handle QR code scan and redirect to target based on routing."""
-
-    etablissement = get_etablissement_by_identifier(identifier)
-
-    if not short_code:
-        logger.warning(f"QR code redirect called without short_code for etablissement {etablissement.id}")
-        raise Http404()
-
-    try:
-        qr_code = QRCode.objects.get(short_code=short_code, etablissement=etablissement)
-    except QRCode.DoesNotExist as err:
-        logger.warning(f"QR code not found: short_code={short_code}, etablissement={etablissement.id}")
-        raise Http404() from err
-
-    # Track the scan
-    try:
-        QRCodeScan.objects.create(qr_code=qr_code)
-    except Exception as e:
-        logger.debug(f"Could not create QRCodeScan record: {e}")
-
-    # Redirect to target based on routing
-    target_url = qr_code.get_target_url(identifier)
-    return redirect(target_url)
-
-
-@login_not_required
+@login_required
 def qr_code_image_view(request, identifier=None):
     """Generate and return QR code image as PNG."""
     from auths.models import QRCode
@@ -201,7 +174,7 @@ def qr_code_image_view(request, identifier=None):
 
     # Build redirect URL for QR code - must have short_code
     if qr_code and qr_code.short_code:
-        redirect_url = reverse("reviews:qr_code_redirect", args=[identifier, qr_code.short_code])
+        redirect_url = reverse("routing:qr_code_redirect", args=[identifier, qr_code.short_code])
         target_url = request.build_absolute_uri(redirect_url)
     else:
         # Fallback to feedback if no QR code or no short_code

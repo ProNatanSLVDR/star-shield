@@ -56,6 +56,9 @@ class Base(Configuration):
         "frontend.reviews",
         "frontend.roulette",
         #
+        # Routing app
+        "routing",
+        #
         # API apps
         "tasks_api",
         "payments",
