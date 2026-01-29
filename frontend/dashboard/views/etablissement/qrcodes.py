@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -9,12 +10,16 @@ from django.views.decorators.http import require_http_methods
 
 from auths.models import QRCode
 from frontend.dashboard.render import starshield_render
+from frontend.reviews.utils import get_etablissement_by_identifier
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
+from starshield.qrcodes import generate_qrcode_png
 
 from .forms import QRCodeCreateForm, QRCodeSettingsForm
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -90,9 +95,11 @@ def qr_code_management_view(request):
     identifier = str(etablissement.uuid)
     qr_code_url = None
     if selected_qr_code and selected_qr_code.short_code:
-        qr_code_url = reverse("reviews:qr_code", args=[identifier]) + f"?short_code={selected_qr_code.short_code}"
+        qr_code_url = (
+            reverse("dashboard:etablissement:qr_code", args=[identifier]) + f"?short_code={selected_qr_code.short_code}"
+        )
     else:
-        qr_code_url = reverse("reviews:qr_code", args=[identifier])
+        qr_code_url = reverse("dashboard:etablissement:qr_code", args=[identifier])
 
     full_qr_code_url = request.build_absolute_uri(
         reverse("routing:qr_code_redirect", args=[identifier, selected_qr_code.short_code])
@@ -205,3 +212,88 @@ def qr_code_delete_partial(request, qr_code_id):
         "etablissement/qrcodes/delete_partial.html",
         context=context,
     )
+
+
+@login_required
+def qr_code_image_view(request, identifier=None):
+    """Generate and return QR code image as PNG."""
+    etablissement = get_etablissement_by_identifier(identifier)
+
+    # Get QRCode from short_code query parameter
+    short_code = request.GET.get("short_code")
+    qr_code = None
+
+    if short_code:
+        try:
+            qr_code = QRCode.objects.filter(short_code=short_code, etablissement=etablissement).first()
+        except Exception as e:
+            logger.debug(
+                f"Could not find QRCode with short_code {short_code} for etablissement {etablissement.id}: {e}"
+            )
+
+    # If no QRCode found, try first one
+    if not qr_code:
+        qr_code = etablissement.qr_codes.first()
+
+    # Build redirect URL for QR code - must have short_code
+    if qr_code and qr_code.short_code:
+        redirect_url = reverse("routing:qr_code_redirect", args=[identifier, qr_code.short_code])
+        target_url = request.build_absolute_uri(redirect_url)
+    else:
+        # Fallback to feedback if no QR code or no short_code
+        target_url = request.build_absolute_uri(reverse("reviews:feedback", args=[identifier]))
+
+    # Get customization parameters from query string (for preview) or QRCode
+    if qr_code:
+        fill_color = request.GET.get("fill_color") or qr_code.qr_fill_color or "#000000"
+        fill_color_secondary = request.GET.get("fill_color_secondary") or qr_code.qr_fill_color_secondary or "#000000"
+        background_color = request.GET.get("background_color") or qr_code.qr_background_color or "#FFFFFF"
+        style = request.GET.get("style") or qr_code.qr_style or "square"
+        color_mask = request.GET.get("color_mask") or qr_code.qr_color_mask or "solid"
+
+        # Get logo file if exists
+        logo_file = None
+        if qr_code.qr_logo:
+            try:
+                logo_file = qr_code.qr_logo.open()
+            except Exception as e:
+                logger.debug(f"Could not open QR logo file for QRCode {qr_code.id}: {e}")
+                logo_file = None
+    else:
+        # Fallback to default values if no QRCode exists
+        fill_color = request.GET.get("fill_color") or "#000000"
+        fill_color_secondary = request.GET.get("fill_color_secondary") or "#000000"
+        background_color = request.GET.get("background_color") or "#FFFFFF"
+        style = request.GET.get("style") or "square"
+        color_mask = request.GET.get("color_mask") or "solid"
+        logo_file = None
+
+    # Generate QR code PNG
+    try:
+        qr_image_bytes = generate_qrcode_png(
+            link=target_url,
+            fill_color=fill_color,
+            fill_color_secondary=fill_color_secondary,
+            background_color=background_color,
+            style=style,
+            color_mask=color_mask,
+            logo_file=logo_file,
+        )
+
+        return HttpResponse(qr_image_bytes, content_type="image/png")
+    except Exception as e:
+        logger.error(f"Error generating QR code for etablissement {etablissement.id}: {e}", exc_info=True)
+        # Return a simple error response or default QR code
+        try:
+            qr_image_bytes = generate_qrcode_png(
+                link=target_url,
+                fill_color="#000000",
+                fill_color_secondary="#000000",
+                background_color="#FFFFFF",
+                style="square",
+                color_mask="solid",
+            )
+            return HttpResponse(qr_image_bytes, content_type="image/png")
+        except Exception:
+            # If even default fails, return 500
+            return HttpResponse("Error generating QR code", status=500)

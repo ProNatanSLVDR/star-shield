@@ -19,4 +19,5 @@ urlpatterns = [
     path("qrcodes/", qrcodes.qr_code_management_view, name="qrcodes"),
     path("qrcodes/create/", qrcodes.qr_code_create_view, name="qrcode_create"),
     path("qrcodes/<int:qr_code_id>/delete/", qrcodes.qr_code_delete_partial, name="qrcode_delete_partial"),
+    path("qrcodes/image/<str:identifier>/", qrcodes.qr_code_image_view, name="qr_code"),
 ]

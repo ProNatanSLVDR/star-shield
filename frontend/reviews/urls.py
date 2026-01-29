@@ -21,5 +21,4 @@ urlpatterns = [
         views.feedback_thanks_view,
         name="feedback_thanks",
     ),
-    path("qr/<str:identifier>/", views.qr_code_image_view, name="qr_code"),
 ]
