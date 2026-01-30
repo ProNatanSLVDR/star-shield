@@ -3,7 +3,7 @@ import json
 from django.contrib.messages import get_messages
 from django.utils.deprecation import MiddlewareMixin
 
-from auths.models import Etablissement
+from apps.private.auths.models import Etablissement
 
 
 class CustomMessageMiddleware(MiddlewareMixin):

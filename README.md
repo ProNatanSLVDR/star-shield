@@ -113,52 +113,58 @@ The central feature of Starshield is its conditional review redirection system:
 │   ├── email_backends.py   # Brevo email backend
 │   └── email_service.py    # Email service wrapper
 │
-├── auths/                  # Authentication and core models
-│   ├── models.py           # User, GoogleCredentials, Etablissement, RatingHistory
-│   ├── views.py            # Authentication views
-│   └── urls.py             # Authentication URL routes
-│
-├── frontend/
-│   ├── dashboard/          # Main dashboard application
-│   │   ├── views/          # View modules
-│   │   │   ├── accueil.py              # Home dashboard
-│   │   │   ├── onboarding/             # Onboarding flow
-│   │   │   ├── etablissements/         # Establishment management
-│   │   │   ├── etablissement/          # Single establishment views
-│   │   │   │   ├── views.py            # Overview, settings
-│   │   │   │   ├── filtre/             # Review filtering (threshold, QR, personalization)
-│   │   │   │   └── roulette/           # Roulette configuration
-│   │   │   ├── facturation/            # Billing/subscription management
-│   │   │   └── profile/                # User profile management
-│   │   └── templates/      # Dashboard templates
+├── apps/
+│   ├── private/            # Private apps (require authentication)
+│   │   ├── auths/         # Authentication and core models
+│   │   │   ├── models.py           # User, GoogleCredentials, Etablissement, RatingHistory
+│   │   │   ├── views.py            # Authentication views
+│   │   │   └── urls.py             # Authentication URL routes
+│   │   │
+│   │   ├── dashboard/     # Main dashboard application
+│   │   │   ├── views/              # View modules
+│   │   │   │   ├── accueil.py              # Home dashboard
+│   │   │   │   ├── onboarding/             # Onboarding flow
+│   │   │   │   ├── etablissements/         # Establishment management
+│   │   │   │   ├── etablissement/          # Single establishment views
+│   │   │   │   │   ├── views.py            # Overview, settings
+│   │   │   │   │   ├── filtre/             # Review filtering (threshold, QR, personalization)
+│   │   │   │   │   └── roulette/           # Roulette configuration
+│   │   │   │   ├── facturation/            # Billing/subscription management
+│   │   │   │   └── profile/                # User profile management
+│   │   │   └── templates/          # Dashboard templates
+│   │   │
+│   │   ├── payments/      # Stripe subscription management
+│   │   │   ├── models.py           # StripeSubscription model
+│   │   │   ├── services.py         # Stripe API integration
+│   │   │   ├── views.py            # Subscription views
+│   │   │   └── webhooks.py         # Stripe webhook handlers
+│   │   │
+│   │   └── tasks_api/     # Background task processing API
+│   │       ├── api/
+│   │       │   ├── router_v1.py    # Django Ninja API routes
+│   │       │   ├── schemas.py      # API request/response schemas
+│   │       │   └── task_tracking.py # Task execution tracking
+│   │       ├── services/
+│   │       │   ├── queue_service.py    # Cloud Tasks queue management
+│   │       │   └── review_service.py   # Review fetching logic
+│   │       ├── models.py           # TaskExecution model
+│   │       └── urls.py             # API URL configuration
 │   │
-│   ├── reviews/             # Review collection application
-│   │   ├── models.py       # Review, ReviewAnalytics models
-│   │   ├── views.py        # Public feedback pages
-│   │   ├── forms.py        # Review forms
-│   │   └── templates/      # Feedback page templates
-│   │
-│   └── roulette/           # Roulette wheel application
-│       ├── models.py       # RoulettePrize, RouletteSpin, RouletteAnalytics
-│       ├── views.py        # Public roulette wheel pages
-│       └── templates/      # Roulette templates
-│
-├── payments/               # Stripe subscription management
-│   ├── models.py           # StripeSubscription model
-│   ├── services.py         # Stripe API integration
-│   ├── views.py            # Subscription views
-│   └── webhooks.py         # Stripe webhook handlers
-│
-├── tasks_api/              # Background task processing API
-│   ├── api/
-│   │   ├── router_v1.py    # Django Ninja API routes
-│   │   ├── schemas.py      # API request/response schemas
-│   │   └── task_tracking.py # Task execution tracking
-│   ├── services/
-│   │   ├── queue_service.py    # Cloud Tasks queue management
-│   │   └── review_service.py   # Review fetching logic
-│   ├── models.py           # TaskExecution model
-│   └── urls.py             # API URL configuration
+│   └── public/            # Public apps (no authentication required)
+│       ├── reviews/       # Review collection application
+│       │   ├── models.py       # Review, ReviewAnalytics models
+│       │   ├── views.py        # Public feedback pages
+│       │   ├── forms.py        # Review forms
+│       │   └── templates/      # Feedback page templates
+│       │
+│       ├── roulette/      # Roulette wheel application
+│       │   ├── models.py       # RoulettePrize, RouletteSpin, RouletteAnalytics
+│       │   ├── views.py        # Public roulette wheel pages
+│       │   └── templates/      # Roulette templates
+│       │
+│       └── routing/       # Public routing/redirects
+│           ├── views.py        # QR code redirect views
+│           └── urls.py         # Routing URL configuration
 │
 ├── components/             # Reusable UI components
 │   ├── button/             # Button component

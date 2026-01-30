@@ -40,8 +40,18 @@ class Base(Configuration):
         "django.contrib.messages",
         "django.contrib.staticfiles",
         #
-        # Auths app
-        "auths",
+        # Private apps
+        "apps.private.auths",
+        "apps.private.dashboard",
+        "apps.private.payments",
+        "apps.private.tasks_api",
+        #
+        # Public apps
+        "apps.public.reviews",
+        "apps.public.roulette",
+        "apps.public.routing",
+        #
+        # Auth
         "allauth",
         "allauth.account",
         "allauth.socialaccount",
@@ -50,18 +60,6 @@ class Base(Configuration):
         # Third party apps
         "django_htmx",
         "django_components",
-        #
-        # Frontend apps
-        "frontend.dashboard",
-        "frontend.reviews",
-        "frontend.roulette",
-        #
-        # Routing app
-        "routing",
-        #
-        # API apps
-        "tasks_api",
-        "payments",
     ]
 
     # API-friendly middleware
