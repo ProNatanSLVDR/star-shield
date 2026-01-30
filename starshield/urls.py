@@ -6,8 +6,9 @@ from django.urls import include, path
 from . import errorviews
 
 urlpatterns = [
-    # Django
+    # Admin and Hijack
     path("admin/", admin.site.urls),
+    path("hijack/", include("hijack.urls")),
     path("", include("django_components.urls")),
     # Auth
     path("accounts/", include("allauth.urls")),

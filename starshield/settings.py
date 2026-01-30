@@ -61,6 +61,8 @@ class Base(Configuration):
         # Third party apps
         "django_htmx",
         "django_components",
+        "hijack",
+        "hijack.contrib.admin",
     ]
 
     # API-friendly middleware
@@ -81,6 +83,7 @@ class Base(Configuration):
         "django_htmx.middleware.HtmxMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
         "starshield.middleware.EtablissementMiddleware",
+        "hijack.middleware.HijackUserMiddleware",
     ]
 
     ROOT_URLCONF = "starshield.urls"

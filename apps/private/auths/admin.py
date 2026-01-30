@@ -1,6 +1,7 @@
 from allauth.account.decorators import secure_admin_login
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+from hijack.contrib.admin import HijackUserAdminMixin
 
 from .models import Etablissement, GoogleCredentials, QRCode, RatingHistory, User
 
@@ -9,7 +10,7 @@ admin.site.login = secure_admin_login(admin.site.login)
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(HijackUserAdminMixin, admin.ModelAdmin):
     list_display = (
         "email",
         "first_name",

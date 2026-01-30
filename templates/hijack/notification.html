@@ -1,0 +1,23 @@
+<div class="position-fixed top-0 start-50 translate-middle-x p-3"
+     id="djhj"
+     style="z-index: 1050">
+    <div class="alert alert-warning d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-0 shadow-sm"
+         role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fa-solid fa-user-secret me-2"></i>
+            <div>
+                Vous usurpez le compte de <strong>{{ request.user }}</strong>.
+            </div>
+        </div>
+        <form action="{% url 'hijack:release' %}"
+              method="post"
+              class="d-flex gap-2">
+            {% csrf_token %}
+            <input type="hidden"
+                   name="next"
+                   value="{{ request.path }}">
+            <button class="btn btn-sm btn-warning"
+                    type="submit">Stopper l' usurpation</button>
+        </form>
+    </div>
+</div>
