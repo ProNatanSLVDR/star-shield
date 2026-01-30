@@ -202,8 +202,10 @@
             }
 
             const historyMap = {};
+            const reviewsMap = {};
             parsedPayload.history.forEach(function(point) {
                 historyMap[point.date] = point.rating;
+                reviewsMap[point.date] = point.total_reviews || 0;
             });
 
             const goalMap = {};
@@ -301,7 +303,13 @@
                                     return formatLabel(label);
                                 },
                                 label: function(context) {
-                                    return context.dataset.label + ': ' + (context.formattedValue || '—') + ' ★';
+                                    const label = context.dataset.label + ': ' + (context.formattedValue || '—') + ' ★';
+                                    if (context.dataset.label === 'Note moyenne') {
+                                        const date = labels[context.dataIndex];
+                                        const reviewCount = reviewsMap[date] || 0;
+                                        return label + ' (' + reviewCount + ' avis)';
+                                    }
+                                    return label;
                                 }
                             }
                         }

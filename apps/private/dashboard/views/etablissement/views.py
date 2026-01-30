@@ -90,7 +90,10 @@ def stats_view(request):
     """Stats page with detailed overview (chart, stats, rating distribution, recent reviews)."""
     etablissement = request.etablissement
 
-    rating_history_qs = etablissement.rating_history.order_by("created_at")
+    # Limit query to maximum 20 most recent entries, then order chronologically for display
+    rating_history_qs = etablissement.rating_history.order_by("-created_at")[:20]
+    rating_history_qs = list(rating_history_qs)
+    rating_history_qs.reverse()  # Reverse to get chronological order (oldest to newest)
 
     rating_history_points: list[dict] = []
     for entry in rating_history_qs:
@@ -111,11 +114,11 @@ def stats_view(request):
 
     goal_projection_points: list[dict] = []
     if goal_rating is not None:
-        origin_date = rating_history_qs.last().created_at if rating_history_points else timezone.now()
+        origin_date = rating_history_qs[-1].created_at if rating_history_qs else timezone.now()
 
         start_rating = goal_rating
         if current_rating is not None and rating_history_points:
-            origin_date = rating_history_qs.last().created_at
+            origin_date = rating_history_qs[-1].created_at
             start_rating = current_rating
 
         projected_goal_date = origin_date + timedelta(days=30 * 6)
