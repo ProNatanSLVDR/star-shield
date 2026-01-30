@@ -4,7 +4,7 @@ set -e
 SERVICE_TYPE="${1:-webapp}"  # Default to 'webapp' if no argument
 
 case "$SERVICE_TYPE" in
-  webapp)
+  web-app)
     exec gunicorn starshield.wsgi:application --bind 0.0.0.0:8080 --workers 4
     ;;
   tasks-api)
