@@ -1,0 +1,52 @@
+---
+description: Create markdown documentation for major features
+alwaysApply: true
+---
+
+# Feature Documentation
+
+When building or significantly modifying features, create or update markdown documentation.
+
+## When to Document
+
+- **Major features**: Document significant app parts (e.g., onboarding flow, payment system, review collection)
+- **Not everything**: Skip docs for small changes, bug fixes, or minor tweaks
+- **One doc per feature area**: Multiple related pages can share one doc (e.g., all onboarding pages in one doc)
+
+## Documentation Location
+
+- Place docs close to the feature code (same directory or root level)
+- Use descriptive names: `onboarding.md`, `roulette.md`, `payments.md`
+- For components: `components/table/TABLE.md` pattern
+
+## What to Include
+
+Be concise. Include:
+
+1. **How it works**: Explain the feature's behavior and flow
+2. **Why it was made this way**: Document design decisions and rationale
+3. **User specs**: Capture the original requirements/specs so future edits maintain behavior unless specs change
+
+## Workflow
+
+1. **Read first**: Check for existing documentation of the app part you're editing
+2. **Build feature**: Implement the feature
+3. **Document last**: Creating/editing documentation is always the final step before completing the task
+
+## Example Structure
+
+```markdown
+# Feature Name
+
+## Purpose
+Brief explanation of what this feature does and why it exists.
+
+## How It Works
+Step-by-step explanation of the feature's behavior.
+
+## Design Decisions
+Why specific implementation choices were made.
+
+## User Specs
+Original requirements that define expected behavior.
+```

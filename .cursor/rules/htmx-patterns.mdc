@@ -1,0 +1,144 @@
+---
+description: HTMX usage patterns and conventions for dynamic content updates
+alwaysApply: true
+---
+
+# HTMX Usage Patterns
+
+This project uses HTMX for dynamic content updates, primarily for modals and partial page updates. Partials are used selectively, not everywhere.
+
+## Request Detection Pattern
+
+Views check `request.htmx` to determine response type:
+
+```python
+def my_view(request):
+    if not request.htmx:
+        # Return full page template
+        return starshield_render(request, "myapp/page.html", page_name="myapp")
+    
+    # Return partial template for HTMX requests
+    return starshield_render(request, "myapp/page_partial.html", context=context)
+```
+
+**Key principle**: Only use partials when you need dynamic updates. Don't create partials for every page.
+
+## Partial Template Naming
+
+- Partial templates use `_partial.html` suffix: `list_partial.html`, `add_partial.html`
+- Full page templates use regular names: `list.html`, `index.html`
+
+## Modal Pattern
+
+### Modal Targets
+
+- Primary modal: `#dynamicModal .modal-content`
+- Secondary modal (for nested flows): `#dynamicModal2 .modal-content`
+
+### Opening Modals
+
+Use the button component with `hx_modal_toggle`:
+
+```python
+{
+    "extra_kwargs": {
+        "hx_modal_toggle": True,
+        "hx-get": reverse("myapp:partial_view"),
+    }
+}
+```
+
+Or directly in templates:
+
+```html
+<button hx-get="{% url 'myapp:partial' %}"
+        hx-target="#dynamicModal .modal-content"
+        data-bs-toggle="modal"
+        data-bs-target="#dynamicModal">
+```
+
+### Modal Content Structure
+
+Partial templates for modals should include:
+
+- `.modal-header` with title and close button
+- `.modal-body` with content
+- `.modal-footer` with action buttons
+
+Example: `apps/private/dashboard/templates/etablissements/add_partial.html`
+
+## HTMX Triggers
+
+Use `hx_triggers` parameter in `starshield_render()` to trigger client-side events:
+
+```python
+hx_triggers = {
+    "etablissements-updated": True,
+    "close-modal": True,
+}
+
+return starshield_render(
+    request,
+    "myapp/partial.html",
+    context=context,
+    hx_triggers=hx_triggers,
+)
+```
+
+Common triggers:
+
+- `close-modal`: Closes any open modals
+- `{resource}-updated`: Triggers refresh of specific content (e.g., `etablissements-updated`)
+
+Listeners in templates:
+
+```html
+<div hx-get="{% url 'myapp:list' %}"
+     hx-trigger="load, etablissements-updated from:body"
+     hx-swap="morph:innerHTML">
+</div>
+```
+
+## Messages
+
+Messages are handled automatically:
+
+- Regular requests: Messages shown via Django messages framework
+- HTMX requests: Messages sent via `X-Messages` header (handled by `CustomMessageMiddleware`)
+- Client-side: Messages displayed as toasts via `htmx:afterRequest` event listener in `base.html`
+
+No special handling needed in views - just use `messages.success()`, `messages.error()`, etc.
+
+## Swap Strategies
+
+- For partial updates: `hx-swap="morph:innerHTML"` (uses idiomorph for smooth transitions)
+- For component replacement: `hx-swap="outerHTML"`
+- Default: `innerHTML` (set in base.html)
+
+## Button Component Integration
+
+The button component supports HTMX modal helpers:
+
+- `hx_modal_toggle`: Adds `hx-target` and Bootstrap modal attributes
+- `hx_modal_target`: Only adds `hx-target` (for buttons inside modals)
+- `modal_close`: Adds `data-bs-dismiss="modal"`
+
+## Loading States
+
+Modal loading states are handled automatically by JavaScript in `base.html`:
+
+- Shows spinner when loading modal content
+- Hides spinner after swap or on error
+- No manual loader code needed in partials
+
+## When NOT to Use Partials
+
+- Static pages that don't need dynamic updates
+- Pages that don't benefit from partial updates
+
+**Rule of thumb**: Use partials only when you need to update content without full page reload, typically for:
+
+- Modal content
+- Table/list updates after actions
+- Form submissions that update specific sections
+- Dynamic content that changes based on user interactions

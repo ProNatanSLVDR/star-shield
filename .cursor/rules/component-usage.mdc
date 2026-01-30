@@ -1,0 +1,58 @@
+---
+description: Always use components from components directory when possible
+globs: **/*.html
+alwaysApply: false
+---
+
+# Component Usage
+
+Always check for and use existing components from `/app/components/` before writing custom HTML. Only skip using components if explicitly told not to use them.
+
+## Component Usage Syntax
+
+Use `{% component %}` tags with appropriate parameters:
+
+```html
+{% component "button"
+    text="Create"
+    classes="btn-primary"
+    icon="fa-solid fa-plus"
+    extra_kwargs={
+        "hx-get": "{% url 'myapp:create' %}",
+        "hx_modal_toggle": True,
+    }
+%}
+```
+
+For components with slots, prefer using default slots (without `{% slot %}` tag) when possible - it's cleaner to read:
+
+```html
+{% component "card" title="Settings" icon="fa-solid fa-gear" %}
+    <!-- Content goes directly into default slot -->
+    <p>Card content here</p>
+{% endcomponent %}
+```
+
+Only use explicit `{% slot %}` tags when you need to target a specific named slot (not the default):
+
+```html
+{% component "card" title="Settings" icon="fa-solid fa-gear" %}
+    {% slot body %}
+        <!-- Explicit slot usage - only when needed -->
+        <p>Card content here</p>
+    {% endslot %}
+{% endcomponent %}
+```
+
+## Checking Components
+
+Before writing custom HTML:
+
+1. Check `/app/components/` directory for existing components
+2. Review component Python files (e.g., `button.py`) to understand available parameters
+3. Look at component templates for usage examples
+4. Check existing template files for component usage patterns
+
+## Exception
+
+Only skip using components if the user explicitly requests not to use them or if no suitable component exists for the specific use case.
