@@ -25,6 +25,23 @@
         #general-stats-section:hover #stats-button {
             opacity: 1;
         }
+
+        #reviews-content {
+            transition: opacity 0.3s;
+        }
+
+        #reviews-button {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #recent-reviews-section:hover #reviews-content {
+            opacity: 0.5;
+        }
+
+        #recent-reviews-section:hover #reviews-button {
+            opacity: 1;
+        }
     </style>
     <!-- Header Section -->
     <div class="rounded-4 border bg-white shadow-sm p-3 w-100 mb-3">
@@ -68,61 +85,7 @@
                 {% endslot %}
             {% endcomponent %}
             <!-- Settings Link Section -->
-            {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="w-100 overflow-hidden" %}
-                {% slot body %}
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <p class="text-muted small mb-0">
-                                Gérez les paramètres généraux de votre établissement
-                            </p>
-                        </div>
-                        <a href="{% url 'dashboard:etablissement:settings:settings' %}"
-                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold">
-                            <i class="fa-solid fa-gear"></i>
-                            <span>Accéder aux paramètres</span>
-                        </a>
-                    </div>
-                {% endslot %}
-            {% endcomponent %}
-        </div>
-        <!-- Right Column: Stats, Links, Settings -->
-        <div class="col-12 col-lg-7">
-            <!-- General Stats Section -->
-            {% component "card" title="Statistiques générales" icon="fa-solid fa-chart-line" card_classes="w-100 mb-3 position-relative overflow-hidden" card_id="general-stats-section" %}
-                {% slot body %}
-                    <div class="row row-cols-1 row-cols-md-3 g-3"
-                         id="stats-content">
-                        {% for stat in general_stats %}
-                            <div class="col">
-                                <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm h-100">
-                                    <div class="flex-grow-1">
-                                        <p class="text-muted small mb-1">{{ stat.label }}</p>
-                                        <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
-                                              style="width: 40px;
-                                                     height: 40px">
-                                            <i class="{{ stat.icon }}"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <!-- Hidden button that appears on hover -->
-                    <div class="position-absolute top-50 start-50 translate-middle m-3"
-                         id="stats-button">
-                        <a href="{% url 'dashboard:etablissement:stats' %}"
-                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
-                            <i class="fa-solid fa-chart-line"></i>
-                            <span>Voir les statistiques détaillées</span>
-                        </a>
-                    </div>
-                {% endslot %}
-            {% endcomponent %}
-            <!-- Shieldy AI Summary Section -->
-            {% component "card" title="Rapport de Shieldy" icon="fa-solid fa-robot" card_classes="w-100 mb-3 overflow-hidden bg-primary-subtle border-primary-subtle" %}
+            {% component "card" title="Rapport de Shieldy" icon="fa-solid fa-robot" card_classes="w-100 overflow-hidden bg-primary-subtle border-primary-subtle" %}
                 {% slot body %}
                     <div class="d-flex align-items-start gap-3">
                         <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
@@ -146,28 +109,91 @@
                     </div>
                 {% endslot %}
             {% endcomponent %}
+        </div>
+        <!-- Right Column: Stats, Links, Settings -->
+        <div class="col-12 col-lg-7">
+            <!-- General Stats Section -->
+            {% component "card" title="Statistiques générales" icon="fa-solid fa-chart-line" card_classes="w-100 mb-3 overflow-hidden" %}
+                {% slot body %}
+                    <div class="position-relative"
+                         id="general-stats-section">
+                        <div id="stats-content"
+                             class="row row-cols-1 row-cols-md-3">
+                            {% for stat in general_stats %}
+                                <div class="col">
+                                    <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm h-100">
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted small mb-1">{{ stat.label }}</p>
+                                            <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                                  style="width: 40px;
+                                                         height: 40px">
+                                                <i class="{{ stat.icon }}"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <!-- Hidden button that appears on hover -->
+                        <div class="position-absolute top-50 start-50 translate-middle g-0 w-75 d-flex justify-content-center"
+                             id="stats-button">
+                            <a href="{% url 'dashboard:etablissement:stats' %}"
+                               class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Voir les statistiques détaillées</span>
+                            </a>
+                        </div>
+                    </div>
+                {% endslot %}
+            {% endcomponent %}
+            {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="w-100 mb-3 overflow-hidden" %}
+                {% slot body %}
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted small mb-0">
+                                Gérez les paramètres généraux de votre établissement
+                            </p>
+                        </div>
+                        <a href="{% url 'dashboard:etablissement:settings:settings' %}"
+                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Accéder aux paramètres</span>
+                        </a>
+                    </div>
+                {% endslot %}
+            {% endcomponent %}
             <!-- Recent Avis Widget -->
             {% component "card" title="Avis récents" icon="fa-solid fa-comments" card_classes="w-100 overflow-hidden" %}
                 {% slot body %}
-                    <div class="d-flex flex-column gap-3"
-                         style="max-height: 400px;
-                                overflow-y: auto">
-                        {% if latest_reviews %}
-                            {% for review in latest_reviews %}
-                                {% component "review" review=review show_badge=True show_timestamp=True truncate_comment=True truncate_words=20 %}
-                                {% endcomponent %}
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-4">
-                                <p class="text-muted mb-0 small">Aucun avis récent ces 15 derniers jours.</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="mt-3 text-center">
-                        <a href="{% url 'dashboard:etablissement:avis' %}"
-                           class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                            Voir tous les avis
-                        </a>
+                    <div class="position-relative"
+                         id="recent-reviews-section">
+                        <div id="reviews-content"
+                             class="d-flex flex-column gap-3"
+                             style="max-height: 225px;
+                                    overflow-y: auto">
+                            {% if latest_reviews %}
+                                {% for review in latest_reviews %}
+                                    {% component "review" review=review show_badge=True show_timestamp=True truncate_comment=True truncate_words=20 %}
+                                    {% endcomponent %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="text-muted mb-0 small">Aucun avis récent ces 15 derniers jours.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <!-- Hidden button that appears on hover -->
+                        <div class="position-absolute top-50 start-50 translate-middle g-0 w-75 d-flex justify-content-center"
+                             id="reviews-button">
+                            <a href="{% url 'dashboard:etablissement:avis' %}"
+                               class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold">
+                                <i class="fa-solid fa-comments"></i>
+                                <span>Voir tous les avis</span>
+                            </a>
+                        </div>
                     </div>
                 {% endslot %}
             {% endcomponent %}
