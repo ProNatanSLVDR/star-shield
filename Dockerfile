@@ -18,8 +18,11 @@ COPY . .
 # collect static files
 RUN python manage.py collectstatic --noinput
 
+# Make entrypoint script executable
+RUN chmod +x scripts/entrypoint.sh
+
 # Expose port for web application
 EXPOSE 8080
 
-# Run WSGI server for production
-CMD ["gunicorn", "starshield.wsgi:application", "--bind", "0.0.0.0:8080", "--workers", "4"]
+# Run entrypoint script with default 'webapp' argument
+CMD ["/app/scripts/entrypoint.sh", "webapp"]
