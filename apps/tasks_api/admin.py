@@ -4,7 +4,7 @@ Admin configuration for tasks_api app.
 
 from django.contrib import admin
 
-from apps.private.tasks_api.models import TaskExecution
+from apps.tasks_api.models import TaskExecution
 
 
 @admin.register(TaskExecution)

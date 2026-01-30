@@ -9,7 +9,7 @@ from collections.abc import Callable
 from typing import Any
 
 from apps.private.auths.models import Etablissement
-from apps.private.tasks_api.models import TaskExecution
+from apps.tasks_api.models import TaskExecution
 
 logger = logging.getLogger(__name__)
 

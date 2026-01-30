@@ -44,7 +44,8 @@ class Base(Configuration):
         "apps.private.auths",
         "apps.private.dashboard",
         "apps.private.payments",
-        "apps.private.tasks_api",
+        # Tasks API (internal, accessed only by Cloud Tasks queue)
+        "apps.tasks_api",
         #
         # Public apps
         "apps.public.reviews",

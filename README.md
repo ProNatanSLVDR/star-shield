@@ -138,17 +138,17 @@ The central feature of Starshield is its conditional review redirection system:
 │   │   │   ├── services.py         # Stripe API integration
 │   │   │   ├── views.py            # Subscription views
 │   │   │   └── webhooks.py         # Stripe webhook handlers
-│   │   │
-│   │   └── tasks_api/     # Background task processing API
-│   │       ├── api/
-│   │       │   ├── router_v1.py    # Django Ninja API routes
-│   │       │   ├── schemas.py      # API request/response schemas
-│   │       │   └── task_tracking.py # Task execution tracking
-│   │       ├── services/
-│   │       │   ├── queue_service.py    # Cloud Tasks queue management
-│   │       │   └── review_service.py   # Review fetching logic
-│   │       ├── models.py           # TaskExecution model
-│   │       └── urls.py             # API URL configuration
+│   │
+│   ├── tasks_api/         # Background task processing API (internal, accessed only by Cloud Tasks queue)
+│   │   ├── api/
+│   │   │   ├── router_v1.py    # Django Ninja API routes
+│   │   │   ├── schemas.py      # API request/response schemas
+│   │   │   └── task_tracking.py # Task execution tracking
+│   │   ├── services/
+│   │   │   ├── queue_service.py    # Cloud Tasks queue management
+│   │   │   └── review_service.py   # Review fetching logic
+│   │   ├── models.py           # TaskExecution model
+│   │   └── urls.py             # API URL configuration
 │   │
 │   └── public/            # Public apps (no authentication required)
 │       ├── reviews/       # Review collection application

@@ -286,7 +286,7 @@ class GoogleCredentials(models.Model):
             # Enqueue full import task for newly created etablissements
             if created:
                 try:
-                    from apps.private.tasks_api.services.queue_service import enqueue_full_import_task
+                    from apps.tasks_api.services.queue_service import enqueue_full_import_task
 
                     enqueue_full_import_task(etablissement.id)
                 except Exception as e:

@@ -5,7 +5,7 @@ URL configuration for tasks_api project.
 from django.urls import path
 from ninja import NinjaAPI
 
-from apps.private.tasks_api.api.router_v1 import api_router as api_router_v1
+from apps.tasks_api.api.router_v1 import api_router as api_router_v1
 
 # Create Django Ninja API instance
 api_v1 = NinjaAPI(

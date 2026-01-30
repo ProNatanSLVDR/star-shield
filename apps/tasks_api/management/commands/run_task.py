@@ -9,8 +9,8 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.private.tasks_api.api.task_tracking import TaskTracker
-from apps.private.tasks_api.services.review_service import fetch_reviews, fetch_stats
+from apps.tasks_api.api.task_tracking import TaskTracker
+from apps.tasks_api.services.review_service import fetch_reviews, fetch_stats
 
 logger = logging.getLogger(__name__)
 

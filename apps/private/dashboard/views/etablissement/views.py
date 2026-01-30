@@ -15,8 +15,8 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from apps.private.tasks_api.models import TaskExecution
-from apps.private.tasks_api.services.queue_service import enqueue_refresh_task
+from apps.tasks_api.models import TaskExecution
+from apps.tasks_api.services.queue_service import enqueue_refresh_task
 
 
 @google_gmb_connected_required

@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 class Base:
     """Base settings for tasks API, extending starshield base settings."""
 
-    ROOT_URLCONF = "tasks_api.urls"
-    WSGI_APPLICATION = "tasks_api.wsgi.application"
+    ROOT_URLCONF = "apps.tasks_api.urls"
+    WSGI_APPLICATION = "apps.tasks_api.wsgi.application"
 
     # API-specific middleware (remove web-specific ones)
     MIDDLEWARE = StarshieldBase.CORE_MIDDLEWARE
