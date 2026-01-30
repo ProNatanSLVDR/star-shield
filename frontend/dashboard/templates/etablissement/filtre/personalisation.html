@@ -36,7 +36,7 @@
                     {% slot body %}
                         <form method="post"
                               id="reviewSettingsForm"
-                              class="h-100">
+                              class="h-100 d-flex flex-column">
                             {% csrf_token %}
                             {% if form.errors %}
                                 <div class="alert alert-danger"
