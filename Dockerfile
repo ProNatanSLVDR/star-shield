@@ -6,6 +6,7 @@ WORKDIR /app
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
 # install dependencies
 RUN pip install --upgrade pip
@@ -25,4 +26,4 @@ RUN chmod +x entrypoint.sh
 EXPOSE 8080
 
 # Run entrypoint script with default 'webapp' argument
-CMD ["/app/scripts/entrypoint.sh", "webapp"]
+CMD ["/app/entrypoint.sh", "webapp"]
