@@ -19,7 +19,7 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # Make entrypoint script executable
-RUN chmod +x scripts/entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 # Expose port for web application
 EXPOSE 8080
