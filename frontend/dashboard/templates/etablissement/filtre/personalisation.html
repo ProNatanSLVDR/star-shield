@@ -1,10 +1,11 @@
 {% extends "dashboard_base.html" %}
+
 {% load i18n %}
 {% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
-{% endblock %}
+{% endblock sidebar_content %}
 
 {% block dashboard_content %}
     <style>
@@ -13,6 +14,7 @@
             user-select: none;
             cursor: not-allowed !important;
         }
+
         .preview-disabled * {
             cursor: not-allowed !important;
         }
@@ -23,29 +25,30 @@
                 <i class="fa-solid fa-palette me-2"></i>
                 Personalisation
             </h1>
-            <p class="text-muted mb-0 small">Personnalisez l'apparence de votre page de collecte d'avis.</p>
+            <p class="text-muted mb-0 small">
+                Personnalisez l'apparence de votre page de collecte d'avis.
+            </p>
         </div>
-
         <div class="row g-3 flex-grow-1">
             <!-- Settings Form -->
             <div class="col-lg-6 d-flex flex-column">
                 {% component "card" title="Configuration" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
                     {% slot body %}
-                        <form method="post" id="reviewSettingsForm">
+                        <form method="post"
+                              id="reviewSettingsForm"
+                              class="h-100">
                             {% csrf_token %}
-
                             {% if form.errors %}
-                                <div class="alert alert-danger" role="alert">
+                                <div class="alert alert-danger"
+                                     role="alert">
                                     {% for field, errors in form.errors.items %}
-                                        {% for error in errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
+                                        {% for error in errors %}<div>{{ error }}</div>{% endfor %}
                                     {% endfor %}
                                 </div>
                             {% endif %}
-
                             <div class="mb-4">
-                                <label for="review_accent_color" class="form-label fw-semibold">
+                                <label for="review_accent_color"
+                                       class="form-label fw-semibold">
                                     <i class="fa-solid fa-palette me-2"></i>
                                     Couleur d'accent
                                 </label>
@@ -55,34 +58,47 @@
                                            id="review_accent_color"
                                            name="review_accent_color"
                                            value="{{ form.review_accent_color.value|default:etablissement.review_accent_color }}"
-                                           style="width: 80px; height: 40px; cursor: pointer; padding: 2px;">
+                                           style="width: 80px;
+                                                  height: 40px;
+                                                  cursor: pointer;
+                                                  padding: 2px">
                                     <input type="text"
                                            class="form-control"
                                            id="accentColorText"
                                            value="{{ form.review_accent_color.value|default:etablissement.review_accent_color }}"
                                            pattern="^#[0-9A-Fa-f]{6}$"
                                            placeholder="#0066ff"
-                                           style="max-width: 150px;">
+                                           style="max-width: 150px">
                                 </div>
-                                <div class="form-text">Couleur d'accent pour la page de feedback (format hexadécimal, ex: #0066ff).</div>
+                                <div class="form-text">
+                                    Couleur d'accent pour la page de feedback (format hexadécimal, ex: #0066ff).
+                                </div>
                             </div>
-
                             <div class="mb-4">
-                                <label for="review_show_etablissement_pill" class="form-label fw-semibold d-block mb-2">
+                                <label for="review_show_etablissement_pill"
+                                       class="form-label fw-semibold d-block mb-2">
                                     <i class="fa-solid fa-building me-2"></i>
                                     Afficher le badge établissement
                                 </label>
                                 <select class="form-select"
                                         id="review_show_etablissement_pill"
                                         name="review_show_etablissement_pill">
-                                    <option value="True" {% if form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}selected{% endif %}>✓ Oui</option>
-                                    <option value="False" {% if not form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}selected{% endif %}>✗ Non</option>
+                                    <option value="True"
+                                            {% if form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}
+                                                selected
+                                            {% endif %}>✓ Oui</option>
+                                    <option value="False"
+                                            {% if not form.review_show_etablissement_pill.value|default:etablissement.review_show_etablissement_pill %}
+                                                selected
+                                            {% endif %}>✗ Non</option>
                                 </select>
-                                <div class="form-text">Afficher le badge avec le nom de l'établissement sur la page de feedback.</div>
+                                <div class="form-text">
+                                    Afficher le badge avec le nom de l'établissement sur la page de feedback.
+                                </div>
                             </div>
-
                             <div class="mb-4">
-                                <label for="review_page_label" class="form-label fw-semibold">
+                                <label for="review_page_label"
+                                       class="form-label fw-semibold">
                                     <i class="fa-solid fa-signature me-2"></i>
                                     Nom sur la page de feedback
                                 </label>
@@ -93,11 +109,13 @@
                                        value="{{ form.review_page_label.value|default:etablissement.review_page_label }}"
                                        placeholder="{{ etablissement.title }}"
                                        maxlength="255">
-                                <div class="form-text">Nom pour l'établissement sur la page de feedback. Si laissé vide, le nom par défaut "{{ etablissement.title }}" sera utilisé.</div>
+                                <div class="form-text">
+                                    Nom pour l'établissement sur la page de feedback. Si laissé vide, le nom par défaut "{{ etablissement.title }}" sera utilisé.
+                                </div>
                             </div>
-
                             <div class="mb-4">
-                                <label for="review_page_text" class="form-label fw-semibold">
+                                <label for="review_page_text"
+                                       class="form-label fw-semibold">
                                     <i class="fa-solid fa-comment-dots me-2"></i>
                                     Texte de la page de feedback
                                 </label>
@@ -109,13 +127,15 @@
                                        maxlength="255">
                                 <div class="form-text">Texte à afficher sur la page de feedback.</div>
                             </div>
-
-                            <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-outline-secondary" id="resetToDefaultsBtn">
+                            <div class="d-grid gap-2 mt-auto">
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="resetToDefaultsBtn">
                                     <i class="fa-solid fa-rotate-left me-2"></i>
                                     Réinitialiser aux valeurs par défaut
                                 </button>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit"
+                                        class="btn btn-primary">
                                     <i class="fa-solid fa-save me-2"></i>
                                     Enregistrer les modifications
                                 </button>
@@ -124,15 +144,15 @@
                     {% endslot %}
                 {% endcomponent %}
             </div>
-
             <!-- Preview -->
-            <div class="col-lg-6 d-flex flex-column" style="min-height: 0;">
+            <div class="col-lg-6 d-flex flex-column"
+                 style="min-height: 0">
                 {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="p-0 flex-grow-1 overflow-auto preview-disabled" %}
                     {% slot body %}
                         <section class="h-100 d-flex align-items-center justify-content-center bg-light">
                             <div class="container">
                                 <div class="row justify-content-center">
-                                    <div class="">
+                                    <div>
                                         {% with feedback_context=preview_context %}
                                             {% include "reviews/feedback_base_content.html" %}
                                         {% endwith %}
@@ -145,7 +165,6 @@
             </div>
         </div>
     </div>
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const colorInput = document.getElementById("review_accent_color");
@@ -201,4 +220,3 @@
         });
     </script>
 {% endblock dashboard_content %}
-

@@ -20,7 +20,7 @@
         </div>
         <div class="row g-3 flex-grow-1">
             <!-- Left Column: Settings -->
-            <div class="col-12 col-lg-5 d-flex flex-column">
+            <div class="col-12 col-lg-4 d-flex flex-column">
                 {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
                     {% slot body %}
                         <!-- Activation Link -->
@@ -85,7 +85,7 @@
                 {% endcomponent %}
             </div>
             <!-- Right Column: Prizes Table -->
-            <div class="col-12 col-lg-7 d-flex flex-column">
+            <div class="col-12 col-lg-8 d-flex flex-column">
                 {% component "card" title="Prix" icon="fa-solid fa-gift" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
                     {% slot body %}
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -272,14 +272,25 @@
 
             // Save editing
             function saveEditing() {
-                if (!editingCell) return;
+                if (!editingCell || editingCell.isSaving) return;
+
+                editingCell.isSaving = true;
 
                 const cell = editingCell.cell;
                 const inputEl = cell.querySelector('input, select');
                 const displayEl = editingCell.displayEl;
                 const type = editingCell.type;
 
-                if (!inputEl) return;
+                if (!inputEl) {
+                    editingCell = null;
+                    return;
+                }
+
+                // Check if element is still in DOM before removing
+                if (!inputEl.parentNode) {
+                    editingCell = null;
+                    return;
+                }
 
                 let newValue = '';
                 if (type === 'icon') {
@@ -296,7 +307,10 @@
                     displayEl.style.display = '';
                 }
 
-                inputEl.remove();
+                // Safely remove the element
+                if (inputEl.parentNode) {
+                    inputEl.remove();
+                }
                 editingCell = null;
 
                 updateTotalProbability();
