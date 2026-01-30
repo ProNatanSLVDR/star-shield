@@ -32,7 +32,7 @@ class Base(Configuration):
 
     # Application definition
 
-    INSTALLED_APPS = [
+    CORE_APPS = [
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -59,10 +59,14 @@ class Base(Configuration):
         "allauth.socialaccount.providers.google",
         #
         # Third party apps
-        "django_htmx",
-        "django_components",
         "hijack",
         "hijack.contrib.admin",
+    ]
+
+    INSTALLED_APPS = [
+        *CORE_APPS,
+        "django_htmx",
+        "django_components",
     ]
 
     # API-friendly middleware

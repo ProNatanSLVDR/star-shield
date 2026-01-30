@@ -30,6 +30,8 @@ class Base:
     # API-specific middleware (remove web-specific ones)
     MIDDLEWARE = StarshieldBase.CORE_MIDDLEWARE
 
+    INSTALLED_APPS = StarshieldBase.CORE_APPS
+
 
 class Dev(Base, StarshieldDev):
     """Development settings for tasks API."""
