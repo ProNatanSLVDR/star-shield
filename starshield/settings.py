@@ -354,7 +354,7 @@ class Prod(Base):
                 "project_id": GCP_PROJECT_ID,
                 "querystring_auth": True,
                 "iam_sign_blob": True,
-                "service_account_email": "cloud-run@starshield-app.iam.gserviceaccount.com",
+                "sa_email": "cloud-run@starshield-app.iam.gserviceaccount.com",
             },
         },
         "staticfiles": {
