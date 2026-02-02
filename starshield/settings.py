@@ -343,7 +343,6 @@ class Prod(Base):
     }
 
     # Google Cloud Storage
-    GS_DEFAULT_BUCKET_NAME = "starshield-default"
     GS_STATIC_BUCKET_NAME = "starshield-static"
     GS_MEDIA_BUCKET_NAME = "starshield-media"
 
@@ -354,6 +353,7 @@ class Prod(Base):
                 "bucket_name": GS_MEDIA_BUCKET_NAME,
                 "project_id": GCP_PROJECT_ID,
                 "querystring_auth": True,
+                "iam_sign_blob": True,
             },
         },
         "staticfiles": {
