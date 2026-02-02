@@ -295,6 +295,12 @@ class Dev(Base):
             "level": "INFO",
         },
         "loggers": {
+            # Starshield application logger
+            "starshield": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": False,
+            },
             # App loggers - don't propagate to root to avoid duplicates
             "auths": {
                 "handlers": ["console"],
@@ -424,5 +430,33 @@ class Prod(Base):
             "monthly": "price_1SreSiPuCLDC9hxjRhhONOHs",
             "trimestrial": "price_1SreT9PuCLDC9hxjzuTLQnir",
             "yearly": "price_1SreTNPuCLDC9hxjvW6yG3fP",
+        },
+    }
+
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            },
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "verbose",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "ERROR",
+        },
+        "loggers": {
+            # Starshield application logger - ERROR level only in production
+            "starshield": {
+                "handlers": ["console"],
+                "level": "ERROR",
+                "propagate": False,
+            },
         },
     }
