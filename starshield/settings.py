@@ -360,22 +360,23 @@ class Prod(Base):
     # Google Cloud Storage
     GS_DEFAULT_BUCKET_NAME = "starshield-default"
     GS_STATIC_BUCKET_NAME = "starshield-static"
+    GS_MEDIA_BUCKET_NAME = "starshield-media"
 
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
             "OPTIONS": {
-                "bucket_name": GS_DEFAULT_BUCKET_NAME,
+                "bucket_name": GS_MEDIA_BUCKET_NAME,
                 "project_id": GCP_PROJECT_ID,
-                "default_acl": "publicRead",
-                "querystring_auth": False,
+                "querystring_auth": True,
+                "querystring_auth_expires": 3600,
             },
         },
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
-    MEDIA_URL = f"https://storage.googleapis.com/{GS_DEFAULT_BUCKET_NAME}/"
+    MEDIA_URL = f"https://storage.googleapis.com/{GS_MEDIA_BUCKET_NAME}/"
     STATIC_URL = f"https://storage.googleapis.com/{GS_STATIC_BUCKET_NAME}/"
 
     # Cloud Tasks configuration
