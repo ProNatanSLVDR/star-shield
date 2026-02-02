@@ -1,5 +1,3 @@
-import logging
-
 from django.contrib.admin.sites import login_not_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -12,8 +10,6 @@ from .utils import (
     get_valid_session_key,
     set_valid_session_key,
 )
-
-logger = logging.getLogger(__name__)
 
 
 @login_not_required

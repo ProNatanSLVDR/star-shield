@@ -2,8 +2,6 @@
 Django Ninja API router for tasks endpoints.
 """
 
-import logging
-
 from ninja import Router
 from ninja.errors import HttpError
 
@@ -15,8 +13,7 @@ from apps.tasks_api.api.schemas import (
 from apps.tasks_api.api.task_tracking import TaskTracker
 from apps.tasks_api.services.queue_service import enqueue_refresh_tasks
 from apps.tasks_api.services.review_service import fetch_reviews, fetch_stats
-
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 api_router = Router()
 

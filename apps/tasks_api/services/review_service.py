@@ -3,13 +3,10 @@ Review fetching service - pure business logic for managing reviews.
 No task execution tracking, no API concerns.
 """
 
-import logging
-
 from apps.private.auths.models import Etablissement, RatingHistory
 from apps.public.reviews.models import Review
 from apps.public.reviews.utils import google_stars_to_number
-
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 def fetch_stats(etablissement: Etablissement) -> None:

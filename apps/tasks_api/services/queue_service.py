@@ -4,7 +4,6 @@ Queue service for enqueuing refresh tasks to Cloud Tasks.
 
 import datetime
 import json
-import logging
 from typing import Any
 
 from django.conf import settings
@@ -12,8 +11,7 @@ from google.cloud import tasks_v2
 from google.protobuf import duration_pb2, timestamp_pb2
 
 from apps.private.auths.models import Etablissement
-
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 def create_google_cloud_task(

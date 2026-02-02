@@ -1,5 +1,3 @@
-import logging
-
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -8,10 +6,9 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from apps.private.auths.models import Etablissement
+from starshield.logger import logger
 
 from .services import check_existing_subscription_for_etablissement, get_or_create_stripe_customer, sync_stripe_data
-
-logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

@@ -1,4 +1,3 @@
-import logging
 import random
 import string
 
@@ -11,10 +10,9 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.private.auths.models import Etablissement
 from apps.public.reviews.utils import get_etablissement_by_identifier, get_valid_session_key, set_valid_session_key
+from starshield.logger import logger
 
 from .models import RouletteAnalytics, RoulettePrize, RouletteSpin
-
-logger = logging.getLogger(__name__)
 
 
 def generate_prize_code(etablissement: Etablissement) -> str:

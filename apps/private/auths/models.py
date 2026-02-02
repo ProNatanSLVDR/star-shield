@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import secrets
 import uuid
 
@@ -17,10 +16,9 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from starshield.kms import decrypt_symmetric, encrypt_symmetric
+from starshield.logger import logger
 
 from . import choices
-
-logger = logging.getLogger(__name__)
 
 
 class UserManager(BaseUserManager):

@@ -1,13 +1,10 @@
-import logging
-
 import stripe
 from django.conf import settings
 
 from apps.private.auths.models import Etablissement
+from starshield.logger import logger
 
 from .models import StripeSubscription
-
-logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

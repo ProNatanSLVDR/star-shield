@@ -1,5 +1,4 @@
 import json
-import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,11 +14,10 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
+from starshield.logger import logger
 from starshield.qrcodes import generate_qrcode_png
 
 from .forms import QRCodeCreateForm, QRCodeSettingsForm
-
-logger = logging.getLogger(__name__)
 
 
 @login_required

@@ -1,5 +1,3 @@
-import logging
-
 import requests
 from django.conf import settings
 from django.contrib import messages
@@ -10,10 +8,9 @@ from django.utils.translation import gettext as _
 from google_auth_oauthlib.flow import Flow
 
 from starshield.kms import encrypt_symmetric
+from starshield.logger import logger
 
 from .models import GoogleCredentials
-
-logger = logging.getLogger(__name__)
 
 
 def get_google_auth_client_config() -> dict[str, dict[str, str]]:

@@ -5,7 +5,6 @@ This adapter overrides the default email rendering to use the custom
 basic_mail.html template with StarShield branding.
 """
 
-import logging
 from typing import Any
 
 from allauth.account.adapter import DefaultAccountAdapter
@@ -13,7 +12,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):

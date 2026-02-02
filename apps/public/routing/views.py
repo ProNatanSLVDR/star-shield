@@ -1,13 +1,10 @@
-import logging
-
 from django.contrib.admin.sites import login_not_required
 from django.http import Http404
 from django.shortcuts import redirect
 
 from apps.private.auths.models import QRCode, QRCodeScan
 from apps.public.reviews.utils import get_etablissement_by_identifier
-
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 @login_not_required

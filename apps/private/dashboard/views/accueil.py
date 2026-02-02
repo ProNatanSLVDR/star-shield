@@ -1,13 +1,9 @@
-import logging
-
 from django.shortcuts import redirect
 from django.urls import reverse
 
 from apps.private.dashboard.render import starshield_render
 from apps.public.reviews.models import ReviewAnalytics
 from starshield.decorators import unselect_etablissement
-
-logger = logging.getLogger(__name__)
 
 
 @unselect_etablissement

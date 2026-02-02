@@ -5,7 +5,6 @@ This backend sends emails through Brevo's Transactional Email API.
 """
 
 import base64
-import logging
 from typing import Any
 
 import brevo_python
@@ -14,7 +13,7 @@ from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.message import EmailMessage
 
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 class BrevoEmailBackend(BaseEmailBackend):

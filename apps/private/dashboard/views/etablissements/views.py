@@ -1,5 +1,3 @@
-import logging
-
 import stripe
 from allauth.account.decorators import reverse
 from django.conf import settings
@@ -16,10 +14,9 @@ from apps.private.payments.services import (
     sync_stripe_data,
 )
 from starshield.decorators import google_gmb_connected_required, unselect_etablissement
+from starshield.logger import logger
 
 from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
-
-logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

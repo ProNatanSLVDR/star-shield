@@ -5,14 +5,11 @@ This command executes tasks directly without enqueueing them to Cloud Tasks,
 useful for local development and testing.
 """
 
-import logging
-
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.tasks_api.api.task_tracking import TaskTracker
 from apps.tasks_api.services.review_service import fetch_reviews, fetch_stats
-
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 class Command(BaseCommand):

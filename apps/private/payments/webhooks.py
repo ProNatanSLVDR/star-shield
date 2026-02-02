@@ -1,5 +1,4 @@
 import json
-import logging
 
 import stripe
 from django.conf import settings
@@ -9,9 +8,9 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .services import sync_stripe_data
+from starshield.logger import logger
 
-logger = logging.getLogger(__name__)
+from .services import sync_stripe_data
 
 
 @csrf_exempt

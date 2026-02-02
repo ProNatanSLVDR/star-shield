@@ -5,13 +5,11 @@ This module provides a simple interface for sending beautiful HTML emails
 using Django templates and the Brevo email backend.
 """
 
-import logging
-
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 def send_email(

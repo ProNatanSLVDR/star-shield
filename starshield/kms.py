@@ -1,12 +1,9 @@
 import base64
-import logging
 
 from django.conf import settings
-
-# Import the client library.
 from google.cloud import kms
 
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 def crc32c(data: bytes) -> int:

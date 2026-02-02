@@ -4,14 +4,12 @@ Handles TaskExecution creation, Etablissement lookup, function execution,
 and error tracking.
 """
 
-import logging
 from collections.abc import Callable
 from typing import Any
 
 from apps.private.auths.models import Etablissement
 from apps.tasks_api.models import TaskExecution
-
-logger = logging.getLogger(__name__)
+from starshield.logger import logger
 
 
 class TaskTracker:
