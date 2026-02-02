@@ -229,27 +229,47 @@
                                             <div class="form-text">Style de masque de couleur pour le QR code.</div>
                                         </div>
                                     </div>
-                                    <div class="mb-4">
+                                    <div class="mb-4 col">
                                         <label for="qr_logo"
                                                class="form-label fw-semibold">
                                             <i class="fa-solid fa-image me-2"></i>
                                             Logo
                                         </label>
-                                        <div class="input-group">
+                                        {% if selected_qr_code.qr_logo %}
+                                            <div class="btn-group form-control p-0 border-0"
+                                                 role="group"
+                                                 aria-label="Basic radio toggle button group">
+                                                <input type="radio"
+                                                       class="btn-check"
+                                                       name="delete_logo"
+                                                       autocomplete="off"
+                                                       id="keep_logo"
+                                                       value=""
+                                                       checked>
+                                                <label class="btn btn-outline-success"
+                                                       for="keep_logo">
+                                                    <i class="fa-solid fa-circle-check me-2"></i>
+                                                    Conserver le logo
+                                                </label>
+                                                <input type="radio"
+                                                       class="btn-check"
+                                                       name="delete_logo"
+                                                       id="delete_logo"
+                                                       value="1"
+                                                       autocomplete="off">
+                                                <label class="btn btn-outline-danger"
+                                                       for="delete_logo">
+                                                    <i class="fa-solid fa-trash me-2"></i>
+                                                    Supprimer le logo
+                                                </label>
+                                            </div>
+                                        {% else %}
                                             <input type="file"
                                                    class="form-control"
                                                    id="qr_logo"
                                                    name="qr_logo"
                                                    accept="image/*">
-                                            {% if selected_qr_code.qr_logo %}
-                                                <button type="button"
-                                                        class="btn btn-outline-danger"
-                                                        id="deleteLogoBtn"
-                                                        title="Supprimer le logo">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            {% endif %}
-                                        </div>
+                                        {% endif %}
                                         <div class="form-text">Logo à afficher au centre du QR code (optionnel).</div>
                                     </div>
                                     <div class="d-grid gap-2 mt-auto">
@@ -412,7 +432,6 @@
             const routingSelect = document.getElementById("routing");
             const resetBtn = document.getElementById("resetToDefaultsBtn");
             const qrCodePreview = document.getElementById("qrCodePreview");
-            const deleteLogoBtn = document.getElementById("deleteLogoBtn");
 
             // Sync color pickers with text inputs
             if (fillColorInput) {
@@ -507,34 +526,6 @@
                 });
             }
 
-            // Handle logo delete button
-            if (deleteLogoBtn) {
-                deleteLogoBtn.addEventListener("click", function() {
-                    if (confirm("Êtes-vous sûr de vouloir supprimer le logo ?")) {
-                        const deleteForm = document.createElement("form");
-                        deleteForm.method = "POST";
-                        deleteForm.action = window.location.pathname + window.location.search;
-
-                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-                        if (csrfToken) {
-                            const csrfInput = document.createElement("input");
-                            csrfInput.type = "hidden";
-                            csrfInput.name = "csrfmiddlewaretoken";
-                            csrfInput.value = csrfToken.value;
-                            deleteForm.appendChild(csrfInput);
-                        }
-
-                        const deleteInput = document.createElement("input");
-                        deleteInput.type = "hidden";
-                        deleteInput.name = "delete_logo";
-                        deleteInput.value = "1";
-                        deleteForm.appendChild(deleteInput);
-
-                        document.body.appendChild(deleteForm);
-                        deleteForm.submit();
-                    }
-                });
-            }
         });
     </script>
 {% endblock dashboard_content %}
