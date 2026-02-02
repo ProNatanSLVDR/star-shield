@@ -301,28 +301,7 @@ class Dev(Base):
                 "level": "INFO",
                 "propagate": False,
             },
-            # App loggers - don't propagate to root to avoid duplicates
-            "auths": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "payments": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "tasks_api": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "frontend": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            # Django framework logger - don't propagate to avoid duplicates
+            # Django framework logger
             "django": {
                 "handlers": ["console"],
                 "level": "INFO",
@@ -452,7 +431,7 @@ class Prod(Base):
             "level": "ERROR",
         },
         "loggers": {
-            # Starshield application logger - ERROR level only in production
+            # Starshield logger
             "starshield": {
                 "handlers": ["console"],
                 "level": "ERROR",
