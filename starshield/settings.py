@@ -354,7 +354,6 @@ class Prod(Base):
                 "bucket_name": GS_MEDIA_BUCKET_NAME,
                 "project_id": GCP_PROJECT_ID,
                 "querystring_auth": True,
-                "querystring_auth_expires": 3600,
             },
         },
         "staticfiles": {
