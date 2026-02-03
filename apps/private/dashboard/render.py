@@ -1,10 +1,11 @@
 import json
 from typing import Any
 
+from django.http import HttpResponse
 from django.shortcuts import render
 
 
-def starshield_render(request, template_name, context={}, page_name="", hx_triggers=None):
+def starshield_render(request, template_name=None, context={}, page_name="", hx_triggers=None):
     """
     Render basique de django, avec un contexte par defaut (page_name, et autres)
     """
@@ -14,7 +15,10 @@ def starshield_render(request, template_name, context={}, page_name="", hx_trigg
 
     # On render la page
     context.update(base_context)
-    response = render(request, template_name, context)
+    if template_name:
+        response = render(request, template_name, context)
+    else:
+        response = HttpResponse(status=200)
 
     # Si des triggers sont passés en paramètre, on les ajoute au response
     if hx_triggers:

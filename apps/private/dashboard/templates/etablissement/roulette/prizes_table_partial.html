@@ -1,0 +1,28 @@
+{% load component_tags %}
+{% component "table"
+    headers=prizes_table.headers
+    rows=prizes_table.rows
+    title="Prix de la roue"
+    %}
+    {% fill actions %}
+        {% if not limit_reached %}
+            {% component "button"
+                text="Ajouter un prix"
+                classes="btn-primary"
+                icon="fa-solid fa-plus"
+                extra_kwargs={
+                "hx_modal_toggle": True,
+                "hx-get": "{% url 'dashboard:etablissement:roulette:prize_create' %}",
+                }
+                %}
+            {% endcomponent %}
+        {% else %}
+            {% component "button"
+                text="Ajouter un prix"
+                classes="btn-primary disabled"
+                icon="fa-solid fa-plus"
+                %}
+            {% endcomponent %}
+        {% endif %}
+    {% endfill %}
+{% endcomponent %}

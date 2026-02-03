@@ -1,0 +1,102 @@
+<form method="post"
+      id="prize-edit-form"
+      hx-post="{% url 'dashboard:etablissement:roulette:prize_edit' prize.id %}">
+    {% csrf_token %}
+    <div class="modal-header">
+        <h6 class="modal-title">
+            <i class="fa-solid fa-pen me-2"></i>
+            Modifier le prix <strong>{{ prize.name }}</strong>
+        </h6>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
+    </div>
+    <div class="modal-body px-4 py-4">
+        <div class="mb-3">
+            <label for="id_name"
+                   class="form-label fw-semibold">
+                <i class="fa-solid fa-tag me-2"></i>
+                {{ form.name.label }}
+            </label>
+            <input type="text"
+                   class="form-control"
+                   id="id_name"
+                   name="name"
+                   value="{{ form.name.value|default:'' }}"
+                   required>
+            {% if form.name.help_text %}
+                <div class="form-text">{{ form.name.help_text }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_icon"
+                   class="form-label fw-semibold d-block mb-2">
+                <i class="fa-solid fa-icons me-2"></i>
+                {{ form.icon.label }}
+            </label>
+            <div class="row row-cols-6">
+                {% for icon, label in form.icon.field.choices %}
+                    <div class="col p-1">
+                        <input type="radio"
+                               class="btn-check"
+                               name="icon"
+                               id="id_icon_{{ icon }}"
+                               autocomplete="off"
+                               value="{{ icon }}"
+                               {% if form.icon.value == icon %}checked{% endif %}>
+                        <label class="btn btn-outline-primary btn-sm w-100"
+                               for="id_icon_{{ icon }}">
+                            <i class="{{ icon }} me-2"></i>{{ label }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if form.icon.help_text %}
+                <div class="form-text">{{ form.icon.help_text }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_probability"
+                   class="form-label fw-semibold">
+                <i class="fa-solid fa-percent me-2"></i>
+                {{ form.probability.label }}
+            </label>
+            <input type="number"
+                   class="form-control"
+                   id="id_probability"
+                   name="probability"
+                   value="{{ form.probability.value|default:'' }}"
+                   min="1"
+                   max="100"
+                   required>
+            {% if form.probability.help_text %}
+                <div class="form-text">{{ form.probability.help_text }}</div>
+            {% endif %}
+        </div>
+        {% if form.errors %}
+            <div class="alert alert-danger d-flex align-items-center mb-4"
+                 role="alert">
+                <i class="fa-solid fa-exclamation-circle pe-3 fs-5"></i>
+                <div>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+            <i class="fa-solid fa-times me-2"></i>
+            Annuler
+        </button>
+        <button type="submit"
+                class="btn btn-primary">
+            <i class="fa-solid fa-check me-2"></i>
+            Enregistrer les modifications
+        </button>
+    </div>
+</form>

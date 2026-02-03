@@ -15,12 +15,34 @@ ROULETTE_ICON_CHOICES = [
     ("fa-solid fa-cookie", "Cookie"),
     ("fa-solid fa-martini-glass", "Cocktail"),
     ("fa-solid fa-champagne-glasses", "Champagne"),
-    ("fa-solid fa-birthday-cake", "Gâteau d'anniversaire"),
+    ("fa-solid fa-apple-whole", "Pomme"),
     ("fa-solid fa-bowl-food", "Bol"),
     ("fa-solid fa-fish", "Poisson"),
     ("fa-solid fa-drumstick-bite", "Poulet"),
     ("fa-solid fa-pepper-hot", "Piment"),
 ]
+
+
+class RoulettePrizeForm(forms.Form):
+    name = forms.CharField(
+        max_length=255,
+        required=True,
+        label="Nom du prix",
+        help_text="Nom du prix à afficher sur la roue",
+    )
+    icon = forms.ChoiceField(
+        choices=ROULETTE_ICON_CHOICES,
+        required=True,
+        label="Icône",
+        help_text="Selectionnez l'icône à afficher sur la roue",
+    )
+    probability = forms.IntegerField(
+        min_value=1,
+        max_value=100,
+        required=True,
+        label="Probabilité (%)",
+        help_text="Probabilité de gagner ce prix. Le prix 'Rien' sera automatiquement ajusté.",
+    )
 
 
 class RouletteSettingsForm(forms.Form):
@@ -30,90 +52,3 @@ class RouletteSettingsForm(forms.Form):
         label="Délai entre deux spins (en jours)",
         initial=14,
     )
-
-    def __init__(self, *args, **kwargs):
-        prizes_data = kwargs.pop("prizes_data", None)
-        super().__init__(*args, **kwargs)
-
-        if prizes_data:
-            for i, _prize in enumerate(prizes_data):
-                self.fields[f"prize_{i}_id"] = forms.IntegerField(
-                    required=False,
-                    widget=forms.HiddenInput(),
-                )
-                self.fields[f"prize_{i}_name"] = forms.CharField(
-                    max_length=255,
-                    required=False,
-                    label=f"Prix {i + 1} - Nom",
-                )
-                self.fields[f"prize_{i}_icon"] = forms.ChoiceField(
-                    choices=ROULETTE_ICON_CHOICES,
-                    required=False,
-                    label=f"Prix {i + 1} - Icône",
-                )
-                self.fields[f"prize_{i}_probability"] = forms.DecimalField(
-                    max_digits=5,
-                    decimal_places=2,
-                    min_value=1,
-                    max_value=100,
-                    required=False,
-                    label=f"Prix {i + 1} - Probabilité (%)",
-                )
-                self.fields[f"prize_{i}_is_nothing"] = forms.BooleanField(
-                    required=False,
-                    label=f"Prix {i + 1} - 'Rien'",
-                )
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        # Collect all prize data
-        prizes = []
-        prize_count = 0
-
-        i = 0
-        while f"prize_{i}_name" in cleaned_data:
-            name = cleaned_data.get(f"prize_{i}_name", "").strip()
-            if name:  # Only include prizes with names
-                icon = cleaned_data.get(f"prize_{i}_icon", "")
-                probability = cleaned_data.get(f"prize_{i}_probability")
-                is_nothing = cleaned_data.get(f"prize_{i}_is_nothing", False)
-                prize_id = cleaned_data.get(f"prize_{i}_id")
-                order = cleaned_data.get(f"prize_{i}_order", i)
-
-                if not icon:
-                    msg = f"L'icône est requise pour le prix '{name}'."
-                    raise forms.ValidationError(msg)
-                if probability is None:
-                    msg = f"La probabilité est requise pour le prix '{name}'."
-                    raise forms.ValidationError(msg)
-                if probability < 1:
-                    msg = f"La probabilité doit être d'au moins 1% pour le prix '{name}'."
-                    raise forms.ValidationError(msg)
-
-                prizes.append(
-                    {
-                        "id": prize_id,
-                        "name": name,
-                        "icon": icon,
-                        "probability": probability,
-                        "is_nothing": is_nothing,
-                        "order": order,
-                    }
-                )
-                prize_count += 1
-            i += 1
-
-        # Validate max 8 prizes
-        if prize_count > 8:
-            msg = "Le maximum de 8 prix est autorisé (y compris le prix 'Rien')."
-            raise forms.ValidationError(msg)
-
-        # Validate probabilities sum to 100%
-        total_probability = sum(p["probability"] for p in prizes)
-        if prizes and abs(total_probability - 100.0) > 0.01:  # Allow small floating point errors
-            msg = f"La somme des probabilités doit être exactement 100%. Actuellement: {total_probability}%"
-            raise forms.ValidationError(msg)
-
-        cleaned_data["prizes"] = prizes
-        return cleaned_data
