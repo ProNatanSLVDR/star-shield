@@ -1,0 +1,27 @@
+{% extends "public_feature_base.html" %}
+
+{% load i18n %}
+
+{% block header_title %}
+    {% trans "Service non disponible" %}
+{% endblock header_title %}
+
+{% block header_subtitle %}
+    {% trans "Ce service n'est pas encore activé" %}
+{% endblock header_subtitle %}
+
+{% block header_icon_class %}
+    fa-solid fa-clock
+{% endblock header_icon_class %}
+
+{% block card_content %}
+    <div class="text-center mb-4 mt-2">
+        <p class="mb-3 fs-5 text-body-secondary">
+            {% trans "Le propriétaire de cet établissement ne l'a pas encore activé" %}
+        </p>
+        <p class="mb-0 fs-6 text-body-secondary">
+            <i class="fa-solid fa-clock me-2"></i>
+            {% trans "Revenez bientôt !" %}
+        </p>
+    </div>
+{% endblock card_content %}

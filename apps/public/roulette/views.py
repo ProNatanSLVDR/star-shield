@@ -2,7 +2,7 @@ import random
 import string
 
 from django.contrib.admin.sites import login_not_required
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
@@ -88,8 +88,9 @@ def roulette_view(request, identifier=None):
     """Main roulette page."""
     etablissement = get_etablissement_by_identifier(identifier)
 
-    if not etablissement.roulette_enabled:
-        raise Http404("Roulette is not enabled for this establishment.")
+    # Redirect to inactive page if establishment or roulette feature is inactive
+    if not etablissement.active or not etablissement.roulette_enabled:
+        return reverse("routing:feature_inactive", args=[identifier])
 
     # Track analytics
     analytics_key = f"roulette_viewed_{etablissement.id}"

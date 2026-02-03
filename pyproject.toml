@@ -1,5 +1,5 @@
 [tool.djlint]
-format_css=true
+format_css=false
 ignore="H021"
 format_js=true
 blank_line_after_tag="extends,endblock"
@@ -12,6 +12,9 @@ max_line_length=80
 
 
 [tool.djlint.js]
+templating="django"
+
+[tool.djlint.css]
 templating="django"
 
 [tool.ruff]

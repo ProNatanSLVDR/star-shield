@@ -1,6 +1,6 @@
 from django.contrib.admin.sites import login_not_required
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 
 from apps.private.auths.models import QRCode, QRCodeScan
 from apps.public.reviews.utils import get_etablissement_by_identifier
@@ -31,3 +31,9 @@ def qr_code_redirect_view(request, identifier=None, short_code=None):
     # Redirect to target based on routing
     target_url = qr_code.get_target_url(identifier)
     return redirect(target_url)
+
+
+@login_not_required
+def feature_inactive_view(request):
+    """Show inactive page when feature or etablissement is inactive."""
+    return render(request, "routing/feature_inactive.html")

@@ -1,11 +1,7 @@
-
 {% load i18n %}
-
-
 <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-
-
-    <div class="position-relative px-4 px-lg-5 py-4 bg-gradient text-white" style="background-color: {{ feedback_context.review_accent_color }} !important;">
+    <div class="position-relative px-4 px-lg-5 py-4 bg-gradient text-white"
+         style="background-color: {{ feedback_context.review_accent_color }} !important">
         <div class="position-absolute top-0 end-0 translate-middle opacity-25 d-none d-sm-block">
             <span class="d-inline-flex border border-light border-2 rounded-circle p-3"></span>
         </div>
@@ -14,25 +10,21 @@
                 <h2 class="h4 mb-1 text-white fw-bold">
                     {% trans "Partagez votre expérience" %}
                 </h2>
-                <p class="mb-0 text-white-50 small">
-                    {% trans "Votre avis compte !" %}
-                </p>
+                <p class="mb-0 text-white-50 small">{% trans "Votre avis compte !" %}</p>
             </div>
             <span class="d-none d-sm-inline-flex text-white-50 fs-3">
-                <i class="fa-solid fa-face-smile" aria-hidden="true"></i>
+                <i class="fa-solid fa-face-smile"
+                   aria-hidden="true"></i>
             </span>
         </div>
     </div>
-
-
     <div class="card-body px-md-4 pb-4 py-md-4">
-
-
         {% if feedback_context.review_show_etablissement_pill == True %}
             <div class="text-center mb-3 mt-3">
                 <h1>
                     <span class="badge rounded-pill mb-3 etablissement-badge fw-bold fs-4">
-                        <i class="fa-solid fa-building" aria-hidden="true"></i>
+                        <i class="fa-solid fa-building"
+                           aria-hidden="true"></i>
                         <span class="etablissement-name">
                             {% if feedback_context.etablissement.review_page_label %}
                                 {{ feedback_context.etablissement.review_page_label }}
@@ -44,7 +36,6 @@
                 </h1>
             </div>
         {% endif %}
-
         {% if feedback_context.mode == "main" %}
             {% include "reviews/feedback_main.html" %}
         {% elif feedback_context.mode == "internal" %}
@@ -54,10 +45,8 @@
         {% elif feedback_context.mode == "inactive" %}
             {% include "reviews/feedback_inactive.html" %}
         {% endif %}
-
     </div>
 </div>
-
 <style>
     :root {
         --accent-color: {{ feedback_context.review_accent_color }};
