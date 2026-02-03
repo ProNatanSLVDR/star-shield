@@ -8,7 +8,7 @@ ROULETTE_ICON_CHOICES = [
     ("fa-solid fa-trophy", "Trophée"),
     ("fa-solid fa-star", "Étoile"),
     ("fa-solid fa-pizza-slice", "Pizza"),
-    ("fa-solid fa-utensils", "Couverts"),
+    ("fa-solid fa-bottle-water", "Bouteille"),
     ("fa-solid fa-wine-glass", "Verre de vin"),
     ("fa-solid fa-cake", "Gâteau"),
     ("fa-solid fa-coffee", "Café"),

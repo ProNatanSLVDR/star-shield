@@ -2,8 +2,7 @@ import random
 import string
 
 from django.contrib.admin.sites import login_not_required
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
@@ -90,7 +89,7 @@ def roulette_view(request, identifier=None):
 
     # Redirect to inactive page if establishment or roulette feature is inactive
     if not etablissement.active or not etablissement.roulette_enabled:
-        return reverse("routing:feature_inactive", args=[identifier])
+        return redirect(reverse("routing:feature_inactive", args=[identifier]))
 
     # Track analytics
     analytics_key = f"roulette_viewed_{etablissement.id}"
@@ -104,15 +103,11 @@ def roulette_view(request, identifier=None):
     # Check if user can spin
     can_spin_now, message = can_spin(request, etablissement)
 
-    # Get prizes for wheel display
-    prizes = etablissement.roulette_prizes.all()
-
-    # Build review URL (simple, no return parameter)
+    # Build review URL
     review_url = etablissement.new_reviews_uri
 
     context = {
         "etablissement": etablissement,
-        "prizes": prizes,
         "can_spin": can_spin_now,
         "message": message,
         "review_url": review_url,
@@ -125,20 +120,20 @@ def roulette_view(request, identifier=None):
 @login_not_required
 @require_POST
 def spin_roulette_view(request, identifier=None):
-    """Handle roulette spin request."""
+    """Handle roulette spin request - redirects to result page."""
     etablissement = get_etablissement_by_identifier(identifier)
 
     if not etablissement.roulette_enabled:
-        return JsonResponse({"error": "Roulette is not enabled."}, status=400)
+        return redirect(reverse("routing:feature_inactive", args=[identifier]))
 
-    # Check cooldown (timer validation is handled client-side)
+    # Check cooldown
     last_spin = get_last_spin_date(request, etablissement)
     if last_spin:
         cooldown_days = etablissement.roulette_spin_cooldown_days
         days_since_spin = (timezone.now() - last_spin).days
         if days_since_spin < cooldown_days:
-            days_remaining = cooldown_days - days_since_spin
-            return JsonResponse({"error": f"You can spin again in {days_remaining} day(s)."}, status=400)
+            # Redirect back to main page with error message
+            return redirect(reverse("roulette:wheel", args=[identifier]))
 
     # Track spin analytics
     analytics_key = f"roulette_spun_{etablissement.id}"
@@ -153,7 +148,13 @@ def spin_roulette_view(request, identifier=None):
     prize = calculate_prize(etablissement)
 
     if not prize:
-        return JsonResponse({"error": "No prizes configured."}, status=400)
+        # No prizes configured - redirect to result page with no code
+        return redirect(reverse("roulette:result", args=[identifier]))
+
+    # Set cookie for cooldown
+    cookie_name = f"roulette_last_spin_{etablissement.id}"
+    cookie_value = timezone.now().isoformat()
+    max_age = etablissement.roulette_spin_cooldown_days * 24 * 60 * 60  # Convert days to seconds
 
     # Handle result
     if prize.is_nothing_prize:
@@ -162,16 +163,7 @@ def spin_roulette_view(request, identifier=None):
             etablissement=etablissement,
             type="no_prize",
         )
-
-        response = JsonResponse(
-            {
-                "success": True,
-                "prize": None,
-                "prize_name": None,
-                "prize_code": None,
-                "message": "Thank you for trying!",
-            }
-        )
+        response = redirect(reverse("roulette:result", args=[identifier]))
     else:
         # Prize won - generate code and save
         try:
@@ -187,30 +179,42 @@ def spin_roulette_view(request, identifier=None):
                 type="prize_won",
             )
 
-            response = JsonResponse(
-                {
-                    "success": True,
-                    "prize": {
-                        "id": prize.id,
-                        "name": prize.name,
-                        "icon": prize.icon,
-                    },
-                    "prize_name": prize.name,
-                    "prize_code": prize_code,
-                    "message": f"Congratulations! You won: {prize.name}",
-                }
-            )
+            response = redirect(reverse("roulette:result", args=[identifier, prize_code]))
         except Exception as e:
             logger.error(f"Error generating prize code: {e}", exc_info=True)
-            return JsonResponse({"error": "Error processing prize. Please try again."}, status=500)
+            # On error, redirect to no prize result
+            response = redirect(reverse("roulette:result", args=[identifier]))
 
-    # Set cookie for cooldown
-    cookie_name = f"roulette_last_spin_{etablissement.id}"
-    cookie_value = timezone.now().isoformat()
-    max_age = etablissement.roulette_spin_cooldown_days * 24 * 60 * 60  # Convert days to seconds
+    # Set cookie on response
     response.set_cookie(cookie_name, cookie_value, max_age=max_age)
-
     return response
+
+
+@login_not_required
+@require_http_methods(["GET"])
+def roulette_result_view(request, identifier=None, prize_code=None):
+    """Display roulette result - prize won or nothing won."""
+    etablissement = get_etablissement_by_identifier(identifier)
+
+    if not etablissement.active or not etablissement.roulette_enabled:
+        return redirect(reverse("routing:feature_inactive", args=[identifier]))
+
+    # If prize_code provided, verify it exists and belongs to this etablissement
+    spin = None
+    if prize_code:
+        try:
+            spin = RouletteSpin.objects.get(prize_code=prize_code, etablissement=etablissement)
+        except RouletteSpin.DoesNotExist:
+            # Invalid code - treat as no prize
+            prize_code = None
+
+    context = {
+        "etablissement": etablissement,
+        "prize_code": prize_code,
+        "spin": spin,
+    }
+
+    return render(request, "roulette/result.html", context)
 
 
 @login_not_required

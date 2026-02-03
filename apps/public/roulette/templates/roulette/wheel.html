@@ -1,555 +1,105 @@
 {% extends "base.html" %}
+
 {% load static %}
 
 {% block body %}
-<!-- Confetti Library -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-<section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5" style="background: radial-gradient(circle at center, #f8f9fa 0%, #e9ecef 100%);">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10">
-                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary text-white text-center py-4 position-relative overflow-hidden">
-                        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);"></div>
-                        <h1 class="h3 fw-bold mb-1 position-relative">{{ etablissement.title }}</h1>
-                        <p class="mb-0 opacity-75 position-relative small text-uppercase fw-bold letter-spacing-1">Roue de la Fortune</p>
-                    </div>
-                    
-                    <div class="card-body p-4 p-md-5 bg-white">
-                        
-                        <!-- STEP 1: INSTRUCTIONS & LINK (Initial State) -->
-                        <div id="step-intro" class="text-center">
-                            <h2 class="h4 fw-bold mb-4">Tentez de gagner une récompense !</h2>
-                            
-                            {% if not can_spin and not review_url %}
-                                <div class="alert alert-warning">
-                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                    {{ message|default:"La roue n'est pas disponible pour le moment." }}
-                                </div>
-                            {% else %}
-                                <div class="mb-5">
-                                    <div class="row justify-content-center g-4">
-                                        <div class="col-md-4">
-                                            <div class="p-3 border rounded-4 h-100 bg-light">
-                                                <div class="fs-1 text-primary mb-3"><i class="fa-solid fa-star"></i></div>
-                                                <h5 class="fw-bold fs-6">1. Donnez votre avis</h5>
-                                                <p class="small text-muted mb-0">Laissez nous 5 étoiles sur Google pour nous soutenir.</p>
+    <section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5"
+             style="background: radial-gradient(circle at center, #f8f9fa 0%, #e9ecef 100%)">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                        <div class="card-header bg-primary text-white text-center py-4 position-relative overflow-hidden">
+                            <div class="position-absolute top-0 start-0 w-100 h-100"
+                                 style="background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)">
+                            </div>
+                            <h1 class="h3 fw-bold mb-1 position-relative">{{ etablissement.title }}</h1>
+                            <p class="mb-0 opacity-75 position-relative small text-uppercase fw-bold letter-spacing-1">
+                                Roue de la Fortune
+                            </p>
+                        </div>
+                        <div class="card-body p-4 p-md-5 bg-white">
+                            <!-- MAIN CONTENT: INSTRUCTIONS & LINK -->
+                            <div id="step-intro"
+                                 class="text-center">
+                                <h2 class="h4 fw-bold mb-4">Tentez de gagner une récompense !</h2>
+                                {% if not can_spin and not review_url %}
+                                    <div class="alert alert-warning">
+                                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                        {{ message|default:"La roue n'est pas disponible pour le moment." }}
+                                    </div>
+                                {% else %}
+                                    <div class="mb-5">
+                                        <div class="row justify-content-center g-4">
+                                            <div class="col-md-4">
+                                                <div class="p-3 border rounded-4 h-100 bg-light">
+                                                    <div class="fs-1 text-primary mb-3">
+                                                        <i class="fa-solid fa-star"></i>
+                                                    </div>
+                                                    <h5 class="fw-bold fs-6">1. Donnez votre avis</h5>
+                                                    <p class="small text-muted mb-0">
+                                                        Laissez nous 5 étoiles sur Google pour nous soutenir.
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="p-3 border rounded-4 h-100 bg-light">
-                                                <div class="fs-1 text-primary mb-3"><i class="fa-solid fa-check-circle"></i></div>
-                                                <h5 class="fw-bold fs-6">2. Vérification</h5>
-                                                <p class="small text-muted mb-0">Nous vérifions rapidement votre participation.</p>
+                                            <div class="col-md-4">
+                                                <div class="p-3 border rounded-4 h-100 bg-light">
+                                                    <div class="fs-1 text-primary mb-3">
+                                                        <i class="fa-solid fa-check-circle"></i>
+                                                    </div>
+                                                    <h5 class="fw-bold fs-6">2. Vérification</h5>
+                                                    <p class="small text-muted mb-0">
+                                                        Nous vérifions rapidement votre participation.
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="p-3 border rounded-4 h-100 bg-light">
-                                                <div class="fs-1 text-primary mb-3"><i class="fa-solid fa-gift"></i></div>
-                                                <h5 class="fw-bold fs-6">3. Cadeau</h5>
-                                                <p class="small text-muted mb-0">Lancez la roue et gagnez une surprise !</p>
+                                            <div class="col-md-4">
+                                                <div class="p-3 border rounded-4 h-100 bg-light">
+                                                    <div class="fs-1 text-primary mb-3">
+                                                        <i class="fa-solid fa-gift"></i>
+                                                    </div>
+                                                    <h5 class="fw-bold fs-6">3. Cadeau</h5>
+                                                    <p class="small text-muted mb-0">Lancez la roue et gagnez une surprise !</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-    
-                                {% if review_url %}
-                                <div class="d-grid gap-2 col-md-8 mx-auto">
-                                    <a href="{{ review_url }}" 
-                                       target="_blank" 
-                                       rel="noopener" 
-                                       class="btn btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
-                                       id="reviewLinkBtn">
-                                        <i class="fa-brands fa-google me-2"></i>
-                                        Laisser un avis & Participer
-                                    </a>
-                                </div>
-                                <p class="text-muted small mt-3">Une nouvelle page va s'ouvrir. Revenez ici après avoir posté votre avis !</p>
+                                    {% if review_url %}
+                                        <div class="d-grid gap-2 col-md-8 mx-auto">
+                                            <a href="{{ review_url }}"
+                                               target="_blank"
+                                               rel="noopener"
+                                               class="btn btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
+                                               id="reviewLinkBtn">
+                                                <i class="fa-brands fa-google me-2"></i>
+                                                Laisser un avis & Participer
+                                            </a>
+                                        </div>
+                                        <p class="text-muted small mt-3">
+                                            Une nouvelle page va s'ouvrir. Revenez ici après avoir posté votre avis !
+                                        </p>
+                                    {% endif %}
+                                    <!-- Cooldown message if applicable -->
+                                    {% if message %}
+                                        <div class="alert alert-warning mt-4 mb-0">
+                                            <i class="fa-solid fa-clock me-2"></i>{{ message }}
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
-                                
-                                <!-- Cooldown message if applicable -->
-                                {% if message %}
-                                <div class="alert alert-warning mt-4 mb-0">
-                                    <i class="fa-solid fa-clock me-2"></i>{{ message }}
-                                </div>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-
-                        <!-- STEP 2: FAKE VERIFICATION (Loading State) -->
-                        <div id="step-verifying" class="text-center py-5" style="display: none;">
-                            <div class="mb-4">
-                                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                            <h3 class="h5 fw-bold mb-2">Vérification en cours...</h3>
-                            <p class="text-muted">Nous vérifions votre participation auprès de Google.</p>
-                            
-                            <div class="progress mt-4 mx-auto" style="height: 6px; max-width: 300px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
                             </div>
                         </div>
-
-                        <!-- STEP 3: WHEEL (Ready State) -->
-                        <div id="step-wheel" style="display: none;">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                            
-                            <div class="text-center mb-2">
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 mb-3">
-                                    <i class="fa-solid fa-check me-1"></i> Participation validée
-                                </span>
-                                <h2 class="h4 fw-bold">À vous de jouer !</h2>
-                            </div>
-
-                            <div class="position-relative mx-auto my-4" style="width: 350px; height: 400px; max-width: 100%;">
-                                <!-- The Wheel -->
-                                <div class="wheel-container position-relative" style="width: 350px; height: 350px; margin: 0 auto;">
-                                    <div class="wheel-outer-rim"></div>
-                                    <canvas id="wheelCanvas" width="350" height="350" class="position-relative" style="z-index: 2;"></canvas>
-                                    <div class="wheel-center-cap">
-                                        <i class="fa-solid fa-star text-white"></i>
-                                    </div>
-                                </div>
-                                
-                                <!-- The Pointer (Clapper) -->
-                                <div class="wheel-pointer">
-                                    <i class="fa-solid fa-location-dot fa-3x text-danger drop-shadow"></i>
-                                </div>
-                            </div>
-                            
-                            <div class="text-center mt-4">
-                                <button id="spinButton" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg hover-scale pulse-animation" onclick="spinWheel()">
-                                    <i class="fa-solid fa-play me-2"></i>
-                                    Lancer la roue !
-                                </button>
-                            </div>
+                        <div class="card-footer bg-light text-center py-3 border-0">
+                            <small class="text-muted fw-bold opacity-50">POWERED BY STARSHIELD</small>
                         </div>
-
-                        <!-- STEP 4: RESULT -->
-                        <div id="step-result" class="text-center py-4" style="display: none;">
-                            <div id="resultContent"></div>
-                            <div class="mt-4">
-                                <button class="btn btn-outline-secondary rounded-pill px-4" onclick="window.location.reload()">
-                                    <i class="fa-solid fa-rotate-right me-2"></i>
-                                    Retour
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="card-footer bg-light text-center py-3 border-0">
-                        <small class="text-muted fw-bold opacity-50">POWERED BY STARSHIELD</small>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-
-<script>
-const prizes = [
-    {% for prize in prizes %}
-    {
-        id: {{ prize.id }},
-        name: "{{ prize.name|escapejs }}",
-        icon: "{{ prize.icon|escapejs }}",
-        probability: {{ prize.probability }},
-        isNothing: {{ prize.is_nothing_prize|yesno:"true,false" }}
-    }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-];
-
-const spinUrl = "{{ spin_url }}";
-const etablissementId = {{ etablissement.id }};
-const storageKey = `roulette_review_clicked_${etablissementId}`;
-const REQUIRED_WAIT_SECONDS = 30;
-
-let isSpinning = false;
-let wheelContext = null;
-
-// Design Configuration
-const WHEEL_COLORS = [
-    ['#FF6B6B', '#EE5253'], // Red
-    ['#4ECDC4', '#26A69A'], // Teal
-    ['#45B7D1', '#2980B9'], // Blue
-    ['#FFA502', '#FF7F50'], // Orange
-    ['#A29BFE', '#6C5CE7'], // Purple
-    ['#FDCB6E', '#F1C40F'], // Yellow
-];
-
-// ----------------------------------------------------------------------------
-// WHEEL DRAWING
-// ----------------------------------------------------------------------------
-function drawWheel() {
-    const canvas = document.getElementById('wheelCanvas');
-    if (!canvas || prizes.length === 0) return;
-    
-    const ctx = canvas.getContext('2d');
-    wheelContext = ctx;
-    
-    // Config
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 15; // Padding for rim
-    
-    const totalProbability = prizes.reduce((sum, p) => sum + parseFloat(p.probability), 0);
-    let currentAngle = -Math.PI / 2; // Start top
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear
-    
-    prizes.forEach((prize, index) => {
-        // Calculate angle size
-        const angle = (parseFloat(prize.probability) / totalProbability) * 2 * Math.PI;
-        
-        // 1. Draw Slice
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + angle);
-        ctx.closePath();
-        
-        // Gradient fill
-        const colorPair = WHEEL_COLORS[index % WHEEL_COLORS.length];
-        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
-        gradient.addColorStop(0, colorPair[1]); // Darker inner
-        gradient.addColorStop(1, colorPair[0]); // Lighter outer
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        
-        // Border
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // 2. Add Text/Icon
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(currentAngle + angle / 2);
-        
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 13px "Segoe UI", Arial, sans-serif';
-        // Shadow for text
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
-
-        // Truncate long names
-        let text = prize.name;
-        if (text.length > 15) text = text.substring(0, 14) + '...';
-        
-        ctx.fillText(text, radius - 20, 0);
-        
-        // Optional: Draw icon circle if you want, or just leave text
-        ctx.restore();
-        
-        currentAngle += angle;
-    });
-}
-
-// ----------------------------------------------------------------------------
-// STATE MANAGEMENT & FLOW
-// ----------------------------------------------------------------------------
-
-function showState(stateName) {
-    // Hide all
-    ['step-intro', 'step-verifying', 'step-wheel', 'step-result'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
-    // Show target
-    // Animation fade in could be added here
-    const target = document.getElementById(`step-${stateName}`);
-    if (target) {
-        target.style.display = 'block';
-        if (stateName === 'wheel') drawWheel();
-    }
-}
-
-function checkFlowStatus() {
-    // If we can't spin (backend check), we usually stay on intro unless manually overridden.
-    // However, if we just clicked, we ignore the backend "can_spin" initial template check 
-    // because that might just be the "Intro" state. We trust local storage for the flow.
-    
-    const clickedTime = localStorage.getItem(storageKey);
-    
-    if (!clickedTime) {
-        showState('intro');
-        return;
-    }
-    
-    const elapsed = (Date.now() - parseInt(clickedTime)) / 1000;
-    
-    if (elapsed < REQUIRED_WAIT_SECONDS) {
-        // Fake verification
-        showState('verifying');
-        
-        const remaining = (REQUIRED_WAIT_SECONDS - elapsed) * 1000;
-        
-        // After wait, show wheel
-        setTimeout(() => {
-            showState('wheel');
-        }, remaining);
-        
-    } else {
-        // Already waited enough
-        showState('wheel');
-    }
-}
-
-// ----------------------------------------------------------------------------
-// SPIN LOGIC
-// ----------------------------------------------------------------------------
-
-function spinWheel() {
-    if (isSpinning) return;
-    
-    const spinButton = document.getElementById('spinButton');
-    spinButton.disabled = true;
-    spinButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>...';
-    isSpinning = true;
-    
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
-    
-    fetch(spinUrl, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken,
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            handleError(data.error);
-            return;
-        }
-        
-        // Calculate physics
-        const prizeIndex = prizes.findIndex(p => p.id === data.prize?.id);
-        if (prizeIndex === -1) {
-            handleError("Erreur de prix. Veuillez actualiser.");
-            return;
-        }
-
-        // Logic to land in the middle of the segment
-        const totalProbability = prizes.reduce((sum, p) => sum + parseFloat(p.probability), 0);
-        let angleSoFar = 0;
-        for (let i = 0; i < prizeIndex; i++) {
-            angleSoFar += (parseFloat(prizes[i].probability) / totalProbability) * 360;
-        }
-        const prizeAngleSize = (parseFloat(prizes[prizeIndex].probability) / totalProbability) * 360;
-        const prizeCenterAngle = angleSoFar + (prizeAngleSize / 2);
-        
-        // CSS rotation needs to be opposite/negative to bring that angle to the top (which is -90deg or 270deg in CSS terms?)
-        // Our draw starts at -PI/2 (Top).
-        // If we want 0 deg (Prize 1 center) to be at Top.
-        // Actually simpler: Rotate the Canvas via CSS.
-        // We want the target angle to end up at -90deg (Top).
-        // Target Rotation = (360 - prizeCenterAngle) + (360 * Spins)
-        
-        const spins = 5; // Minimum full spins
-        const canvas = document.getElementById('wheelCanvas');
-        
-        // Randomize landing slightly within segment (+/- 40% of with) to look organic
-        const jitter = (Math.random() - 0.5) * (prizeAngleSize * 0.8);
-        const finalAngle = prizeCenterAngle + jitter;
-        
-        // CSS Transition
-        const totalRotation = (360 * spins) + (360 - finalAngle); 
-        
-        // Apply rotation
-        canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.2, 1)'; // Ease-out-cubic-ish
-        canvas.style.transform = `rotate(${totalRotation}deg)`;
-        
-        // Wait for animation
-        setTimeout(() => {
-            showResult(data);
-            if (!data.prize?.isNothing && data.prize) {
-                fireConfetti();
-            }
-        }, 4000); // Match transition duration
-        
-    })
-    .catch(error => {
-        console.error(error);
-        handleError("Erreur de connexion.");
-    });
-}
-
-function handleError(msg) {
-    alert(msg);
-    isSpinning = false;
-    const btn = document.getElementById('spinButton');
-    if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-play me-2"></i> Lancer la roue !';
-    }
-}
-
-function showResult(data) {
-    isSpinning = false;
-    document.getElementById('step-wheel').style.display = 'none';
-    const resultContainer = document.getElementById('step-result');
-    resultContainer.style.display = 'block';
-    const content = document.getElementById('resultContent');
-    
-    if (data.prize_code) {
-        // WIN
-        content.innerHTML = `
-            <div class="mb-4">
-                 <div class="display-1 text-success mb-3 animation-bounce"><i class="fa-solid fa-trophy"></i></div>
-                 <h2 class="fw-bold text-success">Félicitations !</h2>
-                 <p class="lead">Vous avez gagné : <strong>${data.prize_name}</strong></p>
-            </div>
-            
-            <div class="card bg-light border-2 border-success border-dashed mx-auto" style="max-width: 400px;">
-                <div class="card-body">
-                    <p class="mb-1 text-muted small text-uppercase">Votre Code Cadeau</p>
-                    <code class="display-6 fw-bold text-dark tracking-wider">${data.prize_code}</code>
-                    <p class="mt-3 mb-0 small text-muted"><i class="fa-solid fa-info-circle me-1"></i> Présentez ce code au personnel pour profiter de votre gain.</p>
-                </div>
-            </div>
-        `;
-    } else {
-        // LOSE / NOTHING
-        content.innerHTML = `
-            <div class="mb-4">
-                 <div class="display-1 text-muted mb-3"><i class="fa-regular fa-face-smile"></i></div>
-                 <h2 class="fw-bold">Merci !</h2>
-                 <p class="lead">${data.message}</p>
-            </div>
-        `;
-    }
-}
-
-function fireConfetti() {
-    var count = 200;
-    var defaults = {
-        origin: { y: 0.7 }
-    };
-
-    function fire(particleRatio, opts) {
-        confetti(Object.assign({}, defaults, opts, {
-            particleCount: Math.floor(count * particleRatio)
-        }));
-    }
-
-    fire(0.25, { spread: 26, startVelocity: 55 });
-    fire(0.2, { spread: 60 });
-    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
-    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
-    fire(0.1, { spread: 120, startVelocity: 45 });
-}
-
-// ----------------------------------------------------------------------------
-// INIT
-// ----------------------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // Check initial flow (intro vs verifying vs wheel)
-    // We only perform the localStorage check if "can_spin" is technically allowed 
-    // OR if we are just entering the "intro" phase.
-    
-    {% if can_spin or review_url %}
-        checkFlowStatus();
-    {% else %}
-        // If backend says NO (e.g. cooldown), we show intro with error inside
-        showState('intro');
-    {% endif %}
-    
-    // Bind click event for the review button
-    const btn = document.getElementById('reviewLinkBtn');
-    if (btn) {
-        btn.addEventListener('click', () => {
-            localStorage.setItem(storageKey, Date.now().toString());
-            // wait a moment for the new tab to open, then switch state
-            setTimeout(() => {
-                showState('verifying');
-                
-                // Start internal timer to switch to wheel
-                setTimeout(() => {
-                    showState('wheel');
-                }, REQUIRED_WAIT_SECONDS * 1000);
-            }, 500);
-        });
-    }
-    
-    // Responsive redraw
-    window.addEventListener('resize', drawWheel);
-});
-</script>
-
-<style>
-/* Custom Styles for Polish */
-.hover-scale {
-    transition: transform 0.2s;
-}
-.hover-scale:hover {
-    transform: scale(1.03);
-}
-
-.wheel-outer-rim {
-    position: absolute;
-    top: -10px; left: -10px; right: -10px; bottom: -10px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #333 0%, #000 100%);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    z-index: 1;
-}
-
-.wheel-center-cap {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 50px; height: 50px;
-    background: white;
-    border-radius: 50%;
-    z-index: 5;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #ffd700;
-}
-
-.wheel-pointer {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.3));
-}
-
-.pulse-animation {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
-}
-
-.animation-bounce {
-    animation: bounce 1s infinite alternate;
-}
-@keyframes bounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-10px); }
-}
-
-.border-dashed {
-    border-style: dashed !important;
-}
-
-.tracking-wider {
-    letter-spacing: 0.1em;
-}
-</style>
+    </section>
+    <!-- Verification Modal -->
+    {% component "empty_modal" modal_id="verificationModal" size="lg" %}
+        {% fill "title" %}
+            Vérification
+        {% endfill %}
+    {% endcomponent %}
 {% endblock body %}
