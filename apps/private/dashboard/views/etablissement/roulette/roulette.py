@@ -30,7 +30,7 @@ def _get_or_create_nothing_prize(etablissement):
             etablissement=etablissement,
             name="Rien",
             icon="fa-solid fa-ban",
-            probability=int(remaining_probability),
+            probability=remaining_probability,
             is_nothing_prize=True,
         )
 
@@ -42,7 +42,7 @@ def _update_nothing_prize_probability(etablissement):
     nothing_prize = _get_or_create_nothing_prize(etablissement)
     other_prizes_total = sum(float(p.probability) for p in etablissement.roulette_prizes.filter(is_nothing_prize=False))
     remaining_probability = max(0, 100 - other_prizes_total)
-    nothing_prize.probability = int(remaining_probability)
+    nothing_prize.probability = remaining_probability
     nothing_prize.save()
     return nothing_prize
 
@@ -126,7 +126,7 @@ def _build_prizes_table_data(etablissement):
         row = {
             "icon": icon_cell,
             "name": prize.name,
-            "probability": f"{prize.probability}%",
+            "probability": f"{float(prize.probability):.2f}%",
             "actions": {
                 "type": "buttons",
                 "buttons": buttons,
@@ -145,7 +145,7 @@ def _build_prizes_table_data(etablissement):
     nothing_row = {
         "icon": nothing_icon_cell,
         "name": nothing_prize.name,
-        "probability": f"{nothing_prize.probability}%",
+        "probability": f"{float(nothing_prize.probability):.2f}%",
         "actions": {
             "type": "html",
             "value": (
@@ -278,7 +278,7 @@ def prize_create_partial(request):
                         "probability",
                         (
                             f"La probabilité totale des prix dépasse 100%. "
-                            f"Probabilité disponible: {available_probability}%"
+                            f"Probabilité disponible: {float(available_probability):.2f}%"
                         ),
                     )
                 else:
@@ -345,7 +345,9 @@ def prize_edit_partial(request, prize_id):
                 available_probability = 100 - (other_prizes_total - old_probability)
                 form.add_error(
                     "probability",
-                    (f"La probabilité totale des prix dépasse 100%. Probabilité disponible: {available_probability}%"),
+                    (
+                        f"La probabilité totale des prix dépasse 100%. Probabilité disponible: {float(available_probability):.2f}%"
+                    ),
                 )
             else:
                 # Update the prize (never allow setting is_nothing_prize to True manually)

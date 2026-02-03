@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 
 # FontAwesome icon choices for roulette prizes
@@ -36,12 +38,13 @@ class RoulettePrizeForm(forms.Form):
         label="Icône",
         help_text="Selectionnez l'icône à afficher sur la roue",
     )
-    probability = forms.IntegerField(
-        min_value=1,
+    probability = forms.DecimalField(
+        min_value=Decimal("0.01"),
         max_value=100,
+        decimal_places=2,
         required=True,
         label="Probabilité (%)",
-        help_text="Probabilité de gagner ce prix. Le prix 'Rien' sera automatiquement ajusté.",
+        help_text="Probabilité de gagner ce prix. Le minimum est de 0.01% (Une chance sur 10000).",
     )
 
 

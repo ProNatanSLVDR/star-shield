@@ -71,9 +71,12 @@
                    class="form-control"
                    id="id_probability"
                    name="probability"
-                   value="{{ form.probability.value|default:'' }}"
-                   min="1"
+                   {% localize off %}
+                   value="{{ form.probability.value }}"
+                   {% endlocalize %}
+                   min="0.01"
                    max="100"
+                   step="0.01"
                    required>
             {% if form.probability.help_text %}
                 <div class="form-text">{{ form.probability.help_text }}</div>
@@ -92,12 +95,6 @@
         {% endif %}
     </div>
     <div class="modal-footer">
-        <button type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal">
-            <i class="fa-solid fa-times me-2"></i>
-            Annuler
-        </button>
         <button type="submit"
                 class="btn btn-primary">
             <i class="fa-solid fa-check me-2"></i>
