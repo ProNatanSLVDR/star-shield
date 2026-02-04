@@ -94,11 +94,12 @@
                 classes="btn-primary btn-lg rounded-pill px-5 shadow-sm"
                 icon="fa-brands fa-google me-2"
                 extra_kwargs={
-                "href": review_url,
-                "target": "_blank",
-                "rel": "noopener",
+                "type": "button",
                 "id": "reviewLinkBtn",
-                "data-bs-dismiss": "modal"
+                "data-review-url": review_url,
+                "data-bs-dismiss": "modal",
+                "data-bs-toggle": "modal",
+                "data-bs-target": "#verificationModal"
                 }
                 %}
             {% endcomponent %}
@@ -141,7 +142,8 @@
             </div>
         {% endfill %}
         {% fill "footer" %}
-            <form method="post"
+            <form id="spinForm"
+                  method="post"
                   action="{{ spin_url }}"
                   class="w-100 d-flex justify-content-center">
                 {% csrf_token %}
@@ -162,116 +164,83 @@
             const POLL_INTERVAL = 5000; // 5 seconds
 
             let pollInterval = null;
-            let modal = null;
 
-            // Initialize modal
-            function initModal() {
-                const modalElement = document.getElementById('verificationModal');
-                if (modalElement && !modal) {
-                    modal = new bootstrap.Modal(modalElement, {
-                        backdrop: 'static',
-                        keyboard: false
-                    });
-                }
-                return modal;
-            }
+            const reviewBtn = document.getElementById('reviewLinkBtn');
+            const verificationModalEl = document.getElementById('verificationModal');
+            const spinnerEl = document.getElementById('verificationSpinner');
+            const readyEl = document.getElementById('verificationReady');
+            const spinButtonEl = document.getElementById('spinButton');
+            const spinForm = document.getElementById('spinForm');
 
-            // Show modal
-            function showModal() {
-                const m = initModal();
-                if (m) {
-                    m.show();
-                    // Hide close button
-                    const closeBtn = document.querySelector('#verificationModal .btn-close');
-                    if (closeBtn) closeBtn.style.display = 'none';
+            function setReadyState(isReady) {
+                if (spinnerEl) spinnerEl.classList.toggle('d-none', isReady);
+                if (readyEl) readyEl.classList.toggle('d-none', !isReady);
+                if (spinButtonEl) {
+                    spinButtonEl.disabled = !isReady;
+                    spinButtonEl.classList.toggle('fa-beat-fade', isReady);
                 }
             }
 
-            // Hide modal
-            function hideModal() {
-                if (modal) modal.hide();
+            function stopPolling() {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
             }
 
-            // Update verification status
+            function startPolling() {
+                if (!pollInterval) {
+                    pollInterval = setInterval(updateStatus, POLL_INTERVAL);
+                }
+            }
+
             function updateStatus() {
                 const clickedTime = localStorage.getItem(STORAGE_KEY);
-                if (!clickedTime) {
-                    hideModal();
-                    if (pollInterval) {
-                        clearInterval(pollInterval);
-                        pollInterval = null;
-                    }
-                    return;
-                }
+                if (!clickedTime) return;
 
-                const elapsed = (Date.now() - parseInt(clickedTime)) / 1000;
-                const remaining = REQUIRED_WAIT_SECONDS - elapsed;
+                const elapsed = (Date.now() - Number(clickedTime)) / 1000;
+                const isReady = elapsed >= REQUIRED_WAIT_SECONDS;
 
-                const spinnerEl = document.getElementById('verificationSpinner');
-                const readyEl = document.getElementById('verificationReady');
-                const spinButtonEl = document.getElementById('spinButton');
+                setReadyState(isReady);
 
-                if (remaining <= 0) {
-                    // Ready to spin
-                    if (spinnerEl) spinnerEl.classList.add('d-none');
-                    if (readyEl) readyEl.classList.remove('d-none');
-                    if (spinButtonEl) spinButtonEl.classList.add('fa-beat-fade');
-                    if (spinButtonEl) spinButtonEl.disabled = false;
-                    if (pollInterval) {
-                        clearInterval(pollInterval);
-                        pollInterval = null;
-                    }
-                } else {
-                    // Still waiting
-                    if (spinnerEl) spinnerEl.classList.remove('d-none');
-                    if (readyEl) readyEl.classList.add('d-none');
-                    if (spinButtonEl) spinButtonEl.classList.remove('disabled');
-                    if (spinButtonEl) spinButtonEl.classList.remove('fa-beat-fade');
-                    if (spinButtonEl) spinButtonEl.disabled = true;
-                }
+                if (isReady) stopPolling();
             }
 
-            // Check initial state on page load
-            function checkInitialState() {
-                const clickedTime = localStorage.getItem(STORAGE_KEY);
-                if (clickedTime) {
-                    showModal();
-                    updateStatus();
-                    if (!pollInterval) {
-                        pollInterval = setInterval(updateStatus, POLL_INTERVAL);
-                    }
-                }
+            function openReviewLink() {
+                if (!reviewBtn) return;
+                const reviewUrl = reviewBtn.getAttribute('data-review-url');
+                if (!reviewUrl) return;
+                const newWindow = window.open(reviewUrl, '_blank', 'noopener');
+                if (newWindow) newWindow.opener = null;
             }
 
-            // Handle review link click
             function handleReviewClick() {
                 localStorage.setItem(STORAGE_KEY, Date.now().toString());
-                setTimeout(() => {
-                    showModal();
-                    updateStatus();
-                    if (!pollInterval) {
-                        pollInterval = setInterval(updateStatus, POLL_INTERVAL);
-                    }
-                }, 500);
+                openReviewLink();
+                updateStatus();
+                startPolling();
             }
 
-            // Handle form submission
             function handleFormSubmit() {
                 localStorage.removeItem(STORAGE_KEY);
+                stopPolling();
             }
 
-            // Initialize on DOM ready
             document.addEventListener('DOMContentLoaded', function() {
-                checkInitialState();
-
-                const reviewBtn = document.getElementById('reviewLinkBtn');
                 if (reviewBtn) {
                     reviewBtn.addEventListener('click', handleReviewClick);
                 }
 
-                const spinForm = document.getElementById('spinForm');
                 if (spinForm) {
                     spinForm.addEventListener('submit', handleFormSubmit);
+                }
+
+                if (localStorage.getItem(STORAGE_KEY)) {
+                    updateStatus();
+                    startPolling();
+                    if (verificationModalEl) {
+                        bootstrap.Modal.getOrCreateInstance(verificationModalEl).show();
+                    }
                 }
             });
         })();
@@ -288,6 +257,9 @@
         }
         .pulse-animation {
             animation: pulse 2s infinite;
+        }
+        #verificationModal .btn-close {
+            display: none;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
