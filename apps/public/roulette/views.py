@@ -101,6 +101,7 @@ def roulette_view(request, identifier=None):
         "can_spin": can_spin_now,
         "review_url": review_url,
         "spin_url": reverse("roulette:spin", args=[identifier]),
+        "prizes": etablissement.roulette_prizes.all(),
     }
 
     return render(request, "roulette/wheel.html", context)

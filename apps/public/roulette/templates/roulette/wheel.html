@@ -20,6 +20,10 @@
 {% endblock header_color %}
 
 {% block card_content %}
+    <div class="d-flex justify-content-center mb-4">
+        {% component "spinwheel" prizes=prizes mode="showcase" wheel_id="public-roulette-wheel" %}
+        {% endcomponent %}
+    </div>
     <!-- MAIN CONTENT: INSTRUCTIONS & LINK -->
     <div id="step-intro"
          class="text-center">

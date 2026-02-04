@@ -1,0 +1,385 @@
+{% load static %}
+<div class="spinwheel"
+     id="{{ wheel_id }}"
+     data-spinwheel="true"
+     data-mode="{{ mode }}"
+     data-stop-index="{% if stop_index is not None %}
+                          {{ stop_index }}
+                      {% endif %}"
+     data-confetti="{% if confetti %}
+                        1
+                    {% else %}
+                        0
+                    {% endif %}"
+     data-prizes-id="{{ prizes_json_id }}">
+    {% if prizes|length == 0 %}
+        <div class="spinwheel-empty text-center text-muted small py-4">
+            Aucun prix configuré pour la roue.
+        </div>
+    {% else %}
+        <div class="spinwheel-frame">
+            <div class="spinwheel-wheel">
+                <div class="spinwheel-slices"></div>
+                <div class="spinwheel-center">
+                    <div class="spinwheel-center-dot"></div>
+                </div>
+                <div class="spinwheel-icons">
+                    {% for prize in prizes %}
+                        <div class="spinwheel-icon"
+                             data-index="{{ forloop.counter0 }}">
+                            <span class="spinwheel-icon-inner"
+                                  aria-hidden="true">
+                                <i class="{{ prize.icon }}"></i>
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="spinwheel-indicator">
+                <div class="spinwheel-arrow"
+                     aria-hidden="true"></div>
+                <div class="spinwheel-prize text-center">
+                    <span class="spinwheel-prize-label"></span>
+                </div>
+            </div>
+            <div class="spinwheel-confetti"
+                 aria-hidden="true"></div>
+        </div>
+    {% endif %}
+</div>
+{{ prizes|json_script:prizes_json_id }}
+<style>
+    .spinwheel {
+        --wheel-size: clamp(220px, 70vw, 360px);
+        --wheel-border: 10px;
+        --wheel-shadow: 0 18px 40px rgba(13, 110, 253, 0.18);
+        --wheel-border-color: #ffffff;
+        --wheel-bg: #f1f5ff;
+        --wheel-text: #0b2b5a;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .spinwheel-frame {
+        position: relative;
+        width: var(--wheel-size);
+        height: var(--wheel-size);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: clamp(52px, 12vw, 70px);
+        max-width: 100%;
+    }
+
+    .spinwheel-wheel {
+        position: relative;
+        width: var(--wheel-size);
+        height: var(--wheel-size);
+        border-radius: 50%;
+        background: var(--wheel-bg);
+        box-shadow: var(--wheel-shadow);
+        border: var(--wheel-border) solid var(--wheel-border-color);
+        transition: transform 0.4s ease;
+        will-change: transform;
+    }
+
+    .spinwheel-slices {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: #e9f0ff;
+    }
+
+    .spinwheel-icons {
+        position: absolute;
+        inset: 0;
+    }
+
+    .spinwheel-icon {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transform: rotate(var(--label-angle)) translateY(-32%);
+        transform-origin: center;
+        pointer-events: none;
+    }
+
+    .spinwheel-icon-inner {
+        transform: rotate(180deg);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--wheel-text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 18px rgba(14, 47, 104, 0.16);
+        font-size: 1rem;
+    }
+
+    .spinwheel-center {
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: 56px;
+        height: 56px;
+        margin-left: -28px;
+        margin-top: -28px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .spinwheel-center-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #0d6efd;
+        box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.6);
+    }
+
+    .spinwheel-indicator {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        z-index: 4;
+    }
+
+    .spinwheel-arrow {
+        position: absolute;
+        top: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-top: 18px solid #0d6efd;
+        filter: drop-shadow(0 6px 8px rgba(13, 110, 253, 0.35));
+    }
+
+    .spinwheel-arrow::after {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -6px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid #0d6efd;
+    }
+
+    .spinwheel-prize {
+        min-width: 140px;
+        background: #ffffff;
+        border-radius: 999px;
+        padding: 0.35rem 0.8rem;
+        box-shadow: 0 10px 20px rgba(14, 47, 104, 0.16);
+        border: 1px solid rgba(13, 110, 253, 0.12);
+        font-weight: 600;
+        color: var(--wheel-text);
+        font-size: 0.85rem;
+    }
+
+    .spinwheel-wheel.is-blurred {
+        filter: blur(1.1px);
+    }
+
+    .spinwheel-wheel.is-spinning {
+        animation: spinwheel-rotate 1.2s linear infinite;
+    }
+
+    .spinwheel-confetti {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .spinwheel-confetti .piece {
+        position: absolute;
+        width: 8px;
+        height: 12px;
+        opacity: 0.95;
+        border-radius: 2px;
+        animation: spinwheel-confetti-fall 1.8s ease-out forwards;
+    }
+
+    @keyframes spinwheel-rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinwheel-confetti-fall {
+        0% {
+            transform: translateY(-30px) rotate(0deg);
+        }
+        100% {
+            transform: translateY(320px) rotate(280deg);
+            opacity: 0;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .spinwheel {
+            --wheel-size: clamp(280px, 55vw, 380px);
+        }
+
+        .spinwheel-prize {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+<script>
+    (function() {
+        function initSpinWheel(root) {
+            var prizesId = root.getAttribute('data-prizes-id');
+            if (!prizesId) return;
+            var prizesEl = document.getElementById(prizesId);
+            if (!prizesEl) return;
+
+            var prizes = [];
+            try {
+                prizes = JSON.parse(prizesEl.textContent || '[]');
+            } catch (err) {
+                return;
+            }
+
+            if (!prizes.length) return;
+
+            var slices = root.querySelector('.spinwheel-slices');
+            var wheel = root.querySelector('.spinwheel-wheel');
+            var labels = root.querySelectorAll('.spinwheel-icon');
+            var prizeLabel = root.querySelector('.spinwheel-prize-label');
+
+            var mode = root.getAttribute('data-mode') || 'showcase';
+            var stopIndex = parseInt(root.getAttribute('data-stop-index') || '', 10);
+            if (Number.isNaN(stopIndex)) stopIndex = null;
+            var confetti = root.getAttribute('data-confetti') === '1';
+
+            var sliceAngle = 360 / prizes.length;
+            var pointerAngle = 180;
+
+            var palette = [
+                '#0d6efd', '#2a7bff', '#5aa2ff', '#8cbcff',
+                '#2fbb7f', '#ffc107', '#ff9f1c', '#ff6b6b'
+            ];
+
+            var gradientStops = prizes.map(function(_, index) {
+                var color = palette[index % palette.length];
+                var start = index * sliceAngle;
+                var end = (index + 1) * sliceAngle;
+                return color + ' ' + start + 'deg ' + end + 'deg';
+            });
+
+            if (slices) {
+                slices.style.background = 'conic-gradient(' + gradientStops.join(', ') + ')';
+            }
+
+            function setRotation(rotation) {
+                if (!wheel) return;
+                wheel.style.transform = 'rotate(' + rotation + 'deg)';
+            }
+
+            labels.forEach(function(label, index) {
+                var angle = (index * sliceAngle) + (sliceAngle / 2);
+                label.style.setProperty('--label-angle', angle + 'deg');
+            });
+
+            function rotationForIndex(index) {
+                return pointerAngle - ((index * sliceAngle) + (sliceAngle / 2));
+            }
+
+            function setPrizeLabel(index, fallback) {
+                if (!prizeLabel) return;
+                if (typeof index === 'number' && prizes[index]) {
+                    prizeLabel.textContent = prizes[index].name || '';
+                    return;
+                }
+                prizeLabel.textContent = fallback || '';
+            }
+
+            function spinToIndex(index, duration) {
+                if (!wheel) return;
+                var baseRotation = rotationForIndex(index);
+                var spins = 4 * 360;
+                var finalRotation = spins + baseRotation;
+                wheel.style.transition = 'transform ' + duration + 'ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+                wheel.classList.add('is-blurred');
+                setRotation(finalRotation);
+                setPrizeLabel(index, '');
+                window.setTimeout(function() {
+                    wheel.classList.remove('is-blurred');
+                    if (confetti) {
+                        fireConfetti(root);
+                    }
+                }, duration);
+            }
+
+            function fireConfetti(container) {
+                var confettiLayer = container.querySelector('.spinwheel-confetti');
+                if (!confettiLayer) return;
+                confettiLayer.innerHTML = '';
+                var colors = ['#0d6efd', '#ffc107', '#2fbb7f', '#ff6b6b', '#8cbcff'];
+                for (var i = 0; i < 40; i += 1) {
+                    var piece = document.createElement('div');
+                    piece.className = 'piece';
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.background = colors[i % colors.length];
+                    piece.style.animationDelay = (Math.random() * 0.2) + 's';
+                    piece.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+                    confettiLayer.appendChild(piece);
+                }
+                window.setTimeout(function() {
+                    confettiLayer.innerHTML = '';
+                }, 2200);
+            }
+
+            if (mode === 'spinning') {
+                wheel.classList.add('is-spinning', 'is-blurred');
+                setPrizeLabel(null, 'Spinning...');
+                return;
+            }
+
+            if (mode === 'stop_on' && stopIndex !== null) {
+                setRotation(0);
+                spinToIndex(stopIndex, 5000);
+                return;
+            }
+
+            if (mode === 'showcase') {
+                var currentIndex = 0;
+                var currentRotation = rotationForIndex(0);
+                setRotation(currentRotation);
+                setPrizeLabel(currentIndex, '');
+                window.setInterval(function() {
+                    currentIndex = (currentIndex + 1) % prizes.length;
+                    currentRotation -= sliceAngle;
+                    wheel.style.transition = 'transform 0.6s ease';
+                    setRotation(currentRotation);
+                    setPrizeLabel(currentIndex, '');
+                }, 1200);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.spinwheel[data-spinwheel="true"]').forEach(initSpinWheel);
+        });
+    })();
+</script>
