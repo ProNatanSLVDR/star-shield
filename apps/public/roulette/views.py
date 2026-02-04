@@ -214,10 +214,16 @@ def roulette_result_view(request, identifier=None, prize_code=None):
             # Invalid code - treat as no prize
             prize_code = None
 
+    prizes = etablissement.roulette_prizes.all()
+    nothing_prize = prizes.filter(is_nothing_prize=True).first()
+    stop_on_prize = spin.prize if spin else nothing_prize
+
     context = {
         "etablissement": etablissement,
         "prize_code": prize_code,
         "spin": spin,
+        "prizes": prizes,
+        "stop_on_prize": stop_on_prize,
     }
 
     return render(request, "roulette/result.html", context)

@@ -1,6 +1,7 @@
 {% extends "public_feature_base.html" %}
 
 {% load static %}
+{% load component_tags %}
 
 {% block header_title %}
     Résultat
@@ -23,6 +24,15 @@
     {% if prize_code %}
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     {% endif %}
+
+    <div class="d-flex justify-content-center mb-4">
+        {% component "spinwheel"
+            prizes=prizes
+            mode="stop_on"
+            stop_on=stop_on_prize
+            wheel_id="public-roulette-result-wheel" %}
+        {% endcomponent %}
+    </div>
 
     <div class="text-center">
         {% if prize_code %}
