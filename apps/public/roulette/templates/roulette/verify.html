@@ -1,81 +1,76 @@
-{% extends "base.html" %}
+{% extends "public_feature_base.html" %}
 
-{% block body %}
-<section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                <div class="card shadow-sm border-0 rounded-4">
-                    <div class="card-body p-4 p-md-5">
-                        <div class="text-center mb-4">
-                            <h1 class="h3 fw-bold mb-3">{{ etablissement.title }}</h1>
-                            <p class="text-muted mb-0">Vérification du code</p>
-                        </div>
+{% block header_title %}
+    Vérification du code
+{% endblock header_title %}
 
-                        {% if error %}
-                        <div class="alert alert-danger" role="alert">
-                            <i class="fa-solid fa-exclamation-circle me-2"></i>
-                            {{ error }}
-                        </div>
-                        {% elif success %}
-                        <div class="alert alert-success" role="alert">
-                            <i class="fa-solid fa-check-circle me-2"></i>
-                            {{ success }}
-                        </div>
-                        {% endif %}
+{% block header_subtitle %}
+    {{ etablissement.title }}
+{% endblock header_subtitle %}
 
-                        {% if spin %}
-                        <div class="card bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Code : <code class="fs-4">{{ code }}</code></h5>
-                                <p class="card-text mb-2">
-                                    <strong>Prix :</strong> {{ spin.prize.name }}<br>
-                                    <strong>Date :</strong> {{ spin.created_at|date:"d/m/Y à H:i" }}
-                                </p>
-                                
-                                {% if spin.is_used %}
-                                <div class="alert alert-warning mb-0" role="alert">
-                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                    Ce code a déjà été utilisé.
-                                </div>
-                                {% else %}
-                                <div class="alert alert-success mb-0" role="alert">
-                                    <i class="fa-solid fa-check-circle me-2"></i>
-                                    Ce code est valide et n'a pas encore été utilisé.
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+{% block header_icon_class %}
+    fa-solid fa-circle-check
+{% endblock header_icon_class %}
 
-                        {% if user.is_authenticated and not spin.is_used %}
-                        {% if user.google_credential %}
-                        {% if etablissement in user.google_credential.etablissements.all %}
-                        <form method="post" class="text-center">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fa-solid fa-check me-2"></i>
-                                Marquer comme utilisé
-                            </button>
-                        </form>
-                        {% endif %}
-                        {% endif %}
-                        {% endif %}
-                        {% endif %}
+{% block header_color %}
+    #0066ff
+{% endblock header_color %}
 
-                        <div class="text-center mt-4">
-                            <a href="{% url 'roulette:wheel' identifier %}" class="btn btn-outline-secondary">
-                                <i class="fa-solid fa-arrow-left me-2"></i>
-                                Retour à la roue
-                            </a>
-                        </div>
-                    </div>
-                </div>
+{% block card_content %}
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fa-solid fa-exclamation-circle me-2"></i>
+            {{ error }}
+        </div>
+    {% elif success %}
+        <div class="alert alert-success" role="alert">
+            <i class="fa-solid fa-check-circle me-2"></i>
+            {{ success }}
+        </div>
+    {% endif %}
 
-                <p class="text-muted text-center mt-4 mb-0 small opacity-75">
-                    Proposé par Starshield
+    {% if spin %}
+        <div class="card bg-light mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Code : <code class="fs-4">{{ code }}</code></h5>
+                <p class="card-text mb-2">
+                    <strong>Prix :</strong> {{ spin.prize.name }}<br>
+                    <strong>Date :</strong> {{ spin.created_at|date:"d/m/Y à H:i" }}
                 </p>
+                
+                {% if spin.is_used %}
+                    <div class="alert alert-warning mb-0" role="alert">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        Ce code a déjà été utilisé.
+                    </div>
+                {% else %}
+                    <div class="alert alert-success mb-0" role="alert">
+                        <i class="fa-solid fa-check-circle me-2"></i>
+                        Ce code est valide et n'a pas encore été utilisé.
+                    </div>
+                {% endif %}
             </div>
         </div>
+
+        {% if user.is_authenticated and not spin.is_used %}
+            {% if user.google_credential %}
+                {% if etablissement in user.google_credential.etablissements.all %}
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-check me-2"></i>
+                            Marquer comme utilisé
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{% url 'roulette:wheel' identifier %}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Retour à la roue
+        </a>
     </div>
-</section>
-{% endblock body %}
+{% endblock card_content %}

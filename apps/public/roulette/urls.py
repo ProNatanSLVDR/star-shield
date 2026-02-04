@@ -6,6 +6,7 @@ app_name = "roulette"
 
 urlpatterns = [
     path("<str:identifier>/", views.roulette_view, name="wheel"),
+    path("<str:identifier>/cooldown/", views.roulette_cooldown_view, name="cooldown"),
     path("<str:identifier>/spin/", views.spin_roulette_view, name="spin"),
     path("<str:identifier>/result/", views.roulette_result_view, name="result"),
     path("<str:identifier>/result/<str:prize_code>/", views.roulette_result_view, name="result"),

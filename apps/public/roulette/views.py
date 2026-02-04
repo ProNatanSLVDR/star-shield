@@ -49,25 +49,22 @@ def calculate_prize(etablissement: Etablissement) -> RoulettePrize | None:
     return prizes.last()
 
 
-def can_spin(request, etablissement: Etablissement) -> bool:
-    """Check if user can spin the roulette."""
+def is_in_cooldown(request, etablissement: Etablissement) -> bool:
+    """Check if user is currently in cooldown period."""
     cookie_name = f"roulette_last_spin_{etablissement.id}"
     cookie_value = request.COOKIES.get(cookie_name)
 
     if not cookie_value:
         return False
 
-    last_spin = timezone.datetime.fromisoformat(cookie_value)
-    if last_spin:
+    try:
+        last_spin = timezone.datetime.fromisoformat(cookie_value)
         cooldown_days = etablissement.roulette_spin_cooldown_days
         days_since_spin = (timezone.now() - last_spin).days
-        if days_since_spin < cooldown_days:
-            days_remaining = cooldown_days - days_since_spin
-            return False, f"You can spin again in {days_remaining} day(s)."
-
-    # Timer validation is handled client-side
-    # Backend just checks cooldown, client-side validates the 30-second timer
-    return True, ""
+        return days_since_spin < cooldown_days
+    except (ValueError, TypeError):
+        # Invalid cookie format - treat as not in cooldown
+        return False
 
 
 @login_not_required
@@ -80,6 +77,10 @@ def roulette_view(request, identifier=None):
     if not etablissement.active or not etablissement.roulette_enabled:
         return redirect("routing:feature_inactive")
 
+    # Check if user is in cooldown - redirect to cooldown page if so
+    if is_in_cooldown(request, etablissement):
+        return redirect(reverse("roulette:cooldown", args=[identifier]))
+
     # Track analytics
     analytics_key = f"roulette_viewed_{etablissement.id}"
     if not get_valid_session_key(request, analytics_key, valid_minutes=5):
@@ -90,7 +91,7 @@ def roulette_view(request, identifier=None):
         set_valid_session_key(request, analytics_key, True)
 
     # Check if user can spin
-    can_spin_now = can_spin(request, etablissement)
+    can_spin_now = not is_in_cooldown(request, etablissement)
 
     # Build review URL
     review_url = etablissement.new_reviews_uri
@@ -115,8 +116,8 @@ def spin_roulette_view(request, identifier=None):
         return redirect("routing:feature_inactive")
 
     # Check cooldown
-    if not can_spin(request, etablissement):
-        return redirect(reverse("roulette:wheel", args=[identifier]))
+    if not is_in_cooldown(request, etablissement):
+        return redirect(reverse("roulette:cooldown", args=[identifier]))
 
     # Track spin analytics
     analytics_key = f"roulette_spun_{etablissement.id}"
@@ -171,6 +172,27 @@ def spin_roulette_view(request, identifier=None):
     # Set cookie on response
     response.set_cookie(cookie_name, cookie_value, max_age=max_age)
     return response
+
+
+@login_not_required
+@require_http_methods(["GET"])
+def roulette_cooldown_view(request, identifier=None):
+    """Display cooldown page when user has already spun recently."""
+    etablissement = get_etablissement_by_identifier(identifier)
+
+    # Redirect to inactive page if establishment or roulette feature is inactive
+    if not etablissement.active or not etablissement.roulette_enabled:
+        return redirect("routing:feature_inactive")
+
+    # If user is not in cooldown, redirect to wheel page
+    if not is_in_cooldown(request, etablissement):
+        return redirect(reverse("roulette:wheel", args=[identifier]))
+
+    context = {
+        "etablissement": etablissement,
+    }
+
+    return render(request, "roulette/cooldown.html", context)
 
 
 @login_not_required

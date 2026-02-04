@@ -1,101 +1,93 @@
-{% extends "base.html" %}
+{% extends "public_feature_base.html" %}
 
 {% load static %}
+{% load component_tags %}
 
-{% block body %}
-    <section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5"
-             style="background: radial-gradient(circle at center, #f8f9fa 0%, #e9ecef 100%)">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 col-md-10">
-                    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                        <div class="card-header bg-primary text-white text-center py-4 position-relative overflow-hidden">
-                            <div class="position-absolute top-0 start-0 w-100 h-100"
-                                 style="background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)">
+{% block header_title %}
+    Roue de la Fortune
+{% endblock header_title %}
+
+{% block header_subtitle %}
+    {{ etablissement.title }}
+{% endblock header_subtitle %}
+
+{% block header_icon_class %}
+    fa-solid fa-circle-notch
+{% endblock header_icon_class %}
+
+{% block header_color %}
+    #0066ff
+{% endblock header_color %}
+
+{% block card_content %}
+    <!-- MAIN CONTENT: INSTRUCTIONS & LINK -->
+    <div id="step-intro"
+         class="text-center">
+        <h2 class="h4 fw-bold mb-4">Tentez de gagner une récompense !</h2>
+        {% if not can_spin and not review_url %}
+            <div class="alert alert-warning">
+                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                {{ message|default:"La roue n'est pas disponible pour le moment." }}
+            </div>
+        {% else %}
+            <div class="mb-5">
+                <div class="row justify-content-center g-4">
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-4 h-100 bg-light">
+                            <div class="fs-1 text-primary mb-3">
+                                <i class="fa-solid fa-star"></i>
                             </div>
-                            <h1 class="h3 fw-bold mb-1 position-relative">{{ etablissement.title }}</h1>
-                            <p class="mb-0 opacity-75 position-relative small text-uppercase fw-bold letter-spacing-1">
-                                Roue de la Fortune
+                            <h5 class="fw-bold fs-6">1. Donnez votre avis</h5>
+                            <p class="small text-muted mb-0">
+                                Laissez nous 5 étoiles sur Google pour nous soutenir.
                             </p>
                         </div>
-                        <div class="card-body p-4 p-md-5 bg-white">
-                            <!-- MAIN CONTENT: INSTRUCTIONS & LINK -->
-                            <div id="step-intro"
-                                 class="text-center">
-                                <h2 class="h4 fw-bold mb-4">Tentez de gagner une récompense !</h2>
-                                {% if not can_spin and not review_url %}
-                                    <div class="alert alert-warning">
-                                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                        {{ message|default:"La roue n'est pas disponible pour le moment." }}
-                                    </div>
-                                {% else %}
-                                    <div class="mb-5">
-                                        <div class="row justify-content-center g-4">
-                                            <div class="col-md-4">
-                                                <div class="p-3 border rounded-4 h-100 bg-light">
-                                                    <div class="fs-1 text-primary mb-3">
-                                                        <i class="fa-solid fa-star"></i>
-                                                    </div>
-                                                    <h5 class="fw-bold fs-6">1. Donnez votre avis</h5>
-                                                    <p class="small text-muted mb-0">
-                                                        Laissez nous 5 étoiles sur Google pour nous soutenir.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 border rounded-4 h-100 bg-light">
-                                                    <div class="fs-1 text-primary mb-3">
-                                                        <i class="fa-solid fa-check-circle"></i>
-                                                    </div>
-                                                    <h5 class="fw-bold fs-6">2. Vérification</h5>
-                                                    <p class="small text-muted mb-0">
-                                                        Nous vérifions rapidement votre participation.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 border rounded-4 h-100 bg-light">
-                                                    <div class="fs-1 text-primary mb-3">
-                                                        <i class="fa-solid fa-gift"></i>
-                                                    </div>
-                                                    <h5 class="fw-bold fs-6">3. Cadeau</h5>
-                                                    <p class="small text-muted mb-0">Lancez la roue et gagnez une surprise !</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% if review_url %}
-                                        <div class="d-grid gap-2 col-md-8 mx-auto">
-                                            <a href="{{ review_url }}"
-                                               target="_blank"
-                                               rel="noopener"
-                                               class="btn btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
-                                               id="reviewLinkBtn">
-                                                <i class="fa-brands fa-google me-2"></i>
-                                                Laisser un avis & Participer
-                                            </a>
-                                        </div>
-                                        <p class="text-muted small mt-3">
-                                            Une nouvelle page va s'ouvrir. Revenez ici après avoir posté votre avis !
-                                        </p>
-                                    {% endif %}
-                                    <!-- Cooldown message if applicable -->
-                                    {% if message %}
-                                        <div class="alert alert-warning mt-4 mb-0">
-                                            <i class="fa-solid fa-clock me-2"></i>{{ message }}
-                                        </div>
-                                    {% endif %}
-                                {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-4 h-100 bg-light">
+                            <div class="fs-1 text-primary mb-3">
+                                <i class="fa-solid fa-check-circle"></i>
                             </div>
+                            <h5 class="fw-bold fs-6">2. Vérification</h5>
+                            <p class="small text-muted mb-0">
+                                Nous vérifions rapidement votre participation.
+                            </p>
                         </div>
-                        <div class="card-footer bg-light text-center py-3 border-0">
-                            <small class="text-muted fw-bold opacity-50">POWERED BY STARSHIELD</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-4 h-100 bg-light">
+                            <div class="fs-1 text-primary mb-3">
+                                <i class="fa-solid fa-gift"></i>
+                            </div>
+                            <h5 class="fw-bold fs-6">3. Cadeau</h5>
+                            <p class="small text-muted mb-0">Lancez la roue et gagnez une surprise !</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+            {% if review_url %}
+                <div class="d-grid gap-2 col-md-8 mx-auto">
+                    <a href="{{ review_url }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
+                       id="reviewLinkBtn">
+                        <i class="fa-brands fa-google me-2"></i>
+                        Laisser un avis & Participer
+                    </a>
+                </div>
+                <p class="text-muted small mt-3">
+                    Une nouvelle page va s'ouvrir. Revenez ici après avoir posté votre avis !
+                </p>
+            {% endif %}
+            <!-- Cooldown message if applicable -->
+            {% if message %}
+                <div class="alert alert-warning mt-4 mb-0">
+                    <i class="fa-solid fa-clock me-2"></i>{{ message }}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
     <!-- Verification Modal -->
     {% component "empty_modal" modal_id="verificationModal" size="lg" %}
         {% fill "title" %}
@@ -135,11 +127,12 @@
         {% fill "footer" %}
             <form method="post"
                   action="{{ spin_url }}"
-                  id="spinForm"
-                  class="w-100 d-flex justify-content-center d-none">
+                  class="w-100 d-flex justify-content-center">
                 {% csrf_token %}
                 <button type="submit"
-                        class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg fa-beat-fade">
+                        id="spinButton"
+                        class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg"
+                        disabled>
                     <i class="fa-solid fa-play me-2"></i>
                     Lancer la roue !
                 </button>
@@ -200,13 +193,14 @@
 
                 const spinnerEl = document.getElementById('verificationSpinner');
                 const readyEl = document.getElementById('verificationReady');
-                const formEl = document.getElementById('spinForm');
+                const spinButtonEl = document.getElementById('spinButton');
 
                 if (remaining <= 0) {
                     // Ready to spin
                     if (spinnerEl) spinnerEl.classList.add('d-none');
                     if (readyEl) readyEl.classList.remove('d-none');
-                    if (formEl) formEl.classList.remove('d-none');
+                    if (spinButtonEl) spinButtonEl.classList.add('fa-beat-fade');
+                    if (spinButtonEl) spinButtonEl.disabled = false;
                     if (pollInterval) {
                         clearInterval(pollInterval);
                         pollInterval = null;
@@ -215,7 +209,9 @@
                     // Still waiting
                     if (spinnerEl) spinnerEl.classList.remove('d-none');
                     if (readyEl) readyEl.classList.add('d-none');
-                    if (formEl) formEl.classList.add('d-none');
+                    if (spinButtonEl) spinButtonEl.classList.remove('disabled');
+                    if (spinButtonEl) spinButtonEl.classList.remove('fa-beat-fade');
+                    if (spinButtonEl) spinButtonEl.disabled = true;
                 }
             }
 
@@ -264,6 +260,9 @@
             });
         })();
     </script>
+{% endblock card_content %}
+
+{% block card_styles %}
     <style>
         .hover-scale {
             transition: transform 0.2s;
@@ -280,4 +279,4 @@
             100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
         }
     </style>
-{% endblock body %}
+{% endblock card_styles %}

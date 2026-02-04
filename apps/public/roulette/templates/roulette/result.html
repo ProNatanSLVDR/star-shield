@@ -1,78 +1,73 @@
-{% extends "base.html" %}
+{% extends "public_feature_base.html" %}
 
 {% load static %}
 
-{% block body %}
+{% block header_title %}
+    Résultat
+{% endblock header_title %}
+
+{% block header_subtitle %}
+    {{ etablissement.title }}
+{% endblock header_subtitle %}
+
+{% block header_icon_class %}
+    {% if prize_code %}fa-solid fa-trophy{% else %}fa-regular fa-face-smile{% endif %}
+{% endblock header_icon_class %}
+
+{% block header_color %}
+    {% if prize_code %}#28a745{% else %}#0066ff{% endif %}
+{% endblock header_color %}
+
+{% block card_content %}
     <!-- Confetti Library (only load if prize won) -->
     {% if prize_code %}
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     {% endif %}
-    <section class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5"
-             style="background: radial-gradient(circle at center, #f8f9fa 0%, #e9ecef 100%)">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 col-md-10">
-                    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                        <div class="card-header bg-primary text-white text-center py-4 position-relative overflow-hidden">
-                            <div class="position-absolute top-0 start-0 w-100 h-100"
-                                 style="background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)">
-                            </div>
-                            <h1 class="h3 fw-bold mb-1 position-relative">{{ etablissement.title }}</h1>
-                            <p class="mb-0 opacity-75 position-relative small text-uppercase fw-bold letter-spacing-1">
-                                Résultat
-                            </p>
-                        </div>
-                        <div class="card-body p-4 p-md-5 bg-white text-center">
-                            {% if prize_code %}
-                                <!-- PRIZE WON -->
-                                <div class="mb-4">
-                                    <div class="display-1 text-success mb-3 animation-bounce">
-                                        <i class="fa-solid fa-trophy"></i>
-                                    </div>
-                                    <h2 class="fw-bold text-success mb-3">Félicitations !</h2>
-                                    {% if spin %}
-                                        <p class="lead mb-4">
-                                            Vous avez gagné : <strong>{{ spin.prize.name }}</strong>
-                                        </p>
-                                    {% else %}
-                                        <p class="lead mb-4">Vous avez gagné un prix !</p>
-                                    {% endif %}
-                                </div>
-                                <div class="card bg-light border-2 border-success border-dashed mx-auto mb-4"
-                                     style="max-width: 500px">
-                                    <div class="card-body p-4">
-                                        <p class="mb-2 text-muted small text-uppercase fw-bold">Votre Code Cadeau</p>
-                                        <code class="display-5 fw-bold text-dark tracking-wider d-block mb-4">{{ prize_code }}</code>
-                                        <div class="alert alert-info mb-0">
-                                            <i class="fa-solid fa-info-circle me-2"></i>
-                                            <strong>Pour récupérer votre gain :</strong>
-                                            <br>
-                                            Trouvez un employé et montrez-lui ce code.
-                                        </div>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <!-- NOTHING WON -->
-                                <div class="mb-4">
-                                    <div class="display-1 text-muted mb-3">
-                                        <i class="fa-regular fa-face-smile"></i>
-                                    </div>
-                                    <h2 class="fw-bold mb-3">Merci pour votre participation !</h2>
-                                    <p class="lead text-muted mb-4">
-                                        Malheureusement, vous n'avez pas gagné cette fois-ci.
-                                    </p>
-                                    <p class="text-muted">Réessayez lors de votre prochaine visite !</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="card-footer bg-light text-center py-3 border-0">
-                            <small class="text-muted fw-bold opacity-50">POWERED BY STARSHIELD</small>
-                        </div>
+
+    <div class="text-center">
+        {% if prize_code %}
+            <!-- PRIZE WON -->
+            <div class="mb-4">
+                <div class="display-1 text-success mb-3 animation-bounce">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-3">Félicitations !</h2>
+                {% if spin %}
+                    <p class="lead mb-4">
+                        Vous avez gagné : <strong>{{ spin.prize.name }}</strong>
+                    </p>
+                {% else %}
+                    <p class="lead mb-4">Vous avez gagné un prix !</p>
+                {% endif %}
+            </div>
+            <div class="card bg-light border-2 border-success border-dashed mx-auto mb-4"
+                 style="max-width: 500px">
+                <div class="card-body p-4">
+                    <p class="mb-2 text-muted small text-uppercase fw-bold">Votre Code Cadeau</p>
+                    <code class="display-5 fw-bold text-dark tracking-wider d-block mb-4">{{ prize_code }}</code>
+                    <div class="alert alert-info mb-0">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        <strong>Pour récupérer votre gain :</strong>
+                        <br>
+                        Trouvez un employé et montrez-lui ce code.
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        {% else %}
+            <!-- NOTHING WON -->
+            <div class="mb-4">
+                <div class="display-1 text-muted mb-3">
+                    <i class="fa-regular fa-face-smile"></i>
+                </div>
+                <h2 class="fw-bold mb-3">Merci pour votre participation !</h2>
+                <p class="lead text-muted mb-4">
+                    Malheureusement, vous n'avez pas gagné cette fois-ci.
+                </p>
+                <p class="text-muted">Réessayez lors de votre prochaine visite !</p>
+            </div>
+        {% endif %}
+    </div>
+
     {% if prize_code %}
         <script>
             // Fire confetti when prize won
@@ -117,23 +112,26 @@
             });
         </script>
     {% endif %}
+{% endblock card_content %}
+
+{% block card_styles %}
     <style>
-/* Custom Styles */
-.animation-bounce {
-    animation: bounce 1s infinite alternate;
-}
+        /* Custom Styles */
+        .animation-bounce {
+            animation: bounce 1s infinite alternate;
+        }
 
-@keyframes bounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-10px); }
-}
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
 
-.tracking-wider {
-    letter-spacing: 0.1em;
-}
+        .tracking-wider {
+            letter-spacing: 0.1em;
+        }
 
-.border-dashed {
-    border-style: dashed !important;
-}
+        .border-dashed {
+            border-style: dashed !important;
+        }
     </style>
-{% endblock body %}
+{% endblock card_styles %}

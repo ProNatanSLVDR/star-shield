@@ -1,0 +1,29 @@
+{% extends "public_feature_base.html" %}
+
+{% load static %}
+
+{% block header_title %}
+    Roue de la Fortune
+{% endblock header_title %}
+
+{% block header_subtitle %}
+    {{ etablissement.title }}
+{% endblock header_subtitle %}
+
+{% block header_icon_class %}
+    fa-solid fa-clock
+{% endblock header_icon_class %}
+
+{% block card_content %}
+    <div class="text-center">
+        <div class="mb-4">
+            <div class="display-1 text-warning mb-3">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <h2 class="fw-bold mb-3">Vous avez déjà lancé la roue récemment</h2>
+            <p class="lead text-muted mb-4">
+                Merci pour votre participation ! Réessayez lors de votre prochaine visite.
+            </p>
+        </div>
+    </div>
+{% endblock card_content %}
