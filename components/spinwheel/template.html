@@ -35,13 +35,13 @@
                     {% endfor %}
                 </div>
             </div>
+            <svg class="spinwheel-arrow"
+                 viewBox="0 0 32 26"
+                 aria-hidden="true"
+                 focusable="false">
+                <path d="M7 4 L25 4 Q28 4 26 7 L18 19 Q16 22 14 19 L6 7 Q4 4 7 4 Z"></path>
+            </svg>
             <div class="spinwheel-indicator">
-                <svg class="spinwheel-arrow"
-                     viewBox="0 0 32 26"
-                     aria-hidden="true"
-                     focusable="false">
-                    <polygon points="2,2 30,2 16,24"></polygon>
-                </svg>
                 <div class="spinwheel-prize text-center">
                     <span class="spinwheel-prize-label"></span>
                 </div>
@@ -56,7 +56,8 @@
     .spinwheel {
         --wheel-size: clamp(220px, 70vw, 360px);
         --wheel-indicator-space: clamp(52px, 12vw, 70px);
-        --wheel-indicator-offset: var(--wheel-indicator-space);
+        --wheel-indicator-offset: calc(var(--wheel-indicator-space) * 0.5);
+        --wheel-arrow-overlap: 30px;
         --wheel-border: 10px;
         --wheel-shadow: 0 18px 40px rgba(13, 110, 253, 0.18);
         --wheel-border-color: #ffffff;
@@ -155,7 +156,7 @@
     .spinwheel-indicator {
         position: absolute;
         left: 50%;
-        bottom: var(--wheel-indicator-offset);
+        bottom: calc(var(--wheel-indicator-offset) - 20px);
         transform: translateX(-50%);
         display: flex;
         flex-direction: column;
@@ -166,21 +167,21 @@
 
     .spinwheel-arrow {
         position: absolute;
-        top: -10px;
+        top: calc(var(--wheel-size) - var(--wheel-arrow-overlap));
         left: 50%;
-        transform: translateX(-50%);
-        width: 32px;
-        height: 26px;
-        filter: drop-shadow(0 6px 8px rgba(229, 57, 53, 0.28));
-        z-index: 2;
+        transform: translateX(-50%) rotate(180deg);
+        width: 60px;
+        height: 46px;
+        z-index: 4;
         pointer-events: none;
     }
 
-    .spinwheel-arrow polygon {
+    .spinwheel-arrow path {
         fill: #e53935;
         stroke: #ffffff;
-        stroke-width: 5;
+        stroke-width: 3;
         stroke-linejoin: round;
+        stroke-linecap: round;
     }
 
     .spinwheel-prize {

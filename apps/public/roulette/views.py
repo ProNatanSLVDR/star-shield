@@ -117,7 +117,7 @@ def spin_roulette_view(request, identifier=None):
         return redirect("routing:feature_inactive")
 
     # Check cooldown
-    if not is_in_cooldown(request, etablissement):
+    if is_in_cooldown(request, etablissement):
         return redirect(reverse("roulette:cooldown", args=[identifier]))
 
     # Track spin analytics
