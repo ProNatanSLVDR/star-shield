@@ -196,10 +196,6 @@
         font-size: 0.85rem;
     }
 
-    .spinwheel-wheel.is-blurred {
-        filter: blur(1.1px);
-    }
-
     .spinwheel-wheel.is-spinning {
         animation: spinwheel-rotate 1.2s linear infinite;
     }
@@ -318,14 +314,12 @@
             function spinToIndex(index, duration) {
                 if (!wheel) return;
                 var baseRotation = rotationForIndex(index);
-                var spins = 4 * 360;
+                var spins = 5 * 360;
                 var finalRotation = spins + baseRotation;
                 wheel.style.transition = 'transform ' + duration + 'ms cubic-bezier(0.2, 0.8, 0.2, 1)';
-                wheel.classList.add('is-blurred');
                 setRotation(finalRotation);
                 setPrizeLabel(index, '');
                 window.setTimeout(function() {
-                    wheel.classList.remove('is-blurred');
                     if (confetti) {
                         fireConfetti(root);
                     }
@@ -352,14 +346,14 @@
             }
 
             if (mode === 'spinning') {
-                wheel.classList.add('is-spinning', 'is-blurred');
+                wheel.classList.add('is-spinning');
                 setPrizeLabel(null, 'Spinning...');
                 return;
             }
 
             if (mode === 'stop_on' && stopIndex !== null) {
                 setRotation(0);
-                spinToIndex(stopIndex, 5000);
+                spinToIndex(stopIndex, 8000);
                 return;
             }
 
