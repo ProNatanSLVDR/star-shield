@@ -36,8 +36,12 @@
                 </div>
             </div>
             <div class="spinwheel-indicator">
-                <div class="spinwheel-arrow"
-                     aria-hidden="true"></div>
+                <svg class="spinwheel-arrow"
+                     viewBox="0 0 32 26"
+                     aria-hidden="true"
+                     focusable="false">
+                    <polygon points="2,2 30,2 16,24"></polygon>
+                </svg>
                 <div class="spinwheel-prize text-center">
                     <span class="spinwheel-prize-label"></span>
                 </div>
@@ -52,7 +56,7 @@
     .spinwheel {
         --wheel-size: clamp(220px, 70vw, 360px);
         --wheel-indicator-space: clamp(52px, 12vw, 70px);
-        --wheel-indicator-offset: calc(var(--wheel-indicator-space) * 0.7);
+        --wheel-indicator-offset: var(--wheel-indicator-space);
         --wheel-border: 10px;
         --wheel-shadow: 0 18px 40px rgba(13, 110, 253, 0.18);
         --wheel-border-color: #ffffff;
@@ -146,7 +150,6 @@
         height: 16px;
         border-radius: 50%;
         background: #0d6efd;
-        box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.6);
     }
 
     .spinwheel-indicator {
@@ -166,25 +169,18 @@
         top: -10px;
         left: 50%;
         transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 13px solid transparent;
-        border-right: 13px solid transparent;
-        border-top: 20px solid #e53935;
+        width: 32px;
+        height: 26px;
         filter: drop-shadow(0 6px 8px rgba(229, 57, 53, 0.28));
         z-index: 2;
+        pointer-events: none;
     }
 
-    .spinwheel-arrow::before {
-        content: "";
-        position: absolute;
-        transform: translate(-50%, -100%);
-        width: 0;
-        height: 0;
-        border-left: 14px solid transparent;
-        border-right: 14px solid transparent;
-        border-top: 22px solid #ffffff;
-        z-index: -1;
+    .spinwheel-arrow polygon {
+        fill: #e53935;
+        stroke: #ffffff;
+        stroke-width: 5;
+        stroke-linejoin: round;
     }
 
     .spinwheel-prize {
