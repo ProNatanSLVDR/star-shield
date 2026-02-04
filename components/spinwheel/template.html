@@ -51,6 +51,8 @@
 <style>
     .spinwheel {
         --wheel-size: clamp(220px, 70vw, 360px);
+        --wheel-indicator-space: clamp(52px, 12vw, 70px);
+        --wheel-indicator-offset: calc(var(--wheel-indicator-space) * 0.7);
         --wheel-border: 10px;
         --wheel-shadow: 0 18px 40px rgba(13, 110, 253, 0.18);
         --wheel-border-color: #ffffff;
@@ -67,11 +69,11 @@
     .spinwheel-frame {
         position: relative;
         width: var(--wheel-size);
-        height: var(--wheel-size);
+        height: calc(var(--wheel-size) + var(--wheel-indicator-space));
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-bottom: clamp(52px, 12vw, 70px);
+        padding-bottom: var(--wheel-indicator-space);
         max-width: 100%;
     }
 
@@ -150,7 +152,7 @@
     .spinwheel-indicator {
         position: absolute;
         left: 50%;
-        bottom: 0;
+        bottom: var(--wheel-indicator-offset);
         transform: translateX(-50%);
         display: flex;
         flex-direction: column;
@@ -161,27 +163,28 @@
 
     .spinwheel-arrow {
         position: absolute;
-        top: -22px;
+        top: -10px;
         left: 50%;
         transform: translateX(-50%);
         width: 0;
         height: 0;
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-top: 18px solid #0d6efd;
-        filter: drop-shadow(0 6px 8px rgba(13, 110, 253, 0.35));
+        border-left: 13px solid transparent;
+        border-right: 13px solid transparent;
+        border-top: 20px solid #e53935;
+        filter: drop-shadow(0 6px 8px rgba(229, 57, 53, 0.28));
+        z-index: 2;
     }
 
-    .spinwheel-arrow::after {
+    .spinwheel-arrow::before {
         content: "";
         position: absolute;
-        top: -10px;
-        left: -6px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 2px solid #0d6efd;
+        transform: translate(-50%, -100%);
+        width: 0;
+        height: 0;
+        border-left: 14px solid transparent;
+        border-right: 14px solid transparent;
+        border-top: 22px solid #ffffff;
+        z-index: -1;
     }
 
     .spinwheel-prize {
