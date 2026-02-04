@@ -17,16 +17,17 @@
                         aria-label="Fermer"></button>
             </div>
             <div id="{{ modal_id }}-inner-content">
-                <div class="modal-body">
+                <div class="body">
                     {% slot "body" %}
                         Contenu
                     {% endslot %}
                 </div>
-                <div class="modal-footer">
-                    {% slot "footer" %}
-                        Footer
-                    {% endslot %}
-                </div>
+                {% if component_vars.slots.footer %}
+                    <div class="modal-footer">
+                        {% slot "footer" %}
+                        {% endslot %}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

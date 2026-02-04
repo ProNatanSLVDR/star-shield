@@ -18,7 +18,7 @@ def generate_prize_code(etablissement: Etablissement) -> str:
     """Generate a unique alphanumeric prize code for an etablissement."""
     max_attempts = 100
     for _ in range(max_attempts):
-        code = "".join(random.choices(string.ascii_uppercase + string.digits, k=9))
+        code = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
         if not RouletteSpin.objects.filter(prize_code=code).exists():
             return code
     raise ValueError("Failed to generate unique prize code")
@@ -49,26 +49,15 @@ def calculate_prize(etablissement: Etablissement) -> RoulettePrize | None:
     return prizes.last()
 
 
-def get_last_spin_date(request, etablissement: Etablissement) -> timezone.datetime | None:
-    """Get the last spin date from cookie."""
+def can_spin(request, etablissement: Etablissement) -> bool:
+    """Check if user can spin the roulette."""
     cookie_name = f"roulette_last_spin_{etablissement.id}"
     cookie_value = request.COOKIES.get(cookie_name)
 
     if not cookie_value:
-        return None
+        return False
 
-    try:
-        return timezone.datetime.fromisoformat(cookie_value)
-    except (ValueError, TypeError):
-        return None
-
-
-def can_spin(request, etablissement: Etablissement) -> tuple[bool, str]:
-    """Check if user can spin the roulette."""
-    if not etablissement.roulette_enabled:
-        return False, "Roulette is not enabled for this establishment."
-
-    last_spin = get_last_spin_date(request, etablissement)
+    last_spin = timezone.datetime.fromisoformat(cookie_value)
     if last_spin:
         cooldown_days = etablissement.roulette_spin_cooldown_days
         days_since_spin = (timezone.now() - last_spin).days
@@ -89,7 +78,7 @@ def roulette_view(request, identifier=None):
 
     # Redirect to inactive page if establishment or roulette feature is inactive
     if not etablissement.active or not etablissement.roulette_enabled:
-        return redirect(reverse("routing:feature_inactive", args=[identifier]))
+        return redirect("routing:feature_inactive")
 
     # Track analytics
     analytics_key = f"roulette_viewed_{etablissement.id}"
@@ -101,7 +90,7 @@ def roulette_view(request, identifier=None):
         set_valid_session_key(request, analytics_key, True)
 
     # Check if user can spin
-    can_spin_now, message = can_spin(request, etablissement)
+    can_spin_now = can_spin(request, etablissement)
 
     # Build review URL
     review_url = etablissement.new_reviews_uri
@@ -109,7 +98,6 @@ def roulette_view(request, identifier=None):
     context = {
         "etablissement": etablissement,
         "can_spin": can_spin_now,
-        "message": message,
         "review_url": review_url,
         "spin_url": reverse("roulette:spin", args=[identifier]),
     }
@@ -124,16 +112,11 @@ def spin_roulette_view(request, identifier=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
     if not etablissement.roulette_enabled:
-        return redirect(reverse("routing:feature_inactive", args=[identifier]))
+        return redirect("routing:feature_inactive")
 
     # Check cooldown
-    last_spin = get_last_spin_date(request, etablissement)
-    if last_spin:
-        cooldown_days = etablissement.roulette_spin_cooldown_days
-        days_since_spin = (timezone.now() - last_spin).days
-        if days_since_spin < cooldown_days:
-            # Redirect back to main page with error message
-            return redirect(reverse("roulette:wheel", args=[identifier]))
+    if not can_spin(request, etablissement):
+        return redirect(reverse("roulette:wheel", args=[identifier]))
 
     # Track spin analytics
     analytics_key = f"roulette_spun_{etablissement.id}"
@@ -220,7 +203,7 @@ def roulette_result_view(request, identifier=None, prize_code=None):
 @login_not_required
 @require_http_methods(["GET", "POST"])
 def verify_code_view(request, identifier=None, code=None):
-    """Verify a prize code (public page, admin can mark as used)."""
+    """Verify a prize code (public page, user can mark as used)."""
     etablissement = get_etablissement_by_identifier(identifier)
 
     try:
@@ -230,24 +213,12 @@ def verify_code_view(request, identifier=None, code=None):
             "etablissement": etablissement,
             "code": code,
             "spin": None,
-            "error": "Invalid code.",
         }
-        return render(request, "roulette/verify.html", context)
 
-    # Handle POST (mark as used - admin only)
     if request.method == "POST" and request.user.is_authenticated:
-        if hasattr(request.user, "google_credential") and request.user.google_credential:
-            user_etablissements = request.user.google_credential.etablissements.all()
-            if spin.etablissement in user_etablissements:
-                spin.is_used = True
-                spin.save()
-                context = {
-                    "etablissement": etablissement,
-                    "code": code,
-                    "spin": spin,
-                    "success": "Code marked as used.",
-                }
-                return render(request, "roulette/verify.html", context)
+        spin.is_used = True
+        spin.save()
+        return redirect(reverse("roulette:verify", args=[identifier, code]))
 
     context = {
         "etablissement": etablissement,

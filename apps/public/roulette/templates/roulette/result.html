@@ -51,13 +51,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-4">
-                                    <a href="{% url 'roulette:wheel' identifier %}"
-                                       class="btn btn-outline-secondary rounded-pill px-4">
-                                        <i class="fa-solid fa-arrow-left me-2"></i>
-                                        Retour
-                                    </a>
-                                </div>
                             {% else %}
                                 <!-- NOTHING WON -->
                                 <div class="mb-4">
@@ -69,13 +62,6 @@
                                         Malheureusement, vous n'avez pas gagné cette fois-ci.
                                     </p>
                                     <p class="text-muted">Réessayez lors de votre prochaine visite !</p>
-                                </div>
-                                <div class="mt-4">
-                                    <a href="{% url 'roulette:wheel' identifier %}"
-                                       class="btn btn-outline-secondary rounded-pill px-4">
-                                        <i class="fa-solid fa-arrow-left me-2"></i>
-                                        Retour
-                                    </a>
                                 </div>
                             {% endif %}
                         </div>

@@ -99,7 +99,185 @@
     <!-- Verification Modal -->
     {% component "empty_modal" modal_id="verificationModal" size="lg" %}
         {% fill "title" %}
-            Vérification
+            <i class="fa-solid fa-circle-check me-2"></i>Vérification
+        {% endfill %}
+        {% fill "body" %}
+            <!-- Spinner State -->
+            <div class="p-4">
+                <div id="verificationSpinner"
+                     class="text-center">
+                    <div class="mb-4">
+                        <div class="spinner-border text-primary"
+                             style="width: 3rem;
+                                    height: 3rem"
+                             role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Vérification en cours...</h3>
+                    <p class="text-muted mb-0">
+                        Nous vérifions votre participation auprès de Google.
+                    </p>
+                </div>
+                <!-- Ready State -->
+                <div id="verificationReady"
+                     class="text-center d-none">
+                    <div class="mb-4">
+                        <div class="display-1 text-success mb-3">
+                            <i class="fa-solid fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Participation validée !</h3>
+                    <p class="text-muted mb-0">Vous pouvez maintenant lancer la roue.</p>
+                </div>
+            </div>
+        {% endfill %}
+        {% fill "footer" %}
+            <form method="post"
+                  action="{{ spin_url }}"
+                  id="spinForm"
+                  class="w-100 d-flex justify-content-center d-none">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg fa-beat-fade">
+                    <i class="fa-solid fa-play me-2"></i>
+                    Lancer la roue !
+                </button>
+            </form>
         {% endfill %}
     {% endcomponent %}
+    <script>
+        (function() {
+            const STORAGE_KEY = `roulette_review_clicked_{{ etablissement.id }}`;
+            const REQUIRED_WAIT_SECONDS = 30;
+            const POLL_INTERVAL = 5000; // 5 seconds
+
+            let pollInterval = null;
+            let modal = null;
+
+            // Initialize modal
+            function initModal() {
+                const modalElement = document.getElementById('verificationModal');
+                if (modalElement && !modal) {
+                    modal = new bootstrap.Modal(modalElement, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                }
+                return modal;
+            }
+
+            // Show modal
+            function showModal() {
+                const m = initModal();
+                if (m) {
+                    m.show();
+                    // Hide close button
+                    const closeBtn = document.querySelector('#verificationModal .btn-close');
+                    if (closeBtn) closeBtn.style.display = 'none';
+                }
+            }
+
+            // Hide modal
+            function hideModal() {
+                if (modal) modal.hide();
+            }
+
+            // Update verification status
+            function updateStatus() {
+                const clickedTime = localStorage.getItem(STORAGE_KEY);
+                if (!clickedTime) {
+                    hideModal();
+                    if (pollInterval) {
+                        clearInterval(pollInterval);
+                        pollInterval = null;
+                    }
+                    return;
+                }
+
+                const elapsed = (Date.now() - parseInt(clickedTime)) / 1000;
+                const remaining = REQUIRED_WAIT_SECONDS - elapsed;
+
+                const spinnerEl = document.getElementById('verificationSpinner');
+                const readyEl = document.getElementById('verificationReady');
+                const formEl = document.getElementById('spinForm');
+
+                if (remaining <= 0) {
+                    // Ready to spin
+                    if (spinnerEl) spinnerEl.classList.add('d-none');
+                    if (readyEl) readyEl.classList.remove('d-none');
+                    if (formEl) formEl.classList.remove('d-none');
+                    if (pollInterval) {
+                        clearInterval(pollInterval);
+                        pollInterval = null;
+                    }
+                } else {
+                    // Still waiting
+                    if (spinnerEl) spinnerEl.classList.remove('d-none');
+                    if (readyEl) readyEl.classList.add('d-none');
+                    if (formEl) formEl.classList.add('d-none');
+                }
+            }
+
+            // Check initial state on page load
+            function checkInitialState() {
+                const clickedTime = localStorage.getItem(STORAGE_KEY);
+                if (clickedTime) {
+                    showModal();
+                    updateStatus();
+                    if (!pollInterval) {
+                        pollInterval = setInterval(updateStatus, POLL_INTERVAL);
+                    }
+                }
+            }
+
+            // Handle review link click
+            function handleReviewClick() {
+                localStorage.setItem(STORAGE_KEY, Date.now().toString());
+                setTimeout(() => {
+                    showModal();
+                    updateStatus();
+                    if (!pollInterval) {
+                        pollInterval = setInterval(updateStatus, POLL_INTERVAL);
+                    }
+                }, 500);
+            }
+
+            // Handle form submission
+            function handleFormSubmit() {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+
+            // Initialize on DOM ready
+            document.addEventListener('DOMContentLoaded', function() {
+                checkInitialState();
+
+                const reviewBtn = document.getElementById('reviewLinkBtn');
+                if (reviewBtn) {
+                    reviewBtn.addEventListener('click', handleReviewClick);
+                }
+
+                const spinForm = document.getElementById('spinForm');
+                if (spinForm) {
+                    spinForm.addEventListener('submit', handleFormSubmit);
+                }
+            });
+        })();
+    </script>
+    <style>
+        .hover-scale {
+            transition: transform 0.2s;
+        }
+        .hover-scale:hover {
+            transform: scale(1.03);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+        }
+    </style>
 {% endblock body %}

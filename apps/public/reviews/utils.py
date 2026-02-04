@@ -83,7 +83,7 @@ def get_etablissement_by_identifier(identifier: str) -> Etablissement | None:
         try:
             etablissement = Etablissement.objects.get(uuid=identifier)
         except (Etablissement.DoesNotExist, ValueError):
-            raise Http404()
+            raise Http404() from None
     return etablissement
 
 
