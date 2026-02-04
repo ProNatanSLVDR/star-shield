@@ -28,55 +28,82 @@
     <div id="step-intro"
          class="text-center">
         <h2 class="h4 fw-bold mb-4">Tentez de gagner une récompense !</h2>
-        <div class="mb-5 text-start">
-            <div class="row mb-2 bg-light p-2 rounded-4 border">
-                <div class="col-2 d-flex justify-content-center align-items-center text-primary">
-                    <i class="fa-solid fs-3 fa-star"></i>
-                </div>
-                <div class="col-10">
-                    <h6 class="fw-bold fs-6 mb-0">1. Laissez 5 étoiles</h6>
-                    <p class="small text-muted mb-0">
-                        Donnez-nous un avis de 5 étoiles pour nous soutenir.
-                    </p>
-                </div>
-            </div>
-            <div class="row mb-2 bg-light p-2 rounded-4 border">
-                <div class="col-2 d-flex justify-content-center align-items-center text-primary">
-                    <i class="fa-solid fs-3 fa-circle-check"></i>
-                </div>
-                <div class="col-10">
-                    <h6 class="fw-bold fs-6 mb-0">2. Vérification</h6>
-                    <p class="small text-muted mb-0">
-                        Nous vérifions rapidement votre participation.
-                    </p>
-                </div>
-            </div>
-            <div class="row mb-2 bg-light p-2 rounded-4 border">
-                <div class="col-2 d-flex justify-content-center align-items-center text-primary">
-                    <i class="fa-solid fs-3 fa-gift"></i>
-                </div>
-                <div class="col-10">
-                    <h6 class="fw-bold fs-6 mb-0">3. Cadeau</h6>
-                    <p class="small text-muted mb-0">
-                        Lancez la roue et tentez de gagner un cadeau !
-                    </p>
-                </div>
-            </div>
-        </div>
         <div class="d-grid gap-2 col-md-8 mx-auto">
-            <a href="{{ review_url }}"
-               target="_blank"
-               rel="noopener"
-               class="btn btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
-               id="reviewLinkBtn">
-                <i class="fa-brands fa-google me-2"></i>
-                Laisser un avis & Participer
-            </a>
+            {% component "button"
+                text="Lancer la roue"
+                classes="btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
+                icon="fa-solid fa-play me-2"
+                extra_kwargs={
+                "type": "button",
+                "data-bs-toggle": "modal",
+                "data-bs-target": "#instructionsModal"
+                }
+                %}
+            {% endcomponent %}
         </div>
-        <p class="text-muted small mt-3">
-            Une nouvelle page va s'ouvrir. Revenez ici après avoir posté votre avis !
-        </p>
     </div>
+    {% component "empty_modal" modal_id="instructionsModal" size="lg" %}
+        {% fill "title" %}
+            <i class="fa-solid fa-circle-info me-2"></i>Comment ça marche ?
+        {% endfill %}
+        {% fill "body" %}
+            <div class="p-3">
+                <div class="mb-4 text-start g-0">
+                    <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
+                        <div class="col-2 d-flex justify-content-center align-items-center text-primary">
+                            <i class="fa-solid fs-3 fa-star"></i>
+                        </div>
+                        <div class="col-10">
+                            <h6 class="fw-bold fs-6 mb-0">1. Laissez 5 étoiles</h6>
+                            <p class="small text-muted mb-0">
+                                Donnez-nous un avis de 5 étoiles pour nous soutenir.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
+                        <div class="col-2 d-flex justify-content-center align-items-center text-primary">
+                            <i class="fa-solid fs-3 fa-circle-check"></i>
+                        </div>
+                        <div class="col-10">
+                            <h6 class="fw-bold fs-6 mb-0">2. Vérification</h6>
+                            <p class="small text-muted mb-0">
+                                Nous vérifions rapidement votre participation.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
+                        <div class="col-2 d-flex justify-content-center align-items-center text-primary">
+                            <i class="fa-solid fs-3 fa-gift"></i>
+                        </div>
+                        <div class="col-10">
+                            <h6 class="fw-bold fs-6 mb-0">3. Cadeau</h6>
+                            <p class="small text-muted mb-0">
+                                Lancez la roue et tentez de gagner un cadeau !
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted small mb-0">
+                    Une nouvelle page va s'ouvrir. Revenez ici après avoir posté votre avis !
+                </p>
+            </div>
+        {% endfill %}
+        {% fill "footer" %}
+            {% component "button"
+                text="Démarrer la vérification"
+                classes="btn-primary btn-lg rounded-pill px-5 shadow-sm"
+                icon="fa-brands fa-google me-2"
+                extra_kwargs={
+                "href": review_url,
+                "target": "_blank",
+                "rel": "noopener",
+                "id": "reviewLinkBtn",
+                "data-bs-dismiss": "modal"
+                }
+                %}
+            {% endcomponent %}
+        {% endfill %}
+    {% endcomponent %}
     <!-- Verification Modal -->
     {% component "empty_modal" modal_id="verificationModal" size="lg" %}
         {% fill "title" %}
