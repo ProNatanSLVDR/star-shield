@@ -91,6 +91,8 @@
                 var wheelEl = document.getElementById('public-roulette-result-wheel');
                 var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                 var hasShown = false;
+                var hasFiredConfetti = false;
+                var RESULT_DELAY_MS = 1500;
 
                 function fireWinConfetti() {
                     {% if prize_code %}
@@ -138,6 +140,11 @@
                     if (hasShown) return;
                     hasShown = true;
                     modal.show();
+                }
+
+                function triggerConfettiOnce() {
+                    if (hasFiredConfetti) return;
+                    hasFiredConfetti = true;
                     fireWinConfetti();
                 }
 
@@ -148,17 +155,33 @@
                     var stopIndex = parseInt(wheelEl.getAttribute('data-stop-index') || '', 10);
                     var hasStopIndex = !Number.isNaN(stopIndex);
 
-                    wheelEl.addEventListener('spinwheel:spin-stop', showResult, {
+                    function scheduleShowResult(delayMs) {
+                        window.setTimeout(showResult, delayMs);
+                    }
+
+                    wheelEl.addEventListener('spinwheel:spin-stop', function() {
+                        triggerConfettiOnce();
+                        scheduleShowResult(RESULT_DELAY_MS);
+                    }, {
                         once: true
                     });
 
                     if (mode !== 'stop_on' || !hasStopIndex) {
-                        window.setTimeout(showResult, 300);
+                        window.setTimeout(function() {
+                            triggerConfettiOnce();
+                            showResult();
+                        }, 300);
                     } else {
-                        window.setTimeout(showResult, spinDuration + 800);
+                        window.setTimeout(function() {
+                            triggerConfettiOnce();
+                            scheduleShowResult(RESULT_DELAY_MS);
+                        }, spinDuration);
                     }
                 } else {
-                    window.setTimeout(showResult, 300);
+                    window.setTimeout(function() {
+                        triggerConfettiOnce();
+                        showResult();
+                    }, 300);
                 }
             });
         })();
