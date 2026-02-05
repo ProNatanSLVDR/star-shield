@@ -24,6 +24,20 @@
                 {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="d-flex flex-column flex-grow-1 overflow-auto" %}
                     {% slot body %}
                         <!-- Activation Link -->
+                        <div class="alert alert-info d-flex align-items-center"
+                             role="alert">
+                            <div class="flex-shrink-0 me-2">
+                                <i class="fa-solid fa-info-circle"></i>
+                            </div>
+                            <div>
+                                <strong>Activation de la roue</strong>
+                                <p class="mb-0 small">
+                                    Pour activer ou désactiver la roue, rendez-vous sur la
+                                    <a href="{% url 'dashboard:etablissement:overview' %}"
+                                       class="alert-link">vue d'ensemble</a>.
+                                </p>
+                            </div>
+                        </div>
                         <form method="post"
                               id="rouletteSettingsForm">
                             {% csrf_token %}
@@ -66,26 +80,15 @@
                             </div>
                         </form>
                         <div class="d-flex flex-column flex-grow-1 justify-content-end">
-                            <div class="alert alert-info d-flex align-items-center"
-                                 role="alert">
-                                <div class="flex-shrink-0 me-2">
-                                    <i class="fa-solid fa-info-circle"></i>
-                                </div>
-                                <div>
-                                    <strong>Activation de la roue</strong>
-                                    <p class="mb-0 small">
-                                        Pour activer ou désactiver la roue, rendez-vous sur la
-                                        <a href="{% url 'dashboard:etablissement:overview' %}"
-                                           class="alert-link">vue d'ensemble</a>.
-                                    </p>
-                                </div>
-                            </div>
                             <hr>
-                            <p>
-                                Pour verifier les codes gagnants, rendez-vous sur la
-                                <a href="{% url 'roulette:verify' etablissement.uuid %}"
-                                   class="alert-link">page de vérification</a>.
-                            </p>
+                            <p>Pour verifier les codes gagnants, rendez-vous sur cette page :</p>
+                            {% component "button"
+                                text="Vérifier un code"
+                                classes="btn btn-primary"
+                                icon="fa-solid fa-up-right-from-square"
+                                href="{% url 'roulette:verify' etablissement.uuid %}"
+                                %}
+                            {% endcomponent %}
                         </div>
                     {% endslot %}
                 {% endcomponent %}
