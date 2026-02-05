@@ -239,10 +239,11 @@ def verify_code_view(request, identifier=None, code=None):
         return redirect("routing:feature_inactive")
 
     spin = None
+    redeem_form = None
     if code:
         spin = RouletteSpin.objects.filter(prize_code=code, etablissement=etablissement).first()
         if spin and not spin.is_used:
-            redeem_form = RedeemPrizeCodeForm(etablissement=etablissement, initial={"code": spin.prize_code})
+            redeem_form = RedeemPrizeCodeForm(initial={"code": spin.prize_code})
 
     context = {
         "etablissement": etablissement,

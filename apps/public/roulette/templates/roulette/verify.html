@@ -17,26 +17,23 @@
 {% endblock header_color %}
 
 {% block card_content %}
-    {% if error %}
-        <div class="alert alert-danger"
-             role="alert">
-            <i class="fa-solid fa-exclamation-circle me-2"></i>
-            {{ error }}
-        </div>
-    {% endif %}
     {% if not code %}
         <div class="card bg-light mb-3">
             <div class="card-body">
                 <h5 class="card-title mb-3">Vérifier un code de gain</h5>
                 <form method="get"
+                      id="rouletteVerifyForm"
+                      data-verify-url-base="{% url 'roulette:verify' identifier %}"
                       action="{% url 'roulette:verify' identifier %}">
                     <div class="input-group">
                         <input type="text"
                                name="code"
+                               id="rouletteVerifyCodeInput"
                                class="form-control text-uppercase"
                                placeholder="ABC123"
                                aria-label="Code de gain"
                                maxlength="50"
+                               autocomplete="off"
                                required>
                         <button type="submit"
                                 class="btn btn-primary">
@@ -48,7 +45,13 @@
             </div>
         </div>
     {% else %}
-        {% if spin %}
+        {% if not spin %}
+            <div class="alert alert-warning mb-3"
+                 role="alert">
+                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                Ce code n'est pas valide ou n'existe pas.
+            </div>
+        {% elif spin %}
             <div class="card bg-light mb-3">
                 <div class="card-body">
                     <h5 class="card-title">
@@ -76,11 +79,10 @@
             </div>
             {% if not spin.is_used %}
                 <form method="post"
+                      action="{% url 'roulette:redeem' identifier %}"
                       class="text-center">
                     {% csrf_token %}
-                    <input type="hidden"
-                           name="action"
-                           value="redeem">
+                    {% if redeem_form %}{{ redeem_form.code }}{% endif %}
                     <button type="submit"
                             class="btn btn-primary">
                         <i class="fa-solid fa-check me-2"></i>
@@ -104,4 +106,23 @@
             Retour à la roue
         </a>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("rouletteVerifyForm");
+            const input = document.getElementById("rouletteVerifyCodeInput");
+            if (!form || !input) return;
+
+            form.addEventListener("submit", function (e) {
+                const code = (input.value || "").trim().toUpperCase();
+                if (!code) return;
+                const base = form.dataset.verifyUrlBase;
+                if (!base) return;
+
+                e.preventDefault();
+                input.value = code;
+                window.location.href = `${base}${encodeURIComponent(code)}/`;
+            });
+        });
+    </script>
 {% endblock card_content %}
