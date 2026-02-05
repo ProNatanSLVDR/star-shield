@@ -327,25 +327,32 @@
                 var baseRotation = rotationForIndex(index);
                 var spins = 5 * 360;
                 var finalRotation = spins + baseRotation;
-                wheel.style.transition = 'transform ' + duration + 'ms cubic-bezier(0.2, 0.8, 0.2, 1)';
-                setRotation(finalRotation);
-                setPrizeLabel(null, '');
-                setSpinning(true);
-                emitEvent('spinwheel:spin-start', {
-                    index: index,
-                    duration: duration
-                });
-                window.setTimeout(function() {
-                    setSpinning(false);
-                    setPrizeLabel(index, '');
-                    if (confetti) {
-                        fireConfetti(root);
-                    }
-                    emitEvent('spinwheel:spin-stop', {
+                wheel.style.transition = 'none';
+                setRotation(0);
+                // Force reflow so the browser commits the initial state before animating.
+                wheel.getBoundingClientRect();
+
+                window.requestAnimationFrame(function() {
+                    wheel.style.transition = 'transform ' + duration + 'ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+                    setRotation(finalRotation);
+                    setPrizeLabel(null, '');
+                    setSpinning(true);
+                    emitEvent('spinwheel:spin-start', {
                         index: index,
                         duration: duration
                     });
-                }, duration);
+                    window.setTimeout(function() {
+                        setSpinning(false);
+                        setPrizeLabel(index, '');
+                        if (confetti) {
+                            fireConfetti(root);
+                        }
+                        emitEvent('spinwheel:spin-stop', {
+                            index: index,
+                            duration: duration
+                        });
+                    }, duration);
+                });
             }
 
             function fireConfetti(container) {
@@ -379,7 +386,6 @@
             }
 
             if (mode === 'stop_on' && stopIndex !== null) {
-                setRotation(0);
                 spinToIndex(stopIndex, spinDuration);
                 return;
             }
@@ -390,8 +396,8 @@
                 setRotation(currentRotation);
                 setPrizeLabel(currentIndex, '');
                 window.setInterval(function() {
-                    currentIndex = (currentIndex + 1) % prizes.length;
-                    currentRotation -= sliceAngle;
+                    currentIndex = (currentIndex - 1 + prizes.length) % prizes.length;
+                    currentRotation += sliceAngle;
                     wheel.style.transition = 'transform 0.6s ease';
                     setRotation(currentRotation);
                     setPrizeLabel(currentIndex, '');
@@ -399,8 +405,14 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        function bootSpinWheels() {
             document.querySelectorAll('.spinwheel[data-spinwheel="true"]').forEach(initSpinWheel);
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootSpinWheels);
+        } else {
+            bootSpinWheels();
+        }
     })();
 </script>
