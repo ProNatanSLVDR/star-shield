@@ -2,6 +2,7 @@ import random
 import string
 
 from django.contrib.admin.sites import login_not_required
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -233,25 +234,48 @@ def roulette_result_view(request, identifier=None, prize_code=None):
 @require_http_methods(["GET", "POST"])
 def verify_code_view(request, identifier=None, code=None):
     """Verify a prize code (public page, user can mark as used)."""
+    if not identifier:
+        raise Http404("Etablissement identifier is required.")
     etablissement = get_etablissement_by_identifier(identifier)
+    base_context = {
+        "etablissement": etablissement,
+        "identifier": identifier,
+    }
+    if not code:
+        code_input = request.GET.get("code", "").strip()
+        if code_input:
+            return redirect(reverse("roulette:verify", args=[identifier, code_input]))
 
-    try:
-        spin = RouletteSpin.objects.get(prize_code=code, etablissement=etablissement)
-    except RouletteSpin.DoesNotExist:
         context = {
-            "etablissement": etablissement,
-            "code": code,
+            **base_context,
+            "code": None,
             "spin": None,
         }
+        return render(request, "roulette/verify.html", context)
 
-    if request.method == "POST" and request.user.is_authenticated:
-        spin.is_used = True
-        spin.save()
-        return redirect(reverse("roulette:verify", args=[identifier, code]))
+    code = code.strip()
+    spin = (
+        RouletteSpin.objects.filter(prize_code__iexact=code, etablissement=etablissement)
+        .select_related("prize")
+        .first()
+    )
+    error = None
+
+    if request.method == "POST" and request.POST.get("action") == "redeem":
+        if not spin:
+            error = "Code invalide ou introuvable."
+        elif not spin.is_used:
+            spin.is_used = True
+            spin.save(update_fields=["is_used"])
+            return redirect(reverse("roulette:verify", args=[identifier, spin.prize_code]))
+
+    if not spin and not error:
+        error = "Code invalide ou introuvable."
 
     context = {
-        "etablissement": etablissement,
-        "code": code,
+        **base_context,
+        "code": spin.prize_code if spin else code,
         "spin": spin,
+        "error": error,
     }
     return render(request, "roulette/verify.html", context)
