@@ -10,6 +10,7 @@ class EmptyModal(Component):
     class Kwargs(NamedTuple):
         modal_id: str
         size: str | None = None
+        no_close_button: bool = False
 
     class Defaults:
         size = "xl"
@@ -28,4 +29,5 @@ class EmptyModal(Component):
         return {
             "modal_id": kwargs.modal_id,
             "size": size,
+            "no_close_button": kwargs.no_close_button,
         }

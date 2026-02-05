@@ -11,10 +11,12 @@
                         Titre de la modal
                     {% endslot %}
                 </h5>
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Fermer"></button>
+                {% if not no_close_button %}
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Fermer"></button>
+                {% endif %}
             </div>
             <div id="{{ modal_id }}-inner-content">
                 <div class="body">

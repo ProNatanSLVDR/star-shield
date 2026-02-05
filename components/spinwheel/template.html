@@ -3,6 +3,7 @@
      id="{{ wheel_id }}"
      data-spinwheel="true"
      data-mode="{{ mode }}"
+     data-spin-duration="8000"
      data-stop-index="{% if stop_index is not None %}
                           {{ stop_index }}
                       {% endif %}"
@@ -194,6 +195,13 @@
         font-weight: 600;
         color: var(--wheel-text);
         font-size: 0.85rem;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .spinwheel.is-spinning .spinwheel-prize {
+        opacity: 0;
+        transform: translateY(6px);
+        pointer-events: none;
     }
 
     .spinwheel-wheel.is-spinning {
@@ -268,6 +276,8 @@
             var stopIndex = parseInt(root.getAttribute('data-stop-index') || '', 10);
             if (Number.isNaN(stopIndex)) stopIndex = null;
             var confetti = root.getAttribute('data-confetti') === '1';
+            var spinDuration = parseInt(root.getAttribute('data-spin-duration') || '8000', 10);
+            if (Number.isNaN(spinDuration)) spinDuration = 8000;
 
             var sliceAngle = 360 / prizes.length;
             var pointerAngle = 180;
@@ -311,6 +321,14 @@
                 prizeLabel.textContent = fallback || '';
             }
 
+            function setSpinning(isSpinning) {
+                root.classList.toggle('is-spinning', isSpinning);
+            }
+
+            function emitEvent(name, detail) {
+                root.dispatchEvent(new CustomEvent(name, { detail: detail || {}, bubbles: true }));
+            }
+
             function spinToIndex(index, duration) {
                 if (!wheel) return;
                 var baseRotation = rotationForIndex(index);
@@ -318,11 +336,16 @@
                 var finalRotation = spins + baseRotation;
                 wheel.style.transition = 'transform ' + duration + 'ms cubic-bezier(0.2, 0.8, 0.2, 1)';
                 setRotation(finalRotation);
-                setPrizeLabel(index, '');
+                setPrizeLabel(null, '');
+                setSpinning(true);
+                emitEvent('spinwheel:spin-start', { index: index, duration: duration });
                 window.setTimeout(function() {
+                    setSpinning(false);
+                    setPrizeLabel(index, '');
                     if (confetti) {
                         fireConfetti(root);
                     }
+                    emitEvent('spinwheel:spin-stop', { index: index, duration: duration });
                 }, duration);
             }
 
@@ -347,13 +370,15 @@
 
             if (mode === 'spinning') {
                 wheel.classList.add('is-spinning');
-                setPrizeLabel(null, 'Spinning...');
+                setSpinning(true);
+                setPrizeLabel(null, '');
+                emitEvent('spinwheel:spin-start', { index: null, duration: null });
                 return;
             }
 
             if (mode === 'stop_on' && stopIndex !== null) {
                 setRotation(0);
-                spinToIndex(stopIndex, 8000);
+                spinToIndex(stopIndex, spinDuration);
                 return;
             }
 
