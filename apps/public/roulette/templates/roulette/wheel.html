@@ -20,14 +20,14 @@
 {% endblock header_color %}
 
 {% block card_content %}
-    <div class="d-flex justify-content-center mb-4">
+    <div class="d-flex justify-content-center mb-3">
         {% component "spinwheel" prizes=prizes mode="showcase" wheel_id="public-roulette-wheel" %}
         {% endcomponent %}
     </div>
     <!-- MAIN CONTENT: INSTRUCTIONS & LINK -->
     <div id="step-intro"
          class="text-center">
-        <h2 class="h4 fw-bold mb-4">Tentez de gagner une récompense !</h2>
+        <h3 class="text-primary fw-bold mb-4">Tentez votre chance !</h3>
         <div class="d-grid gap-2 col-md-8 mx-auto">
             {% component "button"
                 text="Lancer la roue"
