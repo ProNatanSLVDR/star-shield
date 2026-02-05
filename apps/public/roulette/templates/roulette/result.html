@@ -12,11 +12,7 @@
 {% endblock header_subtitle %}
 
 {% block header_icon_class %}
-    {% if prize_code %}
-        fa-solid fa-trophy
-    {% else %}
-        fa-regular fa-face-smile
-    {% endif %}
+    fa-solid fa-trophy
 {% endblock header_icon_class %}
 
 {% block card_content %}
@@ -56,18 +52,19 @@
                             <p class="lead mb-4">Vous avez gagné un prix !</p>
                         {% endif %}
                     </div>
-                    <div class="card bg-light border-2 border-success border-dashed mx-auto mb-4"
-                         style="max-width: 500px">
-                        <div class="card-body p-4">
-                            <p class="mb-2 text-muted small text-uppercase fw-bold">Votre Code Cadeau</p>
-                            <code class="display-5 fw-bold text-dark tracking-wider d-block mb-4">{{ prize_code }}</code>
-                            <div class="alert alert-info mb-0">
-                                <i class="fa-solid fa-info-circle me-2"></i>
-                                <strong>Pour récupérer votre gain :</strong>
-                                <br>
-                                Trouvez un employé et montrez-lui ce code.
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="card bg-light border-2 border-success border-dashed mb-4">
+                            <div class="card-body p-3">
+                                <p class="mb-2 text-muted small text-uppercase fw-bold">Votre Code Cadeau</p>
+                                <code class="display-5 fw-bold text-dark tracking-wider d-block">{{ prize_code }}</code>
                             </div>
                         </div>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        <strong>Pour récupérer votre gain :</strong>
+                        <br>
+                        Trouvez un employé et montrez-lui ce code.
                     </div>
                 {% else %}
                     <!-- NOTHING WON -->
@@ -178,10 +175,6 @@
         @keyframes bounce {
             from { transform: translateY(0); }
             to { transform: translateY(-10px); }
-        }
-
-        .tracking-wider {
-            letter-spacing: 0.1em;
         }
 
         .border-dashed {
