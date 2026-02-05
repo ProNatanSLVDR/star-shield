@@ -1,0 +1,31 @@
+{% extends "dashboard_base.html" %}
+
+{% load component_tags %}
+
+{% block sidebar_content %}
+    {% include "etablissement/sidebar_etablissement.html" %}
+{% endblock sidebar_content %}
+
+{% block dashboard_content %}
+    <div class="d-flex flex-column h-100">
+        <div class="mb-3">
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                <i class="fa-solid fa-trophy me-2"></i>
+                Historique des gains
+            </h1>
+            <p class="text-muted mb-0 small">
+                Consultez l'historique des prix gagnés par vos clients sur la roue de la fortune.
+            </p>
+        </div>
+        <div id="historique-content"
+             hx-get="{% url 'dashboard:etablissement:roulette:historique_content' %}"
+             hx-trigger="load"
+             hx-swap="morph:innerHTML">
+            <div class="d-flex justify-content-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock dashboard_content %}

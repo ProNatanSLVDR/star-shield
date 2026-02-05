@@ -82,6 +82,13 @@
                 page_name="roulette"
                 current_page=current_page %}
             {% endcomponent %}
+            {% component "navlink"
+                link="dashboard:etablissement:roulette:historique"
+                icon="fa-solid fa-trophy"
+                text="Historique des gains"
+                page_name="roulette_historique"
+                current_page=current_page %}
+            {% endcomponent %}
         {% endfill %}
     {% endcomponent %}
 </ul>

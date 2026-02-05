@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import roulette
+from . import historique, roulette
 
 app_name = "roulette"
 
@@ -10,4 +10,6 @@ urlpatterns = [
     path("prizes/create/", roulette.prize_create_partial, name="prize_create"),
     path("prizes/<int:prize_id>/edit/", roulette.prize_edit_partial, name="prize_edit"),
     path("prizes/<int:prize_id>/delete/", roulette.prize_delete_partial, name="prize_delete"),
+    path("historique/", historique.historique_view, name="historique"),
+    path("historique/content/", historique.historique_content_partial, name="historique_content"),
 ]
