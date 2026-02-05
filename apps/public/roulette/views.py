@@ -11,6 +11,7 @@ from apps.private.auths.models import Etablissement
 from apps.public.reviews.utils import get_etablissement_by_identifier, get_valid_session_key, set_valid_session_key
 from starshield.logger import logger
 
+from .forms import RedeemPrizeCodeForm
 from .models import RouletteAnalytics, RoulettePrize, RouletteSpin
 
 
@@ -203,7 +204,7 @@ def roulette_result_view(request, identifier=None, prize_code=None):
     etablissement = get_etablissement_by_identifier(identifier)
 
     if not etablissement.active or not etablissement.roulette_enabled:
-        return redirect(reverse("routing:feature_inactive", args=[identifier]))
+        return redirect("routing:feature_inactive")
 
     # If prize_code provided, verify it exists and belongs to this etablissement
     spin = None
@@ -227,3 +228,49 @@ def roulette_result_view(request, identifier=None, prize_code=None):
     }
 
     return render(request, "roulette/result.html", context)
+
+
+@login_not_required
+@require_http_methods(["GET"])
+def verify_code_view(request, identifier=None, code=None):
+    etablissement = get_etablissement_by_identifier(identifier)
+
+    if not etablissement.active or not etablissement.roulette_enabled:
+        return redirect("routing:feature_inactive")
+
+    spin = None
+    if code:
+        spin = RouletteSpin.objects.filter(prize_code=code, etablissement=etablissement).first()
+        if spin and not spin.is_used:
+            redeem_form = RedeemPrizeCodeForm(etablissement=etablissement, initial={"code": spin.prize_code})
+
+    context = {
+        "etablissement": etablissement,
+        "identifier": identifier,
+        "code": code,
+        "spin": spin,
+        "redeem_form": redeem_form,
+    }
+
+    return render(request, "roulette/verify.html", context)
+
+
+@login_not_required
+@require_POST
+def redeem_code_view(request, identifier=None):
+    """Mark a prize code as redeemed, then redirect back to the verify page."""
+    etablissement = get_etablissement_by_identifier(identifier)
+
+    if not etablissement.active or not etablissement.roulette_enabled:
+        return redirect("routing:feature_inactive")
+
+    form = RedeemPrizeCodeForm(request.POST)
+    if form.is_valid():
+        code = form.cleaned_data["code"]
+        spin = RouletteSpin.objects.filter(prize_code=code, etablissement=etablissement).first()
+        if spin and not spin.is_used:
+            spin.is_used = True
+            spin.save(update_fields=["is_used"])
+
+        return redirect(reverse("roulette:verify", args=[identifier, code]))
+    return redirect(reverse("roulette:verify", args=[identifier]))
