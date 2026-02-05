@@ -1,0 +1,55 @@
+{% load component_tags %}
+
+<!-- Time filter -->
+<div class="mb-4">
+    <div class="rounded-4 border bg-white shadow-sm p-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text text-bg-primary border-primary">
+                        <i class="fa-solid fa-calendar-days me-1"></i>Période
+                    </span>
+                    <select id="periodSelect" class="form-select border-primary"
+                            hx-get="{% url 'dashboard:etablissement:ai_responses:historique_content' %}"
+                            hx-target="#historique-content"
+                            hx-swap="morph:innerHTML"
+                            name="period">
+                        <option value="7" {% if current_period == '7' %}selected{% endif %}>7 derniers jours</option>
+                        <option value="30" {% if current_period == '30' %}selected{% endif %}>30 derniers jours</option>
+                        <option value="90" {% if current_period == '90' %}selected{% endif %}>3 derniers mois</option>
+                        <option value="365" {% if current_period == '365' %}selected{% endif %}>1 an</option>
+                        <option value="all" {% if current_period == 'all' %}selected{% endif %}>Tout le temps</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats cards -->
+<div class="row g-3 mb-4">
+    {% for stat in stats %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="text-muted small mb-1">{{ stat.label }}</p>
+                            <h2 class="fw-bold text-body-emphasis mb-0">{{ stat.value }}</h2>
+                        </div>
+                        <div class="p-3 rounded-3" style="background: {{ stat.bg }};">
+                            <i class="{{ stat.icon }} {% if stat.color == 'purple' %}{% else %}text-{{ stat.color }}{% endif %}" style="font-size: 1.5rem;{% if stat.color == 'purple' %} color: #6f42c1;{% endif %}"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Replies table -->
+{% component "table"
+    headers=table_data.headers
+    rows=table_data.rows
+    title="Réponses aux avis" %}
+{% endcomponent %}

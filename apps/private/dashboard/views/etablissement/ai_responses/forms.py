@@ -1,0 +1,21 @@
+from django import forms
+
+from apps.private.auths.choices import AI_LANGUAGE_CHOICES, AI_LENGTH_CHOICES, AI_TONE_CHOICES
+
+
+class AiResponseSettingsForm(forms.Form):
+    ai_response_tone = forms.ChoiceField(
+        choices=AI_TONE_CHOICES,
+        required=True,
+        label="Ton de la réponse",
+    )
+    ai_response_length = forms.ChoiceField(
+        choices=AI_LENGTH_CHOICES,
+        required=True,
+        label="Longueur de la réponse",
+    )
+    ai_response_language = forms.ChoiceField(
+        choices=AI_LANGUAGE_CHOICES,
+        required=True,
+        label="Langue de la réponse",
+    )

@@ -1,6 +1,7 @@
 from django.urls import include, path
 
 from . import qrcodes, views
+from .ai_responses import urls as ai_responses_urls
 from .filtre import urls as filtre_urls
 from .roulette import urls as roulette_urls
 from .settings import urls as settings_urls
@@ -15,6 +16,7 @@ urlpatterns = [
     path("settings/", include(settings_urls)),
     path("filtre/", include(filtre_urls)),
     path("roulette/", include(roulette_urls)),
+    path("ai-responses/", include(ai_responses_urls)),
     # QR Codes - specific patterns first
     path("qrcodes/create/", qrcodes.qr_code_create_view, name="qrcode_create"),
     path("qrcodes/image/<str:identifier>/<str:short_code>/", qrcodes.qr_code_image_view, name="qr_code"),

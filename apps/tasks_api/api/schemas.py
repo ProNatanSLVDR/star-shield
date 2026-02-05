@@ -24,6 +24,27 @@ class ReviewFetchResponse(BaseModel):
         }
 
 
+class AiResponseResult(BaseModel):
+    """Schema for AI response generation results."""
+
+    etablissement_id: int
+    total_reviews: int
+    responded: int
+    failed: int
+    errors: list[str]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "etablissement_id": 1,
+                "total_reviews": 5,
+                "responded": 4,
+                "failed": 1,
+                "errors": ["Failed to process review abc123: API error"],
+            }
+        }
+
+
 class EnqueueRefreshResponse(BaseModel):
     """Schema for enqueue refresh all response."""
 

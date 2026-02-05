@@ -24,3 +24,24 @@ QR_ROUTING_CHOICES = [
     ("feedback", "Feedback"),
     ("roulette", "Roulette"),
 ]
+
+# AI Response Choices
+AI_TONE_CHOICES = [
+    ("professionnel", "Professionnel"),
+    ("empathique", "Empathique"),
+    ("enthousiaste", "Enthousiaste"),
+    ("amical", "Amical"),
+    ("concis", "Concis"),
+]
+
+AI_LENGTH_CHOICES = [
+    ("short", "Courte"),
+    ("medium", "Moyenne"),
+    ("long", "Longue"),
+]
+
+AI_LANGUAGE_CHOICES = [
+    ("fr", "Français"),
+    ("en", "English"),
+    ("auto", "Auto-detect"),
+]

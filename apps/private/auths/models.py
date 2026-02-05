@@ -426,6 +426,24 @@ class Etablissement(models.Model):
         help_text="Number of days between spins (cooldown period).",
     )
 
+    # AI Responses settings
+    ai_responses_enabled = models.BooleanField(default=False)
+    ai_response_tone = models.CharField(
+        max_length=20,
+        choices=choices.AI_TONE_CHOICES,
+        default="professionnel",
+    )
+    ai_response_length = models.CharField(
+        max_length=10,
+        choices=choices.AI_LENGTH_CHOICES,
+        default="medium",
+    )
+    ai_response_language = models.CharField(
+        max_length=10,
+        choices=choices.AI_LANGUAGE_CHOICES,
+        default="fr",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_reviews_update = models.DateTimeField(blank=True, null=True)

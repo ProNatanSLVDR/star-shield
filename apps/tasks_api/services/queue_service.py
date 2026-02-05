@@ -189,3 +189,81 @@ def enqueue_refresh_tasks() -> dict[str, Any]:
         "failed": failed,
         "errors": errors,
     }
+
+
+def enqueue_ai_responses_task(etablissement_id: int) -> None:
+    """
+    Enqueue an AI response generation task for a single etablissement.
+
+    Args:
+        etablissement_id: ID of the Etablissement to process
+    """
+    queue_name = settings.TASKS_API_QUEUE_NAME
+    base_url = settings.TASKS_API_BASE_URL
+
+    try:
+        target_url = f"{base_url.rstrip('/')}/v1/generate-ai-responses"
+        payload = {"etablissement_id": etablissement_id}
+
+        create_google_cloud_task(
+            queue=queue_name,
+            url=target_url,
+            payload=payload,
+            task_id=f"etablissement_{etablissement_id}_ai_responses",
+        )
+
+        logger.info(f"Enqueued AI responses task for etablissement {etablissement_id}")
+
+    except Exception as e:
+        logger.error(f"Failed to enqueue AI responses task for etablissement {etablissement_id}: {e}", exc_info=True)
+
+
+def enqueue_ai_responses_tasks() -> dict[str, Any]:
+    """
+    Enqueue AI response tasks for all etablissements with AI responses enabled.
+
+    Returns:
+        Dictionary with summary of enqueued tasks.
+    """
+    queue_name = settings.TASKS_API_QUEUE_NAME
+    base_url = settings.TASKS_API_BASE_URL
+
+    etablissements = Etablissement.objects.filter(ai_responses_enabled=True)
+    total = etablissements.count()
+
+    logger.info(f"Enqueuing AI response tasks for {total} etablissements")
+
+    target_url = f"{base_url.rstrip('/')}/v1/generate-ai-responses"
+
+    enqueued = 0
+    failed = 0
+    errors = []
+
+    for etablissement in etablissements:
+        try:
+            payload = {"etablissement_id": etablissement.id}
+
+            create_google_cloud_task(
+                queue=queue_name,
+                url=target_url,
+                payload=payload,
+                task_id=f"etablissement_{etablissement.id}_ai_responses",
+            )
+
+            enqueued += 1
+            logger.info(f"Enqueued AI responses task for etablissement {etablissement.id} ({etablissement.title})")
+
+        except Exception as e:
+            failed += 1
+            error_msg = f"Failed to enqueue AI responses task for etablissement {etablissement.id}: {e}"
+            logger.error(error_msg, exc_info=True)
+            errors.append(error_msg)
+
+    logger.info(f"AI responses enqueueing complete: {enqueued} enqueued, {failed} failed out of {total} total")
+
+    return {
+        "total": total,
+        "enqueued": enqueued,
+        "failed": failed,
+        "errors": errors,
+    }

@@ -65,7 +65,7 @@ def toggle_feature_view(request):
         )
 
     # List of known feature fields
-    feature_fields = ["review_filtering_enabled", "roulette_enabled"]
+    feature_fields = ["review_filtering_enabled", "roulette_enabled", "ai_responses_enabled"]
 
     # Process all features: enable if present in POST and equals "on", otherwise disable
     for feature_field in feature_fields:

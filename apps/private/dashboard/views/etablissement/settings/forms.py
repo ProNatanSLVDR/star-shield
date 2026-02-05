@@ -20,3 +20,4 @@ class ToggleFeatureForm(forms.Form):
     # We'll check them directly from POST data since unchecked checkboxes don't send values
     review_filtering_enabled = forms.CharField(required=False)
     roulette_enabled = forms.CharField(required=False)
+    ai_responses_enabled = forms.CharField(required=False)

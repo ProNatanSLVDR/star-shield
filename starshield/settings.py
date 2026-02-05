@@ -204,6 +204,10 @@ class Base(Configuration):
     TASK_MAX_RETRIES = 3
     TASK_TIMEOUT_SECONDS = 300  # 5 minutes
 
+    # OpenRouter AI configuration
+    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+    OPENROUTER_MODEL = "google/gemini-3-flash-preview"
+
     # Brevo Email Configuration
     BREVO_SENDER_EMAIL = "noreply@starshield.pro"
     BREVO_SENDER_NAME = "StarShield"

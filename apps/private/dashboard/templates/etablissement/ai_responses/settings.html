@@ -1,0 +1,158 @@
+{% extends "dashboard_base.html" %}
+
+{% load component_tags %}
+
+{% block sidebar_content %}
+    {% include "etablissement/sidebar_etablissement.html" %}
+{% endblock sidebar_content %}
+
+{% block dashboard_content %}
+    <div class="d-flex flex-column">
+        <div class="mb-3">
+            <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                <i class="fa-solid fa-robot me-2"></i>
+                Réponses IA
+            </h1>
+            <p class="text-muted mb-0 small">
+                Configurez les réponses automatiques générées par l'IA pour vos avis Google.
+            </p>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-8 mx-auto">
+                <!-- Activation info -->
+                <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                    <div class="flex-shrink-0 me-2">
+                        <i class="fa-solid fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <strong>Activation</strong>
+                        <p class="mb-0 small">
+                            Pour activer ou désactiver les réponses IA, rendez-vous dans
+                            <a href="{% url 'dashboard:etablissement:settings:settings' %}" class="alert-link">Paramètres</a>
+                            puis activez la fonctionnalité "Réponses IA".
+                        </p>
+                    </div>
+                </div>
+
+                <form method="post" id="aiResponseSettingsForm">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Tone Selection -->
+                    {% component "card" title="Ton de la réponse" icon="fa-solid fa-comment-dots" card_classes="mb-3 overflow-hidden" %}
+                        {% slot body %}
+                            <p class="text-muted small mb-3">
+                                Choisissez le ton utilisé par l'IA pour répondre à vos avis. Chaque ton adapte le style de la réponse.
+                            </p>
+                            <div class="row g-2">
+                                {% for value, label in form.ai_response_tone.field.choices %}
+                                    <div class="col-12 col-sm-6 col-md-4">
+                                        <input type="radio"
+                                               class="btn-check"
+                                               name="ai_response_tone"
+                                               id="tone_{{ value }}"
+                                               value="{{ value }}"
+                                               autocomplete="off"
+                                               {% if form.ai_response_tone.value == value %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary w-100 text-start p-3" for="tone_{{ value }}">
+                                            <div class="fw-semibold">{{ label }}</div>
+                                            <div class="small text-muted mt-1">
+                                                {% if value == "professionnel" %}
+                                                    Formel, courtois, orienté service
+                                                {% elif value == "empathique" %}
+                                                    Compréhensif, sincère, reconnaissant
+                                                {% elif value == "enthousiaste" %}
+                                                    Dynamique, positif, chaleureux
+                                                {% elif value == "amical" %}
+                                                    Décontracté, proche, convivial
+                                                {% elif value == "concis" %}
+                                                    Bref, direct, efficace
+                                                {% endif %}
+                                            </div>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endslot %}
+                    {% endcomponent %}
+
+                    <!-- Length Selection -->
+                    {% component "card" title="Longueur de la réponse" icon="fa-solid fa-text-width" card_classes="mb-3 overflow-hidden" %}
+                        {% slot body %}
+                            <div class="row g-2">
+                                {% for value, label in form.ai_response_length.field.choices %}
+                                    <div class="col-12 col-sm-4">
+                                        <input type="radio"
+                                               class="btn-check"
+                                               name="ai_response_length"
+                                               id="length_{{ value }}"
+                                               value="{{ value }}"
+                                               autocomplete="off"
+                                               {% if form.ai_response_length.value == value %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary w-100 text-center p-3" for="length_{{ value }}">
+                                            <div class="fw-semibold">{{ label }}</div>
+                                            <div class="small text-muted mt-1">
+                                                {% if value == "short" %}
+                                                    1-2 phrases
+                                                {% elif value == "medium" %}
+                                                    2-4 phrases
+                                                {% elif value == "long" %}
+                                                    4-6 phrases
+                                                {% endif %}
+                                            </div>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endslot %}
+                    {% endcomponent %}
+
+                    <!-- Language Selection -->
+                    {% component "card" title="Langue de la réponse" icon="fa-solid fa-language" card_classes="mb-3 overflow-hidden" %}
+                        {% slot body %}
+                            <div class="row g-2">
+                                {% for value, label in form.ai_response_language.field.choices %}
+                                    <div class="col-12 col-sm-4">
+                                        <input type="radio"
+                                               class="btn-check"
+                                               name="ai_response_language"
+                                               id="language_{{ value }}"
+                                               value="{{ value }}"
+                                               autocomplete="off"
+                                               {% if form.ai_response_language.value == value %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary w-100 text-center p-3" for="language_{{ value }}">
+                                            <div class="fw-semibold">{{ label }}</div>
+                                            <div class="small text-muted mt-1">
+                                                {% if value == "fr" %}
+                                                    Toujours en français
+                                                {% elif value == "en" %}
+                                                    Always in English
+                                                {% elif value == "auto" %}
+                                                    Détecte la langue de l'avis
+                                                {% endif %}
+                                            </div>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endslot %}
+                    {% endcomponent %}
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-save me-2"></i>
+                            Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock dashboard_content %}

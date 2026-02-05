@@ -6,12 +6,14 @@ from ninja import Router
 from ninja.errors import HttpError
 
 from apps.tasks_api.api.schemas import (
+    AiResponseResult,
     EnqueueRefreshResponse,
     ReviewFetchRequest,
     ReviewFetchResponse,
 )
 from apps.tasks_api.api.task_tracking import TaskTracker
-from apps.tasks_api.services.queue_service import enqueue_refresh_tasks
+from apps.tasks_api.services.ai_response_service import generate_and_send_responses
+from apps.tasks_api.services.queue_service import enqueue_ai_responses_tasks, enqueue_refresh_tasks
 from apps.tasks_api.services.review_service import fetch_reviews, fetch_stats
 from starshield.logger import logger
 
@@ -82,4 +84,48 @@ def enqueue_refresh_all(request):
         raise HttpError(500, str(e))
     except Exception as e:
         logger.error(f"Unexpected error enqueueing refresh tasks: {e}", exc_info=True)
+        raise HttpError(500, "Internal server error")
+
+
+@api_router.post("/generate-ai-responses", response=AiResponseResult)
+def generate_ai_responses(request, payload: ReviewFetchRequest):
+    """
+    Generate and post AI responses for an establishment's unreplied reviews.
+    Called by Cloud Tasks.
+    """
+    try:
+        tracker = TaskTracker("generate_ai_responses", payload.etablissement_id)
+        result = {}
+
+        def run_ai_responses(etablissement):
+            nonlocal result
+            result = generate_and_send_responses(etablissement)
+
+        tracker.execute([run_ai_responses])
+        return AiResponseResult(
+            etablissement_id=payload.etablissement_id,
+            **result,
+        )
+    except ValueError as e:
+        logger.error(f"Invalid request: {e}")
+        raise HttpError(400, str(e))
+    except Exception as e:
+        logger.error(f"Error processing AI responses task: {e}", exc_info=True)
+        raise HttpError(500, "Internal server error")
+
+
+@api_router.post("/enqueue-ai-responses-all", response=EnqueueRefreshResponse)
+def enqueue_ai_responses_all(request):
+    """
+    Batch enqueue AI response tasks for all enabled establishments.
+    Called by Cloud Scheduler.
+    """
+    try:
+        result = enqueue_ai_responses_tasks()
+        return EnqueueRefreshResponse(**result)
+    except RuntimeError as e:
+        logger.error(f"Error enqueueing AI responses tasks: {e}")
+        raise HttpError(500, str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error enqueueing AI responses tasks: {e}", exc_info=True)
         raise HttpError(500, "Internal server error")

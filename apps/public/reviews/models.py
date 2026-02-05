@@ -10,6 +10,11 @@ class Review(models.Model):
         ("google", "Google"),
     ]
 
+    REPLY_TYPE_CHOICES = [
+        ("ai", "AI"),
+        ("google", "Google"),
+    ]
+
     etablissement = models.ForeignKey("auths.Etablissement", on_delete=models.CASCADE)
 
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
@@ -18,6 +23,11 @@ class Review(models.Model):
 
     google_review_id = models.CharField(max_length=255, blank=True, null=True)
     google_reviewer_data = models.JSONField(blank=True, null=True)
+
+    # Reply tracking
+    reply_comment = models.TextField(blank=True, null=True)
+    reply_date = models.DateTimeField(blank=True, null=True)
+    reply_type = models.CharField(max_length=10, choices=REPLY_TYPE_CHOICES, blank=True, null=True)
 
     writen_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

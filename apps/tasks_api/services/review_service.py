@@ -107,16 +107,23 @@ def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
         # Process all reviews in the current page
         for review in reviews_list:
             try:
+                # Build defaults with optional reply data from Google
+                defaults = {
+                    "comment": review.get("comment", ""),
+                    "rating": google_stars_to_number(review.get("starRating")),
+                    "google_reviewer_data": review.get("reviewer"),
+                    "writen_at": review.get("createTime"),
+                }
+                if review.get("reviewReply"):
+                    defaults["reply_comment"] = review["reviewReply"].get("comment")
+                    defaults["reply_date"] = review["reviewReply"].get("updateTime")
+                    defaults["reply_type"] = "google"
+
                 new_review, created = Review.objects.update_or_create(
                     etablissement=etablissement,
                     source="google",
                     google_review_id=review.get("reviewId"),
-                    defaults={
-                        "comment": review.get("comment", ""),
-                        "rating": google_stars_to_number(review.get("starRating")),
-                        "google_reviewer_data": review.get("reviewer"),
-                        "writen_at": review.get("createTime"),
-                    },
+                    defaults=defaults,
                 )
                 import_count += 1
                 review_id = review.get("reviewId", "unknown")

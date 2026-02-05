@@ -91,4 +91,27 @@
             {% endcomponent %}
         {% endfill %}
     {% endcomponent %}
+    <!-- AI Responses Section -->
+    {% component "collapse_navlink"
+        icon="fa-solid fa-robot"
+        text="Réponses IA"
+        collapse_id="collapseAiResponses"
+        %}
+        {% fill navlinks %}
+            {% component "navlink"
+                link="dashboard:etablissement:ai_responses:settings"
+                icon="fa-solid fa-sliders"
+                text="Paramètres"
+                page_name="ai_responses_settings"
+                current_page=current_page %}
+            {% endcomponent %}
+            {% component "navlink"
+                link="dashboard:etablissement:ai_responses:historique"
+                icon="fa-solid fa-clock-rotate-left"
+                text="Historique"
+                page_name="ai_responses_historique"
+                current_page=current_page %}
+            {% endcomponent %}
+        {% endfill %}
+    {% endcomponent %}
 </ul>

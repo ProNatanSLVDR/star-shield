@@ -77,7 +77,7 @@
             </div>
         </div>
         <!-- Roulette Feature -->
-        <div>
+        <div class="mb-3">
             <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border
                         {% if etablissement.roulette_enabled %}
                             bg-success-subtle border-success
@@ -117,6 +117,50 @@
                            name="roulette_enabled"
                            value="on"
                            {% if etablissement.roulette_enabled %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+        <!-- AI Responses Feature -->
+        <div>
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border
+                        {% if etablissement.ai_responses_enabled %}
+                            bg-success-subtle border-success
+                        {% else %}
+                            bg-danger-subtle border-danger
+                        {% endif %}">
+                <div class="d-flex align-items-center gap-3">
+                    <div>
+                        <div class="rounded-circle
+                                    {% if etablissement.ai_responses_enabled %}
+                                        bg-success
+                                    {% else %}
+                                        bg-danger
+                                    {% endif %}
+                                    text-white d-flex align-items-center justify-content-center"
+                             style="width: 48px;
+                                    height: 48px">
+                            <i class="fa-solid fa-robot fa-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="id_ai_responses_enabled"
+                               class="form-label fw-semibold mb-0">Réponses IA</label>
+                        <div class="form-text small mb-0">
+                            {% if etablissement.ai_responses_enabled %}
+                                <span class="text-success">Activé</span> - Les avis reçoivent une réponse automatique
+                            {% else %}
+                                <span class="text-danger">Désactivé</span> - Aucune réponse automatique
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-check form-switch feature-toggle-switch d-flex align-items-center justify-content-end">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           id="id_ai_responses_enabled"
+                           name="ai_responses_enabled"
+                           value="on"
+                           {% if etablissement.ai_responses_enabled %}checked{% endif %}>
                 </div>
             </div>
         </div>

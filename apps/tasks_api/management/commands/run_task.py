@@ -8,18 +8,19 @@ useful for local development and testing.
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.tasks_api.api.task_tracking import TaskTracker
+from apps.tasks_api.services.ai_response_service import generate_and_send_responses
 from apps.tasks_api.services.review_service import fetch_reviews, fetch_stats
 from starshield.logger import logger
 
 
 class Command(BaseCommand):
-    help = "Run a task locally (fetch-all or fetch-refresh) for a given Etablissement"
+    help = "Run a task locally (fetch-all, fetch-refresh, or generate-ai-responses) for a given Etablissement"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "task_type",
             type=str,
-            help="Task type: 'fetch-all' or 'fetch-refresh'",
+            help="Task type: 'fetch-all', 'fetch-refresh', or 'generate-ai-responses'",
         )
         parser.add_argument(
             "etablissement_id",
@@ -33,14 +34,15 @@ class Command(BaseCommand):
 
         logger.info(f"[{etablissement_id}] Starting task execution: {task_type}")
 
-        # Validate task type
-        if task_type not in ["fetch-all", "fetch-refresh"]:
-            raise CommandError(f"Invalid task_type: '{task_type}'. Must be 'fetch-all' or 'fetch-refresh'")
+        valid_types = ["fetch-all", "fetch-refresh", "generate-ai-responses"]
+        if task_type not in valid_types:
+            raise CommandError(f"Invalid task_type: '{task_type}'. Must be one of: {', '.join(valid_types)}")
 
         # Map command task types to TaskTracker task types
         tracker_task_type = {
             "fetch-all": "fetch_reviews_all",
             "fetch-refresh": "fetch_reviews_refresh",
+            "generate-ai-responses": "generate_ai_responses",
         }[task_type]
 
         # Execute the appropriate task using TaskTracker
@@ -59,6 +61,10 @@ class Command(BaseCommand):
                         fetch_stats,
                         lambda e: fetch_reviews(e, new_only=True),
                     ],
+                )
+            elif task_type == "generate-ai-responses":
+                tracker.execute(
+                    [generate_and_send_responses],
                 )
         except ValueError as e:
             logger.error(f"[{etablissement_id}] Task execution failed: {e}")
