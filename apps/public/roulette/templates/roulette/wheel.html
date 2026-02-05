@@ -89,20 +89,22 @@
             </div>
         {% endfill %}
         {% fill "footer" %}
-            {% component "button"
-                text="Démarrer la vérification"
-                classes="btn-primary btn-lg rounded-pill px-5 shadow-sm"
-                icon="fa-brands fa-google me-2"
-                extra_kwargs={
-                "type": "button",
-                "id": "reviewLinkBtn",
-                "data-review-url": review_url,
-                "data-bs-dismiss": "modal",
-                "data-bs-toggle": "modal",
-                "data-bs-target": "#verificationModal"
-                }
-                %}
-            {% endcomponent %}
+            <div class="d-flex justify-content-center align-items-center w-100">
+                {% component "button"
+                    text="Démarrer la vérification"
+                    classes="btn-primary btn-lg rounded-pill px-5 shadow-sm"
+                    icon="fa-brands fa-google me-2"
+                    extra_kwargs={
+                    "type": "button",
+                    "id": "reviewLinkBtn",
+                    "data-review-url": review_url,
+                    "data-bs-dismiss": "modal",
+                    "data-bs-toggle": "modal",
+                    "data-bs-target": "#verificationModal"
+                    }
+                    %}
+                {% endcomponent %}
+            </div>
         {% endfill %}
     {% endcomponent %}
     <!-- Verification Modal -->

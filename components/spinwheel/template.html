@@ -60,7 +60,7 @@
         --wheel-indicator-offset: calc(var(--wheel-indicator-space) * 0.5);
         --wheel-arrow-overlap: 30px;
         --wheel-border: 10px;
-        --wheel-shadow: 0 18px 40px rgba(13, 110, 253, 0.18);
+        --wheel-shadow: 5px 18px 40px rgba(13, 110, 253, 0.18);
         --wheel-border-color: #ffffff;
         --wheel-bg: #f1f5ff;
         --wheel-text: #0b2b5a;
@@ -83,16 +83,30 @@
         max-width: 100%;
     }
 
+    .spinwheel-frame::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: var(--wheel-size);
+        height: var(--wheel-size);
+        border-radius: 50%;
+        box-shadow: var(--wheel-shadow);
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
     .spinwheel-wheel {
         position: relative;
         width: var(--wheel-size);
         height: var(--wheel-size);
         border-radius: 50%;
         background: var(--wheel-bg);
-        box-shadow: var(--wheel-shadow);
         border: var(--wheel-border) solid var(--wheel-border-color);
         transition: transform 0.4s ease;
         will-change: transform;
+        z-index: 2;
     }
 
     .spinwheel-slices {
