@@ -55,7 +55,7 @@
 {{ prizes|json_script:prizes_json_id }}
 <style>
     .spinwheel {
-        --wheel-size: clamp(220px, 70vw, 360px);
+        --wheel-size: clamp(220px, 90vw, 360px);
         --wheel-indicator-space: clamp(52px, 12vw, 70px);
         --wheel-indicator-offset: calc(var(--wheel-indicator-space) * 0.5);
         --wheel-arrow-overlap: 30px;
@@ -239,16 +239,6 @@
             opacity: 0;
         }
     }
-
-    @media (min-width: 768px) {
-        .spinwheel {
-            --wheel-size: clamp(280px, 55vw, 380px);
-        }
-
-        .spinwheel-prize {
-            font-size: 0.9rem;
-        }
-    }
 </style>
 <script>
     (function() {
@@ -326,7 +316,10 @@
             }
 
             function emitEvent(name, detail) {
-                root.dispatchEvent(new CustomEvent(name, { detail: detail || {}, bubbles: true }));
+                root.dispatchEvent(new CustomEvent(name, {
+                    detail: detail || {},
+                    bubbles: true
+                }));
             }
 
             function spinToIndex(index, duration) {
@@ -338,14 +331,20 @@
                 setRotation(finalRotation);
                 setPrizeLabel(null, '');
                 setSpinning(true);
-                emitEvent('spinwheel:spin-start', { index: index, duration: duration });
+                emitEvent('spinwheel:spin-start', {
+                    index: index,
+                    duration: duration
+                });
                 window.setTimeout(function() {
                     setSpinning(false);
                     setPrizeLabel(index, '');
                     if (confetti) {
                         fireConfetti(root);
                     }
-                    emitEvent('spinwheel:spin-stop', { index: index, duration: duration });
+                    emitEvent('spinwheel:spin-stop', {
+                        index: index,
+                        duration: duration
+                    });
                 }, duration);
             }
 
@@ -372,7 +371,10 @@
                 wheel.classList.add('is-spinning');
                 setSpinning(true);
                 setPrizeLabel(null, '');
-                emitEvent('spinwheel:spin-start', { index: null, duration: null });
+                emitEvent('spinwheel:spin-start', {
+                    index: null,
+                    duration: null
+                });
                 return;
             }
 
