@@ -15,6 +15,7 @@ from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
+from apps.private.auths.models import WeeklyPerformanceSummary
 from apps.tasks_api.models import TaskExecution
 from apps.tasks_api.services.queue_service import enqueue_refresh_task
 
@@ -69,11 +70,17 @@ def overview_view(request):
     ordered_reviews = reviews_queryset.order_by("-writen_at", "-created_at")
     latest_reviews = ordered_reviews.filter(writen_at__gte=timezone.now() - timedelta(days=15))
 
+    # Latest weekly summary
+    weekly_summary = WeeklyPerformanceSummary.objects.filter(
+        etablissement=etablissement,
+    ).first()
+
     context = {
         "etablissement": etablissement,
         "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
         "general_stats": general_stats,
         "latest_reviews": list(latest_reviews),
+        "weekly_summary": weekly_summary,
     }
 
     return starshield_render(

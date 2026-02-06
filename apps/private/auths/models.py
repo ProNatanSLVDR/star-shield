@@ -620,6 +620,21 @@ class RatingHistory(models.Model):
         return f"Rating {self.rating}★ for {self.etablissement.title} on {self.created_at.strftime('%Y-%m-%d')}"
 
 
+class WeeklyPerformanceSummary(models.Model):
+    etablissement = models.ForeignKey(Etablissement, on_delete=models.CASCADE, related_name="weekly_summaries")
+    week_start_date = models.DateField(help_text="Monday of the week")
+    short_summary = models.TextField(help_text="Short preview for the card", blank=True, default="")
+    summary_text = models.TextField(help_text="AI-generated full report")
+    advice_text = models.TextField(help_text="AI-generated advice section", blank=True, default="")
+    metrics_data = models.JSONField(default=dict, blank=True, help_text="Raw metrics used for generation")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-week_start_date"]
+        unique_together = [("etablissement", "week_start_date")]
+        indexes = [models.Index(fields=["etablissement", "-week_start_date"])]
+
+
 @receiver(pre_save, sender=User)
 def delete_old_profile_picture(sender, instance, **kwargs):
     """

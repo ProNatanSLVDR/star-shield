@@ -15,6 +15,7 @@ class TaskExecution(models.Model):
         ("fetch_stats", "Fetch Stats"),
         ("fetch_reviews", "Fetch Reviews"),
         ("generate_ai_responses", "Generate AI Responses"),
+        ("generate_weekly_summary", "Generate Weekly Summary"),
     ]
 
     STATUS_CHOICES = [

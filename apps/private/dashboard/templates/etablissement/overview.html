@@ -84,29 +84,47 @@
                     </div>
                 {% endslot %}
             {% endcomponent %}
-            <!-- Settings Link Section -->
+            <!-- Shieldy Weekly Report -->
             {% component "card" title="Rapport de Shieldy" icon="fa-solid fa-robot" card_classes="w-100 overflow-hidden bg-primary-subtle border-primary-subtle" %}
                 {% slot body %}
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
-                             style="width: 48px;
-                                    height: 48px">
-                            <i class="fa-solid fa-robot fs-4"></i>
+                    {% if weekly_summary %}
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width: 48px;
+                                        height: 48px">
+                                <i class="fa-solid fa-robot fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-primary">
+                                    Semaine du {{ weekly_summary.week_start_date|date:"d/m/Y" }}
+                                </h6>
+                                <p class="text-muted small mb-2">
+                                    {{ weekly_summary.short_summary }}
+                                </p>
+                                <button type="button"
+                                        class="btn btn-sm btn-primary rounded-pill d-inline-flex align-items-center gap-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#shieldyReportModal">
+                                    <i class="fa-solid fa-book-open"></i>
+                                    Lire le rapport complet
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-primary">Résumé de la semaine dernière</h6>
-                            <p class="text-muted small mb-2">
-                                Bonjour ! Je suis <strong>Shieldy</strong>, votre assistant IA. Voici ce que j'ai observé pour {{ etablissement.title }} cette semaine :
-                            </p>
-                            <ul class="small text-muted ps-3 mb-0">
-                                <li>Votre note moyenne est restée stable à {{ general_stats.0.value }} ★.</li>
-                                <li>
-                                    Vous avez reçu de nouveaux avis positifs soulignant la qualité de votre service.
-                                </li>
-                                <li>Le taux de redirection vers Google est en augmentation de 12%.</li>
-                            </ul>
+                    {% else %}
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width: 48px;
+                                        height: 48px">
+                                <i class="fa-solid fa-robot fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-primary">Rapport hebdomadaire</h6>
+                                <p class="text-muted small mb-0">
+                                    Le rapport de Shieldy sera bientôt disponible. Revenez la semaine prochaine pour découvrir l'analyse de vos performances !
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
                 {% endslot %}
             {% endcomponent %}
         </div>
@@ -199,4 +217,32 @@
             {% endcomponent %}
         </div>
     </div>
+    {% if weekly_summary %}
+        {% component "empty_modal" modal_id="shieldyReportModal" size="lg" %}
+            {% fill "title" %}
+                <i class="fa-solid fa-robot text-primary me-2"></i>
+                Rapport de Shieldy — Semaine du {{ weekly_summary.week_start_date|date:"d/m/Y" }}
+            {% endfill %}
+            {% fill "body" %}
+                <div class="p-3">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fa-solid fa-chart-line text-primary me-2"></i>
+                        Rapport de la semaine
+                    </h6>
+                    <div class="mb-4">
+                        {{ weekly_summary.summary_text|linebreaksbr }}
+                    </div>
+                    {% if weekly_summary.advice_text %}
+                        <div class="bg-primary-subtle border border-primary-subtle rounded-3 p-3">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fa-solid fa-lightbulb text-primary me-2"></i>
+                                Les conseils de Shieldy
+                            </h6>
+                            {{ weekly_summary.advice_text|linebreaksbr }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfill %}
+        {% endcomponent %}
+    {% endif %}
 {% endblock dashboard_content %}
