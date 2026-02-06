@@ -65,7 +65,9 @@
                                                           {% endif %}">
                                                 <i class="fa-solid
                                                           {% if slot.routing == 'roulette' %}
-                                                              fa-circle-notch
+                                                              fa-record-vinyl
+                                                          {% elif slot.routing == 'verify' %}
+                                                              fa-circle-check
                                                           {% else %}
                                                               fa-comment-dots
                                                           {% endif %}
@@ -145,6 +147,12 @@
                                                         selected
                                                     {% endif %}>
                                                 Roulette
+                                            </option>
+                                            <option value="verify"
+                                                    {% if form.routing.value|default:selected_qr_code.routing == "verify" %}
+                                                        selected
+                                                    {% endif %}>
+                                                Roulette (Page de vérification des codes)
                                             </option>
                                         </select>
                                         <div class="form-text">Où ce QR code redirige les utilisateurs.</div>
