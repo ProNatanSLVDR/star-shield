@@ -9,15 +9,16 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.private.auths.models import WeeklyPerformanceSummary
 from apps.private.dashboard.render import starshield_render
 from apps.public.reviews.models import Review, ReviewAnalytics
+from apps.public.roulette.models import RouletteAnalytics, RouletteSpin
+from apps.tasks_api.models import TaskExecution
+from apps.tasks_api.services.queue_service import enqueue_refresh_task
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from apps.private.auths.models import WeeklyPerformanceSummary
-from apps.tasks_api.models import TaskExecution
-from apps.tasks_api.services.queue_service import enqueue_refresh_task
 
 
 @google_gmb_connected_required
@@ -77,7 +78,7 @@ def overview_view(request):
 
     context = {
         "etablissement": etablissement,
-        "starshield_feedback_url": reverse("reviews:feedback", args=[etablissement.uuid]),
+        "starshield_feedback_url": reverse("dashboard:etablissement:qrcodes"),
         "general_stats": general_stats,
         "latest_reviews": list(latest_reviews),
         "weekly_summary": weekly_summary,
@@ -234,6 +235,45 @@ def stats_view(request):
         },
     ]
 
+    # Roulette stats
+    roulette_spins_played = RouletteAnalytics.objects.filter(etablissement=etablissement, type="roulette_spun").count()
+    roulette_prizes_given = RouletteSpin.objects.filter(etablissement=etablissement).count()
+    roulette_prizes_redeemed = RouletteSpin.objects.filter(etablissement=etablissement, is_used=True).count()
+    roulette_redemption_rate = (
+        round((roulette_prizes_redeemed / roulette_prizes_given) * 100, 1) if roulette_prizes_given > 0 else 0
+    )
+
+    roulette_stats = [
+        {
+            "label": "Tours joués",
+            "value": roulette_spins_played,
+            "icon": "fa-solid fa-rotate",
+            "color": "purple",
+            "bg": "rgba(111, 66, 193, 0.1)",
+        },
+        {
+            "label": "Prix distribués",
+            "value": roulette_prizes_given,
+            "icon": "fa-solid fa-gift",
+            "color": "primary",
+            "bg": "rgba(13, 110, 253, 0.1)",
+        },
+        {
+            "label": "Prix réclamés",
+            "value": roulette_prizes_redeemed,
+            "icon": "fa-solid fa-check",
+            "color": "success",
+            "bg": "rgba(25, 135, 84, 0.1)",
+        },
+        {
+            "label": "Taux de réclamation",
+            "value": f"{roulette_redemption_rate}%",
+            "icon": "fa-solid fa-percent",
+            "color": "warning",
+            "bg": "rgba(255, 193, 7, 0.1)",
+        },
+    ]
+
     context = {
         "etablissement": etablissement,
         "chart_payload_json": json.dumps(chart_payload),
@@ -243,6 +283,7 @@ def stats_view(request):
         "total_reviews": total_reviews,
         "rating_distribution": rating_distribution,
         "qr_codes_stats": qr_codes_stats,
+        "roulette_stats": roulette_stats,
     }
 
     return starshield_render(

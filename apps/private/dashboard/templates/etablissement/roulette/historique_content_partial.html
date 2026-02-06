@@ -1,5 +1,26 @@
 {% load component_tags %}
 
+<!-- Stats cards -->
+<div class="row g-3 mb-4">
+    {% for stat in stats %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="text-muted small mb-1">{{ stat.label }}</p>
+                            <h2 class="fw-bold text-body-emphasis mb-0">{{ stat.value }}</h2>
+                        </div>
+                        <div class="p-3 rounded-3" style="background: {{ stat.bg }};">
+                            <i class="{{ stat.icon }} {% if stat.color == 'purple' %}{% else %}text-{{ stat.color }}{% endif %}" style="font-size: 1.5rem;{% if stat.color == 'purple' %} color: #6f42c1;{% endif %}"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
 <!-- Time filter -->
 <div class="mb-4">
     <div class="rounded-4 border bg-white shadow-sm p-3">
@@ -24,27 +45,6 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- Stats cards -->
-<div class="row g-3 mb-4">
-    {% for stat in stats %}
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div>
-                            <p class="text-muted small mb-1">{{ stat.label }}</p>
-                            <h2 class="fw-bold text-body-emphasis mb-0">{{ stat.value }}</h2>
-                        </div>
-                        <div class="p-3 rounded-3" style="background: {{ stat.bg }};">
-                            <i class="{{ stat.icon }} {% if stat.color == 'purple' %}{% else %}text-{{ stat.color }}{% endif %}" style="font-size: 1.5rem;{% if stat.color == 'purple' %} color: #6f42c1;{% endif %}"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endfor %}
 </div>
 
 <!-- Prizes table -->

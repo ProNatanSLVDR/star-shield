@@ -52,6 +52,12 @@ def list_etablissements_view(request):
             "centered": True,
             "icon": "fa-solid fa-credit-card",
         },
+        {
+            "label": "Fonctionnalités",
+            "key": "features",
+            "centered": True,
+            "icon": "fa-solid fa-toggle-on",
+        },
         {"label": "Actions", "key": "actions", "centered": True, "icon": "fa-solid fa-gear"},
     ]
 
@@ -64,19 +70,8 @@ def list_etablissements_view(request):
         subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
         is_cancelled_at_period_end = subscription and subscription.cancel_at_period_end
 
-        # Add activate button for inactive establishments
-        if not etablissement.active:
-            activate_button = {
-                "text": "Activer",
-                "icon": "fa-solid fa-toggle-on",
-                "classes": "btn-sm btn-success w-100",
-                "extra_kwargs": {
-                    "hx_modal_toggle": True,
-                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
-                },
-            }
-            buttons.append(activate_button)
-        elif is_cancelled_at_period_end:
+        # Check reactivation first (subscription cancelled at period end, regardless of active flag)
+        if is_cancelled_at_period_end:
             # Add reactivate button for establishments with cancelled subscription
             reactivate_button = {
                 "text": "Réactiver",
@@ -88,6 +83,18 @@ def list_etablissements_view(request):
                 },
             }
             buttons.append(reactivate_button)
+        elif not etablissement.active:
+            # Add activate button for inactive establishments
+            activate_button = {
+                "text": "Activer",
+                "icon": "fa-solid fa-toggle-on",
+                "classes": "btn-sm btn-success w-100",
+                "extra_kwargs": {
+                    "hx_modal_toggle": True,
+                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
+                },
+            }
+            buttons.append(activate_button)
         else:
             # Add deactivate button for active establishments
             deactivate_button = {
@@ -164,10 +171,23 @@ def list_etablissements_view(request):
             else created_at_str
         )
 
+        # Feature badges
+        feature_badges = []
+        features = [
+            ("Filtrage", etablissement.review_filtering_enabled),
+            ("Roulette", etablissement.roulette_enabled),
+            ("IA", etablissement.ai_responses_enabled),
+        ]
+        for label, enabled in features:
+            variant = "success" if enabled else "secondary"
+            feature_badges.append(f'<span class="badge bg-{variant} me-1">{label}</span>')
+        features_html = "".join(feature_badges)
+
         row = {
             "title": etablissement.title,
             "created_at": created_at_cell,
             "subscription": subscription_badge,
+            "features": {"type": "html", "value": features_html},
             "actions": {
                 "type": "buttons",
                 "buttons": buttons,
@@ -408,11 +428,11 @@ def toggle_etablissement_status_partial(request, id):
     For reactivation: shows confirmation explaining subscription will continue normally.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
-    is_activation = not etablissement.active
 
-    # Check if this is a reactivation case (active etablissement with cancelled subscription)
+    # Check subscription status first to determine reactivation
     subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-    is_reactivation = etablissement.active and subscription and subscription.cancel_at_period_end
+    is_reactivation = subscription is not None and subscription.cancel_at_period_end
+    is_activation = not etablissement.active and not is_reactivation
 
     context = {
         "etablissement": etablissement,
@@ -524,11 +544,11 @@ def toggle_etablissement_status(request, id):
     For reactivation: removes cancel_at_period_end flag from subscription.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
-    is_activation = not etablissement.active
 
-    # Check if this is a reactivation case (active etablissement with cancelled subscription)
+    # Check subscription status first to determine reactivation
     subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-    is_reactivation = etablissement.active and subscription and subscription.cancel_at_period_end
+    is_reactivation = subscription is not None and subscription.cancel_at_period_end
+    is_activation = not etablissement.active and not is_reactivation
 
     hx_triggers = {
         "close-modal": True,

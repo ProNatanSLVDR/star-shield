@@ -23,6 +23,7 @@ QR_COLOR_MASK_CHOICES = [
 QR_ROUTING_CHOICES = [
     ("feedback", "Feedback"),
     ("roulette", "Roulette"),
+    ("verify", "Vérification des codes"),
 ]
 
 # AI Response Choices

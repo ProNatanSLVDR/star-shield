@@ -555,7 +555,9 @@ class QRCode(models.Model):
 
         if self.routing == "roulette":
             return reverse("roulette:wheel", args=[identifier])
-        if self.routing == "feedback":  # feedback
+        if self.routing == "verify":
+            return reverse("roulette:verify", args=[identifier])
+        if self.routing == "feedback":
             return reverse("reviews:feedback", args=[identifier])
 
         return None

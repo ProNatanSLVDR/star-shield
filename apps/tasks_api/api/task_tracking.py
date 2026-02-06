@@ -81,12 +81,14 @@ class TaskTracker:
             self.task_execution.mark_success()
 
         except ValueError as e:
-            self.task_execution.refresh_from_db()
-            if self.task_execution.status == "running":
-                self.task_execution.mark_error(str(e))
+            if self.task_execution:
+                self.task_execution.refresh_from_db()
+                if self.task_execution.status == "running":
+                    self.task_execution.mark_error(str(e))
             logger.error(f"[{self.etablissement_id}] Error in TaskTracker.execute: {e}")
             raise
         except Exception as e:
-            self.task_execution.mark_error(str(e))
+            if self.task_execution:
+                self.task_execution.mark_error(str(e))
             logger.error(f"[{self.etablissement_id}] Error in TaskTracker.execute: {e}")
             raise

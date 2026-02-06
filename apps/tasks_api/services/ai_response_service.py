@@ -72,10 +72,9 @@ RATING_CONTEXT = {
 def _get_rating_context(rating: int) -> str:
     if rating <= 2:
         return RATING_CONTEXT["low"]
-    elif rating == 3:
+    if rating == 3:
         return RATING_CONTEXT["mid"]
-    else:
-        return RATING_CONTEXT["high"]
+    return RATING_CONTEXT["high"]
 
 
 def _build_system_prompt(etablissement: Etablissement) -> str:
@@ -87,7 +86,7 @@ def _build_system_prompt(etablissement: Etablissement) -> str:
         TONE_INSTRUCTIONS.get(tone, TONE_INSTRUCTIONS["professionnel"]),
         LENGTH_INSTRUCTIONS.get(length, LENGTH_INSTRUCTIONS["medium"]),
         LANGUAGE_INSTRUCTIONS.get(language, LANGUAGE_INSTRUCTIONS["fr"]),
-        f"Tu rediges des reponses pour l'etablissement \"{etablissement.title}\".",
+        f'Tu rediges des reponses pour l\'etablissement "{etablissement.title}".',
         "IMPORTANT: Tu ne generes QUE la reponse a l'avis, sans aucun prefixe, sans guillemets, sans explication.",
     ]
 
@@ -125,14 +124,16 @@ def generate_and_send_responses(etablissement: Etablissement) -> dict:
 
     # Query unreplied reviews from the last 30 days
     cutoff_date = timezone.now() - timedelta(days=30)
-    unreplied_reviews = Review.objects.filter(
-        etablissement=etablissement,
-        source="google",
-        reply_comment__isnull=True,
-        writen_at__gte=cutoff_date,
-    ).exclude(
-        comment=""
-    ).order_by("-writen_at")
+    unreplied_reviews = (
+        Review.objects.filter(
+            etablissement=etablissement,
+            source="google",
+            reply_comment__isnull=True,
+            writen_at__gte=cutoff_date,
+        )
+        .exclude(comment="")
+        .order_by("-writen_at")
+    )
 
     total_reviews = unreplied_reviews.count()
     responded = 0
@@ -146,6 +147,11 @@ def generate_and_send_responses(etablissement: Etablissement) -> dict:
     logger.info(f"[{etablissement.id}] Found {total_reviews} unreplied reviews to process")
 
     # Get the reviews service for posting replies
+    if not etablissement.google_credential_id:
+        error_msg = f"No Google credentials for {etablissement.title}"
+        logger.error(f"[{etablissement.id}] {error_msg}")
+        return {"total_reviews": total_reviews, "responded": 0, "failed": total_reviews, "errors": [error_msg]}
+
     reviews_service = etablissement.google_credential.get_reviews_service()
     if reviews_service is None:
         error_msg = f"Unable to initialize reviews service for {etablissement.title}"

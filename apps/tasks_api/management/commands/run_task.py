@@ -10,17 +10,18 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.tasks_api.api.task_tracking import TaskTracker
 from apps.tasks_api.services.ai_response_service import generate_and_send_responses
 from apps.tasks_api.services.review_service import fetch_reviews, fetch_stats
+from apps.tasks_api.services.weekly_summary_service import generate_and_store_weekly_summary
 from starshield.logger import logger
 
 
 class Command(BaseCommand):
-    help = "Run a task locally (fetch-all, fetch-refresh, or generate-ai-responses) for a given Etablissement"
+    help = "Run a task locally for a given Etablissement"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "task_type",
             type=str,
-            help="Task type: 'fetch-all', 'fetch-refresh', or 'generate-ai-responses'",
+            help="Task type: 'fetch-all', 'fetch-refresh', 'generate-ai-responses', or 'generate-weekly-summary'",
         )
         parser.add_argument(
             "etablissement_id",
@@ -34,7 +35,7 @@ class Command(BaseCommand):
 
         logger.info(f"[{etablissement_id}] Starting task execution: {task_type}")
 
-        valid_types = ["fetch-all", "fetch-refresh", "generate-ai-responses"]
+        valid_types = ["fetch-all", "fetch-refresh", "generate-ai-responses", "generate-weekly-summary"]
         if task_type not in valid_types:
             raise CommandError(f"Invalid task_type: '{task_type}'. Must be one of: {', '.join(valid_types)}")
 
@@ -43,6 +44,7 @@ class Command(BaseCommand):
             "fetch-all": "fetch_reviews_all",
             "fetch-refresh": "fetch_reviews_refresh",
             "generate-ai-responses": "generate_ai_responses",
+            "generate-weekly-summary": "generate_weekly_summary",
         }[task_type]
 
         # Execute the appropriate task using TaskTracker
@@ -65,6 +67,10 @@ class Command(BaseCommand):
             elif task_type == "generate-ai-responses":
                 tracker.execute(
                     [generate_and_send_responses],
+                )
+            elif task_type == "generate-weekly-summary":
+                tracker.execute(
+                    [generate_and_store_weekly_summary],
                 )
         except ValueError as e:
             logger.error(f"[{etablissement_id}] Task execution failed: {e}")

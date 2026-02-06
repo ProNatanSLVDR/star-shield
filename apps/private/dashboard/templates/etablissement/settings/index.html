@@ -56,24 +56,14 @@
                                            class="form-range flex-grow-1"
                                            id="id_target_rating"
                                            name="target_rating"
-                                           value="{% if etablissement.target_rating %}
-                                                      {{ etablissement.target_rating|stringformat:'.1f' }}
-                                                  {% else %}
-                                                      3.5
-                                                  {% endif %}"
+                                           value="{{ etablissement.target_rating|default:'3.5'|stringformat:'.1f' }}"
                                            step="0.1"
                                            min="3.5"
                                            max="4.9">
                                     <div class="text-primary fw-bold d-flex align-items-center gap-1"
                                          style="min-width: 60px;
                                                 justify-content: center">
-                                        <span id="target_rating_display">
-                                            {% if etablissement.target_rating %}
-                                                {{ etablissement.target_rating|stringformat:'.1f' }}
-                                            {% else %}
-                                                3.5
-                                            {% endif %}
-                                        </span>
+                                        <span id="target_rating_display">{{ etablissement.target_rating|default:'3.5'|stringformat:'.1f' }}</span>
                                         <i class="fa-solid fa-star"></i>
                                     </div>
                                 </div>
