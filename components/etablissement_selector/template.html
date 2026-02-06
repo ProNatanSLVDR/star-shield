@@ -1,23 +1,21 @@
-
-
 <div hx-get="{% url 'dashboard:etablissements:selector_partial' %}"
      hx-trigger="click"
      hx-target="#etablissementSelectorModal-inner-content"
      hx-swap="innerHTML"
      data-bs-toggle="modal"
      data-bs-target="#etablissementSelectorModal"
-     class="d-flex flex-column border border-primary-subtle border-2 rounded-3 overflow-hidden {% if not request.etablissement %}fa-beat-fade{% endif %}"
-     style="cursor: pointer; --fa-beat-fade-opacity: 0.67; --fa-beat-fade-scale: 1.025;">
-
+     class="d-flex flex-column border border-primary-subtle border-2 rounded-3 overflow-hidden
+            {% if not request.etablissement %}fa-beat-fade{% endif %}"
+     style="cursor: pointer;
+            --fa-beat-fade-opacity: 0.67;
+            --fa-beat-fade-scale: 1.025">
     <div class="d-flex align-items-center bg-primary p-2 px-3 fw-bold text-white">
-
-        <div class="rounded-circle bg-white text-primary text-center d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+        <div class="rounded-circle bg-white text-primary text-center d-flex align-items-center justify-content-center"
+             style="width: 24px;
+                    height: 24px">
             <i class="fa-solid fa-building"></i>
         </div>
-        <span class="ms-3 flex-grow-1">
-            Établissement
-        </span>
-
+        <span class="ms-3 flex-grow-1">Établissement</span>
     </div>
     <div class="p-2 text-center">
         {% if request.etablissement %}
@@ -27,13 +25,11 @@
         {% endif %}
     </div>
 </div>
-
-
 {% component "empty_modal"
-modal_id="etablissementSelectorModal"
-size="lg"
-%}
-{% fill title %}
-    Sélectionnez un établissement
-{% endfill %}
+    modal_id="etablissementSelectorModal"
+    size="lg"
+    %}
+    {% fill "title" %}
+        <i class="fa-solid fa-building me-2"></i>Sélectionnez un établissement
+    {% endfill %}
 {% endcomponent %}
