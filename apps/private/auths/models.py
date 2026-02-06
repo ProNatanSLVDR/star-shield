@@ -6,7 +6,7 @@ import uuid
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from google.auth.exceptions import RefreshError
@@ -378,7 +378,7 @@ class Etablissement(models.Model):
     )
 
     # for billing
-    active = models.BooleanField(default=False)
+    active = models.BooleanField(default=False, db_index=True)
 
     # access
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -530,24 +530,27 @@ class QRCode(models.Model):
         return f"{self.name} ({self.get_routing_display()})"
 
     def save(self, *args, **kwargs):
-        """Generate short_code if not set."""
-        if not self.short_code:
-            self.short_code = self._generate_unique_short_code()
-        super().save(*args, **kwargs)
+        """Generate short_code if not set, retry on collision."""
+        max_attempts = 10
+        for attempt in range(max_attempts):
+            if not self.short_code:
+                self.short_code = self._generate_short_code()
+            try:
+                super().save(*args, **kwargs)
+                return
+            except IntegrityError:
+                if attempt < max_attempts - 1:
+                    self.short_code = None
+                    continue
+                raise
 
-    def _generate_unique_short_code(self):
-        """Generate a unique short code (6-8 alphanumeric characters)."""
+    @staticmethod
+    def _generate_short_code():
+        """Generate a random short code (8 alphanumeric characters)."""
         import string
 
         characters = string.ascii_letters + string.digits
-        max_attempts = 100
-
-        for _ in range(max_attempts):
-            code = "".join(secrets.choice(characters) for _ in range(8))
-            if not QRCode.objects.filter(short_code=code).exists():
-                return code
-
-        raise ValueError("Could not generate unique short_code after multiple attempts")
+        return "".join(secrets.choice(characters) for _ in range(8))
 
     def get_target_url(self, identifier):
         """Return the target URL based on routing choice."""

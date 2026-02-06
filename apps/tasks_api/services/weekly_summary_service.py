@@ -4,6 +4,7 @@ Weekly Performance Summary service - generates AI-powered weekly summaries.
 
 from datetime import datetime, timedelta
 
+from django.db.models import Case, Count, IntegerField, When
 from django.utils import timezone
 
 from apps.private.auths.models import Etablissement, WeeklyPerformanceSummary
@@ -71,12 +72,8 @@ def collect_weekly_metrics(etablissement: Etablissement, week_start_date):
     week_end_date = week_start_date + timedelta(days=6)  # Sunday
 
     # Convert dates to datetime for filtering
-    week_start_datetime = timezone.make_aware(
-        datetime.combine(week_start_date, datetime.min.time())
-    )
-    week_end_datetime = timezone.make_aware(
-        datetime.combine(week_end_date, datetime.max.time())
-    )
+    week_start_datetime = timezone.make_aware(datetime.combine(week_start_date, datetime.min.time()))
+    week_end_datetime = timezone.make_aware(datetime.combine(week_end_date, datetime.max.time()))
 
     # Reviews metrics
     reviews_queryset = Review.objects.filter(etablissement=etablissement)
@@ -87,10 +84,12 @@ def collect_weekly_metrics(etablissement: Etablissement, week_start_date):
         writen_at__lte=week_end_datetime,
     )
 
-    new_reviews_count = week_reviews.count()
-    new_reviews_by_rating = {}
-    for rating in range(1, 6):
-        new_reviews_by_rating[rating] = week_reviews.filter(rating=rating).count()
+    rating_counts = week_reviews.aggregate(
+        total=Count("id"),
+        **{f"rating_{r}": Count(Case(When(rating=r, then=1), output_field=IntegerField())) for r in range(1, 6)},
+    )
+    new_reviews_count = rating_counts["total"]
+    new_reviews_by_rating = {r: rating_counts[f"rating_{r}"] for r in range(1, 6)}
 
     # Extract review texts (cap at 20, truncate comments to 500 chars)
     review_texts = []
@@ -101,33 +100,33 @@ def collect_weekly_metrics(etablissement: Etablissement, week_start_date):
         comment = review.comment or ""
         if len(comment) > 500:
             comment = comment[:500] + "..."
-        review_texts.append({
-            "rating": review.rating,
-            "comment": comment,
-            "reviewer_name": reviewer_name,
-            "source": review.source,
-        })
+        review_texts.append(
+            {
+                "rating": review.rating,
+                "comment": comment,
+                "reviewer_name": reviewer_name,
+                "source": review.source,
+            }
+        )
 
     # Rating at start and end of week
     rating_at_start = None
     rating_at_end = None
 
-    rating_history = etablissement.rating_history.filter(
-        created_at__lte=week_start_datetime
-    ).order_by("-created_at").first()
+    rating_history = (
+        etablissement.rating_history.filter(created_at__lte=week_start_datetime).order_by("-created_at").first()
+    )
     if rating_history:
         rating_at_start = float(rating_history.rating)
 
-    rating_history = etablissement.rating_history.filter(
-        created_at__lte=week_end_datetime
-    ).order_by("-created_at").first()
+    rating_history = (
+        etablissement.rating_history.filter(created_at__lte=week_end_datetime).order_by("-created_at").first()
+    )
     if rating_history:
         rating_at_end = float(rating_history.rating)
 
     # Total reviews at end of week
-    total_reviews_at_end = reviews_queryset.filter(
-        writen_at__lte=week_end_datetime
-    ).count()
+    total_reviews_at_end = reviews_queryset.filter(writen_at__lte=week_end_datetime).count()
 
     # QR code analytics
     analytics_queryset = ReviewAnalytics.objects.filter(etablissement=etablissement)
@@ -166,12 +165,8 @@ def collect_weekly_metrics(etablissement: Etablissement, week_start_date):
     # Comparison with previous week
     previous_week_start = get_previous_week_start(week_start_date)
     previous_week_end = previous_week_start + timedelta(days=6)
-    previous_week_start_datetime = timezone.make_aware(
-        datetime.combine(previous_week_start, datetime.min.time())
-    )
-    previous_week_end_datetime = timezone.make_aware(
-        datetime.combine(previous_week_end, datetime.max.time())
-    )
+    previous_week_start_datetime = timezone.make_aware(datetime.combine(previous_week_start, datetime.min.time()))
+    previous_week_end_datetime = timezone.make_aware(datetime.combine(previous_week_end, datetime.max.time()))
 
     previous_week_reviews = reviews_queryset.filter(
         writen_at__gte=previous_week_start_datetime,

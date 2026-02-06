@@ -4,6 +4,7 @@ import stripe
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_not_required
+from django.core.cache import cache
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -11,6 +12,8 @@ from django.views.decorators.http import require_POST
 from starshield.logger import logger
 
 from .services import sync_stripe_data
+
+WEBHOOK_EVENT_CACHE_TTL = 60 * 60 * 24  # 24 hours
 
 
 @csrf_exempt
@@ -33,6 +36,13 @@ def stripe_webhook(request):
     except stripe.error.SignatureVerificationError as e:
         logger.error(f"Webhook signature verification failed: {e}")
         return HttpResponse(status=400)
+
+    # Idempotency: skip already-processed events
+    event_id = event.get("id")
+    cache_key = f"stripe_webhook_{event_id}"
+    if cache.get(cache_key):
+        logger.info(f"Skipping already-processed webhook event {event_id}")
+        return HttpResponse(status=200)
 
     allowed_events = [
         "checkout.session.completed",
@@ -73,4 +83,7 @@ def stripe_webhook(request):
             logger.warning(f"Webhook event {event['type']} has no customer ID")
 
         logger.info(f"Webhook event {event['type']} processed successfully")
+
+    # Mark event as processed
+    cache.set(cache_key, True, WEBHOOK_EVENT_CACHE_TTL)
     return HttpResponse(status=200)

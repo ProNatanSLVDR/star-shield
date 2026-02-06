@@ -1,6 +1,9 @@
 from django import forms
+from django.core.validators import RegexValidator
 
 from apps.private.auths import choices
+
+hex_color_validator = RegexValidator(regex=r"^#[0-9a-fA-F]{6}$", message="Entrez une couleur hexadécimale valide.")
 
 
 class ThresholdObjectiveForm(forms.Form):
@@ -14,6 +17,7 @@ class ReviewSettingsForm(forms.Form):
     review_accent_color = forms.CharField(
         max_length=7,
         required=True,
+        validators=[hex_color_validator],
     )
     review_show_etablissement_pill = forms.ChoiceField(
         choices=[(True, "Oui"), (False, "Non")],

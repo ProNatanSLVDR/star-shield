@@ -1,4 +1,5 @@
 import random
+import secrets
 import string
 
 from django.contrib.admin.sites import login_not_required
@@ -19,7 +20,7 @@ def generate_prize_code(etablissement: Etablissement) -> str:
     """Generate a unique alphanumeric prize code for an etablissement."""
     max_attempts = 100
     for _ in range(max_attempts):
-        code = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        code = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
         if not RouletteSpin.objects.filter(prize_code=code).exists():
             return code
     raise ValueError("Failed to generate unique prize code")

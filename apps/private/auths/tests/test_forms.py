@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from django.test import SimpleTestCase
-
 from apps.private.auths.forms import UserLoginForm
+from django.test import SimpleTestCase
 
 
 class UserLoginFormTests(SimpleTestCase):

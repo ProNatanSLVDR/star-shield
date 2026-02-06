@@ -3,6 +3,8 @@ Review fetching service - pure business logic for managing reviews.
 No task execution tracking, no API concerns.
 """
 
+from django.db import transaction
+
 from apps.private.auths.models import Etablissement, RatingHistory
 from apps.public.reviews.models import Review
 from apps.public.reviews.utils import google_stars_to_number
@@ -119,12 +121,13 @@ def fetch_reviews(etablissement: Etablissement, new_only: bool = False) -> None:
                     defaults["reply_date"] = review["reviewReply"].get("updateTime")
                     defaults["reply_type"] = "google"
 
-                new_review, created = Review.objects.update_or_create(
-                    etablissement=etablissement,
-                    source="google",
-                    google_review_id=review.get("reviewId"),
-                    defaults=defaults,
-                )
+                with transaction.atomic():
+                    new_review, created = Review.objects.update_or_create(
+                        etablissement=etablissement,
+                        source="google",
+                        google_review_id=review.get("reviewId"),
+                        defaults=defaults,
+                    )
                 import_count += 1
                 review_id = review.get("reviewId", "unknown")
                 status = "new" if created else "existing"

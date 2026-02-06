@@ -1,5 +1,6 @@
 import stripe
 from django.conf import settings
+from django.db import transaction
 
 from apps.private.auths.models import Etablissement
 from starshield.logger import logger
@@ -13,20 +14,30 @@ def get_or_create_stripe_customer(user):
     """
     Ensure the user has a Stripe Customer ID.
     If not, create one in Stripe and save it to the User model.
+    Uses select_for_update to prevent duplicate creation.
     """
     if user.stripe_customer_id:
         return user.stripe_customer_id
 
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+
     try:
-        customer = stripe.Customer.create(
-            email=user.email,
-            metadata={
-                "userId": user.id,
-            },
-        )
-        user.stripe_customer_id = customer.id
-        user.save(update_fields=["stripe_customer_id"])
-        return customer.id
+        with transaction.atomic():
+            locked_user = User.objects.select_for_update().get(pk=user.pk)
+            if locked_user.stripe_customer_id:
+                return locked_user.stripe_customer_id
+
+            customer = stripe.Customer.create(
+                email=locked_user.email,
+                metadata={"userId": locked_user.id},
+                idempotency_key=f"create_customer_{locked_user.id}",
+            )
+            locked_user.stripe_customer_id = customer.id
+            locked_user.save(update_fields=["stripe_customer_id"])
+            user.stripe_customer_id = customer.id
+            return customer.id
     except Exception as e:
         logger.error(f"Failed to create Stripe customer for user {user.id}: {e}")
         raise
@@ -264,44 +275,41 @@ def sync_stripe_data(user):
         if subscription["cancel_at"] is not None:
             cancel_at_period_end = True
 
-        # Update local database
+        # Update local database + etablissement status atomically
         try:
-            if subscription_status not in STRIPE_CANCELED_STATUS:
-                sub_obj, created = StripeSubscription.objects.update_or_create(
-                    etablissement=etablissement,
-                    subscription_id=subscription_id,
-                    defaults={
-                        "status": subscription_status,
-                        "price_id": price_id,
-                        "cancel_at_period_end": cancel_at_period_end,
-                    },
-                )
-            else:
-                StripeSubscription.objects.filter(etablissement=etablissement, subscription_id=subscription_id).delete()
-        except Exception as e:
-            logger.error(f"Failed to update StripeSubscription for subscription {subscription_id}: {e}")
-            continue
-
-        # Activate etablissement if subscription is active (even if cancelled at period end, keep active until period ends)
-        try:
-            if subscription_status in STRIPE_ACTIVE_STATUS or subscription_status in STRIPE_INACTIVE_STATUS:
-                if not etablissement.active:
-                    etablissement.active = True
-                    etablissement.save()
-                    logger.info(f"Activated etablissement {etablissement.id} for active subscription {subscription_id}")
-            elif subscription_status in STRIPE_CANCELED_STATUS:
-                if etablissement.active:
-                    etablissement.active = False
-                    etablissement.save()
-                    logger.info(
-                        f"Deactivated etablissement {etablissement.id} for inactive subscription {subscription_id}"
+            with transaction.atomic():
+                if subscription_status not in STRIPE_CANCELED_STATUS:
+                    StripeSubscription.objects.update_or_create(
+                        subscription_id=subscription_id,
+                        defaults={
+                            "etablissement": etablissement,
+                            "status": subscription_status,
+                            "price_id": price_id,
+                            "cancel_at_period_end": cancel_at_period_end,
+                        },
                     )
-            else:
-                logger.warning(f"Subscription {subscription_id} has unknown status: {subscription_status}")
+                else:
+                    StripeSubscription.objects.filter(subscription_id=subscription_id).delete()
+
+                # Activate etablissement if subscription is active (even if cancelled at period end, keep active until period ends)
+                if subscription_status in STRIPE_ACTIVE_STATUS or subscription_status in STRIPE_INACTIVE_STATUS:
+                    if not etablissement.active:
+                        etablissement.active = True
+                        etablissement.save(update_fields=["active"])
+                        logger.info(
+                            f"Activated etablissement {etablissement.id} for active subscription {subscription_id}"
+                        )
+                elif subscription_status in STRIPE_CANCELED_STATUS:
+                    if etablissement.active:
+                        etablissement.active = False
+                        etablissement.save(update_fields=["active"])
+                        logger.info(
+                            f"Deactivated etablissement {etablissement.id} for inactive subscription {subscription_id}"
+                        )
+                else:
+                    logger.warning(f"Subscription {subscription_id} has unknown status: {subscription_status}")
         except Exception as e:
-            logger.error(
-                f"Failed to update etablissement {etablissement.id} status for subscription {subscription_id}: {e}"
-            )
+            logger.error(f"Failed to update subscription {subscription_id} / etablissement {etablissement.id}: {e}")
             continue
 
     # on désactive les etablissements qui n'ont pas d'abonnement actif

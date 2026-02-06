@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
 from apps.private.auths.models import Etablissement
+from starshield.logger import logger
 
 
 def calcul_objectif(noteactu: float, nb_notes: int, objectif: float) -> float:
@@ -25,7 +26,7 @@ def calcul_objectif(noteactu: float, nb_notes: int, objectif: float) -> float:
         if note > objectif:
             notes_potential_list.append(note)
 
-    print(f"notes potential list: {notes_potential_list}")
+    logger.debug(f"notes potential list: {notes_potential_list}")
 
     results = {
         "1_stars_needed": None,
@@ -48,7 +49,7 @@ def calcul_objectif(noteactu: float, nb_notes: int, objectif: float) -> float:
 
         results[f"{note}_stars_needed"] = nb_notes_to_add
 
-    print(results)
+    logger.debug(f"calcul_objectif results: {results}")
 
     return results
 
@@ -194,7 +195,7 @@ def estimations(note_actuelle: float, nb_notes: int, objectif: float, notes_par_
             new_test_array.extend(weekly_notes)
 
             if moyenne(new_test_array) >= objectif:
-                print(f"{i} semaines pour atteindre l'objectif, threshold: {threshold}")
+                logger.debug(f"{i} semaines pour atteindre l'objectif, threshold: {threshold}")
                 results[f"at_threshold_{threshold}"] = i
                 break
 

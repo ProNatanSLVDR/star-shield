@@ -16,8 +16,6 @@ class EtablissementSettingsForm(forms.Form):
 
 
 class ToggleFeatureForm(forms.Form):
-    # These fields are optional - they're only present when checkboxes are checked
-    # We'll check them directly from POST data since unchecked checkboxes don't send values
-    review_filtering_enabled = forms.CharField(required=False)
-    roulette_enabled = forms.CharField(required=False)
-    ai_responses_enabled = forms.CharField(required=False)
+    review_filtering_enabled = forms.BooleanField(required=False)
+    roulette_enabled = forms.BooleanField(required=False)
+    ai_responses_enabled = forms.BooleanField(required=False)

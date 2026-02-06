@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reviews', '0009_alter_reviewanalytics_type'),
+        ("reviews", "0009_alter_reviewanalytics_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='review',
-            name='reply_comment',
+            model_name="review",
+            name="reply_comment",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='review',
-            name='reply_date',
+            model_name="review",
+            name="reply_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='review',
-            name='reply_type',
-            field=models.CharField(blank=True, choices=[('ai', 'AI'), ('google', 'Google')], max_length=10, null=True),
+            model_name="review",
+            name="reply_type",
+            field=models.CharField(blank=True, choices=[("ai", "AI"), ("google", "Google")], max_length=10, null=True),
         ),
     ]

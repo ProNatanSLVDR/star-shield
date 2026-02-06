@@ -5,23 +5,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0028_alter_qrcode_options_and_more'),
+        ("auths", "0028_alter_qrcode_options_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='qrcode',
-            name='short_code',
-            field=models.CharField(blank=True, db_index=True, help_text='Code court unique pour identifier ce QR code dans les URLs.', max_length=8, null=True, unique=True),
+            model_name="qrcode",
+            name="short_code",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                help_text="Code court unique pour identifier ce QR code dans les URLs.",
+                max_length=8,
+                null=True,
+                unique=True,
+            ),
         ),
         migrations.CreateModel(
-            name='QRCodeScan',
+            name="QRCodeScan",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('qr_code', models.ForeignKey(help_text='QR code qui a été scanné.', on_delete=django.db.models.deletion.CASCADE, related_name='scans', to='auths.qrcode')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "qr_code",
+                    models.ForeignKey(
+                        help_text="QR code qui a été scanné.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="scans",
+                        to="auths.qrcode",
+                    ),
+                ),
             ],
         ),
     ]

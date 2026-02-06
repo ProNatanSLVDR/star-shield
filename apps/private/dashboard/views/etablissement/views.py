@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Case, Count, IntegerField, Q, When
+from django.db.models.functions import Coalesce
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -329,21 +330,15 @@ def avis_view(request):
             date_from = (today - timedelta(days=90)).strftime("%Y-%m-%d")
             date_to = today.strftime("%Y-%m-%d")
         elif date_preset == "all_time":
-            all_reviews = Review.objects.filter(etablissement=etablissement)
-            oldest_review = (
-                all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"})
-                .order_by("review_date")
-                .first()
+            all_reviews = Review.objects.filter(etablissement=etablissement).annotate(
+                review_date=Coalesce("writen_at", "created_at")
             )
+            oldest_review = all_reviews.order_by("review_date").first()
             if oldest_review:
                 review_date = oldest_review.writen_at or oldest_review.created_at
                 if review_date:
                     date_from = review_date.date().strftime("%Y-%m-%d")
-            newest_review = (
-                all_reviews.extra(select={"review_date": "COALESCE(writen_at, created_at)"})
-                .order_by("-review_date")
-                .first()
-            )
+            newest_review = all_reviews.order_by("-review_date").first()
             if newest_review:
                 review_date = newest_review.writen_at or newest_review.created_at
                 if review_date:
@@ -393,14 +388,11 @@ def avis_view(request):
         else:
             reviews_queryset = reviews_queryset.order_by("-rating", "-writen_at", "-created_at")
     else:  # order_by == "date"
+        reviews_queryset = reviews_queryset.annotate(sort_date=Coalesce("writen_at", "created_at"))
         if order_dir == "asc":
-            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by(
-                "sort_date"
-            )
+            reviews_queryset = reviews_queryset.order_by("sort_date")
         else:
-            reviews_queryset = reviews_queryset.extra(select={"sort_date": "COALESCE(writen_at, created_at)"}).order_by(
-                "-sort_date"
-            )
+            reviews_queryset = reviews_queryset.order_by("-sort_date")
 
     # Pagination
     paginator = Paginator(reviews_queryset, 50)

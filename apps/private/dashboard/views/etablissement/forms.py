@@ -1,6 +1,9 @@
 from django import forms
+from django.core.validators import RegexValidator
 
 from apps.private.auths import choices
+
+hex_color_validator = RegexValidator(regex=r"^#[0-9a-fA-F]{6}$", message="Entrez une couleur hexadécimale valide.")
 
 
 class QRCodeCreateForm(forms.Form):
@@ -39,16 +42,19 @@ class QRCodeSettingsForm(forms.Form):
         max_length=7,
         required=True,
         label="Couleur primaire",
+        validators=[hex_color_validator],
     )
     qr_fill_color_secondary = forms.CharField(
         max_length=7,
         required=True,
         label="Couleur secondaire",
+        validators=[hex_color_validator],
     )
     qr_background_color = forms.CharField(
         max_length=7,
         required=True,
         label="Couleur de fond",
+        validators=[hex_color_validator],
     )
     qr_style = forms.ChoiceField(
         choices=choices.QR_STYLE_CHOICES,

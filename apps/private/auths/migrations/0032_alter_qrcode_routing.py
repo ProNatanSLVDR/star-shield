@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0031_weeklyperformancesummary'),
+        ("auths", "0031_weeklyperformancesummary"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='qrcode',
-            name='routing',
-            field=models.CharField(choices=[('feedback', 'Feedback'), ('roulette', 'Roulette'), ('verify', 'Vérification des codes')], default='feedback', help_text='Destination du QR code (feedback ou roulette).', max_length=20),
+            model_name="qrcode",
+            name="routing",
+            field=models.CharField(
+                choices=[("feedback", "Feedback"), ("roulette", "Roulette"), ("verify", "Vérification des codes")],
+                default="feedback",
+                help_text="Destination du QR code (feedback ou roulette).",
+                max_length=20,
+            ),
         ),
     ]

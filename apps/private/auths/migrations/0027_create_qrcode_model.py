@@ -5,33 +5,104 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0026_add_review_filtering_enabled'),
+        ("auths", "0026_add_review_filtering_enabled"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='QRCode',
+            name="QRCode",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text="Nom du QR code pour l'identifier facilement.", max_length=255)),
-                ('routing', models.CharField(choices=[('feedback', 'Feedback'), ('roulette', 'Roulette')], default='feedback', help_text='Destination du QR code (feedback ou roulette).', max_length=20)),
-                ('is_default', models.BooleanField(default=False, help_text="Marquer ce QR code comme défaut pour l'établissement.")),
-                ('qr_fill_color', models.CharField(default='#000000', help_text='Couleur de remplissage du QR code (format hexadécimal).', max_length=7)),
-                ('qr_fill_color_secondary', models.CharField(default='#000000', help_text='Couleur secondaire pour les dégradés (format hexadécimal).', max_length=7)),
-                ('qr_background_color', models.CharField(default='#FFFFFF', help_text='Couleur de fond du QR code (format hexadécimal).', max_length=7)),
-                ('qr_style', models.CharField(choices=[('square', 'Carré'), ('square_spaced', 'Carré espacé'), ('rounded', 'Arrondi'), ('circle', 'Cercle')], default='square', help_text='Style des modules du QR code.', max_length=20)),
-                ('qr_color_mask', models.CharField(choices=[('solid', 'Solide'), ('round_radial', 'Dégradé radial rond'), ('square_radial', 'Dégradé radial carré'), ('horizontal_gradiant', 'Dégradé horizontal'), ('vertical_gradiant', 'Dégradé vertical')], default='solid', help_text='Style de masque de couleur pour le QR code.', max_length=20)),
-                ('qr_logo', models.ImageField(blank=True, help_text='Logo à afficher au centre du QR code.', null=True, upload_to='qr_logos/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('etablissement', models.ForeignKey(help_text='Établissement associé à ce QR code.', on_delete=django.db.models.deletion.CASCADE, related_name='qr_codes', to='auths.etablissement')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(help_text="Nom du QR code pour l'identifier facilement.", max_length=255)),
+                (
+                    "routing",
+                    models.CharField(
+                        choices=[("feedback", "Feedback"), ("roulette", "Roulette")],
+                        default="feedback",
+                        help_text="Destination du QR code (feedback ou roulette).",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "is_default",
+                    models.BooleanField(
+                        default=False, help_text="Marquer ce QR code comme défaut pour l'établissement."
+                    ),
+                ),
+                (
+                    "qr_fill_color",
+                    models.CharField(
+                        default="#000000",
+                        help_text="Couleur de remplissage du QR code (format hexadécimal).",
+                        max_length=7,
+                    ),
+                ),
+                (
+                    "qr_fill_color_secondary",
+                    models.CharField(
+                        default="#000000",
+                        help_text="Couleur secondaire pour les dégradés (format hexadécimal).",
+                        max_length=7,
+                    ),
+                ),
+                (
+                    "qr_background_color",
+                    models.CharField(
+                        default="#FFFFFF", help_text="Couleur de fond du QR code (format hexadécimal).", max_length=7
+                    ),
+                ),
+                (
+                    "qr_style",
+                    models.CharField(
+                        choices=[
+                            ("square", "Carré"),
+                            ("square_spaced", "Carré espacé"),
+                            ("rounded", "Arrondi"),
+                            ("circle", "Cercle"),
+                        ],
+                        default="square",
+                        help_text="Style des modules du QR code.",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "qr_color_mask",
+                    models.CharField(
+                        choices=[
+                            ("solid", "Solide"),
+                            ("round_radial", "Dégradé radial rond"),
+                            ("square_radial", "Dégradé radial carré"),
+                            ("horizontal_gradiant", "Dégradé horizontal"),
+                            ("vertical_gradiant", "Dégradé vertical"),
+                        ],
+                        default="solid",
+                        help_text="Style de masque de couleur pour le QR code.",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "qr_logo",
+                    models.ImageField(
+                        blank=True, help_text="Logo à afficher au centre du QR code.", null=True, upload_to="qr_logos/"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "etablissement",
+                    models.ForeignKey(
+                        help_text="Établissement associé à ce QR code.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="qr_codes",
+                        to="auths.etablissement",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'QR Code',
-                'verbose_name_plural': 'QR Codes',
-                'ordering': ['-is_default', 'name'],
+                "verbose_name": "QR Code",
+                "verbose_name_plural": "QR Codes",
+                "ordering": ["-is_default", "name"],
             },
         ),
     ]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, NamedTuple
+from collections.abc import Iterable
+from typing import Any, NamedTuple
 
 from django_components import Component, register
 

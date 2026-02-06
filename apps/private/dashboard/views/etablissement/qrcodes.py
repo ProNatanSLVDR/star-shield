@@ -33,10 +33,7 @@ def qr_code_management_view(request, short_code=None):
     selected_qr_code = None
 
     if short_code:
-        try:
-            selected_qr_code = QRCode.objects.filter(short_code=short_code, etablissement=etablissement).first()
-        except Exception:
-            selected_qr_code = None
+        selected_qr_code = QRCode.objects.filter(short_code=short_code, etablissement=etablissement).first()
 
     # If no QR code selected, use first one
     if not selected_qr_code:

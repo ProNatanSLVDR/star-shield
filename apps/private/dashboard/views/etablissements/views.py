@@ -596,7 +596,7 @@ def toggle_etablissement_status(request, id):
                 request.session["price_id"] = price_id
                 request.session["etablissement_id"] = etablissement.id
                 return redirect("payments:create_checkout_session")
-            print(form.errors)
+            logger.debug(f"ToggleEtablissementStatusForm errors: {form.errors}")
             messages.error(request, "Une erreur est survenue lors de la sélection du plan d'abonnement.")
 
     # Désactivation

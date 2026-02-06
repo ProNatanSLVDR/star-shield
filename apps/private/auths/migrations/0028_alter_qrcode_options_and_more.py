@@ -4,42 +4,41 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0027_create_qrcode_model'),
+        ("auths", "0027_create_qrcode_model"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='qrcode',
-            options={'verbose_name': 'QR Code', 'verbose_name_plural': 'QR Codes'},
+            name="qrcode",
+            options={"verbose_name": "QR Code", "verbose_name_plural": "QR Codes"},
         ),
         migrations.RemoveField(
-            model_name='etablissement',
-            name='qr_background_color',
+            model_name="etablissement",
+            name="qr_background_color",
         ),
         migrations.RemoveField(
-            model_name='etablissement',
-            name='qr_color_mask',
+            model_name="etablissement",
+            name="qr_color_mask",
         ),
         migrations.RemoveField(
-            model_name='etablissement',
-            name='qr_fill_color',
+            model_name="etablissement",
+            name="qr_fill_color",
         ),
         migrations.RemoveField(
-            model_name='etablissement',
-            name='qr_fill_color_secondary',
+            model_name="etablissement",
+            name="qr_fill_color_secondary",
         ),
         migrations.RemoveField(
-            model_name='etablissement',
-            name='qr_logo',
+            model_name="etablissement",
+            name="qr_logo",
         ),
         migrations.RemoveField(
-            model_name='etablissement',
-            name='qr_style',
+            model_name="etablissement",
+            name="qr_style",
         ),
         migrations.RemoveField(
-            model_name='qrcode',
-            name='is_default',
+            model_name="qrcode",
+            name="is_default",
         ),
     ]

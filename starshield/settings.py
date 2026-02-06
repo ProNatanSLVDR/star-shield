@@ -27,7 +27,7 @@ class Base(Configuration):
     # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
     # SECURITY
-    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "VERY_INSECURE_SECRET_KEY")
+    SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
     # Application definition
@@ -234,17 +234,13 @@ class Dev(Base):
     # BREVO_API_KEY = "keykey"
 
     # STRIPE (test keys)
-    STRIPE_PUBLIC_KEY = (
-        "pk_test_51SQXa9LTXmr2kgo1d0xybTC83CpckGWwAJgmg3So7zexggtedDp04OTZRf57KAtpqGZxqkrWcUxrFHbXjjgYopb300eENE18ue"
-    )
-    STRIPE_SECRET_KEY = (
-        "sk_test_51SQXa9LTXmr2kgo1PCSTaSVZlh60CUaEkqdMifTatyZYDoB1SYBv1TqiLwc0x1GjG5CcVIREDf5IKqOK7rM7yfQ900QgpOdrTa"
-    )
-    STRIPE_WEBHOOK_SECRET = "whsec_1a33b01f5f912d07f415cce17a6a55572f51f681e91ae2a077a78d57335078ba"
+    STRIPE_PUBLIC_KEY = os.environ["STRIPE_PUBLIC_KEY"]
+    STRIPE_SECRET_KEY = os.environ["STRIPE_SECRET_KEY"]
+    STRIPE_WEBHOOK_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
 
     # Google OAuth
-    GOOGLE_OAUTH_CLIENT_ID = "621365538525-pmqljdfrvshf91c3dn3aqbe62k5l5909.apps.googleusercontent.com"
-    GOOGLE_OAUTH_CLIENT_SECRET = "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"
+    GOOGLE_OAUTH_CLIENT_ID = os.environ["GOOGLE_OAUTH_CLIENT_ID"]
+    GOOGLE_OAUTH_CLIENT_SECRET = os.environ["GOOGLE_OAUTH_CLIENT_SECRET"]
     GOOGLE_OAUTH_GMB_SCOPES = [
         "https://www.googleapis.com/auth/business.manage",
         "https://www.googleapis.com/auth/userinfo.email",
@@ -323,6 +319,15 @@ class Prod(Base):
 
     # Trust Cloud Run proxy headers for HTTPS detection
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+    # Security headers
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SECURE = True
 
     WEBSITE_URL = f"https://{os.getenv('WEBSITE_URL', 'app.starshield.pro')}"
     GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")

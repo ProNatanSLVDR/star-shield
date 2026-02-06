@@ -4,30 +4,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auths', '0029_qrcode_short_code_qrcodescan'),
+        ("auths", "0029_qrcode_short_code_qrcodescan"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='etablissement',
-            name='ai_response_language',
-            field=models.CharField(choices=[('fr', 'Français'), ('en', 'English'), ('auto', 'Auto-detect')], default='fr', max_length=10),
+            model_name="etablissement",
+            name="ai_response_language",
+            field=models.CharField(
+                choices=[("fr", "Français"), ("en", "English"), ("auto", "Auto-detect")], default="fr", max_length=10
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='ai_response_length',
-            field=models.CharField(choices=[('short', 'Courte'), ('medium', 'Moyenne'), ('long', 'Longue')], default='medium', max_length=10),
+            model_name="etablissement",
+            name="ai_response_length",
+            field=models.CharField(
+                choices=[("short", "Courte"), ("medium", "Moyenne"), ("long", "Longue")],
+                default="medium",
+                max_length=10,
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='ai_response_tone',
-            field=models.CharField(choices=[('professionnel', 'Professionnel'), ('empathique', 'Empathique'), ('enthousiaste', 'Enthousiaste'), ('amical', 'Amical'), ('concis', 'Concis')], default='professionnel', max_length=20),
+            model_name="etablissement",
+            name="ai_response_tone",
+            field=models.CharField(
+                choices=[
+                    ("professionnel", "Professionnel"),
+                    ("empathique", "Empathique"),
+                    ("enthousiaste", "Enthousiaste"),
+                    ("amical", "Amical"),
+                    ("concis", "Concis"),
+                ],
+                default="professionnel",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='etablissement',
-            name='ai_responses_enabled',
+            model_name="etablissement",
+            name="ai_responses_enabled",
             field=models.BooleanField(default=False),
         ),
     ]

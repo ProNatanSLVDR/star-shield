@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks_api', '0002_alter_taskexecution_task_type'),
+        ("tasks_api", "0002_alter_taskexecution_task_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='taskexecution',
-            name='task_type',
-            field=models.CharField(choices=[('fetch_reviews_all', 'Fetch Reviews All'), ('fetch_reviews_refresh', 'Fetch Reviews Refresh'), ('fetch_stats', 'Fetch Stats'), ('fetch_reviews', 'Fetch Reviews'), ('generate_ai_responses', 'Generate AI Responses'), ('generate_weekly_summary', 'Generate Weekly Summary')], max_length=50),
+            model_name="taskexecution",
+            name="task_type",
+            field=models.CharField(
+                choices=[
+                    ("fetch_reviews_all", "Fetch Reviews All"),
+                    ("fetch_reviews_refresh", "Fetch Reviews Refresh"),
+                    ("fetch_stats", "Fetch Stats"),
+                    ("fetch_reviews", "Fetch Reviews"),
+                    ("generate_ai_responses", "Generate AI Responses"),
+                    ("generate_weekly_summary", "Generate Weekly Summary"),
+                ],
+                max_length=50,
+            ),
         ),
     ]

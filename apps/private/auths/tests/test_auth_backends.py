@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from apps.private.auths.auth_backends import EmailBackend
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.private.auths.auth_backends import EmailBackend
 from apps.private.auths.models import Entreprise
 
 

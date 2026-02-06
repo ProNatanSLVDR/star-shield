@@ -4,8 +4,28 @@ OpenRouter API service for generating AI responses.
 
 import requests
 from django.conf import settings
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from starshield.logger import logger
+
+_session = None
+
+
+def _get_session() -> requests.Session:
+    """Get a requests session with retry logic for transient failures."""
+    global _session
+    if _session is None:
+        _session = requests.Session()
+        retry_strategy = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["POST"],
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        _session.mount("https://", adapter)
+    return _session
 
 
 def generate_response(prompt: str, system_prompt: str) -> str:
@@ -28,8 +48,10 @@ def generate_response(prompt: str, system_prompt: str) -> str:
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY is not configured")
 
+    session = _get_session()
+
     try:
-        response = requests.post(
+        response = session.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {api_key}",
