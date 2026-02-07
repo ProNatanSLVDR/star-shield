@@ -207,9 +207,19 @@
                                         Réponse IA
                                     </span>
                                 </div>
-                                <div class="ai-tone-preview text-body-secondary"
+                                {% comment %} Professionnel {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
                                      data-tone="professionnel"
-                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'professionnel' %}display: none;{% endif %}">
+                                     data-length="short"
+                                     style="line-height: 1.6; display: none;">
+                                    Nous vous remercions pour votre
+                                    retour, Madame Dupont. Votre
+                                    satisfaction est notre priorité.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="professionnel"
+                                     data-length="medium"
+                                     style="line-height: 1.6; display: none;">
                                     Nous vous remercions sincèrement
                                     pour votre retour, Madame Dupont.
                                     Votre satisfaction est notre
@@ -219,9 +229,38 @@
                                     plaisir de vous accueillir à
                                     nouveau.
                                 </div>
-                                <div class="ai-tone-preview text-body-secondary"
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="professionnel"
+                                     data-length="long"
+                                     style="line-height: 1.6; display: none;">
+                                    Nous vous remercions sincèrement
+                                    pour votre retour, Madame Dupont.
+                                    Votre satisfaction est au cœur de
+                                    nos préoccupations et nous sommes
+                                    ravis que notre équipe ait su
+                                    répondre à vos attentes. C'est
+                                    grâce à des retours comme le vôtre
+                                    que nous pouvons continuer à
+                                    améliorer la qualité de nos
+                                    services. Nous mettons un point
+                                    d'honneur à offrir une expérience
+                                    irréprochable à chacun de nos
+                                    clients. Nous espérons avoir le
+                                    plaisir de vous accueillir à
+                                    nouveau très prochainement.
+                                </div>
+                                {% comment %} Empathique {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
                                      data-tone="empathique"
-                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'empathique' %}display: none;{% endif %}">
+                                     data-length="short"
+                                     style="line-height: 1.6; display: none;">
+                                    Votre avis nous touche beaucoup,
+                                    Marie. Merci du fond du cœur.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="empathique"
+                                     data-length="medium"
+                                     style="line-height: 1.6; display: none;">
                                     Votre avis nous touche beaucoup,
                                     Marie. Savoir que vous avez vécu
                                     une expérience aussi positive nous
@@ -230,9 +269,36 @@
                                     équipe trouve sa motivation au
                                     quotidien.
                                 </div>
-                                <div class="ai-tone-preview text-body-secondary"
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="empathique"
+                                     data-length="long"
+                                     style="line-height: 1.6; display: none;">
+                                    Votre avis nous touche
+                                    profondément, Marie. Savoir que
+                                    vous avez vécu une expérience aussi
+                                    positive nous remplit de joie et de
+                                    gratitude. Chaque membre de notre
+                                    équipe s'investit avec passion pour
+                                    créer des moments uniques. C'est
+                                    grâce à des personnes comme vous
+                                    que nous trouvons la motivation de
+                                    donner le meilleur de nous-mêmes
+                                    chaque jour. Votre recommandation
+                                    est le plus beau des compliments.
+                                </div>
+                                {% comment %} Enthousiaste {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
                                      data-tone="enthousiaste"
-                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'enthousiaste' %}display: none;{% endif %}">
+                                     data-length="short"
+                                     style="line-height: 1.6; display: none;">
+                                    Quelle joie de lire votre
+                                    commentaire, Marie ! Merci
+                                    infiniment !
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="enthousiaste"
+                                     data-length="medium"
+                                     style="line-height: 1.6; display: none;">
                                     Quelle joie de lire votre
                                     commentaire, Marie ! Nous sommes
                                     absolument ravis que vous ayez
@@ -241,9 +307,36 @@
                                     nous fait chaud au cœur, merci
                                     infiniment !
                                 </div>
-                                <div class="ai-tone-preview text-body-secondary"
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="enthousiaste"
+                                     data-length="long"
+                                     style="line-height: 1.6; display: none;">
+                                    Quelle joie immense de lire votre
+                                    commentaire, Marie ! Nous sommes
+                                    absolument ravis que vous ayez
+                                    passé un excellent moment avec
+                                    notre équipe. C'est exactement ce
+                                    genre de retour qui nous donne une
+                                    énergie incroyable ! Toute l'équipe
+                                    est aux anges de savoir que vous
+                                    avez apprécié votre expérience.
+                                    Votre recommandation nous fait
+                                    chaud au cœur et nous motive à nous
+                                    surpasser. Merci mille fois et à
+                                    très vite !
+                                </div>
+                                {% comment %} Amical {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
                                      data-tone="amical"
-                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'amical' %}display: none;{% endif %}">
+                                     data-length="short"
+                                     style="line-height: 1.6; display: none;">
+                                    Merci beaucoup Marie ! À très
+                                    bientôt chez nous !
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="amical"
+                                     data-length="medium"
+                                     style="line-height: 1.6; display: none;">
                                     Merci beaucoup Marie ! On est super
                                     contents que l'équipe vous ait plu.
                                     C'est toujours un plaisir
@@ -251,12 +344,46 @@
                                     sympathiques. À très bientôt chez
                                     nous !
                                 </div>
-                                <div class="ai-tone-preview text-body-secondary"
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="amical"
+                                     data-length="long"
+                                     style="line-height: 1.6; display: none;">
+                                    Merci beaucoup Marie ! On est super
+                                    contents que l'équipe vous ait plu,
+                                    ça fait vraiment plaisir à
+                                    entendre. C'est toujours un bonheur
+                                    d'accueillir des personnes aussi
+                                    sympathiques que vous. On fait de
+                                    notre mieux pour que chaque visite
+                                    soit un bon moment. Votre
+                                    recommandation nous touche
+                                    énormément, c'est la plus belle des
+                                    récompenses. À très bientôt chez
+                                    nous !
+                                </div>
+                                {% comment %} Concis {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
                                      data-tone="concis"
-                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'concis' %}display: none;{% endif %}">
+                                     data-length="short"
+                                     style="line-height: 1.6; display: none;">
+                                    Merci Marie. Au plaisir.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="concis"
+                                     data-length="medium"
+                                     style="line-height: 1.6; display: none;">
                                     Merci pour votre avis, Marie. Ravis
                                     de votre expérience. Au plaisir de
                                     vous revoir.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="concis"
+                                     data-length="long"
+                                     style="line-height: 1.6; display: none;">
+                                    Merci pour votre avis, Marie. Ravis
+                                    que l'équipe vous ait plu. Votre
+                                    recommandation nous fait plaisir.
+                                    Au plaisir de vous revoir.
                                 </div>
                             </div>
                             <!-- Active settings summary -->
@@ -304,30 +431,42 @@
             const toneBadge = document.getElementById("previewToneBadge");
             const lengthBadge = document.getElementById("previewLengthBadge");
             const languageBadge = document.getElementById("previewLanguageBadge");
+            const previews = document.querySelectorAll(".ai-preview");
+
+            function updatePreview() {
+                var tone = toneSelect ? toneSelect.value : "";
+                var length = lengthSelect ? lengthSelect.value : "";
+                previews.forEach(function (el) {
+                    el.style.display =
+                        el.dataset.tone === tone && el.dataset.length === length
+                            ? ""
+                            : "none";
+                });
+            }
 
             if (toneSelect) {
                 toneSelect.addEventListener("change", function () {
-                    document.querySelectorAll(".ai-tone-preview").forEach(function (el) {
-                        el.style.display = el.dataset.tone === toneSelect.value ? "" : "none";
-                    });
+                    updatePreview();
                     if (toneBadge) {
-                        const selected = toneSelect.options[toneSelect.selectedIndex];
-                        toneBadge.textContent = selected.text;
+                        toneBadge.textContent = toneSelect.options[toneSelect.selectedIndex].text;
                     }
                 });
             }
-            if (lengthSelect && lengthBadge) {
+            if (lengthSelect) {
                 lengthSelect.addEventListener("change", function () {
-                    const selected = lengthSelect.options[lengthSelect.selectedIndex];
-                    lengthBadge.textContent = selected.text;
+                    updatePreview();
+                    if (lengthBadge) {
+                        lengthBadge.textContent = lengthSelect.options[lengthSelect.selectedIndex].text;
+                    }
                 });
             }
             if (languageSelect && languageBadge) {
                 languageSelect.addEventListener("change", function () {
-                    const selected = languageSelect.options[languageSelect.selectedIndex];
-                    languageBadge.textContent = selected.text;
+                    languageBadge.textContent = languageSelect.options[languageSelect.selectedIndex].text;
                 });
             }
+
+            updatePreview();
         });
     </script>
 {% endblock dashboard_content %}
