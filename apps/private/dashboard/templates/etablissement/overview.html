@@ -83,45 +83,26 @@
                 {% endslot %}
             {% endcomponent %}
             <!-- Shieldy Weekly Report -->
-            {% component "card" title="Rapport de Shieldy" icon="fa-solid fa-robot" card_classes="w-100 overflow-hidden bg-primary-subtle border-primary-subtle" %}
+            {% component "card" title="Rapport de Shieldy" icon="fa-solid fa-robot" card_classes="w-100 overflow-hidden" %}
                 {% slot body %}
                     {% if weekly_summary %}
-                        <div class="d-flex align-items-start gap-3">
-                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
-                                 style="width: 48px;
-                                        height: 48px">
-                                <i class="fa-solid fa-robot fs-4"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-1 text-primary">
-                                    Semaine du {{ weekly_summary.week_start_date|date:"d/m/Y" }}
-                                </h6>
-                                <p class="text-muted small mb-2">
-                                    {{ weekly_summary.short_summary }}
-                                </p>
-                                <button type="button"
-                                        class="btn btn-sm btn-primary rounded-pill d-inline-flex align-items-center gap-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#shieldyReportModal">
-                                    <i class="fa-solid fa-book-open"></i>
-                                    Lire le rapport complet
-                                </button>
-                            </div>
-                        </div>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill mb-3">
+                            Semaine du {{ weekly_summary.week_start_date|date:"d/m/Y" }}
+                        </span>
+                        <p class="text-muted small mb-3">
+                            {{ weekly_summary.short_summary }}
+                        </p>
+                        <button type="button"
+                                class="btn btn-sm btn-primary rounded-pill d-inline-flex align-items-center gap-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#shieldyReportModal">
+                            <i class="fa-solid fa-book-open"></i>
+                            Lire le rapport complet
+                        </button>
                     {% else %}
-                        <div class="d-flex align-items-start gap-3">
-                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
-                                 style="width: 48px;
-                                        height: 48px">
-                                <i class="fa-solid fa-robot fs-4"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-1 text-primary">Rapport hebdomadaire</h6>
-                                <p class="text-muted small mb-0">
-                                    Le rapport de Shieldy sera bientôt disponible. Revenez la semaine prochaine pour découvrir l'analyse de vos performances !
-                                </p>
-                            </div>
-                        </div>
+                        <p class="text-muted small mb-0">
+                            Le rapport de Shieldy sera bientôt disponible. Revenez la semaine prochaine !
+                        </p>
                     {% endif %}
                 {% endslot %}
             {% endcomponent %}
@@ -227,8 +208,8 @@
                         <i class="fa-solid fa-chart-line text-primary me-2"></i>
                         Rapport de la semaine
                     </h6>
-                    <div class="mb-4">
-                        {{ weekly_summary.summary_text|linebreaksbr }}
+                    <div class="mb-4 markdown-content" data-markdown>
+                        {{ weekly_summary.summary_text }}
                     </div>
                     {% if weekly_summary.advice_text %}
                         <div class="bg-primary-subtle border border-primary-subtle rounded-3 p-3">
@@ -236,11 +217,50 @@
                                 <i class="fa-solid fa-lightbulb text-primary me-2"></i>
                                 Les conseils de Shieldy
                             </h6>
-                            {{ weekly_summary.advice_text|linebreaksbr }}
+                            <div class="markdown-content" data-markdown>
+                                {{ weekly_summary.advice_text }}
+                            </div>
                         </div>
                     {% endif %}
                 </div>
             {% endfill %}
         {% endcomponent %}
+        <style>
+            .markdown-content ul,
+            .markdown-content ol {
+                padding-left: 1.25rem;
+                margin-bottom: 0.75rem;
+            }
+            .markdown-content li {
+                margin-bottom: 0.35rem;
+            }
+            .markdown-content p {
+                margin-bottom: 0.5rem;
+            }
+            .markdown-content p:last-child {
+                margin-bottom: 0;
+            }
+        </style>
+
+        <script type="text/javascript" src="{% static 'marked.min.js' %}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                function renderMarkdown() {
+                    document.querySelectorAll("[data-markdown]").forEach(function(el) {
+                        if (el.dataset.rendered) return;
+                        el.innerHTML = marked.parse(el.textContent.trim());
+                        el.dataset.rendered = "true";
+                    });
+                }
+                renderMarkdown();
+                var modal = document.getElementById("shieldyReportModal");
+                if (modal) {
+                    modal.addEventListener("show.bs.modal", function() {
+                        setTimeout(renderMarkdown, 50);
+                    });
+                }
+            });
+        </script>
+        
     {% endif %}
 {% endblock dashboard_content %}
