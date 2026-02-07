@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
@@ -83,7 +84,7 @@ def get_etablissement_by_identifier(identifier: str) -> Etablissement | None:
     except Etablissement.DoesNotExist:
         try:
             etablissement = Etablissement.objects.get(uuid=identifier)
-        except (Etablissement.DoesNotExist, ValueError):
+        except (Etablissement.DoesNotExist, ValueError, ValidationError):
             raise Http404() from None
     return etablissement
 

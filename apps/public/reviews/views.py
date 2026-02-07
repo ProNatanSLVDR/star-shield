@@ -18,7 +18,7 @@ def feedback_view(request, identifier=None):
 
     # Redirect to inactive page if establishment is inactive
     if not etablissement.active or not etablissement.review_filtering_enabled:
-        return redirect(reverse("routing:feature_inactive", args=[identifier]))
+        return redirect(reverse("routing:feature_inactive"))
 
     analytics_key = f"review_page_consulted_{etablissement.id}"
     if not get_valid_session_key(request, analytics_key):
