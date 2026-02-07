@@ -20,7 +20,7 @@ django-htmx==1.26.0
 django-ninja==1.5.1
 django-storages==1.14.6
 django-tailwind==4.2.0
-django_components==0.141.6
+django_components==0.148.0
 djc_core_html_parser==1.0.2
 djlint==1.36.4
 EditorConfig==0.17.1
