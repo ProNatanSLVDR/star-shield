@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from hijack.contrib.admin import HijackUserAdminMixin
 
-from .models import Etablissement, GoogleCredentials, QRCode, RatingHistory, User
+from .models import Etablissement, GoogleCredentials, QRCode, RatingHistory, User, WeeklyPerformanceSummary
 
 admin.autodiscover()
 admin.site.login = secure_admin_login(admin.site.login)
@@ -39,16 +39,68 @@ class UserAdmin(HijackUserAdminMixin, admin.ModelAdmin):
 
 @admin.register(GoogleCredentials)
 class GoogleCredentialsAdmin(admin.ModelAdmin):
-    list_display = ("user", "is_valid", "created_at", "updated_at")
-    search_fields = ("user__email",)
-    list_filter = ("is_valid", "created_at")
+    list_display = ("user", "google_account_email", "is_valid", "has_invalid_grants", "created_at", "updated_at")
+    search_fields = ("user__email", "google_account_email")
+    list_filter = ("is_valid", "has_invalid_grants", "created_at")
+
+    fieldsets = (
+        (
+            _("Account"),
+            {"fields": ("user", "google_account_email")},
+        ),
+        (
+            _("Status"),
+            {"fields": ("is_valid", "has_invalid_grants")},
+        ),
+        (
+            _("OAuth Tokens"),
+            {
+                "fields": ("token", "refresh_token", "token_uri", "client_id", "client_secret", "scopes"),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            _("Dates"),
+            {"fields": ("created_at", "updated_at")},
+        ),
+    )
+    readonly_fields = ("created_at", "updated_at")
+
+
+class QRCodeInline(admin.TabularInline):
+    model = QRCode
+    extra = 0
+    fields = ("name", "short_code", "routing", "created_at")
+    readonly_fields = ("short_code", "created_at")
+    show_change_link = True
+
+
+class RatingHistoryInline(admin.TabularInline):
+    model = RatingHistory
+    extra = 0
+    fields = ("rating", "total_reviews", "created_at")
+    readonly_fields = ("rating", "total_reviews", "created_at")
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class WeeklyPerformanceSummaryInline(admin.TabularInline):
+    model = WeeklyPerformanceSummary
+    extra = 0
+    fields = ("week_start_date", "short_summary", "created_at")
+    readonly_fields = ("week_start_date", "short_summary", "created_at")
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Etablissement)
 class EtablissementAdmin(admin.ModelAdmin):
-    list_display = ("title", "slug", "uuid", "active", "review_threshold")
+    list_display = ("title", "slug", "uuid", "active", "review_threshold", "roulette_enabled", "ai_responses_enabled")
     search_fields = ("title", "slug", "uuid")
-    list_filter = ("active", "created_at", "updated_at")
+    list_filter = ("active", "roulette_enabled", "ai_responses_enabled", "created_at", "updated_at")
+    inlines = [QRCodeInline, RatingHistoryInline, WeeklyPerformanceSummaryInline]
 
     fieldsets = (
         (
@@ -86,6 +138,29 @@ class EtablissementAdmin(admin.ModelAdmin):
             },
         ),
         (
+            _("Review Filtering"),
+            {"fields": ("review_filtering_enabled",)},
+        ),
+        (
+            _("Roulette Settings"),
+            {
+                "fields": ("roulette_enabled", "roulette_spin_cooldown_days"),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            _("AI Responses Settings"),
+            {
+                "fields": (
+                    "ai_responses_enabled",
+                    "ai_response_tone",
+                    "ai_response_length",
+                    "ai_response_language",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
             _("URLs"),
             {
                 "fields": (
@@ -111,9 +186,11 @@ class EtablissementAdmin(admin.ModelAdmin):
 
 @admin.register(QRCode)
 class QRCodeAdmin(admin.ModelAdmin):
-    list_display = ("name", "etablissement", "routing", "created_at")
-    search_fields = ("name", "etablissement__title")
+    list_display = ("name", "short_code", "etablissement", "routing", "created_at")
+    search_fields = ("name", "short_code", "etablissement__title")
     list_filter = ("routing", "created_at")
+    ordering = ("-created_at",)
+
     fieldsets = (
         (
             _("Basic Information"),
@@ -121,6 +198,7 @@ class QRCodeAdmin(admin.ModelAdmin):
                 "fields": (
                     "etablissement",
                     "name",
+                    "short_code",
                     "routing",
                 )
             },
@@ -148,7 +226,7 @@ class QRCodeAdmin(admin.ModelAdmin):
             },
         ),
     )
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("short_code", "created_at", "updated_at")
 
 
 @admin.register(RatingHistory)
@@ -156,3 +234,70 @@ class RatingHistoryAdmin(admin.ModelAdmin):
     list_display = ("etablissement", "rating", "total_reviews", "created_at")
     search_fields = ("etablissement__title",)
     list_filter = ("created_at",)
+
+    fieldsets = (
+        (
+            _("Establishment"),
+            {"fields": ("etablissement",)},
+        ),
+        (
+            _("Rating Snapshot"),
+            {"fields": ("rating", "total_reviews")},
+        ),
+        (
+            _("Dates"),
+            {"fields": ("created_at",)},
+        ),
+    )
+    readonly_fields = ("etablissement", "rating", "total_reviews", "created_at")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(WeeklyPerformanceSummary)
+class WeeklyPerformanceSummaryAdmin(admin.ModelAdmin):
+    list_display = ("etablissement", "week_start_date", "short_summary", "created_at")
+    search_fields = ("etablissement__title", "short_summary", "summary_text")
+    list_filter = ("created_at",)
+    date_hierarchy = "week_start_date"
+
+    fieldsets = (
+        (
+            _("Establishment"),
+            {"fields": ("etablissement",)},
+        ),
+        (
+            _("Summary Content"),
+            {"fields": ("week_start_date", "short_summary", "summary_text", "advice_text")},
+        ),
+        (
+            _("Raw Data"),
+            {
+                "fields": ("metrics_data",),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            _("Dates"),
+            {"fields": ("created_at",)},
+        ),
+    )
+    readonly_fields = (
+        "etablissement",
+        "week_start_date",
+        "short_summary",
+        "summary_text",
+        "advice_text",
+        "metrics_data",
+        "created_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
