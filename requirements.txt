@@ -26,7 +26,7 @@ djlint==1.36.4
 EditorConfig==0.17.1
 factory_boy==3.3.3
 Faker==40.4.0
-filelock==3.19.1
+filelock==3.20.3
 gevent==25.9.1
 google-api-core==2.29.0
 google-api-python-client==2.184.0
