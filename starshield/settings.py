@@ -237,13 +237,13 @@ class Dev(Base):
     # BREVO_API_KEY = "keykey"
 
     # STRIPE (test keys)
-    STRIPE_PUBLIC_KEY = os.environ["STRIPE_PUBLIC_KEY"]
-    STRIPE_SECRET_KEY = os.environ["STRIPE_SECRET_KEY"]
-    STRIPE_WEBHOOK_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
+    STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
+    STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+    STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
     # Google OAuth
-    GOOGLE_OAUTH_CLIENT_ID = os.environ["GOOGLE_OAUTH_CLIENT_ID"]
-    GOOGLE_OAUTH_CLIENT_SECRET = os.environ["GOOGLE_OAUTH_CLIENT_SECRET"]
+    GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
+    GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
     GOOGLE_OAUTH_GMB_SCOPES = [
         "https://www.googleapis.com/auth/business.manage",
         "https://www.googleapis.com/auth/userinfo.email",
@@ -319,7 +319,7 @@ class Prod(Base):
 
     SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    
+
     # login with google redirect uri protocol
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
