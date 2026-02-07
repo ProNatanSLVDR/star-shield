@@ -30,3 +30,5 @@ node_modules/
 Thumbs.db
 
 *.env
+
+.coverage
