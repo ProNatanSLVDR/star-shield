@@ -7,152 +7,327 @@
 {% endblock sidebar_content %}
 
 {% block dashboard_content %}
-    <div class="d-flex flex-column">
+    <style>
+        .preview-disabled {
+            pointer-events: none;
+            user-select: none;
+            cursor: not-allowed !important;
+        }
+
+        .preview-disabled * {
+            cursor: not-allowed !important;
+        }
+    </style>
+    <div class="d-flex flex-column h-100">
         <div class="mb-3">
             <h1 class="h4 fw-bold text-body-emphasis mb-1">
                 <i class="fa-solid fa-robot me-2"></i>
                 Réponses IA
             </h1>
             <p class="text-muted mb-0 small">
-                Configurez les réponses automatiques générées par l'IA pour vos avis Google.
+                Configurez les réponses automatiques générées
+                par l'IA pour vos avis Google.
             </p>
         </div>
-        <div class="row g-3">
-            <div class="col-lg-8 mx-auto">
-                <!-- Activation info -->
-                <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
-                    <div class="flex-shrink-0 me-2">
-                        <i class="fa-solid fa-info-circle"></i>
-                    </div>
-                    <div>
-                        <strong>Activation</strong>
-                        <p class="mb-0 small">
-                            Pour activer ou désactiver les réponses IA, rendez-vous dans
-                            <a href="{% url 'dashboard:etablissement:settings:settings' %}" class="alert-link">Paramètres</a>
-                            puis activez la fonctionnalité "Réponses IA".
-                        </p>
-                    </div>
-                </div>
-
-                <form method="post" id="aiResponseSettingsForm">
-                    {% csrf_token %}
-
-                    {% if form.errors %}
-                        <div class="alert alert-danger" role="alert">
-                            {% for field, errors in form.errors.items %}
-                                {% for error in errors %}<div>{{ error }}</div>{% endfor %}
-                            {% endfor %}
+        <div class="row g-3 flex-grow-1">
+            <!-- Settings Form -->
+            <div class="col-lg-6 d-flex flex-column">
+                {% component "card" title="Configuration" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto" %}
+                    {% slot body %}
+                        <form method="post"
+                              id="aiResponseSettingsForm"
+                              class="h-100 d-flex flex-column">
+                            {% csrf_token %}
+                            {% if form.errors %}
+                                <div class="alert alert-danger"
+                                     role="alert">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="alert alert-info d-flex align-items-center mb-4"
+                                 role="alert">
+                                <div class="flex-shrink-0 me-2">
+                                    <i class="fa-solid fa-info-circle"></i>
+                                </div>
+                                <div>
+                                    <strong>Activation</strong>
+                                    <p class="mb-0 small">
+                                        Pour activer ou désactiver les
+                                        réponses IA, rendez-vous dans
+                                        <a href="{% url 'dashboard:etablissement:settings:settings' %}"
+                                           class="alert-link">
+                                            Paramètres
+                                        </a>
+                                        puis activez la fonctionnalité
+                                        "Réponses IA".
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="ai_response_tone"
+                                       class="form-label fw-semibold">
+                                    <i class="fa-solid fa-comment-dots me-2"></i>
+                                    Ton
+                                </label>
+                                <select class="form-select"
+                                        id="ai_response_tone"
+                                        name="ai_response_tone">
+                                    {% for value, label in form.ai_response_tone.field.choices %}
+                                        <option value="{{ value }}"
+                                                {% if form.ai_response_tone.value == value %}
+                                                    selected
+                                                {% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    Choisissez le ton utilisé par l'IA
+                                    pour répondre à vos avis.
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="ai_response_length"
+                                       class="form-label fw-semibold">
+                                    <i class="fa-solid fa-text-width me-2"></i>
+                                    Longueur
+                                </label>
+                                <select class="form-select"
+                                        id="ai_response_length"
+                                        name="ai_response_length">
+                                    {% for value, label in form.ai_response_length.field.choices %}
+                                        <option value="{{ value }}"
+                                                {% if form.ai_response_length.value == value %}
+                                                    selected
+                                                {% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    Définissez la longueur des réponses
+                                    générées par l'IA.
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="ai_response_language"
+                                       class="form-label fw-semibold">
+                                    <i class="fa-solid fa-language me-2"></i>
+                                    Langue
+                                </label>
+                                <select class="form-select"
+                                        id="ai_response_language"
+                                        name="ai_response_language">
+                                    {% for value, label in form.ai_response_language.field.choices %}
+                                        <option value="{{ value }}"
+                                                {% if form.ai_response_language.value == value %}
+                                                    selected
+                                                {% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    Langue dans laquelle l'IA rédigera
+                                    ses réponses.
+                                </div>
+                            </div>
+                            <div class="d-grid mt-auto">
+                                <button type="submit"
+                                        class="btn btn-primary">
+                                    <i class="fa-solid fa-save me-2"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    {% endslot %}
+                {% endcomponent %}
+            </div>
+            <!-- Preview -->
+            <div class="col-lg-6 d-flex flex-column"
+                 style="min-height: 0">
+                {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto preview-disabled d-flex align-items-center justify-content-center" %}
+                    {% slot body %}
+                        <div class="d-flex flex-column gap-3 w-100"
+                             style="max-width: 420px;">
+                            <!-- Google header -->
+                            <div class="d-flex align-items-center gap-2 pb-3 border-bottom">
+                                <i class="fa-brands fa-google text-muted"
+                                   style="font-size: 1.25rem;"></i>
+                                <span class="fw-semibold text-muted">
+                                    Google Avis
+                                </span>
+                            </div>
+                            <!-- Customer review -->
+                            <div>
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center flex-shrink-0"
+                                         style="width: 44px;
+                                                height: 44px;">
+                                        <span class="fw-bold text-primary">
+                                            M
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">
+                                            Marie Dupont
+                                        </div>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                            <i class="fa-solid fa-star text-warning"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="mb-0 text-body-secondary"
+                                   style="line-height: 1.6;">
+                                    Excellent service ! L'équipe est
+                                    très accueillante et
+                                    professionnelle. Je recommande
+                                    vivement.
+                                </p>
+                            </div>
+                            <hr class="my-0">
+                            <!-- AI response -->
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                                         style="width: 32px;
+                                                height: 32px;">
+                                        <i class="fa-solid fa-robot text-white"
+                                           style="font-size: 0.8rem;"></i>
+                                    </div>
+                                    <span class="fw-semibold text-primary">
+                                        Réponse IA
+                                    </span>
+                                </div>
+                                <div class="ai-tone-preview text-body-secondary"
+                                     data-tone="professionnel"
+                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'professionnel' %}display: none;{% endif %}">
+                                    Nous vous remercions sincèrement
+                                    pour votre retour, Madame Dupont.
+                                    Votre satisfaction est notre
+                                    priorité et nous sommes ravis que
+                                    notre équipe ait su répondre à vos
+                                    attentes. Nous espérons avoir le
+                                    plaisir de vous accueillir à
+                                    nouveau.
+                                </div>
+                                <div class="ai-tone-preview text-body-secondary"
+                                     data-tone="empathique"
+                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'empathique' %}display: none;{% endif %}">
+                                    Votre avis nous touche beaucoup,
+                                    Marie. Savoir que vous avez vécu
+                                    une expérience aussi positive nous
+                                    remplit de joie. C'est grâce à des
+                                    retours comme le vôtre que notre
+                                    équipe trouve sa motivation au
+                                    quotidien.
+                                </div>
+                                <div class="ai-tone-preview text-body-secondary"
+                                     data-tone="enthousiaste"
+                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'enthousiaste' %}display: none;{% endif %}">
+                                    Quelle joie de lire votre
+                                    commentaire, Marie ! Nous sommes
+                                    absolument ravis que vous ayez
+                                    passé un excellent moment avec
+                                    notre équipe. Votre recommandation
+                                    nous fait chaud au cœur, merci
+                                    infiniment !
+                                </div>
+                                <div class="ai-tone-preview text-body-secondary"
+                                     data-tone="amical"
+                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'amical' %}display: none;{% endif %}">
+                                    Merci beaucoup Marie ! On est super
+                                    contents que l'équipe vous ait plu.
+                                    C'est toujours un plaisir
+                                    d'accueillir des personnes aussi
+                                    sympathiques. À très bientôt chez
+                                    nous !
+                                </div>
+                                <div class="ai-tone-preview text-body-secondary"
+                                     data-tone="concis"
+                                     style="line-height: 1.6; {% if form.ai_response_tone.value != 'concis' %}display: none;{% endif %}">
+                                    Merci pour votre avis, Marie. Ravis
+                                    de votre expérience. Au plaisir de
+                                    vous revoir.
+                                </div>
+                            </div>
+                            <!-- Active settings summary -->
+                            <div class="border-top pt-3 mt-1">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <span class="badge rounded-pill bg-primary-subtle text-primary">
+                                        <i class="fa-solid fa-comment-dots me-1"></i>
+                                        <span id="previewToneBadge">
+                                            {{ form.ai_response_tone.value|default:"professionnel"|capfirst }}
+                                        </span>
+                                    </span>
+                                    <span class="badge rounded-pill bg-primary-subtle text-primary">
+                                        <i class="fa-solid fa-text-width me-1"></i>
+                                        <span id="previewLengthBadge">
+                                            {% for value, label in form.ai_response_length.field.choices %}
+                                                {% if value == form.ai_response_length.value %}
+                                                    {{ label }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+                                    </span>
+                                    <span class="badge rounded-pill bg-primary-subtle text-primary">
+                                        <i class="fa-solid fa-language me-1"></i>
+                                        <span id="previewLanguageBadge">
+                                            {% for value, label in form.ai_response_language.field.choices %}
+                                                {% if value == form.ai_response_language.value %}
+                                                    {{ label }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    {% endif %}
-
-                    <!-- Tone Selection -->
-                    {% component "card" title="Ton de la réponse" icon="fa-solid fa-comment-dots" card_classes="mb-3 overflow-hidden" %}
-                        {% slot body %}
-                            <p class="text-muted small mb-3">
-                                Choisissez le ton utilisé par l'IA pour répondre à vos avis. Chaque ton adapte le style de la réponse.
-                            </p>
-                            <div class="row g-2">
-                                {% for value, label in form.ai_response_tone.field.choices %}
-                                    <div class="col-12 col-sm-6 col-md-4">
-                                        <input type="radio"
-                                               class="btn-check"
-                                               name="ai_response_tone"
-                                               id="tone_{{ value }}"
-                                               value="{{ value }}"
-                                               autocomplete="off"
-                                               {% if form.ai_response_tone.value == value %}checked{% endif %}>
-                                        <label class="btn btn-outline-primary w-100 text-start p-3" for="tone_{{ value }}">
-                                            <div class="fw-semibold">{{ label }}</div>
-                                            <div class="small text-muted mt-1">
-                                                {% if value == "professionnel" %}
-                                                    Formel, courtois, orienté service
-                                                {% elif value == "empathique" %}
-                                                    Compréhensif, sincère, reconnaissant
-                                                {% elif value == "enthousiaste" %}
-                                                    Dynamique, positif, chaleureux
-                                                {% elif value == "amical" %}
-                                                    Décontracté, proche, convivial
-                                                {% elif value == "concis" %}
-                                                    Bref, direct, efficace
-                                                {% endif %}
-                                            </div>
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endslot %}
-                    {% endcomponent %}
-
-                    <!-- Length Selection -->
-                    {% component "card" title="Longueur de la réponse" icon="fa-solid fa-text-width" card_classes="mb-3 overflow-hidden" %}
-                        {% slot body %}
-                            <div class="row g-2">
-                                {% for value, label in form.ai_response_length.field.choices %}
-                                    <div class="col-12 col-sm-4">
-                                        <input type="radio"
-                                               class="btn-check"
-                                               name="ai_response_length"
-                                               id="length_{{ value }}"
-                                               value="{{ value }}"
-                                               autocomplete="off"
-                                               {% if form.ai_response_length.value == value %}checked{% endif %}>
-                                        <label class="btn btn-outline-primary w-100 text-center p-3" for="length_{{ value }}">
-                                            <div class="fw-semibold">{{ label }}</div>
-                                            <div class="small text-muted mt-1">
-                                                {% if value == "short" %}
-                                                    1-2 phrases
-                                                {% elif value == "medium" %}
-                                                    2-4 phrases
-                                                {% elif value == "long" %}
-                                                    4-6 phrases
-                                                {% endif %}
-                                            </div>
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endslot %}
-                    {% endcomponent %}
-
-                    <!-- Language Selection -->
-                    {% component "card" title="Langue de la réponse" icon="fa-solid fa-language" card_classes="mb-3 overflow-hidden" %}
-                        {% slot body %}
-                            <div class="row g-2">
-                                {% for value, label in form.ai_response_language.field.choices %}
-                                    <div class="col-12 col-sm-4">
-                                        <input type="radio"
-                                               class="btn-check"
-                                               name="ai_response_language"
-                                               id="language_{{ value }}"
-                                               value="{{ value }}"
-                                               autocomplete="off"
-                                               {% if form.ai_response_language.value == value %}checked{% endif %}>
-                                        <label class="btn btn-outline-primary w-100 text-center p-3" for="language_{{ value }}">
-                                            <div class="fw-semibold">{{ label }}</div>
-                                            <div class="small text-muted mt-1">
-                                                {% if value == "fr" %}
-                                                    Toujours en français
-                                                {% elif value == "en" %}
-                                                    Always in English
-                                                {% elif value == "auto" %}
-                                                    Détecte la langue de l'avis
-                                                {% endif %}
-                                            </div>
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endslot %}
-                    {% endcomponent %}
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-save me-2"></i>
-                            Enregistrer les modifications
-                        </button>
-                    </div>
-                </form>
+                    {% endslot %}
+                {% endcomponent %}
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toneSelect = document.getElementById("ai_response_tone");
+            const lengthSelect = document.getElementById("ai_response_length");
+            const languageSelect = document.getElementById("ai_response_language");
+            const toneBadge = document.getElementById("previewToneBadge");
+            const lengthBadge = document.getElementById("previewLengthBadge");
+            const languageBadge = document.getElementById("previewLanguageBadge");
+
+            if (toneSelect) {
+                toneSelect.addEventListener("change", function () {
+                    document.querySelectorAll(".ai-tone-preview").forEach(function (el) {
+                        el.style.display = el.dataset.tone === toneSelect.value ? "" : "none";
+                    });
+                    if (toneBadge) {
+                        const selected = toneSelect.options[toneSelect.selectedIndex];
+                        toneBadge.textContent = selected.text;
+                    }
+                });
+            }
+            if (lengthSelect && lengthBadge) {
+                lengthSelect.addEventListener("change", function () {
+                    const selected = lengthSelect.options[lengthSelect.selectedIndex];
+                    lengthBadge.textContent = selected.text;
+                });
+            }
+            if (languageSelect && languageBadge) {
+                languageSelect.addEventListener("change", function () {
+                    const selected = languageSelect.options[languageSelect.selectedIndex];
+                    languageBadge.textContent = selected.text;
+                });
+            }
+        });
+    </script>
 {% endblock dashboard_content %}
