@@ -64,6 +64,10 @@ class TaskTracker:
                 logger.error(f"[{self.etablissement_id}] {error_msg}")
                 raise ValueError(error_msg)
 
+            if not self.etablissement.active:
+                logger.info(f"[{self.etablissement_id}] Skipping task — etablissement is deactivated")
+                return
+
             logger.info(f"[{self.etablissement_id}] Etablissement: {self.etablissement}")
 
             self.task_execution = TaskExecution.objects.create(

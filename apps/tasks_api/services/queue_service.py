@@ -306,10 +306,10 @@ def enqueue_weekly_summary_tasks() -> dict[str, Any]:
     queue_name = settings.TASKS_API_QUEUE_NAME
     base_url = settings.TASKS_API_BASE_URL
 
-    etablissements = Etablissement.objects.all()
+    etablissements = Etablissement.objects.filter(active=True)
     total = etablissements.count()
 
-    logger.info(f"Enqueuing weekly summary tasks for {total} etablissements")
+    logger.info(f"Enqueuing weekly summary tasks for {total} active etablissements")
 
     target_url = f"{base_url.rstrip('/')}/v1/generate-weekly-summary"
 

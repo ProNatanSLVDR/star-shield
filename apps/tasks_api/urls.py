@@ -2,6 +2,7 @@
 URL configuration for tasks_api project.
 """
 
+from django.http import JsonResponse
 from django.urls import path
 from ninja import NinjaAPI
 
@@ -20,3 +21,15 @@ api_v1.add_router("", api_router_v1)
 urlpatterns = [
     path("v1/", api_v1.urls),
 ]
+
+
+def api_404(request, exception):
+    return JsonResponse({"error": "Not found"}, status=404)
+
+
+def api_500(request):
+    return JsonResponse({"error": "Internal server error"}, status=500)
+
+
+handler404 = api_404
+handler500 = api_500
