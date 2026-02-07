@@ -34,7 +34,7 @@ google-auth==2.41.1
 google-auth-httplib2==0.3.0
 google-auth-oauthlib==1.2.2
 google-cloud-core==2.5.0
-google-cloud-kms==3.7.0
+google-cloud-kms==3.10.0
 google-cloud-storage==3.8.0
 google-cloud-tasks==2.20.0
 google-crc32c==1.8.0
