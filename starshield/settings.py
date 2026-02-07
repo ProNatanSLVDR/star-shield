@@ -26,10 +26,6 @@ class Base(Configuration):
     # Quick-start development settings - unsuitable for production
     # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-    # SECURITY
-    SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
-    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-
     # Application definition
 
     CORE_APPS = [
@@ -219,6 +215,9 @@ class Base(Configuration):
 class Dev(Base):
     DEBUG = True
 
+    SECRET_KEY = "dev-secret-key"
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
     PASSWORD_HASHERS = [
         "django.contrib.auth.hashers.MD5PasswordHasher",
     ]
@@ -318,6 +317,9 @@ class Dev(Base):
 class Prod(Base):
     DEBUG = False
 
+    SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    
     # login with google redirect uri protocol
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
