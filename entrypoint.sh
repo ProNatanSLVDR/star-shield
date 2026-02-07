@@ -11,7 +11,7 @@ case "$SERVICE_TYPE" in
     exec gunicorn apps.tasks_api.wsgi:application --bind 0.0.0.0:8080 --workers 2 --worker-class gevent --worker-connection 500 --timeout 360 --keep-alive 5
     ;;
   migrate)
-    exec python manage.py migrate --noinput
+    exec python prod.manage.py migrate --noinput
     ;;
   *)
     echo "Unknown service type: $SERVICE_TYPE"
