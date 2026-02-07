@@ -4,21 +4,17 @@ from apps.private.auths.auth_backends import EmailBackend
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.private.auths.models import Entreprise
-
 
 class EmailBackendTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.backend = EmailBackend()
-        cls.entreprise = Entreprise.objects.create(nom="Acme Corp")
         cls.UserModel = get_user_model()
 
     def _create_user(self, **overrides):
         defaults = {
             "email": "user@example.com",
             "password": "secure-password-123",
-            "entreprise": self.entreprise,
         }
         defaults.update(overrides)
         return self.UserModel.objects.create_user(**defaults)

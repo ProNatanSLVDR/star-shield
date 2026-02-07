@@ -4,27 +4,16 @@ from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.private.auths.models import Entreprise
-
-
-class EntrepriseModelTests(TestCase):
-    def test_str_returns_nom(self):
-        entreprise = Entreprise.objects.create(nom="Acme Corp")
-
-        self.assertEqual(str(entreprise), "Acme Corp")
-
 
 class UserModelTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.entreprise = Entreprise.objects.create(nom="Acme Corp")
         cls.UserModel = get_user_model()
 
     def _create_user(self, **overrides):
         defaults = {
             "email": "john.doe@example.com",
             "password": "testpass123",
-            "entreprise": self.entreprise,
         }
         defaults.update(overrides)
         return self.UserModel.objects.create_user(**defaults)
@@ -60,7 +49,6 @@ class UserModelTests(TestCase):
             self.UserModel.objects.create_user(
                 email="",
                 password="password123",
-                entreprise=self.entreprise,
             )
 
     def test_create_superuser_requires_password(self):
@@ -68,7 +56,6 @@ class UserModelTests(TestCase):
             self.UserModel.objects.create_superuser(
                 email="admin@example.com",
                 password=" ",
-                entreprise=self.entreprise,
             )
 
     def test_create_superuser_requires_is_staff_true(self):
@@ -76,7 +63,6 @@ class UserModelTests(TestCase):
             self.UserModel.objects.create_superuser(
                 email="admin@example.com",
                 password="password123",
-                entreprise=self.entreprise,
                 is_staff=False,
             )
 
@@ -85,7 +71,6 @@ class UserModelTests(TestCase):
             self.UserModel.objects.create_superuser(
                 email="admin@example.com",
                 password="password123",
-                entreprise=self.entreprise,
                 is_superuser=False,
             )
 

@@ -4,8 +4,6 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from apps.private.auths.models import Entreprise
-
 
 class LoginViewTests(TestCase):
     @classmethod
@@ -13,14 +11,12 @@ class LoginViewTests(TestCase):
         cls.client = Client()
         cls.login_url = reverse("auths:login")
         cls.dashboard_url = reverse("dashboard:accueil")
-        cls.entreprise = Entreprise.objects.create(nom="Acme Corp")
         cls.UserModel = get_user_model()
 
     def test_redirect_authenticated_user(self):
         user = self.UserModel.objects.create_user(
             email="user@example.com",
             password="password123",
-            entreprise=self.entreprise,
         )
         self.client.force_login(user)
 
@@ -49,7 +45,6 @@ class LoginViewTests(TestCase):
         self.UserModel.objects.create_user(
             email="user@example.com",
             password="password123",
-            entreprise=self.entreprise,
             is_active=False,
         )
 
@@ -68,7 +63,6 @@ class LoginViewTests(TestCase):
         self.UserModel.objects.create_user(
             email="user@example.com",
             password="password123",
-            entreprise=self.entreprise,
         )
 
         response = self.client.post(

@@ -219,6 +219,10 @@ class Base(Configuration):
 class Dev(Base):
     DEBUG = True
 
+    PASSWORD_HASHERS = [
+        "django.contrib.auth.hashers.MD5PasswordHasher",
+    ]
+
     WEBSITE_URL = "http://localhost:8000"
 
     DATABASES = {
