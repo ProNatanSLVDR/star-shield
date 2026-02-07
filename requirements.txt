@@ -30,7 +30,7 @@ filelock==3.19.1
 gevent==25.9.1
 google-api-core==2.29.0
 google-api-python-client==2.184.0
-google-auth==2.41.1
+google-auth==2.48.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.2
 google-cloud-core==2.5.0
