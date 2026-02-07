@@ -171,17 +171,23 @@ def list_etablissements_view(request):
             else created_at_str
         )
 
-        # Feature badges
-        feature_badges = []
+        # Feature badges (fused icon group with tooltips)
         features = [
-            ("Filtrage", etablissement.review_filtering_enabled),
-            ("Roulette", etablissement.roulette_enabled),
-            ("IA", etablissement.ai_responses_enabled),
+            ("Filtrage", etablissement.review_filtering_enabled, "fa-solid fa-filter"),
+            ("Roulette", etablissement.roulette_enabled, "fa-solid fa-record-vinyl"),
+            ("IA", etablissement.ai_responses_enabled, "fa-solid fa-robot"),
         ]
-        for label, enabled in features:
-            variant = "success" if enabled else "secondary"
-            feature_badges.append(f'<span class="badge bg-{variant} me-1">{label}</span>')
-        features_html = "".join(feature_badges)
+        feature_badges = []
+        for label, enabled, icon in features:
+            if enabled:
+                classes = "badge bg-success text-white"
+            else:
+                classes = "badge bg-body-secondary text-muted"
+            feature_badges.append(
+                f'<span class="{classes}" data-bs-toggle="tooltip" data-bs-title="{label}">'
+                f'<i class="{icon}"></i></span>'
+            )
+        features_html = '<span class="feature-group">' + "".join(feature_badges) + "</span>"
 
         row = {
             "title": etablissement.title,
