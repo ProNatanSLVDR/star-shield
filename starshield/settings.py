@@ -317,7 +317,7 @@ class Dev(Base):
 class Prod(Base):
     DEBUG = False
 
-    SECRET_KEY = os.getenv["DJANGO_SECRET_KEY"]
+    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
     ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
     # login with google redirect uri protocol
