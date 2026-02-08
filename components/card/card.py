@@ -11,7 +11,7 @@ class Card(Component):
         title: str
         icon: str | None = None
         card_classes: str = ""
-        body_classes: str = "p-4"
+        body_classes: str = "p-md-4"
         header_classes: str = ""
         card_id: str | None = None
 
