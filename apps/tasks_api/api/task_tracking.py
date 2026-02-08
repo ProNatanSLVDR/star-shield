@@ -24,6 +24,7 @@ class TaskTracker:
         task_type: str,
         etablissement_id: int,
         metadata: dict[str, Any] | None = None,
+        skip_active_check: bool = False,
     ):
         """
         Initialize task tracker.
@@ -37,6 +38,7 @@ class TaskTracker:
         self.etablissement_id = etablissement_id
         self.metadata = metadata or {}
         self.metadata["etablissement_id"] = etablissement_id
+        self.skip_active_check = skip_active_check
         self.task_execution: TaskExecution | None = None
         self.etablissement: Etablissement | None = None
 
@@ -64,7 +66,7 @@ class TaskTracker:
                 logger.error(f"[{self.etablissement_id}] {error_msg}")
                 raise ValueError(error_msg)
 
-            if not self.etablissement.active:
+            if not self.skip_active_check and not self.etablissement.active:
                 logger.info(f"[{self.etablissement_id}] Skipping task — etablissement is deactivated")
                 return
 

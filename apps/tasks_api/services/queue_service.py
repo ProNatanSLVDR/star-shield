@@ -228,7 +228,7 @@ def enqueue_ai_responses_tasks() -> dict[str, Any]:
     queue_name = settings.TASKS_API_QUEUE_NAME
     base_url = settings.TASKS_API_BASE_URL
 
-    etablissements = Etablissement.objects.filter(ai_responses_enabled=True)
+    etablissements = Etablissement.objects.filter(active=True, ai_responses_enabled=True)
     total = etablissements.count()
 
     logger.info(f"Enqueuing AI response tasks for {total} etablissements")

@@ -32,7 +32,7 @@ def fetch_all(request, payload: ReviewFetchRequest):
     Called by Cloud Tasks.
     """
     try:
-        tracker = TaskTracker("fetch_reviews_all", payload.etablissement_id)
+        tracker = TaskTracker("fetch_reviews_all", payload.etablissement_id, skip_active_check=True)
         tracker.execute(
             [
                 fetch_stats,
@@ -57,7 +57,7 @@ def fetch_refresh(request, payload: ReviewFetchRequest):
     Called by Cloud Tasks for nightly syncs.
     """
     try:
-        tracker = TaskTracker("fetch_reviews_refresh", payload.etablissement_id)
+        tracker = TaskTracker("fetch_reviews_refresh", payload.etablissement_id, skip_active_check=True)
         tracker.execute(
             [
                 fetch_stats,

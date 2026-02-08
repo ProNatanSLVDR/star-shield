@@ -85,7 +85,15 @@
             <!-- Shieldy Weekly Report -->
             {% component "card" title="Rapport de Shieldy" icon="fa-solid fa-robot" card_classes="w-100 overflow-hidden" %}
                 {% slot body %}
-                    {% if weekly_summary %}
+                    {% if not etablissement.active %}
+                        <div class="text-center py-3">
+                            <i class="fa-solid fa-lock text-muted fa-2x mb-3"></i>
+                            <p class="text-muted small mb-0">
+                                Activez votre abonnement pour
+                                débloquer les rapports de Shieldy.
+                            </p>
+                        </div>
+                    {% elif weekly_summary %}
                         <span class="badge bg-primary-subtle text-primary rounded-pill mb-3">
                             Semaine du {{ weekly_summary.week_start_date|date:"d/m/Y" }}
                         </span>
