@@ -134,6 +134,7 @@ def generate_and_send_responses(etablissement: Etablissement) -> dict:
         .exclude(comment="")
         .order_by("-writen_at")
     )
+    logger.info(f"[{etablissement.id}] Found {unreplied_reviews.count()} unreplied reviews to process")
 
     total_reviews = unreplied_reviews.count()
     responded = 0
