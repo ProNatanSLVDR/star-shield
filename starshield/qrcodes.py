@@ -32,6 +32,7 @@ def generate_qrcode_png(
     style: str = "square",
     color_mask: str = "solid",
     logo_file=None,
+    badge_file=None,
     box_size: int = 10,
     border: int = 4,
 ) -> bytes:
@@ -92,6 +93,16 @@ def generate_qrcode_png(
         image_factory=StyledPilImage,
     )
     img = img.convert("RGBA")
+
+    # Composite destination badge in bottom-right corner
+    if badge_file:
+        badge = Image.open(badge_file).convert("RGBA")
+        badge_size = int(img.width * 0.08)
+        badge = badge.resize((badge_size, badge_size), Image.LANCZOS)
+        margin = int(img.width * 0.02)
+        x = img.width - badge_size - margin
+        y = img.height - badge_size - margin
+        img.paste(badge, (x, y), badge)
 
     # Save to bytes
     img_bytes = io.BytesIO()

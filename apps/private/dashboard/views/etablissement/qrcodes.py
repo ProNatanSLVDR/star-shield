@@ -1,5 +1,7 @@
 import json
+from pathlib import Path
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -271,6 +273,20 @@ def qr_code_image_view(request, identifier=None, short_code=None):
         color_mask = request.GET.get("color_mask") or "solid"
         logo_file = None
 
+    # Resolve badge file based on QR code routing
+    badge_file = None
+    if qr_code:
+        badge_map = {
+            "feedback": "logo-filtering.png",
+            "roulette": "logo-roulette.png",
+            "verify": "logo-roulette-verif.png",
+        }
+        badge_name = badge_map.get(qr_code.routing)
+        if badge_name:
+            badge_path = Path(settings.BASE_DIR) / "static" / "img" / "qr-badges" / badge_name
+            if badge_path.exists():
+                badge_file = badge_path
+
     # Generate QR code PNG
     try:
         qr_image_bytes = generate_qrcode_png(
@@ -281,6 +297,7 @@ def qr_code_image_view(request, identifier=None, short_code=None):
             style=style,
             color_mask=color_mask,
             logo_file=logo_file,
+            badge_file=badge_file,
         )
 
         return HttpResponse(qr_image_bytes, content_type="image/png")

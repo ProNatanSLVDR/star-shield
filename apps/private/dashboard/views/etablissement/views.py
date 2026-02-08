@@ -14,7 +14,6 @@ from apps.private.auths.models import WeeklyPerformanceSummary
 from apps.private.dashboard.render import starshield_render
 from apps.public.reviews.models import Review, ReviewAnalytics
 from apps.public.roulette.models import RouletteAnalytics, RouletteSpin
-from apps.tasks_api.models import TaskExecution
 from apps.tasks_api.services.queue_service import enqueue_refresh_task
 from starshield.decorators import (
     google_gmb_connected_required,
@@ -463,20 +462,9 @@ def refresh_reviews_view(request):
     """
     etablissement = request.etablissement
 
-    # Check for latest successful refresh task
-    latest_refresh = (
-        TaskExecution.objects.filter(
-            etablissement=etablissement,
-            task_type="fetch_reviews_refresh",
-            status="success",
-        )
-        .order_by("-completed_at")
-        .first()
-    )
-
     # Rate limiting: 30 minutes between refreshes
-    if latest_refresh and latest_refresh.completed_at:
-        time_since_refresh = timezone.now() - latest_refresh.completed_at
+    if etablissement.last_reviews_update:
+        time_since_refresh = timezone.now() - etablissement.last_reviews_update
         if time_since_refresh < timedelta(minutes=30):
             minutes_remaining = 30 - int(time_since_refresh.total_seconds() / 60)
             messages.warning(
@@ -484,6 +472,10 @@ def refresh_reviews_view(request):
                 f"Un rafraîchissement a déjà été effectué récemment. Veuillez attendre {minutes_remaining} minute(s) avant d'en demander un nouveau.",
             )
             return redirect("dashboard:etablissement:overview")
+
+    # Mark refresh time immediately to prevent duplicate requests
+    etablissement.last_reviews_update = timezone.now()
+    etablissement.save(update_fields=["last_reviews_update"])
 
     # Enqueue refresh task
     try:
