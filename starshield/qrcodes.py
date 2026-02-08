@@ -97,7 +97,7 @@ def generate_qrcode_png(
     # Composite destination badge in bottom-right corner
     if badge_file:
         badge = Image.open(badge_file).convert("RGBA")
-        badge_size = int(img.width * 0.08)
+        badge_size = int(img.width * 0.05)
         badge = badge.resize((badge_size, badge_size), Image.LANCZOS)
         margin = int(img.width * 0.02)
         x = img.width - badge_size - margin
