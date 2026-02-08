@@ -8,7 +8,11 @@ Starshield is a Django-based SaaS for managing online reviews. Businesses genera
 
 The app is in French (fr-fr, Europe/Paris timezone). Model names and some code comments are in French (e.g., "Etablissement" = business establishment).
 
-## Commands
+## Environment
+
+This project uses **devcontainers**. Python, Django, djlint, and other tools run inside the container — never try to run commands that require the Python environment locally (e.g., `python manage.py`, `djlint`, `ruff`). They will always fail.
+
+## Commands (run inside devcontainer only)
 
 ```bash
 # Run dev server
@@ -31,7 +35,7 @@ python manage.py collectstatic --noinput
 
 **Important:** Never run `python manage.py migrate`. Only `makemigrations` is allowed.
 
-Always run `ruff check` and `ruff format` on modified Python files before completing a task.
+Always run `ruff check` and `ruff format` on modified Python files before completing a task — but only inside the devcontainer.
 
 ## Architecture
 
