@@ -179,11 +179,12 @@
 </style>
 
 <script>
+    if (!window.TableManager) {
     /**
      * TableManager: Handles table functionality (search, sort, tooltips, popovers)
      * Scoped per table instance to avoid conflicts
      */
-    class TableManager {
+    window.TableManager = class TableManager {
         constructor(containerElement) {
             this.container = containerElement;
             this.table = containerElement.querySelector('[data-table]');
@@ -366,6 +367,7 @@
                 this.noResultsDiv.style.display = 'none';
             }
         }
+    };
     }
 
     /**
@@ -373,7 +375,7 @@
      */
     function initializeTables() {
         document.querySelectorAll('[data-table-container]').forEach(container => {
-            new TableManager(container);
+            new window.TableManager(container);
         });
     }
 
