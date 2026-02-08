@@ -286,13 +286,19 @@
             var sliceAngle = 360 / prizes.length;
             var pointerAngle = 180;
 
-            var palette = [
-                '#0d6efd', '#ff6b6b', '#2fbb7f', '#ffc107',
-                '#5aa2ff', '#ff9f1c', '#8cbcff', '#2a7bff'
-            ];
+            function generatePalette(count) {
+                var colors = [];
+                for (var i = 0; i < count; i++) {
+                    var hue = (i * 360) / count;
+                    colors.push('hsl(' + hue + ', 90%, 55%)');
+                }
+                return colors;
+            }
+
+            var palette = generatePalette(prizes.length);
 
             var gradientStops = prizes.map(function(_, index) {
-                var color = palette[index % palette.length];
+                var color = palette[index];
                 var start = index * sliceAngle;
                 var end = (index + 1) * sliceAngle;
                 return color + ' ' + start + 'deg ' + end + 'deg';
