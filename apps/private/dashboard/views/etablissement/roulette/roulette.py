@@ -300,11 +300,18 @@ def prize_create_partial(request):
     else:
         form = RoulettePrizeForm()
 
+    # Calculate available probability for info display
+    other_prizes_total = sum(
+        float(p.probability) for p in etablissement.roulette_prizes.filter(is_nothing_prize=False)
+    )
+    available_probability = max(0, 100 - other_prizes_total)
+
     context = {
         "etablissement": etablissement,
         "form": form,
         "limit_reached": limit_reached,
         "prize_count": other_prizes_count,
+        "available_probability": f"{available_probability:.2f}",
     }
 
     return starshield_render(
@@ -373,10 +380,17 @@ def prize_edit_partial(request, prize_id):
             }
         )
 
+    # Calculate available probability for info display (include current prize's probability as available)
+    other_prizes_total = sum(
+        float(p.probability) for p in etablissement.roulette_prizes.filter(is_nothing_prize=False)
+    )
+    available_probability = max(0, 100 - (other_prizes_total - float(prize.probability)))
+
     context = {
         "etablissement": etablissement,
         "form": form,
         "prize": prize,
+        "available_probability": f"{available_probability:.2f}",
     }
 
     return starshield_render(

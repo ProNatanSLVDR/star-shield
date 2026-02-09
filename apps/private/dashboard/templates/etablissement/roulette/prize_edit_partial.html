@@ -88,6 +88,14 @@
                     {% endfor %}
                 </div>
             </div>
+        {% else %}
+            <div class="alert alert-info d-flex align-items-center mb-4"
+                 role="alert">
+                <i class="fa-solid fa-info-circle pe-3 fs-5"></i>
+                <div>
+                    Probabilité disponible sans ce prix : {{ available_probability }}%
+                </div>
+            </div>
         {% endif %}
     </div>
     <div class="modal-footer">
