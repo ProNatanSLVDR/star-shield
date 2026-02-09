@@ -25,7 +25,16 @@ class ReviewAdmin(admin.ModelAdmin):
         ),
         (
             _("Reply"),
-            {"fields": ("reply_comment", "reply_date", "reply_type")},
+            {
+                "fields": (
+                    "reply_comment",
+                    "reply_date",
+                    "reply_type",
+                    "ai_response_status",
+                    "ai_draft_comment",
+                    "ai_flag_reason",
+                )
+            },
         ),
         (
             _("Dates"),
