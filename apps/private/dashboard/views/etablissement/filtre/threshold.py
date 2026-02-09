@@ -50,5 +50,5 @@ def threshold_settings_view(request):
         request,
         "etablissement/filtre/threshold.html",
         context=context,
-        page_name="seuil_et_objectif",
+        page_name="seuil_de_redirection",
     )
