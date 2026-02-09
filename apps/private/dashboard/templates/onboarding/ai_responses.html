@@ -1,0 +1,231 @@
+{% extends "onboarding/base.html" %}
+{% load i18n %}
+
+{% block onboarding_content %}
+    <div class="container-fluid d-flex flex-column h-100">
+        <div class="row justify-content-center flex-grow-1 overflow-hidden">
+            <div class="col-lg-10 d-flex flex-column h-100 justify-content-center">
+            <!-- Progress Indicator -->
+                <div class="py-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">
+                            Étape {{ step }} sur {{ total_steps }}
+                        </span>
+                        <a href="{% url 'dashboard:onboarding:skip' %}"
+                           class="text-muted small text-decoration-none">
+                            Passer
+                        </a>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary"
+                             role="progressbar"
+                             style="width: {% widthratio step total_steps 100 %}%">
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Content -->
+                <div class="card border-0 shadow-sm rounded-4
+                            flex-grow-1 d-flex flex-column
+                            overflow-hidden">
+                    <div class="card-body p-4 overflow-auto
+                                d-flex flex-column
+                                justify-content-center">
+                        <div class="text-center mb-4">
+                            <h1 class="h2 fw-bold text-body-emphasis mb-1
+                                       d-flex align-items-center
+                                       justify-content-center gap-3">
+                                <div class="d-inline-flex
+                                            align-items-center
+                                            justify-content-center
+                                            rounded-circle
+                                            bg-primary bg-opacity-10"
+                                     style="width: 48px;
+                                            height: 48px;">
+                                    <i class="fa-solid fa-wand-magic-sparkles
+                                              text-primary"
+                                       style="font-size: 1.5rem;">
+                                    </i>
+                                </div>
+                                Réponses IA aux avis
+                            </h1>
+                            <p class="text-muted mb-0 small"
+                               style="font-size: 0.85rem;">
+                                Gagnez du temps en générant des
+                                réponses professionnelles
+                                grâce à l'intelligence artificielle
+                            </p>
+                        </div>
+
+                        <div class="row justify-content-center mb-4">
+                            <div class="col-lg-8
+                                        d-flex flex-column
+                                        justify-content-center">
+                                <!-- AI generation -->
+                                <div class="card border-0
+                                            bg-light mb-2 rounded-3">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex
+                                                    align-items-center">
+                                            <div class="flex-shrink-0
+                                                        me-2">
+                                                <div class="rounded-circle
+                                                            bg-primary
+                                                            text-white
+                                                            d-flex
+                                                            align-items-center
+                                                            justify-content-center"
+                                                     style="width: 38px;
+                                                            height: 38px;">
+                                                    <i class="fa-solid
+                                                              fa-robot">
+                                                    </i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1">
+                                                    <span class="opacity-50">
+                                                        1:
+                                                    </span>
+                                                    Génération automatique
+                                                </h6>
+                                                <p class="text-muted
+                                                          small mb-0"
+                                                   style="font-size:
+                                                          0.9rem;">
+                                                    Pour chaque avis Google
+                                                    reçu, l'IA génère
+                                                    automatiquement une
+                                                    réponse personnalisée
+                                                    et adaptée au contexte.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Review & publish -->
+                                <div class="card border-0
+                                            bg-light mb-2 rounded-3">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex
+                                                    align-items-center">
+                                            <div class="flex-shrink-0
+                                                        me-2">
+                                                <div class="rounded-circle
+                                                            bg-primary
+                                                            text-white
+                                                            d-flex
+                                                            align-items-center
+                                                            justify-content-center"
+                                                     style="width: 38px;
+                                                            height: 38px;">
+                                                    <i class="fa-solid
+                                                              fa-paper-plane">
+                                                    </i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1">
+                                                    <span class="opacity-50">
+                                                        2:
+                                                    </span>
+                                                    Relisez et publiez
+                                                </h6>
+                                                <p class="text-muted
+                                                          small mb-0"
+                                                   style="font-size:
+                                                          0.9rem;">
+                                                    Vous gardez le contrôle
+                                                    : relisez la réponse
+                                                    proposée, modifiez-la
+                                                    si besoin, puis
+                                                    publiez-la en un clic.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Time saved -->
+                                <div class="card border-0
+                                            bg-light rounded-3">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex
+                                                    align-items-center">
+                                            <div class="flex-shrink-0
+                                                        me-2">
+                                                <div class="rounded-circle
+                                                            bg-primary
+                                                            text-white
+                                                            d-flex
+                                                            align-items-center
+                                                            justify-content-center"
+                                                     style="width: 38px;
+                                                            height: 38px;">
+                                                    <i class="fa-solid
+                                                              fa-clock">
+                                                    </i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1">
+                                                    <span class="opacity-50">
+                                                        3:
+                                                    </span>
+                                                    Gagnez du temps
+                                                </h6>
+                                                <p class="text-muted
+                                                          small mb-0"
+                                                   style="font-size:
+                                                          0.9rem;">
+                                                    Plus besoin de rédiger
+                                                    chaque réponse
+                                                    manuellement. L'IA
+                                                    s'adapte au ton et
+                                                    au contenu de chaque
+                                                    avis.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="text-center">
+                            <p class="text-muted mb-0"
+                               style="font-size: 0.75rem;">
+                                <i class="fa-solid fa-info-circle
+                                          me-1"></i>
+                                Les réponses IA sont disponibles
+                                depuis la page de gestion
+                                des avis de chaque établissement
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Navigation Footer -->
+                <div class="my-4">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ prev_url }}"
+                           class="btn btn-outline-secondary
+                                  btn-lg rounded-pill px-4">
+                            <i class="fa-solid fa-arrow-left me-2">
+                            </i> Précédent
+                        </a>
+                        <a href="{{ next_url }}"
+                           class="btn btn-primary btn-lg
+                                  rounded-pill px-5">
+                            Suivant
+                            <i class="fa-solid fa-arrow-right ms-2">
+                            </i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock onboarding_content %}
