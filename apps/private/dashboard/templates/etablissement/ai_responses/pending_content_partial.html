@@ -1,0 +1,147 @@
+{% if not review %}
+    <div class="text-center text-muted py-5">
+        <i class="fa-solid fa-check-circle mb-3"
+           style="font-size: 3rem;"></i>
+        <p class="mb-0">
+            Aucune réponse en attente de validation.
+        </p>
+    </div>
+{% else %}
+    {% if remaining_count > 1 %}
+        <div class="text-muted small text-end mb-2">
+            {{ remaining_count }} avis restants
+        </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <!-- Why it's pending -->
+            {% if review.ai_response_status == 'flagged' %}
+                <div class="alert alert-danger d-flex
+                            align-items-start mb-3">
+                    <i class="fa-solid fa-triangle-exclamation
+                              me-2 mt-1"></i>
+                    <div>
+                        <strong>Avis signalé</strong>
+                        <span class="text-danger-emphasis">
+                            &mdash;
+                            {{ review.ai_flag_reason }}
+                        </span>
+                        <p class="mb-0 small mt-1">
+                            Cet avis a été détecté comme
+                            potentiellement suspect. Vérifiez-le
+                            avant de publier une réponse.
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info d-flex
+                            align-items-start mb-3">
+                    <i class="fa-solid fa-clipboard-check
+                              me-2 mt-1"></i>
+                    <div>
+                        <strong>Validation requise</strong>
+                        <p class="mb-0 small mt-1">
+                            La validation manuelle est activée.
+                            Vérifiez et modifiez la réponse IA
+                            avant de la publier sur Google.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- The review -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center
+                                gap-3 mb-3">
+                        <div class="rounded-circle
+                                    bg-primary-subtle
+                                    d-flex align-items-center
+                                    justify-content-center
+                                    flex-shrink-0"
+                             style="width: 48px;
+                                    height: 48px;">
+                            <span class="fw-bold text-primary">
+                                {{ reviewer_name|first|upper }}
+                            </span>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">
+                                {{ reviewer_name }}
+                            </div>
+                            <div class="d-flex align-items-center
+                                        gap-1">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="fa-solid fa-star
+                                                  text-warning">
+                                        </i>
+                                    {% else %}
+                                        <i class="fa-regular fa-star
+                                                  text-muted">
+                                        </i>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if review.writen_at %}
+                                    <span class="text-muted
+                                                 small ms-2">
+                                        {{ review.writen_at|date:"d/m/Y H:i" }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mb-0"
+                       style="line-height: 1.7;">
+                        {{ review.comment|default:"(pas de commentaire)" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- AI response textarea -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">
+                    <i class="fa-solid fa-robot me-2"></i>
+                    Réponse IA
+                </label>
+                <div id="draftForm">
+                    <textarea class="form-control"
+                              name="edited_comment"
+                              rows="5"
+                              style="line-height: 1.7;">{{ review.ai_draft_comment|default:"" }}</textarea>
+                </div>
+                <div class="form-text">
+                    Modifiez la réponse si nécessaire
+                    avant de l'approuver.
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 justify-content-between">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-danger"
+                            hx-post="{% url 'dashboard:etablissement:ai_responses:pending_reject' review.id %}"
+                            hx-swap="none"
+                            hx-confirm="Rejeter et ne pas répondre à cet avis ?">
+                        <i class="fa-solid fa-xmark me-1"></i>
+                        Rejeter
+                    </button>
+                    <button class="btn btn-outline-secondary"
+                            hx-post="{% url 'dashboard:etablissement:ai_responses:pending_regenerate' review.id %}"
+                            hx-swap="none">
+                        <i class="fa-solid fa-rotate me-1"></i>
+                        Régénérer
+                    </button>
+                </div>
+                <button class="btn btn-success"
+                        hx-post="{% url 'dashboard:etablissement:ai_responses:pending_approve' review.id %}"
+                        hx-include="#draftForm"
+                        hx-swap="none">
+                    <i class="fa-solid fa-check me-1"></i>
+                    Approuver et publier
+                </button>
+            </div>
+        </div>
+    </div>
+{% endif %}

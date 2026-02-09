@@ -31,6 +31,8 @@ class AiResponseResult(BaseModel):
     total_reviews: int
     responded: int
     failed: int
+    pending: int = 0
+    flagged: int = 0
     errors: list[str]
 
     class Config:
@@ -38,8 +40,10 @@ class AiResponseResult(BaseModel):
             "example": {
                 "etablissement_id": 1,
                 "total_reviews": 5,
-                "responded": 4,
+                "responded": 3,
                 "failed": 1,
+                "pending": 1,
+                "flagged": 0,
                 "errors": ["Failed to process review abc123: API error"],
             }
         }

@@ -106,6 +106,13 @@
                 current_page=current_page %}
             {% endcomponent %}
             {% component "navlink"
+                link="dashboard:etablissement:ai_responses:pending"
+                icon="fa-solid fa-clock"
+                text="En attente"
+                page_name="ai_responses_pending"
+                current_page=current_page %}
+            {% endcomponent %}
+            {% component "navlink"
                 link="dashboard:etablissement:ai_responses:historique"
                 icon="fa-solid fa-clock-rotate-left"
                 text="Historique"

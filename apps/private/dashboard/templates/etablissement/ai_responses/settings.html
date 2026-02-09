@@ -136,6 +136,93 @@
                                     ses réponses.
                                 </div>
                             </div>
+                            <hr class="my-3">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fa-solid fa-clipboard-check me-2"></i>
+                                    Validation manuelle
+                                </label>
+                                <div class="btn-group w-100"
+                                     role="group">
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="ai_response_validation_required"
+                                           id="validation_off"
+                                           value=""
+                                           autocomplete="off"
+                                           {% if not form.ai_response_validation_required.value %}
+                                               checked
+                                           {% endif %}>
+                                    <label class="btn btn-outline-secondary"
+                                           for="validation_off">
+                                        <i class="fa-solid fa-bolt me-1"></i>
+                                        Publication auto
+                                    </label>
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="ai_response_validation_required"
+                                           id="validation_on"
+                                           value="on"
+                                           autocomplete="off"
+                                           {% if form.ai_response_validation_required.value %}
+                                               checked
+                                           {% endif %}>
+                                    <label class="btn btn-outline-primary"
+                                           for="validation_on">
+                                        <i class="fa-solid fa-clipboard-check me-1"></i>
+                                        Validation requise
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    En mode validation, les réponses
+                                    IA seront sauvegardées en
+                                    brouillon pour votre approbation
+                                    avant d'être publiées sur Google.
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fa-solid fa-shield-halved me-2"></i>
+                                    Protection avis malveillants
+                                </label>
+                                <div class="btn-group w-100"
+                                     role="group">
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="ai_response_malicious_protection"
+                                           id="protection_off"
+                                           value=""
+                                           autocomplete="off"
+                                           {% if not form.ai_response_malicious_protection.value %}
+                                               checked
+                                           {% endif %}>
+                                    <label class="btn btn-outline-danger"
+                                           for="protection_off">
+                                        <i class="fa-solid fa-shield-xmark me-1"></i>
+                                        Désactivée
+                                    </label>
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="ai_response_malicious_protection"
+                                           id="protection_on"
+                                           value="on"
+                                           autocomplete="off"
+                                           {% if form.ai_response_malicious_protection.value %}
+                                               checked
+                                           {% endif %}>
+                                    <label class="btn btn-outline-success"
+                                           for="protection_on">
+                                        <i class="fa-solid fa-shield-halved me-1"></i>
+                                        Activée
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Détecte automatiquement les avis
+                                    suspects (malveillants, faux) et
+                                    les signale pour votre examen
+                                    avant toute réponse.
+                                </div>
+                            </div>
                             <div class="d-grid mt-auto">
                                 <button type="submit"
                                         class="btn btn-primary">
@@ -467,6 +554,24 @@
             }
 
             updatePreview();
+
+            // Confirmation when deactivating malicious protection
+            var protectionOff = document.getElementById("protection_off");
+            var protectionOn = document.getElementById("protection_on");
+            if (protectionOff && protectionOn) {
+                protectionOff.addEventListener("change", function () {
+                    if (this.checked) {
+                        var confirmed = confirm(
+                            "Désactiver la protection signifie que l'IA " +
+                            "répondra automatiquement à tous les avis " +
+                            "négatifs, même suspects. Continuer ?"
+                        );
+                        if (!confirmed) {
+                            protectionOn.checked = true;
+                        }
+                    }
+                });
+            }
         });
     </script>
 {% endblock dashboard_content %}

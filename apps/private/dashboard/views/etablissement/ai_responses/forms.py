@@ -19,3 +19,11 @@ class AiResponseSettingsForm(forms.Form):
         required=True,
         label="Langue de la réponse",
     )
+    ai_response_validation_required = forms.BooleanField(
+        required=False,
+        label="Validation manuelle",
+    )
+    ai_response_malicious_protection = forms.BooleanField(
+        required=False,
+        label="Protection avis malveillants",
+    )

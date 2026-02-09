@@ -15,6 +15,13 @@ class Review(models.Model):
         ("google", "Google"),
     ]
 
+    AI_RESPONSE_STATUS_CHOICES = [
+        ("pending", "En attente"),
+        ("approved", "Approuvé"),
+        ("rejected", "Rejeté"),
+        ("flagged", "Signalé"),
+    ]
+
     etablissement = models.ForeignKey("auths.Etablissement", on_delete=models.CASCADE)
 
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], db_index=True)
@@ -28,6 +35,13 @@ class Review(models.Model):
     reply_comment = models.TextField(blank=True, null=True)
     reply_date = models.DateTimeField(blank=True, null=True, db_index=True)
     reply_type = models.CharField(max_length=10, choices=REPLY_TYPE_CHOICES, blank=True, null=True, db_index=True)
+
+    # AI response workflow
+    ai_response_status = models.CharField(
+        max_length=10, choices=AI_RESPONSE_STATUS_CHOICES, blank=True, null=True, db_index=True
+    )
+    ai_draft_comment = models.TextField(blank=True, null=True)
+    ai_flag_reason = models.CharField(max_length=255, blank=True, null=True)
 
     writen_at = models.DateTimeField(blank=True, null=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
