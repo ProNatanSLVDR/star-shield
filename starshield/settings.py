@@ -257,6 +257,7 @@ class Dev(Base):
                 "key": "",
             },
             "SCOPE": ["profile", "email"],
+            "AUTH_PARAMS": {"prompt": "select_account"},
             "EMAIL_AUTHENTICATION": True,
             "EMAIL_VERIFICATION": "none",
         }
@@ -413,6 +414,7 @@ class Prod(Base):
                 "key": "",
             },
             "SCOPE": ["profile", "email"],
+            "AUTH_PARAMS": {"prompt": "select_account"},
             "EMAIL_AUTHENTICATION": True,
             "EMAIL_VERIFICATION": "none",
         }
