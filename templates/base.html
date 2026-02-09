@@ -49,8 +49,8 @@
             {% if messages and not request.htmx %}
                 {% for message in messages %}
                     createToast({
-                        message: '{{ message.message }}',
-                        tags: '{{ message.tags }}'
+                        message: '{{ message.message|escapejs }}',
+                        tags: '{{ message.tags|escapejs }}'
                     });
                 {% endfor %}
             {% endif %}
