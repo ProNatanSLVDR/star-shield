@@ -112,6 +112,8 @@ class RouletteSpinFactory(factory.django.DjangoModelFactory):
 
     etablissement = factory.SubFactory(EtablissementFactory)
     prize = factory.SubFactory(RoulettePrizeFactory)
+    prize_name = factory.LazyAttribute(lambda o: o.prize.name)
+    prize_icon = factory.LazyAttribute(lambda o: o.prize.icon)
     prize_code = factory.Sequence(lambda n: f"CODE{n:04d}")
     is_used = False
 

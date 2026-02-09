@@ -40,7 +40,7 @@ def historique_content_partial(request):
     spins_qs = RouletteSpin.objects.filter(
         etablissement=etablissement,
         **date_filter,
-    ).select_related("prize")
+    )
 
     # Stats
     prizes_given = spins_qs.count()
@@ -121,7 +121,7 @@ def historique_content_partial(request):
             {
                 "prize_name": {
                     "type": "html",
-                    "value": f'<i class="{spin.prize.icon} me-2"></i>{spin.prize.name}',
+                    "value": f'<i class="{spin.prize_icon} me-2"></i>{spin.prize_name}',
                 },
                 "code": spin.prize_code,
                 "date": {

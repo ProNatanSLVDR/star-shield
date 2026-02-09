@@ -33,7 +33,9 @@ class RoulettePrize(models.Model):
 
 class RouletteSpin(models.Model):
     etablissement = models.ForeignKey(Etablissement, on_delete=models.CASCADE, related_name="roulette_spins")
-    prize = models.ForeignKey(RoulettePrize, on_delete=models.CASCADE, related_name="spins")
+    prize = models.ForeignKey(RoulettePrize, on_delete=models.SET_NULL, null=True, related_name="spins")
+    prize_name = models.CharField(max_length=255)
+    prize_icon = models.CharField(max_length=50)
     prize_code = models.CharField(max_length=50, unique=True)
     is_used = models.BooleanField(default=False, help_text="Whether code was redeemed")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -42,7 +44,7 @@ class RouletteSpin(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.etablissement.title} - {self.prize.name} - {self.prize_code}"
+        return f"{self.etablissement.title} - {self.prize_name} - {self.prize_code}"
 
 
 class RouletteAnalytics(models.Model):
