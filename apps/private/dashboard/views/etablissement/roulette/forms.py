@@ -10,18 +10,27 @@ ROULETTE_ICON_CHOICES = [
     ("fa-solid fa-pizza-slice", "Pizza"),
     ("fa-solid fa-bottle-water", "Bouteille"),
     ("fa-solid fa-wine-glass", "Verre de vin"),
+    #
     ("fa-solid fa-cake", "Gâteau"),
     ("fa-solid fa-coffee", "Café"),
     ("fa-solid fa-burger", "Burger"),
     ("fa-solid fa-ice-cream", "Glace"),
     ("fa-solid fa-cookie", "Cookie"),
     ("fa-solid fa-martini-glass", "Cocktail"),
+    #
     ("fa-solid fa-champagne-glasses", "Champagne"),
     ("fa-solid fa-apple-whole", "Pomme"),
     ("fa-solid fa-bowl-food", "Bol"),
     ("fa-solid fa-fish", "Poisson"),
     ("fa-solid fa-drumstick-bite", "Poulet"),
     ("fa-solid fa-pepper-hot", "Piment"),
+    #
+    ("fa-solid fa-bag-shopping", "Sac"),
+    ("fa-solid fa-dollar-sign", "Dollar"),
+    ("fa-solid fa-money-bill-wave", "Billet"),
+    ("fa-solid fa-ticket", "Ticket"),
+    ("fa-solid fa-percent", "Pourcentage"),
+    ("fa-solid fa-scissors", "Ciseaux"),
 ]
 
 
