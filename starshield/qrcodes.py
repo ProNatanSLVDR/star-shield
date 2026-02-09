@@ -1,7 +1,7 @@
 import io
 
 import qrcode
-from PIL import Image
+from PIL import Image, ImageDraw
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.colormasks import (
     HorizontalGradiantColorMask,
@@ -85,9 +85,27 @@ def generate_qrcode_png(
     qr.add_data(link)
     qr.make(fit=True)
 
+    # Prepare logo with white rounded-rect background (handles transparent PNGs)
+    embeded_image = None
+    if logo_file:
+        logo = Image.open(logo_file).convert("RGBA")
+        padding = int(max(logo.size) * 0.15)
+        bg_w = logo.width + padding * 2
+        bg_h = logo.height + padding * 2
+        radius = int(min(bg_w, bg_h) * 0.2)
+
+        # Draw white rounded rectangle
+        bg = Image.new("RGBA", (bg_w, bg_h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(bg)
+        draw.rounded_rectangle([0, 0, bg_w - 1, bg_h - 1], radius=radius, fill=(255, 255, 255, 255))
+
+        # Paste logo centered on the background
+        bg.paste(logo, (padding, padding), logo)
+        embeded_image = bg
+
     # Create QR code with square modules first
     img = qr.make_image(
-        embeded_image=Image.open(logo_file) if logo_file else None,
+        embeded_image=embeded_image,
         color_mask=color_mask_map[color_mask],
         module_drawer=module_drawer_map[style],
         image_factory=StyledPilImage,
