@@ -28,7 +28,10 @@
                 <div class="row row-cols-1 row-cols-md-2 g-2">
                     {% for stat in stats_items %}
                         <div class="col">
-                            <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm">
+                            <div class="d-flex justify-content-center align-items-start border rounded-4 p-3 shadow-sm"
+                                 data-bs-toggle="tooltip"
+                                 data-bs-placement="top"
+                                 data-bs-title="{{ stat.description }}">
                                 <div class="flex-grow-1">
                                     <p class="text-muted small mb-1">{{ stat.label }}</p>
                                     <h6 class="fw-semibold mb-0">{{ stat.value }}</h6>

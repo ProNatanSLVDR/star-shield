@@ -1,5 +1,6 @@
+import calendar
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -98,21 +99,50 @@ def stats_view(request):
     """Stats page with detailed overview (chart, stats, rating distribution, recent reviews)."""
     etablissement = request.etablissement
 
-    # Limit query to maximum 20 most recent entries, then order chronologically for display
-    rating_history_qs = etablissement.rating_history.order_by("-created_at")[:20]
-    rating_history_qs = list(rating_history_qs)
-    rating_history_qs.reverse()  # Reverse to get chronological order (oldest to newest)
+    # Build chart data from actual review publish dates
+    reviews_with_dates = (
+        Review.objects.filter(etablissement=etablissement, writen_at__isnull=False)
+        .order_by("writen_at")
+        .values_list("writen_at", "rating")
+    )
 
+    # Generate 24 checkpoints: mid-month (15th) + end-of-month for the last 12 months
+    today = timezone.now().date()
+    checkpoints: list[date] = []
+    for months_ago in range(12, 0, -1):
+        # Calculate the target month
+        month = today.month - months_ago
+        year = today.year
+        while month <= 0:
+            month += 12
+            year -= 1
+        last_day = calendar.monthrange(year, month)[1]
+        checkpoints.append(date(year, month, 15))
+        checkpoints.append(date(year, month, last_day))
+
+    # Compute running average at each checkpoint
     rating_history_points: list[dict] = []
-    for entry in rating_history_qs:
-        rating_history_points.append(
-            {
-                "date": entry.created_at.strftime("%Y-%m-%d"),
-                "label": entry.created_at.strftime("%d %b %Y"),
-                "rating": float(entry.rating),
-                "total_reviews": entry.total_reviews,
-            }
-        )
+    running_sum = 0.0
+    running_count = 0
+    review_iter = iter(reviews_with_dates)
+    current_review = next(review_iter, None)
+
+    for checkpoint in checkpoints:
+        # Consume all reviews up to and including this checkpoint
+        while current_review is not None and current_review[0].date() <= checkpoint:
+            running_sum += current_review[1]
+            running_count += 1
+            current_review = next(review_iter, None)
+
+        if running_count > 0:
+            rating_history_points.append(
+                {
+                    "date": checkpoint.strftime("%Y-%m-%d"),
+                    "label": checkpoint.strftime("%d %b %Y"),
+                    "rating": round(running_sum / running_count, 2),
+                    "total_reviews": running_count,
+                }
+            )
 
     current_rating = rating_history_points[-1]["rating"] if rating_history_points else None
 
@@ -122,11 +152,12 @@ def stats_view(request):
 
     goal_projection_points: list[dict] = []
     if goal_rating is not None:
-        origin_date = rating_history_qs[-1].created_at if rating_history_qs else timezone.now()
+        origin_date = today
 
         start_rating = goal_rating
         if current_rating is not None and rating_history_points:
-            origin_date = rating_history_qs[-1].created_at
+            last_point_date = datetime.strptime(rating_history_points[-1]["date"], "%Y-%m-%d").date()
+            origin_date = last_point_date
             start_rating = current_rating
 
         projected_goal_date = origin_date + timedelta(days=30 * 6)
@@ -197,41 +228,49 @@ def stats_view(request):
             "label": "Note actuelle",
             "value": current_rating if current_rating else "-",
             "icon": "fa-solid fa-gauge-high",
+            "description": "Note moyenne calculée à partir de tous les avis reçus",
         },
         {
             "label": "Visites du QR Code",
             "value": qr_page_visits if qr_page_visits else "-",
             "icon": "fa-solid fa-qrcode",
+            "description": "Nombre de fois que la page d'avis a été ouverte via un QR code",
         },
         {
             "label": "Redirections Google",
             "value": reviews_redirected_google if reviews_redirected_google else "-",
             "icon": "fa-solid fa-arrow-up-right-from-square",
+            "description": "Nombre de clients redirigés vers Google pour laisser un avis",
         },
         {
             "label": "Redirections Internes",
             "value": reviews_kept_private if reviews_kept_private else "-",
             "icon": "fa-solid fa-lock",
+            "description": "Nombre de clients ayant donné un avis en interne",
         },
         {
             "label": "Avis Internes",
             "value": internal_reviews_count if internal_reviews_count else "-",
             "icon": "fa-solid fa-inbox",
+            "description": "Nombre total d'avis reçus en interne via Starshield",
         },
         {
             "label": "Avis Google",
             "value": google_reviews_count if google_reviews_count else "-",
             "icon": "fa-brands fa-google",
+            "description": "Nombre total d'avis publiés sur Google",
         },
         {
             "label": "Avis Total",
             "value": total_reviews if total_reviews else "-",
             "icon": "fa-solid fa-star",
+            "description": "Nombre total d'avis toutes sources confondues",
         },
         {
             "label": "Dernier Avis",
             "value": latest_reviews.first().writen_at if latest_reviews.exists() else "-",
             "icon": "fa-solid fa-clock-rotate-left",
+            "description": "Date et heure du dernier avis reçu",
         },
     ]
 
