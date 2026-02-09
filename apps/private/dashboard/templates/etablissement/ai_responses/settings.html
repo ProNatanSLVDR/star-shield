@@ -42,9 +42,7 @@
                                 <div class="alert alert-danger"
                                      role="alert">
                                     {% for field, errors in form.errors.items %}
-                                        {% for error in errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
+                                        {% for error in errors %}<div>{{ error }}</div>{% endfor %}
                                     {% endfor %}
                                 </div>
                             {% endif %}
@@ -57,86 +55,67 @@
                                     <strong>Activation</strong>
                                     <p class="mb-0 small">
                                         Pour activer ou désactiver les
-                                        réponses IA, rendez-vous dans
+                                        réponses IA, rendez-vous sur
                                         <a href="{% url 'dashboard:etablissement:overview' %}"
-                                           class="alert-link">
-                                            Vue d'ensemble
-                                        </a>
-                                        puis activez la fonctionnalité
-                                        "Réponses IA".
+                                           class="alert-link">cette page</a>.
                                     </p>
                                 </div>
                             </div>
-                            <div class="mb-4">
-                                <label for="ai_response_tone"
-                                       class="form-label fw-semibold">
-                                    <i class="fa-solid fa-comment-dots me-2"></i>
-                                    Ton
-                                </label>
-                                <select class="form-select"
-                                        id="ai_response_tone"
-                                        name="ai_response_tone">
-                                    {% for value, label in form.ai_response_tone.field.choices %}
-                                        <option value="{{ value }}"
-                                                {% if form.ai_response_tone.value == value %}
-                                                    selected
-                                                {% endif %}>
-                                            {{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <div class="form-text">
-                                    Choisissez le ton utilisé par l'IA
-                                    pour répondre à vos avis.
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="ai_response_tone"
+                                           class="form-label fw-semibold">
+                                        <i class="fa-solid fa-comment-dots me-2"></i>
+                                        Ton
+                                    </label>
+                                    <select class="form-select"
+                                            id="ai_response_tone"
+                                            name="ai_response_tone">
+                                        {% for value, label in form.ai_response_tone.field.choices %}
+                                            <option value="{{ value }}"
+                                                    {% if form.ai_response_tone.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Ton de réponse utilisé par l'IA.</div>
                                 </div>
-                            </div>
-                            <div class="mb-4">
-                                <label for="ai_response_length"
-                                       class="form-label fw-semibold">
-                                    <i class="fa-solid fa-text-width me-2"></i>
-                                    Longueur
-                                </label>
-                                <select class="form-select"
-                                        id="ai_response_length"
-                                        name="ai_response_length">
-                                    {% for value, label in form.ai_response_length.field.choices %}
-                                        <option value="{{ value }}"
-                                                {% if form.ai_response_length.value == value %}
-                                                    selected
-                                                {% endif %}>
-                                            {{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <div class="form-text">
-                                    Définissez la longueur des réponses
-                                    générées par l'IA.
+                                <div class="col-md-6 mb-4">
+                                    <label for="ai_response_length"
+                                           class="form-label fw-semibold">
+                                        <i class="fa-solid fa-text-width me-2"></i>
+                                        Longueur
+                                    </label>
+                                    <select class="form-select"
+                                            id="ai_response_length"
+                                            name="ai_response_length">
+                                        {% for value, label in form.ai_response_length.field.choices %}
+                                            <option value="{{ value }}"
+                                                    {% if form.ai_response_length.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Longueur des réponses de l'IA.</div>
                                 </div>
                             </div>
                             <div class="mb-4">
                                 <label for="ai_response_language"
                                        class="form-label fw-semibold">
                                     <i class="fa-solid fa-language me-2"></i>
-                                    Langue
+                                    Langue des réponses
                                 </label>
                                 <select class="form-select"
                                         id="ai_response_language"
                                         name="ai_response_language">
                                     {% for value, label in form.ai_response_language.field.choices %}
                                         <option value="{{ value }}"
-                                                {% if form.ai_response_language.value == value %}
-                                                    selected
-                                                {% endif %}>
+                                                {% if form.ai_response_language.value == value %}selected{% endif %}>
                                             {{ label }}
                                         </option>
                                     {% endfor %}
                                 </select>
-                                <div class="form-text">
-                                    Langue dans laquelle l'IA rédigera
-                                    ses réponses.
-                                </div>
                             </div>
-                            <hr class="my-3">
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">
                                     <i class="fa-solid fa-clipboard-check me-2"></i>
@@ -150,9 +129,7 @@
                                            id="validation_off"
                                            value=""
                                            autocomplete="off"
-                                           {% if not form.ai_response_validation_required.value %}
-                                               checked
-                                           {% endif %}>
+                                           {% if not form.ai_response_validation_required.value %}checked{% endif %}>
                                     <label class="btn btn-outline-secondary"
                                            for="validation_off">
                                         <i class="fa-solid fa-bolt me-1"></i>
@@ -164,9 +141,7 @@
                                            id="validation_on"
                                            value="on"
                                            autocomplete="off"
-                                           {% if form.ai_response_validation_required.value %}
-                                               checked
-                                           {% endif %}>
+                                           {% if form.ai_response_validation_required.value %}checked{% endif %}>
                                     <label class="btn btn-outline-primary"
                                            for="validation_on">
                                         <i class="fa-solid fa-clipboard-check me-1"></i>
@@ -176,14 +151,14 @@
                                 <div class="form-text">
                                     En mode validation, les réponses
                                     IA seront sauvegardées en
-                                    brouillon pour votre approbation
-                                    avant d'être publiées sur Google.
+                                    brouillon et demanderont votre approbation
+                                    avant d'être publiées.
                                 </div>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">
                                     <i class="fa-solid fa-shield-halved me-2"></i>
-                                    Protection avis malveillants
+                                    Protection contre les avis malveillants
                                 </label>
                                 <div class="btn-group w-100"
                                      role="group">
@@ -193,12 +168,10 @@
                                            id="protection_off"
                                            value=""
                                            autocomplete="off"
-                                           {% if not form.ai_response_malicious_protection.value %}
-                                               checked
-                                           {% endif %}>
+                                           {% if not form.ai_response_malicious_protection.value %}checked{% endif %}>
                                     <label class="btn btn-outline-danger"
                                            for="protection_off">
-                                        <i class="fa-solid fa-shield-xmark me-1"></i>
+                                        <i class="fa-solid fa-circle-xmark me-1"></i>
                                         Désactivée
                                     </label>
                                     <input type="radio"
@@ -207,9 +180,7 @@
                                            id="protection_on"
                                            value="on"
                                            autocomplete="off"
-                                           {% if form.ai_response_malicious_protection.value %}
-                                               checked
-                                           {% endif %}>
+                                           {% if form.ai_response_malicious_protection.value %}checked{% endif %}>
                                     <label class="btn btn-outline-success"
                                            for="protection_on">
                                         <i class="fa-solid fa-shield-halved me-1"></i>
@@ -219,8 +190,8 @@
                                 <div class="form-text">
                                     Détecte automatiquement les avis
                                     suspects (malveillants, faux) et
-                                    les signale pour votre examen
-                                    avant toute réponse.
+                                    les signale pour que vous puissiez
+                                    les examiner.
                                 </div>
                             </div>
                             <div class="d-grid mt-auto">
@@ -240,29 +211,23 @@
                 {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto preview-disabled d-flex align-items-center justify-content-center" %}
                     {% slot body %}
                         <div class="d-flex flex-column gap-3 w-100"
-                             style="max-width: 420px;">
+                             style="max-width: 420px">
                             <!-- Google header -->
                             <div class="d-flex align-items-center gap-2 pb-3 border-bottom">
                                 <i class="fa-brands fa-google text-muted"
-                                   style="font-size: 1.25rem;"></i>
-                                <span class="fw-semibold text-muted">
-                                    Google Avis
-                                </span>
+                                   style="font-size: 1.25rem"></i>
+                                <span class="fw-semibold text-muted">Google Avis</span>
                             </div>
                             <!-- Customer review -->
                             <div>
                                 <div class="d-flex align-items-center gap-3 mb-2">
                                     <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center flex-shrink-0"
                                          style="width: 44px;
-                                                height: 44px;">
-                                        <span class="fw-bold text-primary">
-                                            M
-                                        </span>
+                                                height: 44px">
+                                        <span class="fw-bold text-primary">M</span>
                                     </div>
                                     <div>
-                                        <div class="fw-semibold">
-                                            Marie Dupont
-                                        </div>
+                                        <div class="fw-semibold">Marie Dupont</div>
                                         <div class="d-flex align-items-center gap-1">
                                             <i class="fa-solid fa-star text-warning"></i>
                                             <i class="fa-solid fa-star text-warning"></i>
@@ -273,7 +238,7 @@
                                     </div>
                                 </div>
                                 <p class="mb-0 text-body-secondary"
-                                   style="line-height: 1.6;">
+                                   style="line-height: 1.6">
                                     Excellent service ! L'équipe est
                                     très accueillante et
                                     professionnelle. Je recommande
@@ -286,19 +251,18 @@
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
                                          style="width: 32px;
-                                                height: 32px;">
+                                                height: 32px">
                                         <i class="fa-solid fa-robot text-white"
-                                           style="font-size: 0.8rem;"></i>
+                                           style="font-size: 0.8rem"></i>
                                     </div>
-                                    <span class="fw-semibold text-primary">
-                                        Réponse IA
-                                    </span>
+                                    <span class="fw-semibold text-primary">Réponse IA</span>
                                 </div>
                                 {% comment %} Professionnel {% endcomment %}
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="professionnel"
                                      data-length="short"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Nous vous remercions pour votre
                                     retour, Madame Dupont. Votre
                                     satisfaction est notre priorité.
@@ -306,7 +270,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="professionnel"
                                      data-length="medium"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Nous vous remercions sincèrement
                                     pour votre retour, Madame Dupont.
                                     Votre satisfaction est notre
@@ -319,7 +284,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="professionnel"
                                      data-length="long"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Nous vous remercions sincèrement
                                     pour votre retour, Madame Dupont.
                                     Votre satisfaction est au cœur de
@@ -340,14 +306,16 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="empathique"
                                      data-length="short"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Votre avis nous touche beaucoup,
                                     Marie. Merci du fond du cœur.
                                 </div>
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="empathique"
                                      data-length="medium"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Votre avis nous touche beaucoup,
                                     Marie. Savoir que vous avez vécu
                                     une expérience aussi positive nous
@@ -359,7 +327,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="empathique"
                                      data-length="long"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Votre avis nous touche
                                     profondément, Marie. Savoir que
                                     vous avez vécu une expérience aussi
@@ -377,7 +346,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="enthousiaste"
                                      data-length="short"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Quelle joie de lire votre
                                     commentaire, Marie ! Merci
                                     infiniment !
@@ -385,7 +355,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="enthousiaste"
                                      data-length="medium"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Quelle joie de lire votre
                                     commentaire, Marie ! Nous sommes
                                     absolument ravis que vous ayez
@@ -397,7 +368,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="enthousiaste"
                                      data-length="long"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Quelle joie immense de lire votre
                                     commentaire, Marie ! Nous sommes
                                     absolument ravis que vous ayez
@@ -416,14 +388,16 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="amical"
                                      data-length="short"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Merci beaucoup Marie ! À très
                                     bientôt chez nous !
                                 </div>
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="amical"
                                      data-length="medium"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Merci beaucoup Marie ! On est super
                                     contents que l'équipe vous ait plu.
                                     C'est toujours un plaisir
@@ -434,7 +408,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="amical"
                                      data-length="long"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Merci beaucoup Marie ! On est super
                                     contents que l'équipe vous ait plu,
                                     ça fait vraiment plaisir à
@@ -452,13 +427,15 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="concis"
                                      data-length="short"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Merci Marie. Au plaisir.
                                 </div>
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="concis"
                                      data-length="medium"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Merci pour votre avis, Marie. Ravis
                                     de votre expérience. Au plaisir de
                                     vous revoir.
@@ -466,7 +443,8 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="concis"
                                      data-length="long"
-                                     style="line-height: 1.6; display: none;">
+                                     style="line-height: 1.6;
+                                            display: none">
                                     Merci pour votre avis, Marie. Ravis
                                     que l'équipe vous ait plu. Votre
                                     recommandation nous fait plaisir.
@@ -486,9 +464,7 @@
                                         <i class="fa-solid fa-text-width me-1"></i>
                                         <span id="previewLengthBadge">
                                             {% for value, label in form.ai_response_length.field.choices %}
-                                                {% if value == form.ai_response_length.value %}
-                                                    {{ label }}
-                                                {% endif %}
+                                                {% if value == form.ai_response_length.value %}{{ label }}{% endif %}
                                             {% endfor %}
                                         </span>
                                     </span>
@@ -496,9 +472,7 @@
                                         <i class="fa-solid fa-language me-1"></i>
                                         <span id="previewLanguageBadge">
                                             {% for value, label in form.ai_response_language.field.choices %}
-                                                {% if value == form.ai_response_language.value %}
-                                                    {{ label }}
-                                                {% endif %}
+                                                {% if value == form.ai_response_language.value %}{{ label }}{% endif %}
                                             {% endfor %}
                                         </span>
                                     </span>
@@ -511,7 +485,7 @@
         </div>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const toneSelect = document.getElementById("ai_response_tone");
             const lengthSelect = document.getElementById("ai_response_length");
             const languageSelect = document.getElementById("ai_response_language");
@@ -523,16 +497,16 @@
             function updatePreview() {
                 var tone = toneSelect ? toneSelect.value : "";
                 var length = lengthSelect ? lengthSelect.value : "";
-                previews.forEach(function (el) {
+                previews.forEach(function(el) {
                     el.style.display =
-                        el.dataset.tone === tone && el.dataset.length === length
-                            ? ""
-                            : "none";
+                        el.dataset.tone === tone && el.dataset.length === length ?
+                        "" :
+                        "none";
                 });
             }
 
             if (toneSelect) {
-                toneSelect.addEventListener("change", function () {
+                toneSelect.addEventListener("change", function() {
                     updatePreview();
                     if (toneBadge) {
                         toneBadge.textContent = toneSelect.options[toneSelect.selectedIndex].text;
@@ -540,7 +514,7 @@
                 });
             }
             if (lengthSelect) {
-                lengthSelect.addEventListener("change", function () {
+                lengthSelect.addEventListener("change", function() {
                     updatePreview();
                     if (lengthBadge) {
                         lengthBadge.textContent = lengthSelect.options[lengthSelect.selectedIndex].text;
@@ -548,7 +522,7 @@
                 });
             }
             if (languageSelect && languageBadge) {
-                languageSelect.addEventListener("change", function () {
+                languageSelect.addEventListener("change", function() {
                     languageBadge.textContent = languageSelect.options[languageSelect.selectedIndex].text;
                 });
             }
@@ -559,7 +533,7 @@
             var protectionOff = document.getElementById("protection_off");
             var protectionOn = document.getElementById("protection_on");
             if (protectionOff && protectionOn) {
-                protectionOff.addEventListener("change", function () {
+                protectionOff.addEventListener("change", function() {
                     if (this.checked) {
                         var confirmed = confirm(
                             "Désactiver la protection signifie que l'IA " +
