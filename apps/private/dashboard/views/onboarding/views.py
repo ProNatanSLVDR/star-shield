@@ -122,7 +122,7 @@ def import_etablissements_view(request):
     # Filter out locations that already exist
     new_locations = [loc for loc in available_locations if not loc.get("exists", False)]
 
-    from frontend.dashboard.views.etablissements.forms import ImportEtablissementForm
+    from apps.private.dashboard.views.etablissements.forms import ImportEtablissementForm
 
     form = ImportEtablissementForm(available_locations=available_locations)
 
