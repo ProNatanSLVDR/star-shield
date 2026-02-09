@@ -386,7 +386,7 @@ class Etablissement(models.Model):
 
     # filtrage settings
     review_filtering_enabled = models.BooleanField(
-        default=True,
+        default=False,
         help_text="Activer le filtrage d'avis basé sur le seuil de redirection.",
     )
     review_threshold = models.PositiveSmallIntegerField(
