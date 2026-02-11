@@ -1,43 +1,78 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html lang="fr" class="h-100">
+<html lang="fr"
+      class="h-100">
     <head>
         <title>StarShield</title>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
-        <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}">
-
-        <script defer src="{% static 'icons/brands.min.js' %}"></script>
-        <script defer src="{% static 'icons/solid.min.js' %}"></script>
-        <script defer src="{% static 'icons/fontawesome.min.js' %}"></script>
-
-        <div data-toast-container class="position-fixed bottom-0 end-0 p-4 d-flex flex-column gap-3 align-items-end" style="max-width: 400px; width: 100%; z-index: 1100;">
-            <div data-toast-template class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 100%;">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible"
+              content="ie=edge">
+        <link rel="icon"
+              type="image/png"
+              href="/static/favicon/favicon-96x96.png"
+              sizes="96x96" />
+        <link rel="icon"
+              type="image/svg+xml"
+              href="/static/favicon/favicon.svg" />
+        <link rel="shortcut icon"
+              href="/static/favicon/favicon.ico" />
+        <link rel="apple-touch-icon"
+              sizes="180x180"
+              href="/static/favicon/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-title"
+              content="Starshield" />
+        <link rel="manifest"
+              href="/static/favicon/site.webmanifest" />
+        <link rel="stylesheet"
+              href="{% static 'bootstrap/bootstrap.min.css' %}">
+        <script defer
+                src="{% static 'icons/brands.min.js' %}"></script>
+        <script defer
+                src="{% static 'icons/solid.min.js' %}"></script>
+        <script defer
+                src="{% static 'icons/fontawesome.min.js' %}"></script>
+        <div data-toast-container
+             class="position-fixed bottom-0 end-0 p-4 d-flex flex-column gap-3 align-items-end"
+             style="max-width: 400px;
+                    width: 100%;
+                    z-index: 1100">
+            <div data-toast-template
+                 class="toast"
+                 role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true"
+                 style="min-width: 100%">
                 <div class="toast-header">
-                    <strong class="me-auto fs-5" data-toast-title></strong>
-                    <small class="fs-6" data-toast-time></small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <strong class="me-auto fs-5"
+                            data-toast-title></strong>
+                    <small class="fs-6"
+                           data-toast-time></small>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"></button>
                 </div>
-                <div data-toast-body class="toast-body fs-6"></div>
+                <div data-toast-body
+                     class="toast-body fs-6"></div>
             </div>
         </div>
         <script src="{% static 'custom/toasts.js' %}"></script>
-
     </head>
-
-    <body class="h-100" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+    <body class="h-100"
+          hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 
         {% block body %}
         {% endblock body %}
 
     </body>
-
-    <script type="text/javascript" src="{% static 'htmx/htmx.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'htmx/htmx.idiomorph.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'htmx/htmx.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'htmx/htmx.idiomorph.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -45,17 +80,17 @@
             const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
 
-                // Handle messages for regular requests
+            // Handle messages for regular requests
             {% if messages and not request.htmx %}
-                {% for message in messages %}
-                    createToast({
-                        message: '{{ message.message|escapejs }}',
-                        tags: '{{ message.tags|escapejs }}'
-                    });
-                {% endfor %}
+            {% for message in messages %}
+            createToast({
+                message: '{{ message.message|escapejs }}',
+                tags: '{{ message.tags|escapejs }}'
+            });
+            {% endfor %}
             {% endif %}
 
-                // Handle messages from X-Messages header for HTMX requests
+            // Handle messages from X-Messages header for HTMX requests
             htmx.on("htmx:afterRequest", (e) => {
                 const messages = e.detail.xhr.getResponseHeader("X-Messages");
                 if (messages) {
@@ -159,6 +194,5 @@
             });
         });
     </script>
-
     {% include "confirmation_modal.html" %}
 </html>

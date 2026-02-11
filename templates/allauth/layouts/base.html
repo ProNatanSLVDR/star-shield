@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+
 {% load i18n %}
+{% load static %}
 
 {% block body %}
     <section class="min-vh-100 d-flex flex-column bg-body-tertiary">
@@ -7,15 +9,22 @@
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 col-lg-5">
                     <div class="text-center mb-4">
-                        <a href="{% url 'account_login' %}" class="d-inline-flex align-items-center justify-content-center gap-2 text-decoration-none text-dark">
-                            <span class="d-inline-flex rounded-circle align-items-center justify-content-center bg-white shadow-sm" style="width: 3rem; height: 3rem;">
-                                <i class="fa-solid fa-map-signs fs-4 text-dark" aria-hidden="true"></i>
+                        <a href="{% url 'account_login' %}"
+                           class="d-inline-flex align-items-center justify-content-center gap-2 text-decoration-none text-dark">
+                            <span class="d-inline-flex rounded-circle align-items-center justify-content-center bg-white shadow-sm"
+                                  style="width: 3rem;
+                                         height: 3rem">
+                                <img src="{% static 'img/logo.svg' %}"
+                                     alt="StarShield"
+                                     class="img-fluid"
+                                     style="width: 32px;
+                                            height: 32px">
                             </span>
                             <span class="fw-semibold fs-4">StarShield</span>
                         </a>
                     </div>
-
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
                         {% block auths_card_header %}
                             <div class="position-relative px-4 px-lg-5 py-3 bg-primary bg-gradient text-white">
                                 <div class="position-absolute top-0 end-0 translate-middle opacity-25 d-none d-sm-block">
@@ -23,35 +32,45 @@
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between gap-3">
                                     <div>
-
                                         <h2 class="h5 mb-0 text-white">
+
                                             {% block auths_card_title %}
                                                 {% trans "Connexion" %}
                                             {% endblock auths_card_title %}
-                                        </h2>
 
+                                        </h2>
                                         <p class="mb-0 text-white-50 small mt-1">
+
                                             {% block auths_card_subtitle %}
                                                 {% trans "Accédez à votre plateforme en toute tranquillité." %}
                                             {% endblock auths_card_subtitle %}
+
                                         </p>
                                     </div>
                                     <span class="d-none d-sm-inline-flex text-white-50 fs-4">
-                                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                                        <i class="fa-solid fa-shield-halved"
+                                           aria-hidden="true"></i>
                                     </span>
                                 </div>
                             </div>
                         {% endblock %}
+
                         <div class="card-body px-4 pt-3 pb-4">
+
                             {% block content %}
                             {% endblock content %}
+
                         </div>
                     </div>
-
                     <div class="text-center mt-4">
+
                         {% block auths_footer %}
-                            <p class="text-secondary small mb-0">{% trans "Un problème ?" %} <a href="mailto:support@starshield.pro" class="text-secondary">{% trans "Contactez le support StarShield." %}</a></p>
+                            <p class="text-secondary small mb-0">
+                                {% trans "Un problème ?" %} <a href="mailto:support@starshield.pro"
+    class="text-secondary">{% trans "Contactez le support StarShield." %}</a>
+                            </p>
                         {% endblock auths_footer %}
+
                     </div>
                 </div>
             </div>

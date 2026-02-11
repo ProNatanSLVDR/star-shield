@@ -1,89 +1,95 @@
 {% extends "base.html" %}
+
 {% load i18n %}
+{% load static %}
 
 {% block body %}
     <div class="d-flex flex-column w-100 h-100 bg-body-tertiary">
-
         <!-- Mobile top bar -->
         <div class="d-md-none d-flex align-items-center bg-white border-bottom px-3 py-2">
-            <button class="btn btn-sm border-0" type="button"
+            <button class="btn btn-sm border-0"
+                    type="button"
                     data-bs-toggle="offcanvas"
                     data-bs-target="#sidebar">
                 <i class="fa-solid fa-bars fs-5"></i>
             </button>
             <div class="d-flex align-items-center gap-2 ms-2">
-                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary"
-                      style="width: 32px; height: 32px;">
-                    <i class="fa-solid fa-shield-halved small"></i>
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-2"
+                      style="width: 32px;
+                             height: 32px">
+                    <img src="{% static 'img/logo.svg' %}"
+                         alt="StarShield"
+                         class="img-fluid"
+                         style="width: 40px;
+                                height: 40px">
                 </span>
-                <span class="fw-semibold text-body-emphasis">
-                    StarShield
-                </span>
+                <span class="fw-semibold text-body-emphasis">StarShield</span>
             </div>
         </div>
-
         <div class="d-flex flex-grow-1 overflow-hidden">
-
             <!-- Sidebar -->
             <aside id="sidebar"
                    class="offcanvas-md offcanvas-start d-flex flex-column bg-white border-end flex-shrink-0"
-                   style="width: 280px; --bs-offcanvas-width: 280px;"
+                   style="width: 280px;
+                          --bs-offcanvas-width: 280px"
                    tabindex="-1">
-
                 <!-- Offcanvas header (mobile only) -->
                 <div class="offcanvas-header d-md-none border-bottom">
                     <div class="d-flex align-items-center gap-3">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary"
-                              style="width: 40px; height: 40px;">
-                            <i class="fa-solid fa-shield-halved"></i>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-2"
+                              style="width: 40px;
+                                     height: 40px">
+                            <img src="{% static 'img/logo.svg' %}"
+                                 alt="StarShield"
+                                 class="img-fluid"
+                                 style="width: 40px;
+                                        height: 40px">
                         </span>
                         <div class="d-flex flex-column">
-                            <span class="fw-semibold text-body-emphasis">
-                                StarShield
-                            </span>
-                            <span class="text-muted small">
-                                Protégez votre image
-                            </span>
+                            <span class="fw-semibold text-body-emphasis">StarShield</span>
+                            <span class="text-muted small">Protégez votre image</span>
                         </div>
                     </div>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="offcanvas"
                             data-bs-target="#sidebar"
-                            aria-label="Close">
-                    </button>
+                            aria-label="Close"></button>
                 </div>
-
                 <!-- Sidebar Header (desktop only) -->
                 <div class="d-none d-md-block px-4 pt-4 pb-3 border-bottom">
                     <div class="d-flex align-items-center gap-3">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary"
-                              style="width: 40px; height: 40px;">
-                            <i class="fa-solid fa-shield-halved"></i>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-2"
+                              style="width: 40px;
+                                     height: 40px">
+                            <img src="{% static 'img/logo.svg' %}"
+                                 alt="StarShield"
+                                 class="img-fluid"
+                                 style="width: 40px;
+                                        height: 40px">
                         </span>
                         <div class="d-flex flex-column">
-                            <span class="fw-semibold text-body-emphasis">
-                                StarShield
-                            </span>
-                            <span class="text-muted small">
-                                Protégez votre image
-                            </span>
+                            <span class="fw-semibold text-body-emphasis">StarShield</span>
+                            <span class="text-muted small">Protégez votre image</span>
                         </div>
                     </div>
                 </div>
-
                 <!-- Sidebar Body -->
                 <div class="d-flex flex-column flex-grow-1 overflow-hidden">
                     <div class="flex-grow-1 overflow-auto px-3 py-4">
+
                         {% block sidebar_content %}
                             {% include "sidebar_main.html" %}
-                        {% endblock %}
+                        {% endblock sidebar_content %}
+
                     </div>
                     {% if request.etablissement and not request.etablissement.active %}
                         <a href="{% url 'dashboard:etablissements:list' %}"
                            class="alert alert-warning d-flex flex-column align-items-center text-center p-2 m-2 rounded-4 fa-beat-fade  text-decoration-none"
                            role="alert"
-                           style="--fa-beat-fade-opacity: 0.67; --fa-beat-fade-scale: 1.025; cursor: pointer;">
+                           style="--fa-beat-fade-opacity: 0.67;
+                                  --fa-beat-fade-scale: 1.025;
+                                  cursor: pointer">
                             <div class="d-flex align-items-center gap-2">
                                 <i class="fa-solid fa-triangle-exclamation text-warning"></i>
                                 <strong>Établissement désactivé</strong>
@@ -95,9 +101,13 @@
                     {% endif %}
                     <div class="px-3 py-3 border-top flex-shrink-0">
                         <div class="dropup w-100">
-                            <button class="w-100 border-0 bg-white p-2 rounded-4 d-flex align-items-center gap-3 text-start" type="button" data-bs-toggle="dropdown" >
+                            <button class="w-100 border-0 bg-white p-2 rounded-4 d-flex align-items-center gap-3 text-start"
+                                    type="button"
+                                    data-bs-toggle="dropdown">
                                 <div>
-                                    <div class="rounded-circle bg-primary text-white text-center d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                    <div class="rounded-circle bg-primary text-white text-center d-flex align-items-center justify-content-center"
+                                         style="width: 36px;
+                                                height: 36px">
                                         <i class="fa-solid fa-user"></i>
                                     </div>
                                 </div>
@@ -124,22 +134,29 @@
                             <ul class="dropdown-menu w-100 shadow border rounded-4 py-2">
                                 {% if request.user.is_superuser %}
                                     <li>
-                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'admin:index' %}">
+                                        <a class="dropdown-item d-flex align-items-center gap-2"
+                                           href="{% url 'admin:index' %}">
                                             <span class="text-muted"><i class="fa-solid fa-screwdriver-wrench"></i></span>
                                             <span>Administration</span>
                                         </a>
                                     </li>
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
                                 {% endif %}
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'dashboard:profile:profile' %}">
+                                    <a class="dropdown-item d-flex align-items-center gap-2"
+                                       href="{% url 'dashboard:profile:profile' %}">
                                         <span class="text-muted"><i class="fa-solid fa-user"></i></span>
                                         <span>{% blocktrans %}Mon profil{% endblocktrans %}</span>
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'account_logout' %}">
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2"
+                                       href="{% url 'account_logout' %}">
                                         <span class="text-muted"><i class="fa-solid fa-right-from-bracket"></i></span>
                                         <span>{% blocktrans %}Se déconnecter{% endblocktrans %}</span>
                                     </a>
@@ -148,25 +165,23 @@
                         </div>
                     </div>
                 </div>
-
             </aside>
-
             <!-- Main Content -->
             <main class="d-flex flex-column flex-grow-1 p-2 p-md-3 h-100 overflow-scroll">
+
                 {% block dashboard_content %}
                 {% endblock dashboard_content %}
-            </main>
 
+            </main>
         </div>
     </div>
-
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const sidebar = document.getElementById("sidebar");
             if (!sidebar) return;
 
             // Move modals out of offcanvas to avoid stacking context issues
-            sidebar.querySelectorAll(".modal").forEach(function (modal) {
+            sidebar.querySelectorAll(".modal").forEach(function(modal) {
                 document.body.appendChild(modal);
             });
 
@@ -176,14 +191,14 @@
             }
 
             // Close sidebar on HTMX navigation (mobile)
-            document.body.addEventListener("htmx:beforeRequest", function (e) {
+            document.body.addEventListener("htmx:beforeRequest", function(e) {
                 if (sidebar.contains(e.detail.elt)) {
                     closeSidebar();
                 }
             });
 
             // Close sidebar on regular link clicks within sidebar
-            sidebar.addEventListener("click", function (e) {
+            sidebar.addEventListener("click", function(e) {
                 const link = e.target.closest("a[href]");
                 if (link && !link.hasAttribute("hx-get") && !link.hasAttribute("hx-post")) {
                     closeSidebar();
@@ -191,5 +206,4 @@
             });
         });
     </script>
-
 {% endblock body %}
