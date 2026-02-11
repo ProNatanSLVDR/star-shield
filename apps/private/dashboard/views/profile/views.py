@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.private.dashboard.render import starshield_render
 
-from .forms import UserProfileForm
+from .forms import ProfilePictureForm, UserProfileForm
 
 
 @login_required
@@ -52,20 +52,20 @@ def profile_picture_partial(request):
     hx_triggers = {}
 
     if request.method == "POST":
-        # Handle profile picture deletion
-        if request.POST.get("delete_profile_picture"):
-            if user.profile_picture:
-                user.profile_picture.delete(save=False)
-                user.profile_picture = None
+        form = ProfilePictureForm(request.POST, request.FILES)
+        if form.is_valid():
+            if form.cleaned_data.get("delete_profile_picture"):
+                if user.profile_picture:
+                    user.profile_picture.delete(save=False)
+                    user.profile_picture = None
+                    user.save()
+                    messages.success(request, "Photo de profil supprimée avec succès.")
+                    hx_triggers["profile-picture-updated"] = True
+            elif form.cleaned_data.get("profile_picture"):
+                user.profile_picture = form.cleaned_data["profile_picture"]
                 user.save()
-                messages.success(request, "Photo de profil supprimée avec succès.")
+                messages.success(request, "Photo de profil mise à jour avec succès.")
                 hx_triggers["profile-picture-updated"] = True
-        # Handle profile picture upload
-        elif "profile_picture" in request.FILES:
-            user.profile_picture = request.FILES["profile_picture"]
-            user.save()
-            messages.success(request, "Photo de profil mise à jour avec succès.")
-            hx_triggers["profile-picture-updated"] = True
 
     context = {
         "user": user,

@@ -47,7 +47,7 @@ def qr_code_management_view(request, short_code=None):
             form = QRCodeSettingsForm(request.POST, request.FILES)
             if form.is_valid():
                 # Handle logo deletion
-                if request.POST.get("delete_logo"):
+                if form.cleaned_data.get("delete_logo"):
                     selected_qr_code.qr_logo.delete(save=False)
                     selected_qr_code.qr_logo = None
                     selected_qr_code.save()
@@ -64,8 +64,8 @@ def qr_code_management_view(request, short_code=None):
                 selected_qr_code.qr_style = form.cleaned_data["qr_style"]
                 selected_qr_code.qr_color_mask = form.cleaned_data["qr_color_mask"]
 
-                if "qr_logo" in request.FILES:
-                    selected_qr_code.qr_logo = request.FILES["qr_logo"]
+                if form.cleaned_data.get("qr_logo"):
+                    selected_qr_code.qr_logo = form.cleaned_data["qr_logo"]
 
                 selected_qr_code.save()
                 messages.success(request, "Paramètres du QR code mis à jour avec succès.")

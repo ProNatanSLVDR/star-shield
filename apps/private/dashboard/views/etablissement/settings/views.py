@@ -69,8 +69,7 @@ def toggle_feature_view(request):
 
     # Process all features: enable if present in POST and equals "on", otherwise disable
     for feature_field in feature_fields:
-        # Checkbox sends "on" when checked, or nothing when unchecked
-        new_state = request.POST.get(feature_field) == "on"
+        new_state = form.cleaned_data.get(feature_field, False)
         setattr(etablissement, feature_field, new_state)
 
     # Save all changes at once

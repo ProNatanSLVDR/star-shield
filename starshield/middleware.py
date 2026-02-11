@@ -38,9 +38,12 @@ class EtablissementMiddleware(MiddlewareMixin):
     """
 
     def __call__(self, request):
-        etablissement = request.session.get("selected_etablissement")
-        if etablissement:
-            etablissement = Etablissement.objects.filter(id=etablissement).first()
+        etablissement_id = request.session.get("selected_etablissement")
+        if etablissement_id and hasattr(request, "user") and request.user.is_authenticated:
+            etablissement = Etablissement.objects.filter(
+                id=etablissement_id,
+                google_credential__user=request.user,
+            ).first()
             if etablissement:
                 request.etablissement = etablissement
             else:

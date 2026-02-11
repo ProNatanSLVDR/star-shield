@@ -17,3 +17,13 @@ class UserProfileForm(forms.Form):
         label="Photo de profil",
         help_text="Téléchargez une nouvelle photo de profil.",
     )
+
+
+class ProfilePictureForm(forms.Form):
+    profile_picture = forms.ImageField(
+        required=False,
+        label="Photo de profil",
+    )
+    delete_profile_picture = forms.BooleanField(
+        required=False,
+    )

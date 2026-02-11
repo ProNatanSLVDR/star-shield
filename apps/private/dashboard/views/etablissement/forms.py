@@ -71,3 +71,6 @@ class QRCodeSettingsForm(forms.Form):
         label="Logo",
         help_text="Logo à afficher au centre du QR code.",
     )
+    delete_logo = forms.BooleanField(
+        required=False,
+    )

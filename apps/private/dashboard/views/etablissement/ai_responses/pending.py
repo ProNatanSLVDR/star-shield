@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 
 from apps.private.dashboard.render import starshield_render
+from apps.private.dashboard.views.etablissement.ai_responses.forms import ApproveReviewForm
 from apps.public.reviews.models import Review
 from apps.tasks_api.services.ai_response_service import (
     approve_ai_response,
@@ -88,7 +89,12 @@ def approve_review_view(request, review_id):
         messages.error(request, "Avis non trouvé.")
         return HttpResponse(status=404)
 
-    edited_comment = request.POST.get("edited_comment", "").strip() or None
+    form = ApproveReviewForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Données invalides.")
+        return starshield_render(request, hx_triggers={"refreshPendingList": True})
+
+    edited_comment = form.cleaned_data.get("edited_comment") or None
     success = approve_ai_response(review.id, edited_comment=edited_comment)
 
     if success:

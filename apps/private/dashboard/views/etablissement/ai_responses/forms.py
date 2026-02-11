@@ -3,6 +3,14 @@ from django import forms
 from apps.private.auths.choices import AI_LANGUAGE_CHOICES, AI_LENGTH_CHOICES, AI_TONE_CHOICES
 
 
+class ApproveReviewForm(forms.Form):
+    edited_comment = forms.CharField(
+        required=False,
+        max_length=2000,
+        widget=forms.Textarea,
+    )
+
+
 class AiResponseSettingsForm(forms.Form):
     ai_response_tone = forms.ChoiceField(
         choices=AI_TONE_CHOICES,
