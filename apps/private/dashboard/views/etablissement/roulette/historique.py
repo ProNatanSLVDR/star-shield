@@ -1,6 +1,9 @@
 from datetime import timedelta
 
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from apps.private.dashboard.render import starshield_render
 from apps.public.roulette.models import RouletteAnalytics, RouletteSpin
@@ -117,6 +120,21 @@ def historique_content_partial(request):
 
     rows = []
     for spin in spins_qs:
+        if spin.is_used:
+            status_html = (
+                f'<button class="btn btn-sm btn-success" '
+                f'hx-post="{reverse("dashboard:etablissement:roulette:toggle_spin_status", args=[spin.id])}" '
+                f'hx-swap="none" title="Cliquer pour marquer en attente">'
+                f'<i class="fa-solid fa-check me-1"></i>Réclamé</button>'
+            )
+        else:
+            status_html = (
+                f'<button class="btn btn-sm btn-warning" '
+                f'hx-post="{reverse("dashboard:etablissement:roulette:toggle_spin_status", args=[spin.id])}" '
+                f'hx-swap="none" title="Cliquer pour marquer réclamé">'
+                f'<i class="fa-solid fa-clock me-1"></i>En attente</button>'
+            )
+
         rows.append(
             {
                 "prize_name": {
@@ -129,10 +147,10 @@ def historique_content_partial(request):
                     "sort_value": spin.created_at.timestamp(),
                 },
                 "status": {
-                    "type": "badge",
-                    "value": "Réclamé" if spin.is_used else "En attente",
-                    "variant": "success" if spin.is_used else "warning",
+                    "type": "html",
+                    "value": status_html,
                     "sort_value": 1 if spin.is_used else 0,
+                    "centered": True,
                 },
             }
         )
@@ -150,4 +168,20 @@ def historique_content_partial(request):
         request,
         "etablissement/roulette/historique_content_partial.html",
         context=context,
+    )
+
+
+@google_gmb_connected_required
+@selected_etablissement_required
+@require_POST
+def toggle_spin_status(request, spin_id):
+    """HTMX endpoint to toggle a spin's is_used status."""
+    etablissement = request.etablissement
+    spin = get_object_or_404(RouletteSpin, id=spin_id, etablissement=etablissement)
+    spin.is_used = not spin.is_used
+    spin.save(update_fields=["is_used"])
+
+    return starshield_render(
+        request,
+        hx_triggers={"historique-updated": True},
     )

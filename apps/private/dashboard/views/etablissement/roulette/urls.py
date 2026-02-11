@@ -12,4 +12,5 @@ urlpatterns = [
     path("prizes/<int:prize_id>/delete/", roulette.prize_delete_partial, name="prize_delete"),
     path("historique/", historique.historique_view, name="historique"),
     path("historique/content/", historique.historique_content_partial, name="historique_content"),
+    path("historique/<int:spin_id>/toggle/", historique.toggle_spin_status, name="toggle_spin_status"),
 ]

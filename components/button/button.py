@@ -22,6 +22,10 @@ class Button(Component):
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         extra_kwargs = kwargs.extra_kwargs.copy()
 
+        # Inject href into extra_kwargs so the template can access it
+        if kwargs.href:
+            extra_kwargs["href"] = kwargs.href
+
         # pop the extra_kwargs keys that are not needed
         hx_modal_toggle = extra_kwargs.pop("hx_modal_toggle", None)
         hx_modal_target = extra_kwargs.pop("hx_modal_target", None)

@@ -23,21 +23,6 @@
             <div class="col-12 col-lg-4 d-flex flex-column">
                 {% component "card" title="Paramètres" icon="fa-solid fa-gear" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="d-flex flex-column flex-grow-1 overflow-auto" %}
                     {% slot body %}
-                        <!-- Activation Link -->
-                        <div class="alert alert-info d-flex align-items-center"
-                             role="alert">
-                            <div class="flex-shrink-0 me-2">
-                                <i class="fa-solid fa-info-circle"></i>
-                            </div>
-                            <div>
-                                <strong>Activation de la roue</strong>
-                                <p class="mb-0 small">
-                                    Pour activer ou désactiver la roue, rendez-vous sur la
-                                    <a href="{% url 'dashboard:etablissement:overview' %}"
-                                       class="alert-link">vue d'ensemble</a>.
-                                </p>
-                            </div>
-                        </div>
                         <form method="post"
                               id="rouletteSettingsForm">
                             {% csrf_token %}
@@ -66,9 +51,10 @@
                                        name="roulette_spin_cooldown_days"
                                        value="{{ form.roulette_spin_cooldown_days.value|default:14 }}"
                                        min="1"
+                                       max="180"
                                        required>
                                 <div class="form-text">
-                                    Nombre de jours d'attente entre deux spins pour le même utilisateur.
+                                    Nombre de jours d'attente entre deux spins pour le même utilisateur (max 180 jours). Contrôle la durée du cookie.
                                 </div>
                             </div>
                             <div class="d-grid gap-2 mt-4">
@@ -80,13 +66,22 @@
                             </div>
                         </form>
                         <div class="d-flex flex-column flex-grow-1 justify-content-end">
+                            <a href="{{ roulette_url }}"
+                               target="_blank"
+                               class="btn btn-outline-primary w-100">
+                                <i class="fa-solid fa-eye me-2"></i>
+                                Voir la roue
+                                <i class="fa-solid fa-up-right-from-square ms-1 small"></i>
+                            </a>
                             <hr>
                             <p>Pour verifier les codes gagnants, rendez-vous sur cette page :</p>
                             {% component "button"
                                 text="Vérifier un code"
                                 classes="btn btn-primary"
                                 icon="fa-solid fa-up-right-from-square"
-                                href="{% url 'roulette:verify' etablissement.uuid %}"
+                                extra_kwargs={
+                                "href": "{% url 'roulette:verify' etablissement.uuid %}"
+                                }
                                 %}
                             {% endcomponent %}
                         </div>

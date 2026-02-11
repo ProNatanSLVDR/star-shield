@@ -70,6 +70,7 @@
         align-items: center;
         margin: 0 auto;
         width: 100%;
+        overflow: hidden;
     }
 
     .spinwheel-frame {
@@ -101,6 +102,8 @@
         position: relative;
         width: var(--wheel-size);
         height: var(--wheel-size);
+        max-width: 100%;
+        aspect-ratio: 1;
         border-radius: 50%;
         background: var(--wheel-bg);
         border: var(--wheel-border) solid var(--wheel-border-color);
