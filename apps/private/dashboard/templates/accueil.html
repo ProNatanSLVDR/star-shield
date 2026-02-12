@@ -1,5 +1,7 @@
 {% extends "dashboard_base.html" %}
 
+{% load component_tags %}
+
 {% block dashboard_content %}
     <div class="p-2 p-md-5 d-flex flex-column h-100">
 
@@ -136,6 +138,26 @@
                 </div>
             </div>
         </div>
+
+        {% component "empty_modal" modal_id="helpModal" size="md" %}
+            {% fill "title" %}
+                <i class="fa-solid fa-headset me-2"></i>Besoin d'aide ?
+            {% endfill %}
+            {% fill "body" %}
+                <div class="p-3">
+                    <p class="text-muted mb-3">
+                        Contactez notre support pour toute question liée à
+                        votre compte ou à la configuration de vos
+                        établissements.
+                    </p>
+                    <a href="mailto:support@starshield.pro"
+                       class="btn btn-primary rounded-pill w-100">
+                        <i class="fa-solid fa-envelope me-2"></i>
+                        support@starshield.pro
+                    </a>
+                </div>
+            {% endfill %}
+        {% endcomponent %}
     </div>
 
     <style>
@@ -145,5 +167,4 @@
         }
     </style>
 {% endblock %}
-
 
