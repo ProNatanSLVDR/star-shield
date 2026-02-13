@@ -56,8 +56,11 @@ def qr_code_management_view(request, short_code=None):
                         return redirect(reverse("dashboard:etablissement:qrcodes", args=[selected_qr_code.short_code]))
                     return redirect("dashboard:etablissement:qrcodes")
 
-                selected_qr_code.name = form.cleaned_data["name"]
-                selected_qr_code.routing = form.cleaned_data["routing"]
+                # If the QR code is not locked, update the name and routing too
+                if not selected_qr_code.locked:
+                    selected_qr_code.name = form.cleaned_data["name"]
+                    selected_qr_code.routing = form.cleaned_data["routing"]
+
                 selected_qr_code.qr_fill_color = form.cleaned_data["qr_fill_color"]
                 selected_qr_code.qr_fill_color_secondary = form.cleaned_data["qr_fill_color_secondary"]
                 selected_qr_code.qr_background_color = form.cleaned_data["qr_background_color"]
@@ -201,6 +204,12 @@ def qr_code_delete_partial(request, short_code):
 
     qr_code = get_object_or_404(QRCode, short_code=short_code, etablissement=etablissement)
     qr_code_name = qr_code.name
+
+    if qr_code.locked:
+        messages.error(request, 'Ce QR code est "Permament" et ne peut pas être supprimé.')
+        if qr_code.short_code:
+            return redirect(reverse("dashboard:etablissement:qrcodes", args=[qr_code.short_code]))
+        return redirect("dashboard:etablissement:qrcodes")
 
     if request.method == "POST":
         qr_code.delete()

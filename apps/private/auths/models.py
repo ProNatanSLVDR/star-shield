@@ -7,7 +7,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models
-from django.db.models.signals import pre_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
@@ -485,6 +485,10 @@ class QRCode(models.Model):
         default="feedback",
         help_text="Destination du QR code (feedback ou roulette).",
     )
+    locked = models.BooleanField(
+        default=False,
+        help_text="Empêche la suppression et la modification de certains champs dans le dashboard.",
+    )
 
     # QR code customization settings
     qr_fill_color = models.CharField(
@@ -686,3 +690,25 @@ def delete_old_qr_logo(sender, instance, **kwargs):
                 f"Error deleting old QR logo for QRCode {instance.pk}: {e}",
                 exc_info=True,
             )
+
+
+@receiver(post_save, sender=Etablissement)
+def create_default_qr_codes(sender, instance, created, **kwargs):
+    """
+    Create 2 default locked QR codes for newly created etablissements.
+    """
+    if not created:
+        return
+
+    QRCode.objects.create(
+        etablissement=instance,
+        name="Filtre",
+        routing="feedback",
+        locked=True,
+    )
+    QRCode.objects.create(
+        etablissement=instance,
+        name="Roulette",
+        routing="roulette",
+        locked=True,
+    )

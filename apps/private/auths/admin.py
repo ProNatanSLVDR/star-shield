@@ -70,7 +70,7 @@ class GoogleCredentialsAdmin(admin.ModelAdmin):
 class QRCodeInline(admin.TabularInline):
     model = QRCode
     extra = 0
-    fields = ("name", "short_code", "routing", "created_at")
+    fields = ("name", "short_code", "routing", "locked", "created_at")
     readonly_fields = ("short_code", "created_at")
     show_change_link = True
 
@@ -186,9 +186,9 @@ class EtablissementAdmin(admin.ModelAdmin):
 
 @admin.register(QRCode)
 class QRCodeAdmin(admin.ModelAdmin):
-    list_display = ("name", "short_code", "etablissement", "routing", "created_at")
+    list_display = ("name", "short_code", "etablissement", "routing", "locked", "created_at")
     search_fields = ("name", "short_code", "etablissement__title")
-    list_filter = ("routing", "created_at")
+    list_filter = ("routing", "locked", "created_at")
     ordering = ("-created_at",)
 
     fieldsets = (
@@ -200,6 +200,7 @@ class QRCodeAdmin(admin.ModelAdmin):
                     "name",
                     "short_code",
                     "routing",
+                    "locked",
                 )
             },
         ),

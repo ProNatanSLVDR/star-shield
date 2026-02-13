@@ -56,8 +56,17 @@
                                               active text-white
                                           {% endif %}">
                                     <div class="row">
-                                        <div class="col-auto me-auto">
-                                            <h6 class="mb-1 fw-bold">{{ slot.name }}</h6>
+                                        <div class="col-auto w-100">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-1 fw-bold">{{ slot.name }}</h6>
+                                                {% if slot.locked %}
+                                                    <span class="badge text-bg-warning"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-title="Ce QR code est Permament, certaines modifications sont désactivées.">
+                                                        <i class="fa-solid fa-lock"></i>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
                                             <small class="{% if selected_qr_code and selected_qr_code.id == slot.id %}
                                                               text-white
                                                           {% else %}
@@ -125,7 +134,13 @@
                                                id="name"
                                                name="name"
                                                value="{{ form.name.value|default:selected_qr_code.name }}"
+                                               {% if selected_qr_code.locked %}disabled{% endif %}
                                                required>
+                                        {% if selected_qr_code.locked %}
+                                            <input type="hidden"
+                                                   name="name"
+                                                   value="{{ selected_qr_code.name }}">
+                                        {% endif %}
                                     </div>
                                     <div class="mb-3">
                                         <label for="routing"
@@ -135,7 +150,8 @@
                                         </label>
                                         <select class="form-select"
                                                 id="routing"
-                                                name="routing">
+                                                name="routing"
+                                                {% if selected_qr_code.locked %}disabled{% endif %}>
                                             <option value="feedback"
                                                     {% if form.routing.value|default:selected_qr_code.routing == "feedback" %}
                                                         selected
@@ -155,7 +171,16 @@
                                                 Roulette (Page de vérification des codes)
                                             </option>
                                         </select>
-                                        <div class="form-text">Où ce QR code redirige les utilisateurs.</div>
+                                        {% if selected_qr_code.locked %}
+                                            <input type="hidden"
+                                                   name="routing"
+                                                   value="{{ selected_qr_code.routing }}">
+                                            <div class="form-text">
+                                                Ce QR code est Permament : sa destination ne peut pas être modifiée.
+                                            </div>
+                                        {% else %}
+                                            <div class="form-text">Où ce QR code redirige les utilisateurs.</div>
+                                        {% endif %}
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6">
@@ -303,20 +328,36 @@
                                                     %}
                                                 {% endcomponent %}
                                             </div>
-                                            <div class="col-md-6">
-                                                {% component "button"
-                                                    text="Supprimer"
-                                                    classes="btn-outline-danger w-100"
-                                                    icon="fa-solid fa-trash"
-                                                    extra_kwargs={
-                                                    "hx_modal_toggle": True,
-                                                    "type": "button",
-                                                    "hx-get": "{% url 'dashboard:etablissement:qrcode_delete_partial' selected_qr_code.short_code %}",
-                                                    "hx-trigger": "click",
-                                                    }
-                                                    %}
-                                                {% endcomponent %}
-                                            </div>
+                                            {% if selected_qr_code.locked %}
+                                                <div class="col-md-6"
+                                                     data-bs-toggle="tooltip"
+                                                     data-bs-title="Ce QR code est Permament, sa suppression est désactivée.">
+                                                    {% component "button"
+                                                        text="Supprimer"
+                                                        classes="btn-outline-danger w-100"
+                                                        icon="fa-solid fa-trash"
+                                                        extra_kwargs={
+                                                        "disabled": True,
+                                                        }
+                                                        %}
+                                                    {% endcomponent %}
+                                                </div>
+                                            {% else %}
+                                                <div class="col-md-6">
+                                                    {% component "button"
+                                                        text="Supprimer"
+                                                        classes="btn-outline-danger w-100"
+                                                        icon="fa-solid fa-trash"
+                                                        extra_kwargs={
+                                                        "hx_modal_toggle": True,
+                                                        "type": "button",
+                                                        "hx-get": "{% url 'dashboard:etablissement:qrcode_delete_partial' selected_qr_code.short_code %}",
+                                                        "hx-trigger": "click",
+                                                        }
+                                                        %}
+                                                    {% endcomponent %}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -378,6 +419,8 @@
                                             <img id="qrCodePreview"
                                                  src="{{ qr_code_url }}"
                                                  alt="QR Code Preview"
+                                                 width="400"
+                                                 height="400"
                                                  class="img-fluid shadow rounded border">
                                         </div>
                                         <div class="row">

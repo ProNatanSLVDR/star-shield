@@ -46,6 +46,21 @@ class TestEtablissement(TestCase):
 
         self.assertEqual(etab.review_threshold, 4)
 
+    def test_creates_default_locked_qr_codes_on_create(self):
+        etab = EtablissementFactory()
+
+        locked_qr_codes = etab.qr_codes.filter(locked=True)
+        locked_routes = set(locked_qr_codes.values_list("name", "routing"))
+
+        self.assertEqual(locked_qr_codes.count(), 2)
+        self.assertSetEqual(
+            locked_routes,
+            {
+                ("Filtre", "feedback"),
+                ("Roulette", "roulette"),
+            },
+        )
+
 
 class TestQRCode(TestCase):
     def test_str(self):
