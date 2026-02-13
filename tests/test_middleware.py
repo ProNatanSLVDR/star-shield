@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.test import RequestFactory, TestCase
 
 from starshield.middleware import CustomMessageMiddleware, EtablissementMiddleware
-from tests.factories import EtablissementFactory
+from tests.factories import EtablissementFactory, UserFactory
 
 
 class TestCustomMessageMiddleware(TestCase):
@@ -86,18 +86,21 @@ class TestEtablissementMiddleware(TestCase):
         middleware = self._make_middleware()
         request = self.factory.get("/test/")
         request.session = {"selected_etablissement": etab.id}
+        request.user = etab.google_credential.user
 
         middleware(request)
 
         self.assertEqual(request.etablissement, etab)
 
     def test_clears_session_when_etablissement_deleted(self):
+        user = UserFactory()
         middleware = self._make_middleware()
         request = self.factory.get("/test/")
         session = SessionStore()
         session["selected_etablissement"] = 99999  # non-existent
         session.create()
         request.session = session
+        request.user = user
 
         middleware(request)
 
