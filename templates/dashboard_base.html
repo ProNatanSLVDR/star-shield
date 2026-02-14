@@ -13,7 +13,8 @@
                     data-bs-target="#sidebar">
                 <i class="fa-solid fa-bars fs-5"></i>
             </button>
-            <div class="d-flex align-items-center gap-2 ms-2">
+            <a href="{% url 'dashboard:accueil' %}"
+               class="d-flex align-items-center gap-2 ms-2 text-decoration-none">
                 <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-2"
                       style="width: 32px;
                              height: 32px">
@@ -24,7 +25,7 @@
                                 height: 40px">
                 </span>
                 <span class="fw-semibold text-body-emphasis">StarShield</span>
-            </div>
+            </a>
         </div>
         <div class="d-flex flex-grow-1 overflow-hidden">
             <!-- Sidebar -->
@@ -35,7 +36,8 @@
                    tabindex="-1">
                 <!-- Offcanvas header (mobile only) -->
                 <div class="offcanvas-header d-md-none border-bottom">
-                    <div class="d-flex align-items-center gap-3">
+                    <a href="{% url 'dashboard:accueil' %}"
+                       class="d-flex align-items-center gap-3 text-decoration-none">
                         <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-2"
                               style="width: 40px;
                                      height: 40px">
@@ -49,7 +51,7 @@
                             <span class="fw-semibold text-body-emphasis">StarShield</span>
                             <span class="text-muted small">Protégez votre image</span>
                         </div>
-                    </div>
+                    </a>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="offcanvas"
@@ -58,7 +60,8 @@
                 </div>
                 <!-- Sidebar Header (desktop only) -->
                 <div class="d-none d-md-block px-4 pt-4 pb-3 border-bottom">
-                    <div class="d-flex align-items-center gap-3">
+                    <a href="{% url 'dashboard:accueil' %}"
+                       class="d-flex align-items-center gap-3 text-decoration-none">
                         <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-2"
                               style="width: 40px;
                                      height: 40px">
@@ -72,7 +75,7 @@
                             <span class="fw-semibold text-body-emphasis">StarShield</span>
                             <span class="text-muted small">Protégez votre image</span>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <!-- Sidebar Body -->
                 <div class="d-flex flex-column flex-grow-1 overflow-hidden">
