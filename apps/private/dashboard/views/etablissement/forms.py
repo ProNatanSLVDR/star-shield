@@ -74,3 +74,7 @@ class QRCodeSettingsForm(forms.Form):
     delete_logo = forms.BooleanField(
         required=False,
     )
+    qr_show_badge = forms.BooleanField(
+        required=False,
+        label="Afficher le badge",
+    )

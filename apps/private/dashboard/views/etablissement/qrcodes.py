@@ -66,6 +66,7 @@ def qr_code_management_view(request, short_code=None):
                 selected_qr_code.qr_background_color = form.cleaned_data["qr_background_color"]
                 selected_qr_code.qr_style = form.cleaned_data["qr_style"]
                 selected_qr_code.qr_color_mask = form.cleaned_data["qr_color_mask"]
+                selected_qr_code.qr_show_badge = form.cleaned_data.get("qr_show_badge", False)
 
                 if form.cleaned_data.get("qr_logo"):
                     selected_qr_code.qr_logo = form.cleaned_data["qr_logo"]
@@ -89,6 +90,7 @@ def qr_code_management_view(request, short_code=None):
                     "qr_background_color": selected_qr_code.qr_background_color,
                     "qr_style": selected_qr_code.qr_style,
                     "qr_color_mask": selected_qr_code.qr_color_mask,
+                    "qr_show_badge": selected_qr_code.qr_show_badge,
                 }
             )
         else:
@@ -283,8 +285,17 @@ def qr_code_image_view(request, identifier=None, short_code=None):
         logo_file = None
 
     # Resolve badge file based on QR code routing
+    # Query param show_badge overrides for real-time preview; otherwise use model field
+    show_badge_param = request.GET.get("show_badge")
+    if show_badge_param is not None:
+        show_badge = show_badge_param != "0"
+    elif qr_code:
+        show_badge = qr_code.qr_show_badge
+    else:
+        show_badge = True
+
     badge_file = None
-    if qr_code:
+    if show_badge and qr_code:
         badge_map = {
             "feedback": "logo-filtering.png",
             "roulette": "logo-roulette.png",

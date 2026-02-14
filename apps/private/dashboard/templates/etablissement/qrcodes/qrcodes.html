@@ -305,6 +305,27 @@
                                         {% endif %}
                                         <div class="form-text">Logo à afficher au centre du QR code (optionnel).</div>
                                     </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   role="switch"
+                                                   id="qr_show_badge"
+                                                   name="qr_show_badge"
+                                                   {% if form.qr_show_badge.value %}
+                                                       checked
+                                                   {% endif %}>
+                                            <label class="form-check-label fw-semibold"
+                                                   for="qr_show_badge">
+                                                <i class="fa-solid fa-certificate me-2"></i>
+                                                Afficher le badge
+                                            </label>
+                                        </div>
+                                        <div class="form-text">
+                                            Affiche un petit logo de destination
+                                            en bas à droite du QR code.
+                                        </div>
+                                    </div>
                                     <div class="d-grid gap-2 mt-auto">
                                         {% component "button"
                                             text="Enregistrer les modifications"
@@ -481,6 +502,7 @@
             const styleSelect = document.getElementById("qr_style");
             const colorMaskSelect = document.getElementById("qr_color_mask");
             const routingSelect = document.getElementById("routing");
+            const showBadgeInput = document.getElementById("qr_show_badge");
             const resetBtn = document.getElementById("resetToDefaultsBtn");
             const qrCodePreview = document.getElementById("qrCodePreview");
 
@@ -530,6 +552,12 @@
                 });
             }
 
+            if (showBadgeInput) {
+                showBadgeInput.addEventListener("change", function() {
+                    updatePreview();
+                });
+            }
+
             // Update preview function with debouncing
             let previewTimeout = null;
 
@@ -553,6 +581,8 @@
                     url.searchParams.set("background_color", background_color);
                     url.searchParams.set("style", style);
                     url.searchParams.set("color_mask", colorMask);
+                    const showBadge = showBadgeInput ? (showBadgeInput.checked ? "1" : "0") : "1";
+                    url.searchParams.set("show_badge", showBadge);
 
                     if (qrCodePreview) {
                         qrCodePreview.src = url.toString();
@@ -572,6 +602,7 @@
                     if (backgroundColorInput) backgroundColorInput.value = defaultBackgroundColor;
                     if (styleSelect) styleSelect.value = "square";
                     if (colorMaskSelect) colorMaskSelect.value = "solid";
+                    if (showBadgeInput) showBadgeInput.checked = true;
 
                     updatePreview();
                 });

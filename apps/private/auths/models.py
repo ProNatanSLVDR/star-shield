@@ -524,6 +524,10 @@ class QRCode(models.Model):
         null=True,
         help_text="Logo à afficher au centre du QR code.",
     )
+    qr_show_badge = models.BooleanField(
+        default=True,
+        help_text="Afficher le badge de destination sur le QR code.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
