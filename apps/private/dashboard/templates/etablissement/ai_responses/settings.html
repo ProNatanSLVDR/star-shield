@@ -222,12 +222,21 @@
                                         </div>
                                     </div>
                                 </div>
-                                <p class="mb-0 text-body-secondary"
+                                <p class="customer-review-text mb-0 text-body-secondary"
+                                   data-language="fr"
                                    style="line-height: 1.6">
                                     Excellent service ! L'équipe est
                                     très accueillante et
                                     professionnelle. Je recommande
                                     vivement.
+                                </p>
+                                <p class="customer-review-text mb-0 text-body-secondary"
+                                   data-language="en"
+                                   style="line-height: 1.6;
+                                          display: none">
+                                    Excellent service! The team is
+                                    very welcoming and professional.
+                                    I highly recommend.
                                 </p>
                             </div>
                             <hr class="my-0">
@@ -242,10 +251,11 @@
                                     </div>
                                     <span class="fw-semibold text-primary">Réponse IA</span>
                                 </div>
-                                {% comment %} Professionnel {% endcomment %}
+                                {% comment %} Professionnel - FR {% endcomment %}
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="professionnel"
                                      data-length="short"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Nous vous remercions pour votre
@@ -255,6 +265,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="professionnel"
                                      data-length="medium"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Nous vous remercions sincèrement
@@ -269,6 +280,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="professionnel"
                                      data-length="long"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Nous vous remercions sincèrement
@@ -287,10 +299,55 @@
                                     plaisir de vous accueillir à
                                     nouveau très prochainement.
                                 </div>
-                                {% comment %} Empathique {% endcomment %}
+                                {% comment %} Professionnel - EN {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="professionnel"
+                                     data-length="short"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you for your feedback,
+                                    Mrs. Dupont. Your satisfaction
+                                    is our priority.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="professionnel"
+                                     data-length="medium"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you sincerely for your
+                                    feedback, Mrs. Dupont. Your
+                                    satisfaction is our priority and
+                                    we are delighted that our team
+                                    met your expectations. We look
+                                    forward to welcoming you again.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="professionnel"
+                                     data-length="long"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you sincerely for your
+                                    feedback, Mrs. Dupont. Your
+                                    satisfaction is at the heart of
+                                    our concerns and we are delighted
+                                    that our team met your
+                                    expectations. It is thanks to
+                                    feedback like yours that we can
+                                    continue to improve the quality
+                                    of our services. We take great
+                                    pride in offering an impeccable
+                                    experience to each of our clients.
+                                    We look forward to welcoming you
+                                    again very soon.
+                                </div>
+                                {% comment %} Empathique - FR {% endcomment %}
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="empathique"
                                      data-length="short"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Votre avis nous touche beaucoup,
@@ -299,6 +356,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="empathique"
                                      data-length="medium"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Votre avis nous touche beaucoup,
@@ -312,6 +370,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="empathique"
                                      data-length="long"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Votre avis nous touche
@@ -327,10 +386,53 @@
                                     chaque jour. Votre recommandation
                                     est le plus beau des compliments.
                                 </div>
-                                {% comment %} Enthousiaste {% endcomment %}
+                                {% comment %} Empathique - EN {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="empathique"
+                                     data-length="short"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Your review truly touches us,
+                                    Marie. Thank you from the bottom
+                                    of our hearts.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="empathique"
+                                     data-length="medium"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Your review truly touches us,
+                                    Marie. Knowing that you had such
+                                    a positive experience fills us
+                                    with joy. It's thanks to feedback
+                                    like yours that our team finds
+                                    motivation every day.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="empathique"
+                                     data-length="long"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Your review deeply touches us,
+                                    Marie. Knowing that you had such
+                                    a positive experience fills us
+                                    with joy and gratitude. Every
+                                    member of our team is passionately
+                                    dedicated to creating unique
+                                    moments. It's thanks to people
+                                    like you that we find the
+                                    motivation to give our very best
+                                    every day. Your recommendation is
+                                    the most beautiful compliment.
+                                </div>
+                                {% comment %} Enthousiaste - FR {% endcomment %}
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="enthousiaste"
                                      data-length="short"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Quelle joie de lire votre
@@ -340,6 +442,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="enthousiaste"
                                      data-length="medium"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Quelle joie de lire votre
@@ -353,6 +456,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="enthousiaste"
                                      data-length="long"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Quelle joie immense de lire votre
@@ -369,10 +473,52 @@
                                     surpasser. Merci mille fois et à
                                     très vite !
                                 </div>
-                                {% comment %} Amical {% endcomment %}
+                                {% comment %} Enthousiaste - EN {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="enthousiaste"
+                                     data-length="short"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    What a joy to read your comment,
+                                    Marie! Thank you so much!
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="enthousiaste"
+                                     data-length="medium"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    What a joy to read your comment,
+                                    Marie! We are absolutely thrilled
+                                    that you had a wonderful time with
+                                    our team. Your recommendation warms
+                                    our hearts, thank you so much!
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="enthousiaste"
+                                     data-length="long"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    What an immense joy to read your
+                                    comment, Marie! We are absolutely
+                                    thrilled that you had a wonderful
+                                    time with our team. This is exactly
+                                    the kind of feedback that gives us
+                                    incredible energy! The whole team
+                                    is over the moon knowing you
+                                    enjoyed your experience. Your
+                                    recommendation warms our hearts
+                                    and motivates us to surpass
+                                    ourselves. Thank you a thousand
+                                    times and see you very soon!
+                                </div>
+                                {% comment %} Amical - FR {% endcomment %}
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="amical"
                                      data-length="short"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Merci beaucoup Marie ! À très
@@ -381,6 +527,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="amical"
                                      data-length="medium"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Merci beaucoup Marie ! On est super
@@ -393,6 +540,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="amical"
                                      data-length="long"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Merci beaucoup Marie ! On est super
@@ -408,10 +556,48 @@
                                     récompenses. À très bientôt chez
                                     nous !
                                 </div>
-                                {% comment %} Concis {% endcomment %}
+                                {% comment %} Amical - EN {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="amical"
+                                     data-length="short"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you so much Marie! See you
+                                    soon!
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="amical"
+                                     data-length="medium"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you so much Marie! We're
+                                    so happy you liked the team. It's
+                                    always a pleasure to welcome such
+                                    lovely people. See you very soon!
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="amical"
+                                     data-length="long"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you so much Marie! We're
+                                    so happy you liked the team, it
+                                    really means a lot to hear that.
+                                    It's always a joy to welcome
+                                    people as nice as you. We do our
+                                    best to make every visit a great
+                                    time. Your recommendation means
+                                    the world to us, it's the best
+                                    reward. See you very soon!
+                                </div>
+                                {% comment %} Concis - FR {% endcomment %}
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="concis"
                                      data-length="short"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Merci Marie. Au plaisir.
@@ -419,6 +605,7 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="concis"
                                      data-length="medium"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Merci pour votre avis, Marie. Ravis
@@ -428,12 +615,43 @@
                                 <div class="ai-preview text-body-secondary"
                                      data-tone="concis"
                                      data-length="long"
+                                     data-language="fr"
                                      style="line-height: 1.6;
                                             display: none">
                                     Merci pour votre avis, Marie. Ravis
                                     que l'équipe vous ait plu. Votre
                                     recommandation nous fait plaisir.
                                     Au plaisir de vous revoir.
+                                </div>
+                                {% comment %} Concis - EN {% endcomment %}
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="concis"
+                                     data-length="short"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you Marie. See you soon.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="concis"
+                                     data-length="medium"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you for your review, Marie.
+                                    Glad you enjoyed your experience.
+                                    See you again soon.
+                                </div>
+                                <div class="ai-preview text-body-secondary"
+                                     data-tone="concis"
+                                     data-length="long"
+                                     data-language="en"
+                                     style="line-height: 1.6;
+                                            display: none">
+                                    Thank you for your review, Marie.
+                                    Glad the team made a good
+                                    impression. Your recommendation
+                                    means a lot. See you again soon.
                                 </div>
                             </div>
                             <!-- Active settings summary -->
@@ -512,15 +730,29 @@
             const lengthBadge = document.getElementById("previewLengthBadge");
             const languageBadge = document.getElementById("previewLanguageBadge");
             const previews = document.querySelectorAll(".ai-preview");
+            const customerReviews = document.querySelectorAll(".customer-review-text");
+
+            function getPreviewLanguage() {
+                var lang = languageSelect ? languageSelect.value : "fr";
+                // auto-detect shows French (review is in French)
+                return lang === "auto" ? "fr" : lang;
+            }
 
             function updatePreview() {
                 var tone = toneSelect ? toneSelect.value : "";
                 var length = lengthSelect ? lengthSelect.value : "";
+                var lang = getPreviewLanguage();
                 previews.forEach(function(el) {
                     el.style.display =
-                        el.dataset.tone === tone && el.dataset.length === length ?
+                        el.dataset.tone === tone &&
+                        el.dataset.length === length &&
+                        el.dataset.language === lang ?
                         "" :
                         "none";
+                });
+                customerReviews.forEach(function(el) {
+                    el.style.display =
+                        el.dataset.language === lang ? "" : "none";
                 });
             }
 
@@ -540,9 +772,12 @@
                     }
                 });
             }
-            if (languageSelect && languageBadge) {
+            if (languageSelect) {
                 languageSelect.addEventListener("change", function() {
-                    languageBadge.textContent = languageSelect.options[languageSelect.selectedIndex].text;
+                    updatePreview();
+                    if (languageBadge) {
+                        languageBadge.textContent = languageSelect.options[languageSelect.selectedIndex].text;
+                    }
                 });
             }
 
