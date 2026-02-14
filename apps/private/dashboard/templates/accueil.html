@@ -16,95 +16,98 @@
                 </div>
             </div>
         </div>
-        <div class="d-inline-flex align-items-center gap-2 mb-3 px-3 py-2 rounded-pill bg-body-tertiary border">
-            <i class="fa-solid fa-layer-group text-primary"></i>
-            <span class="text-muted fw-medium">Vue globale — tous les établissements</span>
-        </div>
-        <div class="row g-3 mb-5">
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 transition"
-                     style="cursor: pointer;
-                            transition: all 0.3s ease">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <p class="text-muted small mb-1">Nb Établissements</p>
-                                <h2 class="fw-bold text-body-emphasis mb-0">
-                                    {{ total_etablissements|default:"0" }}
-                                </h2>
-                            </div>
-                            <div class="p-3 rounded-3"
-                                 style="background: rgba(13, 110, 253, 0.1)">
-                                <i class="fa-solid fa-building text-primary"
-                                   style="font-size: 1.5rem"></i>
+        <div class="mb-3 p-3 rounded-3 bg-body-tertiary border">
+            <div class="d-inline-flex align-items-center gap-2 mb-3"
+                 style="font-size: 0.85rem">
+                <i class="fa-solid fa-layer-group text-primary"></i>
+                <span class="text-muted fw-medium">Vue globale — tous les établissements</span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-sm h-100 transition"
+                         style="cursor: pointer;
+                                transition: all 0.3s ease">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <p class="text-muted small mb-1">Total Établissements</p>
+                                    <h2 class="fw-bold text-body-emphasis mb-0">
+                                        {{ total_etablissements|default:"0" }}
+                                    </h2>
+                                </div>
+                                <div class="p-3 rounded-3"
+                                     style="background: rgba(13, 110, 253, 0.1)">
+                                    <i class="fa-solid fa-building text-primary"
+                                       style="font-size: 1.5rem"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 transition"
-                     style="cursor: pointer;
-                            transition: all 0.3s ease">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <p class="text-muted small mb-1">Nb Établissements Actifs</p>
-                                <h2 class="fw-bold text-body-emphasis mb-0">
-                                    {{ active_etablissements|default:"0" }}
-                                </h2>
-                            </div>
-                            <div class="p-3 rounded-3"
-                                 style="background: rgba(25, 135, 84, 0.1)">
-                                <i class="fa-solid fa-check-circle text-success"
-                                   style="font-size: 1.5rem"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 transition"
-                     style="cursor: pointer;
-                            transition: all 0.3s ease">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <p class="text-muted small mb-1">Note Moyenne</p>
-                                <h2 class="fw-bold text-body-emphasis mb-0">
-                                    {% if average_rating %}
-                                        {{ average_rating|floatformat:2 }}★
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </h2>
-                            </div>
-                            <div class="p-3 rounded-3"
-                                 style="background: rgba(255, 193, 7, 0.1)">
-                                <i class="fa-solid fa-star text-warning"
-                                   style="font-size: 1.5rem"></i>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-sm h-100 transition"
+                         style="cursor: pointer;
+                                transition: all 0.3s ease">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <p class="text-muted small mb-1">Établissements Actifs</p>
+                                    <h2 class="fw-bold text-body-emphasis mb-0">
+                                        {{ active_etablissements|default:"0" }}
+                                    </h2>
+                                </div>
+                                <div class="p-3 rounded-3"
+                                     style="background: rgba(25, 135, 84, 0.1)">
+                                    <i class="fa-solid fa-check-circle text-success"
+                                       style="font-size: 1.5rem"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 transition"
-                     style="cursor: pointer;
-                            transition: all 0.3s ease">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div>
-                                <p class="text-muted small mb-1">Consultations QR</p>
-                                <h2 class="fw-bold text-body-emphasis mb-0">
-                                    {{ total_qr_consultations|default:"0" }}
-                                </h2>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-sm h-100 transition"
+                         style="cursor: pointer;
+                                transition: all 0.3s ease">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <p class="text-muted small mb-1">Note Moyenne</p>
+                                    <h2 class="fw-bold text-body-emphasis mb-0">
+                                        {% if average_rating %}
+                                            {{ average_rating|floatformat:2 }}★
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </h2>
+                                </div>
+                                <div class="p-3 rounded-3"
+                                     style="background: rgba(255, 193, 7, 0.1)">
+                                    <i class="fa-solid fa-star text-warning"
+                                       style="font-size: 1.5rem"></i>
+                                </div>
                             </div>
-                            <div class="p-3 rounded-3"
-                                 style="background: rgba(111, 66, 193, 0.1)">
-                                <i class="fa-solid fa-qrcode"
-                                   style="color: #6f42c1;
-                                          font-size: 1.5rem"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-sm h-100 transition"
+                         style="cursor: pointer;
+                                transition: all 0.3s ease">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <p class="text-muted small mb-1">Consultations QR</p>
+                                    <h2 class="fw-bold text-body-emphasis mb-0">
+                                        {{ total_qr_consultations|default:"0" }}
+                                    </h2>
+                                </div>
+                                <div class="p-3 rounded-3"
+                                     style="background: rgba(111, 66, 193, 0.1)">
+                                    <i class="fa-solid fa-qrcode"
+                                       style="color: #6f42c1;
+                                              font-size: 1.5rem"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
