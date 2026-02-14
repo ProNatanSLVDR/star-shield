@@ -22,8 +22,6 @@ from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-from time import sleep
-
 
 @google_gmb_connected_required
 @unselect_etablissement
@@ -31,7 +29,6 @@ def list_etablissements_view(request):
     if not request.htmx:
         return starshield_render(request, "etablissements/list.html", page_name="etablissements")
 
-    sleep(10)
     etablissements = request.user.google_credential.etablissements.all()
 
     # Prepare table headers
@@ -178,7 +175,6 @@ def etablissement_details_partial(request, id):
     Show establishment details modal with subscription status, features, and actions.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
-    sleep(10)
     # Determine subscription state
     subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
     is_cancelled_at_period_end = subscription and subscription.cancel_at_period_end
@@ -600,90 +596,40 @@ def toggle_etablissement_status(request, id):
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
-    # Check subscription status first to determine reactivation
     subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
     is_reactivation = subscription is not None and subscription.cancel_at_period_end
     is_activation = not etablissement.active and not is_reactivation
 
-    hx_triggers = {
-        "close-modal": True,
-    }
-
-    # Reactivation
-    if is_reactivation:
-        try:
-            reactivated_subscription = reactivate_subscription_for_etablissement(request.user, etablissement.id)
-            if reactivated_subscription:
-                # Sync Stripe data to update local database with reactivation status
+    try:
+        if is_activation:
+            if etablissement.has_active_subscription():
                 sync_stripe_data(request.user)
-                messages.success(
-                    request, f"L'abonnement de l'établissement {etablissement.title} a été réactivé avec succès."
-                )
-                hx_triggers["etablissements-updated"] = True
             else:
-                messages.error(
-                    request, f"Impossible de réactiver l'abonnement de l'établissement {etablissement.title}."
-                )
-        except Exception as e:
-            logger.error(f"Error reactivating subscription for etablissement {etablissement.id}: {e}")
-            messages.error(
-                request,
-                f"Une erreur est survenue lors de la réactivation de l'abonnement de l'établissement {etablissement.title}. Veuillez réessayer ou contacter le support.",
-            )
+                form = ToggleEtablissementStatusForm(request.POST)
+                if form.is_valid():
+                    request.session["price_id"] = form.cleaned_data["price_id"]
+                    request.session["etablissement_id"] = etablissement.id
+                    return redirect("payments:create_checkout_session")
+                logger.debug(f"ToggleEtablissementStatusForm errors: {form.errors}")
+                messages.error(request, "Une erreur est survenue lors de la sélection du plan d'abonnement.")
 
-    # Activation
-    elif is_activation:
-        has_active_subscription = etablissement.has_active_subscription()
+        elif is_reactivation:
+            reactivated = reactivate_subscription_for_etablissement(request.user, etablissement.id)
+            if reactivated:
+                sync_stripe_data(request.user)
+                messages.success(request, "L'abonnement a été réactivé avec succès.")
+            else:
+                messages.error(request, "Impossible de réactiver l'abonnement.")
 
-        # si l'établissement a un abonnement actif, on sync les données de Stripe
-        if has_active_subscription:
+        elif etablissement.has_active_subscription():
+            cancel_subscription_for_etablissement(request.user, etablissement.id)
             sync_stripe_data(request.user)
-            hx_triggers["etablissements-updated"] = True
-
-        # si l'établissement n'a pas d'abonnement actif, on redirige vers la sélection du plan d'abonnement
-        else:
-            # Validate form for price_id when activating without subscription
-            form = ToggleEtablissementStatusForm(request.POST)
-
-            if form.is_valid():
-                price_id = form.cleaned_data["price_id"]
-
-                request.session["price_id"] = price_id
-                request.session["etablissement_id"] = etablissement.id
-                return redirect("payments:create_checkout_session")
-            logger.debug(f"ToggleEtablissementStatusForm errors: {form.errors}")
-            messages.error(request, "Une erreur est survenue lors de la sélection du plan d'abonnement.")
-
-    # Désactivation
-    else:
-        if etablissement.has_active_subscription():
-            try:
-                cancelled_subscription = cancel_subscription_for_etablissement(request.user, etablissement.id)
-                if cancelled_subscription:
-                    sync_stripe_data(request.user)
-                    messages.success(
-                        request,
-                        f"L'établissement {etablissement.title} a été désactivé. Votre abonnement continuera jusqu'à la fin de la période en cours.",
-                    )
-                else:
-                    messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
-                    etablissement.active = False
-                    etablissement.save()
-            except Exception as e:
-                logger.error(f"Error cancelling subscription for etablissement {etablissement.id}: {e}")
-                messages.warning(
-                    request,
-                    f"L'établissement {etablissement.title} a été désactivé, "
-                    "mais une erreur est survenue lors de l'annulation de l'abonnement. "
-                    "Veuillez vérifier votre portail de facturation.",
-                )
-                etablissement.active = False
-                etablissement.save()
+            messages.success(request, "L'abonnement a été annulé.")
         else:
             messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
-            etablissement.active = False
-            etablissement.save()
 
-        hx_triggers["etablissements-updated"] = True
+    except Exception as e:
+        logger.error(f"Error toggling etablissement {etablissement.id} status: {e}")
+        messages.error(request, "Une erreur est survenue.")
 
     return redirect("dashboard:etablissements:list")
