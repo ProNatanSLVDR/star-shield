@@ -136,25 +136,26 @@ def _build_prizes_table_data(etablissement):
         rows.append(row)
 
     # Add nothing prize as read-only row at the end
-    nothing_icon_cell = {
-        "type": "html",
-        "value": f'<i class="{nothing_prize.icon} fa-2x"></i>',
-        "centered": True,
-    }
-
-    nothing_row = {
-        "icon": nothing_icon_cell,
-        "name": nothing_prize.name,
-        "probability": f"{float(nothing_prize.probability):.2f}%",
-        "actions": {
+    if nothing_prize.probability > 0:
+        nothing_icon_cell = {
             "type": "html",
-            "value": (
-                '<span class="text-muted small"><i class="fa-solid fa-info-circle me-1"></i>Géré automatiquement</span>'
-            ),
+            "value": f'<i class="{nothing_prize.icon} fa-2x"></i>',
             "centered": True,
-        },
-    }
-    rows.append(nothing_row)
+        }
+
+        nothing_row = {
+            "icon": nothing_icon_cell,
+            "name": nothing_prize.name,
+            "probability": f"{float(nothing_prize.probability):.2f}%",
+            "actions": {
+                "type": "html",
+                "value": (
+                    '<span class="text-muted small"><i class="fa-solid fa-info-circle me-1"></i>Géré automatiquement</span>'
+                ),
+                "centered": True,
+            },
+        }
+        rows.append(nothing_row)
 
     return {
         "headers": headers,
@@ -301,9 +302,7 @@ def prize_create_partial(request):
         form = RoulettePrizeForm()
 
     # Calculate available probability for info display
-    other_prizes_total = sum(
-        float(p.probability) for p in etablissement.roulette_prizes.filter(is_nothing_prize=False)
-    )
+    other_prizes_total = sum(float(p.probability) for p in etablissement.roulette_prizes.filter(is_nothing_prize=False))
     available_probability = max(0, 100 - other_prizes_total)
 
     context = {
@@ -381,9 +380,7 @@ def prize_edit_partial(request, prize_id):
         )
 
     # Calculate available probability for info display (include current prize's probability as available)
-    other_prizes_total = sum(
-        float(p.probability) for p in etablissement.roulette_prizes.filter(is_nothing_prize=False)
-    )
+    other_prizes_total = sum(float(p.probability) for p in etablissement.roulette_prizes.filter(is_nothing_prize=False))
     available_probability = max(0, 100 - (other_prizes_total - float(prize.probability)))
 
     context = {
