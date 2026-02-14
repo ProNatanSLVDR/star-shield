@@ -21,11 +21,6 @@
              hx-get="{% url 'dashboard:etablissement:ai_responses:historique_content' %}"
              hx-trigger="load"
              hx-swap="morph:innerHTML">
-            <div class="d-flex justify-content-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Chargement...</span>
-                </div>
-            </div>
         </div>
     </div>
 {% endblock dashboard_content %}

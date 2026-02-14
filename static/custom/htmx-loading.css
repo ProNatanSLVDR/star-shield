@@ -1,0 +1,22 @@
+.htmx-loading {
+    position: relative !important;
+    min-height: 200px;
+}
+
+.htmx-loading > * {
+    visibility: hidden;
+}
+
+.htmx-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 2rem;
+    height: 2rem;
+    border: 0.25em solid var(--bs-primary);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+    z-index: 11;
+}

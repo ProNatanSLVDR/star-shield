@@ -22,6 +22,8 @@ from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+from time import sleep
+
 
 @google_gmb_connected_required
 @unselect_etablissement
@@ -29,6 +31,7 @@ def list_etablissements_view(request):
     if not request.htmx:
         return starshield_render(request, "etablissements/list.html", page_name="etablissements")
 
+    sleep(10)
     etablissements = request.user.google_credential.etablissements.all()
 
     # Prepare table headers
@@ -175,7 +178,7 @@ def etablissement_details_partial(request, id):
     Show establishment details modal with subscription status, features, and actions.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
-
+    sleep(10)
     # Determine subscription state
     subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
     is_cancelled_at_period_end = subscription and subscription.cancel_at_period_end
@@ -226,7 +229,6 @@ def etablissement_details_partial(request, id):
     ]
 
     # Build subscription_data for template
-    from datetime import datetime
 
     subscription_data = {
         "plan_label": plan_label,
