@@ -105,11 +105,19 @@
                                     type="button"
                                     data-bs-toggle="dropdown">
                                 <div>
-                                    <div class="rounded-circle bg-primary text-white text-center d-flex align-items-center justify-content-center"
-                                         style="width: 36px;
-                                                height: 36px">
-                                        <i class="fa-solid fa-user"></i>
-                                    </div>
+                                    {% if request.user.profile_picture %}
+                                        <img src="{{ request.user.profile_picture.url }}"
+                                             alt="Photo de profil"
+                                             class="rounded-circle object-fit-cover"
+                                             style="width: 36px;
+                                                    height: 36px">
+                                    {% else %}
+                                        <div class="rounded-circle bg-primary text-white text-center d-flex align-items-center justify-content-center"
+                                             style="width: 36px;
+                                                    height: 36px">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <span class="flex-grow-1 d-flex flex-column overflow-hidden">
                                     <span class="fw-semibold text-body-emphasis text-truncate">
