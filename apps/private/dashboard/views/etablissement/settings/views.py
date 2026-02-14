@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 
@@ -83,4 +84,33 @@ def toggle_feature_view(request):
         request,
         "etablissement/settings/feature_toggles.html",
         context={"etablissement": etablissement},
+    )
+
+
+ALLOWED_FEATURE_FIELDS = {"roulette_enabled", "ai_responses_enabled", "review_filtering_enabled"}
+
+
+@selected_etablissement_required
+@require_POST
+def toggle_single_feature_view(request):
+    """HTMX endpoint to toggle a single feature on/off."""
+    etablissement = request.etablissement
+    feature = request.POST.get("feature")
+
+    if feature not in ALLOWED_FEATURE_FIELDS:
+        return HttpResponseBadRequest("Invalid feature field.")
+
+    current_value = getattr(etablissement, feature)
+    setattr(etablissement, feature, not current_value)
+    etablissement.save(update_fields=[feature])
+    etablissement.refresh_from_db()
+
+    return starshield_render(
+        request,
+        "etablissement/settings/feature_header_toggle_partial.html",
+        context={
+            "etablissement": etablissement,
+            "feature_field": feature,
+            "feature_enabled": getattr(etablissement, feature),
+        },
     )

@@ -7,4 +7,5 @@ app_name = "settings"
 urlpatterns = [
     path("", views.settings_view, name="settings"),
     path("toggle-feature/", views.toggle_feature_view, name="toggle_feature"),
+    path("toggle-single-feature/", views.toggle_single_feature_view, name="toggle_single_feature"),
 ]

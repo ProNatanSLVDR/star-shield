@@ -10,14 +10,17 @@
 
 {% block dashboard_content %}
     <div class="d-flex flex-column">
-        <div class="mb-3">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">
-                <i class="fa-solid fa-star-half-stroke me-2"></i>
-                Seuil de redirection
-            </h1>
-            <p class="text-muted mb-0 small">
-                Trouvez le seuil de redirection optimal pour optimiser la collecte d'avis de votre établissement.
-            </p>
+        <div class="mb-3 d-flex align-items-start justify-content-between">
+            <div>
+                <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                    <i class="fa-solid fa-star-half-stroke me-2"></i>
+                    Seuil de redirection
+                </h1>
+                <p class="text-muted mb-0 small">
+                    Trouvez le seuil de redirection optimal pour optimiser la collecte d'avis de votre établissement.
+                </p>
+            </div>
+            {% include "etablissement/settings/feature_header_toggle_partial.html" with feature_field="review_filtering_enabled" feature_enabled=etablissement.review_filtering_enabled %}
         </div>
         <div class="row g-3">
             <!-- Left Column: Threshold Selection -->

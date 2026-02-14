@@ -19,15 +19,18 @@
         }
     </style>
     <div class="d-flex flex-column h-100">
-        <div class="mb-3">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">
-                <i class="fa-solid fa-robot me-2"></i>
-                Réponses IA
-            </h1>
-            <p class="text-muted mb-0 small">
-                Configurez les réponses automatiques générées
-                par l'IA pour vos avis Google.
-            </p>
+        <div class="mb-3 d-flex align-items-start justify-content-between">
+            <div>
+                <h1 class="h4 fw-bold text-body-emphasis mb-1">
+                    <i class="fa-solid fa-robot me-2"></i>
+                    Réponses IA
+                </h1>
+                <p class="text-muted mb-0 small">
+                    Configurez les réponses automatiques générées
+                    par l'IA pour vos avis Google.
+                </p>
+            </div>
+            {% include "etablissement/settings/feature_header_toggle_partial.html" with feature_field="ai_responses_enabled" feature_enabled=etablissement.ai_responses_enabled %}
         </div>
         <div class="row g-3 flex-grow-1">
             <!-- Settings Form -->
