@@ -469,6 +469,40 @@
             </div>
         </div>
     </div>
+    <!-- Modal confirmation désactivation protection -->
+    <div class="modal fade"
+         id="protectionConfirmModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-shield-halved me-2"></i>
+                        Confirmation
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    Désactiver la protection signifie que
+                    l'IA répondra automatiquement à tous
+                    les avis négatifs, même suspects.
+                    Continuer ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-danger"
+                            id="protectionConfirmBtn">
+                        <i class="fa-solid fa-check me-1"></i>
+                        Confirmer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const toneSelect = document.getElementById("ai_response_tone");
@@ -517,18 +551,23 @@
             // Confirmation when deactivating malicious protection
             var protectionOff = document.getElementById("protection_off");
             var protectionOn = document.getElementById("protection_on");
-            if (protectionOff && protectionOn) {
+            var confirmModal = document.getElementById("protectionConfirmModal");
+            if (protectionOff && protectionOn && confirmModal) {
+                var modal = new bootstrap.Modal(confirmModal);
                 protectionOff.addEventListener("change", function() {
                     if (this.checked) {
-                        var confirmed = confirm(
-                            "Désactiver la protection signifie que l'IA " +
-                            "répondra automatiquement à tous les avis " +
-                            "négatifs, même suspects. Continuer ?"
-                        );
-                        if (!confirmed) {
-                            protectionOn.checked = true;
-                        }
+                        modal.show();
                     }
+                });
+                document.getElementById("protectionConfirmBtn").addEventListener("click", function() {
+                    protectionOff.dataset.confirmed = "true";
+                    modal.hide();
+                });
+                confirmModal.addEventListener("hidden.bs.modal", function() {
+                    if (!protectionOff.dataset.confirmed) {
+                        protectionOn.checked = true;
+                    }
+                    delete protectionOff.dataset.confirmed;
                 });
             }
         });
