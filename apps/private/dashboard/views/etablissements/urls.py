@@ -7,6 +7,7 @@ app_name = "etablissements"
 urlpatterns = [
     path("", views.list_etablissements_view, name="list"),
     path("import/", views.import_etablissement_partial, name="import_partial"),
+    path("details/<int:id>/", views.etablissement_details_partial, name="details_partial"),
     path("delete/<int:id>/", views.delete_etablissement_confirmation_partial, name="delete_partial"),
     # Toggle status (Activate/Deactivate)
     path("toggle-status/<int:id>/", views.toggle_etablissement_status_partial, name="toggle_status_partial"),

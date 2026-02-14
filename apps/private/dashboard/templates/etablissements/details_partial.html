@@ -1,0 +1,226 @@
+{% load component_tags %}
+<!-- Details Modal Body -->
+<div class="p-4">
+    <!-- Establishment Information Card -->
+    <div class="card mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex align-items-center flex-wrap gap-3">
+                <i class="fa-solid fa-building text-primary"></i>
+                <h6 class="mb-0 fw-bold fs-6">{{ etablissement.title }}</h6>
+                <div class="ms-auto"></div>
+                {% if etablissement.created_at %}
+                    <div class="d-flex align-items-center gap-1 text-muted small">
+                        <i class="fa-solid fa-calendar"></i>
+                        <span>Créé le {{ etablissement.created_at|date:"d/m/Y" }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Abonnement + Fonctionnalités side by side -->
+    <div class="row g-3 mb-4">
+        <!-- Section 1: Abonnement -->
+        <div class="col-md-7">
+            <div class="h-100 d-flex flex-column">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">
+                    <i class="fa-solid fa-credit-card me-1"></i>
+                    Abonnement
+                </h6>
+                <div class="card flex-grow-1">
+                    <div class="card-body p-3 d-flex flex-column">
+                        {% if subscription_data.status != "inactive" %}
+                            <div class="d-flex justify-content-between align-items-center gap-3">
+                                <div class="d-inline-flex align-items-center justify-content-center">
+                                    {% if subscription_data.status == "active" %}
+                                        <i class="fa-solid fa-check-circle text-success fs-5"></i>
+                                    {% elif subscription_data.status == "cancellation_pending" %}
+                                        <i class="fa-solid fa-clock text-warning fs-5"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">Abonnement {{ subscription_data.plan_label }}</div>
+                                </div>
+                            </div>
+                            <hr class="my-2 opacity-25">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="small">
+                                    <i class="fa-solid fa-money-bill me-1 text-muted"></i>
+                                    Prix :
+                                </div>
+                                <div class="small">
+                                    <strong>{{ subscription_data.price|floatformat:2 }} {{ subscription_data.currency|upper }}</strong>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="small">
+                                    <i class="fa-solid fa-calendar-day me-1 text-muted"></i>
+                                    Date de création :
+                                </div>
+                                <div class="small">
+                                    <strong>{{ subscription_data.created|date:"d F Y" }}</strong>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="small">
+                                    <i class="fa-solid fa-calendar-week me-1 text-muted"></i>
+                                    Période actuelle :
+                                </div>
+                                <div class="small">
+                                    <strong>{{ subscription_data.current_period_start|date:"d/m/y" }} - {{ subscription_data.current_period_end|date:"d/m/y" }}</strong>
+                                </div>
+                            </div>
+                            {% if subscription_data.status == "cancellation_pending" %}
+                                <div class="alert alert-warning p-2 my-2 small"
+                                     role="alert">
+                                    Votre abonnement sera annulé le {{ subscription_data.current_period_end|date:"d/m/y" }}.
+                                </div>
+                            {% endif %}
+                            <hr class="my-2 opacity-25">
+                            <div class="d-flex justify-content-end flex-column flex-grow-1">
+                                {% if subscription_data.status == "active" %}
+                                    {% component "button"
+                                        text="Changer de plan"
+                                        icon="fa-solid fa-arrow-right-arrow-left"
+                                        classes="btn-sm btn-outline-primary w-100 mb-1"
+                                        extra_kwargs={
+                                        "disabled": True,
+                                        }
+                                        %}
+                                    {% endcomponent %}
+                                    {% component "button"
+                                        text="Annuler l'abonnement"
+                                        icon="fa-solid fa-circle-xmark"
+                                        classes="btn-sm btn-outline-danger w-100"
+                                        extra_kwargs={
+                                        "hx-get": toggle_status_url,
+                                        "hx-target":
+                                        "#dynamicModal2 .modal-content",
+                                        "data-bs-toggle": "modal",
+                                        "data-bs-target": "#dynamicModal2",
+                                        }
+                                        %}
+                                    {% endcomponent %}
+                                {% elif subscription_data.status == "cancellation_pending" %}
+                                    {% component "button"
+                                        text="Réactiver l'abonnement"
+                                        icon="fa-solid fa-circle-check"
+                                        classes="btn-sm btn-outline-success w-100"
+                                        extra_kwargs={
+                                        "hx-get": toggle_status_url,
+                                        "hx-target":
+                                        "#dynamicModal2 .modal-content",
+                                        "data-bs-toggle": "modal",
+                                        "data-bs-target": "#dynamicModal2",
+                                        }
+                                        %}
+                                    {% endcomponent %}
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-3 flex-grow-1 d-flex flex-column justify-content-center">
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-rocket text-primary fs-1 opacity-75"></i>
+                                </div>
+                                <h6 class="fw-bold mb-2">
+                                    Activez cet établissement
+                                </h6>
+                                <p class="small text-muted mb-3">
+                                    Souscrivez un abonnement pour activer les QR codes, le filtrage des avis et toutes les fonctionnalités.
+                                </p>
+                                {% component "button"
+                                    text="S'abonner"
+                                    icon="fa-solid fa-bolt"
+                                    classes="btn-primary w-100"
+                                    extra_kwargs={
+                                    "hx-get": toggle_status_url,
+                                    "hx-target":
+                                    "#dynamicModal2 .modal-content",
+                                    "data-bs-toggle": "modal",
+                                    "data-bs-target": "#dynamicModal2",
+                                    }
+                                    %}
+                                {% endcomponent %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Section 2: Fonctionnalites actives -->
+        <div class="col-md-5">
+            <div class="h-100 d-flex flex-column">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">
+                    <i class="fa-solid fa-toggle-on me-1"></i>
+                    Fonctionnalités actives
+                </h6>
+                <div class="card mb-3">
+                    <div class="list-group list-group-flush">
+                        {% for feature in features %}
+                            <div class="list-group-item d-flex align-items-center gap-3 py-3">
+                                <div class="flex-grow-1">
+                                    <i class="{{ feature.icon }} me-1
+                                              {% if feature.enabled %}
+                                                  text-dark
+                                              {% else %}
+                                                  text-muted
+                                              {% endif %}"></i>
+                                    <span class="{% if not feature.enabled %}
+                                                     text-muted
+                                                 {% endif %}">
+                                        {{ feature.label }}
+                                    </span>
+                                </div>
+                                {% if feature.enabled %}
+                                    <span class="badge bg-success-subtle text-success">Activé</span>
+                                {% else %}
+                                    <span class="badge bg-body-secondary text-muted">Désactivé</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <hr class="mt-auto opacity-25">
+                <p class="small text-muted mb-0">
+                    Pour modifier les fonctionnalités activées, sélectionnez l'établissement dans la barre latérale.
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Section 3: Autres actions -->
+    <h6 class="fw-bold text-muted text-uppercase small mb-3">
+        <i class="fa-solid fa-ellipsis me-1"></i>
+        Autres actions
+    </h6>
+    <div class="card">
+        <div class="card-body p-3">
+            {% if etablissement.active %}
+                {% component "button"
+                    text="Supprimer l'établissement"
+                    icon="fa-solid fa-trash"
+                    classes="btn-sm btn-outline-danger"
+                    extra_kwargs={
+                    "disabled": True,
+                    "data-bs-toggle": "tooltip",
+                    "data-bs-placement": "top",
+                    "title": "Vous devez d'abord désactiver l'établissement avant de le supprimer",
+                    }
+                    %}
+                {% endcomponent %}
+            {% else %}
+                {% component "button"
+                    text="Supprimer l'établissement"
+                    icon="fa-solid fa-trash"
+                    classes="btn-sm btn-outline-danger"
+                    extra_kwargs={
+                    "hx-get": delete_url,
+                    "hx-target":
+                    "#dynamicModal2 .modal-content",
+                    "data-bs-toggle": "modal",
+                    "data-bs-target": "#dynamicModal2",
+                    }
+                    %}
+                {% endcomponent %}
+            {% endif %}
+        </div>
+    </div>
+</div>

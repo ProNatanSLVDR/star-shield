@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import stripe
 from allauth.account.decorators import reverse
 from django.conf import settings
@@ -46,6 +48,12 @@ def list_etablissements_view(request):
             "icon": "fa-solid fa-calendar",
         },
         {
+            "label": "Fonctionnalités",
+            "key": "features",
+            "centered": True,
+            "icon": "fa-solid fa-toggle-on",
+        },
+        {
             "label": "Abonnement",
             "key": "subscription",
             "orderable": True,
@@ -53,88 +61,18 @@ def list_etablissements_view(request):
             "icon": "fa-solid fa-credit-card",
         },
         {
-            "label": "Fonctionnalités",
-            "key": "features",
+            "label": "Gérer (abonnement, etc.)",
+            "key": "actions",
             "centered": True,
-            "icon": "fa-solid fa-toggle-on",
+            "icon": "fa-solid fa-gear",
         },
-        {"label": "Actions", "key": "actions", "centered": True, "icon": "fa-solid fa-gear"},
     ]
 
     # Prepare table rows
     rows = []
     for etablissement in etablissements:
-        buttons = []
-
-        # Check subscription status for reactivation case
+        # Subscription status logic
         subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-        is_cancelled_at_period_end = subscription and subscription.cancel_at_period_end
-
-        # Check reactivation first (subscription cancelled at period end, regardless of active flag)
-        if is_cancelled_at_period_end:
-            # Add reactivate button for establishments with cancelled subscription
-            reactivate_button = {
-                "text": "Réactiver",
-                "icon": "fa-solid fa-toggle-on",
-                "classes": "btn-sm btn-success w-100",
-                "extra_kwargs": {
-                    "hx_modal_toggle": True,
-                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
-                },
-            }
-            buttons.append(reactivate_button)
-        elif not etablissement.active:
-            # Add activate button for inactive establishments
-            activate_button = {
-                "text": "Activer",
-                "icon": "fa-solid fa-toggle-on",
-                "classes": "btn-sm btn-success w-100",
-                "extra_kwargs": {
-                    "hx_modal_toggle": True,
-                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
-                },
-            }
-            buttons.append(activate_button)
-        else:
-            # Add deactivate button for active establishments
-            deactivate_button = {
-                "text": "Désactiver",
-                "icon": "fa-solid fa-toggle-off",
-                "classes": "btn-sm btn-danger w-100",
-                "extra_kwargs": {
-                    "hx_modal_toggle": True,
-                    "hx-get": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
-                },
-            }
-            buttons.append(deactivate_button)
-
-        # Add delete button
-        delete_button = {
-            "text": "",
-            "icon": "fa-solid fa-trash",
-            "classes": "btn-sm btn-danger",
-            "extra_kwargs": {},
-        }
-
-        # Disable delete button if etablissement is active
-        if etablissement.active:
-            delete_button["extra_kwargs"]["disabled"] = True
-            delete_button["extra_kwargs"]["data-bs-toggle"] = "tooltip"
-            delete_button["extra_kwargs"]["data-bs-placement"] = "top"
-            delete_button["extra_kwargs"]["title"] = (
-                "Vous devez d'abord désactiver l'établissement avant de le supprimer"
-            )
-        else:
-            delete_button["extra_kwargs"]["hx_modal_toggle"] = True
-            delete_button["extra_kwargs"]["hx-get"] = reverse(
-                "dashboard:etablissements:delete_partial", args=[etablissement.id]
-            )
-
-        buttons.append(delete_button)
-
-        # Subscription status logic (reuse subscription from above if available)
-        if not subscription:
-            subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
         if not subscription:
             subscription_badge = {
                 "type": "badge",
@@ -146,7 +84,7 @@ def list_etablissements_view(request):
             subscription_badge = {
                 "type": "badge",
                 "value": "Actif (annulation)",
-                "variant": "success",
+                "variant": "warning",
                 "icon": "fa-solid fa-clock",
                 "tooltip": "L'abonnement sera annulé à la fin de la période en cours",
             }
@@ -173,9 +111,9 @@ def list_etablissements_view(request):
 
         # Feature badges (fused icon group with tooltips)
         features = [
-            ("Filtrage", etablissement.review_filtering_enabled, "fa-solid fa-filter"),
-            ("Roulette", etablissement.roulette_enabled, "fa-solid fa-record-vinyl"),
-            ("IA", etablissement.ai_responses_enabled, "fa-solid fa-robot"),
+            ("Filtrage", etablissement.review_filtering_enabled and etablissement.active, "fa-solid fa-filter"),
+            ("Roulette", etablissement.roulette_enabled and etablissement.active, "fa-solid fa-record-vinyl"),
+            ("IA", etablissement.ai_responses_enabled and etablissement.active, "fa-solid fa-robot"),
         ]
         feature_badges = []
         for label, enabled, icon in features:
@@ -189,6 +127,20 @@ def list_etablissements_view(request):
             )
         features_html = '<span class="feature-group">' + "".join(feature_badges) + "</span>"
 
+        details_url = reverse("dashboard:etablissements:details_partial", args=[etablissement.id])
+        manage_button = {
+            "text": "Gérer",
+            "icon": "fa-solid fa-gear",
+            "classes": "btn-sm btn-outline-primary w-100",
+            "extra_kwargs": {
+                "hx-get": details_url,
+                "hx-target": "#detailsModal-inner-content",
+                "hx-swap": "innerHTML",
+                "data-bs-toggle": "modal",
+                "data-bs-target": "#detailsModal",
+            },
+        }
+
         row = {
             "title": etablissement.title,
             "created_at": created_at_cell,
@@ -196,7 +148,7 @@ def list_etablissements_view(request):
             "features": {"type": "html", "value": features_html},
             "actions": {
                 "type": "buttons",
-                "buttons": buttons,
+                "buttons": [manage_button],
                 "centered": True,
             },
         }
@@ -215,6 +167,101 @@ def list_etablissements_view(request):
         context=context,
         page_name="etablissements",
     )
+
+
+@google_gmb_connected_required
+def etablissement_details_partial(request, id):
+    """
+    Show establishment details modal with subscription status, features, and actions.
+    """
+    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
+
+    # Determine subscription state
+    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
+    is_cancelled_at_period_end = subscription and subscription.cancel_at_period_end
+
+    if is_cancelled_at_period_end:
+        subscription_state = "cancellation_pending"
+    elif subscription and etablissement.active:
+        subscription_state = "active"
+    else:
+        subscription_state = "inactive"
+
+    # Determine plan label from price_id
+    plan_label = ""
+    if subscription and subscription.price_id:
+        price_map = settings.STRIPE_PRODUCTS.get("basic_subscription", {})
+        if subscription.price_id == price_map.get("monthly"):
+            plan_label = "Mensuel"
+        elif subscription.price_id == price_map.get("trimestrial"):
+            plan_label = "Trimestriel"
+        elif subscription.price_id == price_map.get("yearly"):
+            plan_label = "Annuel"
+
+    # Fetch subscription details from Stripe
+    stripe_subscription = None
+    if subscription:
+        try:
+            stripe_subscription = check_existing_subscription_for_etablissement(request.user, etablissement.id)
+        except Exception as e:
+            logger.error(f"Error fetching subscription for etablissement {etablissement.id}: {e}")
+
+    # Features
+    features = [
+        {
+            "label": "Filtrage des avis",
+            "enabled": etablissement.review_filtering_enabled and etablissement.active,
+            "icon": "fa-solid fa-filter",
+        },
+        {
+            "label": "Roulette",
+            "enabled": etablissement.roulette_enabled and etablissement.active,
+            "icon": "fa-solid fa-record-vinyl",
+        },
+        {
+            "label": "Réponses IA",
+            "enabled": etablissement.ai_responses_enabled and etablissement.active,
+            "icon": "fa-solid fa-robot",
+        },
+    ]
+
+    # Build subscription_data for template
+    from datetime import datetime
+
+    subscription_data = {
+        "plan_label": plan_label,
+        "status": subscription_state,
+        "price": None,
+        "currency": "",
+        "current_period_start": None,
+        "current_period_end": None,
+        "created": None,
+    }
+
+    if stripe_subscription:
+        plan = stripe_subscription.get("plan") or {}
+        items_data = (stripe_subscription.get("items", {}).get("data") or [{}])[0]
+
+        if plan.get("amount") is not None:
+            subscription_data["price"] = plan["amount"] / 100
+        subscription_data["currency"] = plan.get("currency", "eur")
+
+        if items_data.get("current_period_start"):
+            subscription_data["current_period_start"] = datetime.fromtimestamp(items_data["current_period_start"])
+        if items_data.get("current_period_end"):
+            subscription_data["current_period_end"] = datetime.fromtimestamp(items_data["current_period_end"])
+        if items_data.get("created"):
+            subscription_data["created"] = datetime.fromtimestamp(items_data["created"])
+
+    context = {
+        "etablissement": etablissement,
+        "subscription_data": subscription_data,
+        "features": features,
+        "toggle_status_url": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
+        "delete_url": reverse("dashboard:etablissements:delete_partial", args=[etablissement.id]),
+    }
+
+    return starshield_render(request, "etablissements/details_partial.html", context=context)
 
 
 @google_gmb_connected_required
@@ -607,34 +654,34 @@ def toggle_etablissement_status(request, id):
 
     # Désactivation
     else:
-        # Check if etablissement has an active subscription and cancel it
         if etablissement.has_active_subscription():
             try:
                 cancelled_subscription = cancel_subscription_for_etablissement(request.user, etablissement.id)
                 if cancelled_subscription:
-                    # Sync Stripe data to update local database with cancellation status
                     sync_stripe_data(request.user)
                     messages.success(
                         request,
                         f"L'établissement {etablissement.title} a été désactivé. Votre abonnement continuera jusqu'à la fin de la période en cours.",
                     )
                 else:
-                    # Subscription not found or already cancelled, proceed with deactivation
                     messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
+                    etablissement.active = False
+                    etablissement.save()
             except Exception as e:
                 logger.error(f"Error cancelling subscription for etablissement {etablissement.id}: {e}")
-                # Still proceed with deactivation even if cancellation fails
                 messages.warning(
                     request,
                     f"L'établissement {etablissement.title} a été désactivé, "
                     "mais une erreur est survenue lors de l'annulation de l'abonnement. "
                     "Veuillez vérifier votre portail de facturation.",
                 )
+                etablissement.active = False
+                etablissement.save()
         else:
             messages.success(request, f"L'établissement {etablissement.title} a été désactivé.")
+            etablissement.active = False
+            etablissement.save()
 
-        etablissement.active = False
-        etablissement.save()
         hx_triggers["etablissements-updated"] = True
 
     return redirect("dashboard:etablissements:list")
