@@ -383,88 +383,13 @@
                                     </div>
                                 </div>
                                 <!-- Preview -->
-                                <div class="col-md-5 d-flex flex-column">
-                                    <div>
-                                        <label class="form-label fw-semibold">
-                                            <i class="fa-solid fa-palette me-2"></i>
-                                            Couleurs
-                                        </label>
-                                        <div class="input-group mb-3">
-                                            <span class="input-group-text mb-0 w-50 text-center">
-                                                <i class="fa-solid fa-circle me-2"></i>
-                                                Primaire
-                                            </span>
-                                            <input type="color"
-                                                   class="form-control"
-                                                   id="qr_fill_color"
-                                                   name="qr_fill_color"
-                                                   value="{{ form.qr_fill_color.value|default:selected_qr_code.qr_fill_color }}"
-                                                   style="width: 80px;
-                                                          height: 40px;
-                                                          cursor: pointer;
-                                                          padding: 2px">
-                                        </div>
-                                        <div class="input-group mb-3">
-                                            <span class="input-group-text mb-0 w-50 text-center">
-                                                <i class="fa-solid fa-circle-half-stroke me-2"></i>
-                                                Secondaire
-                                            </span>
-                                            <input type="color"
-                                                   class="form-control"
-                                                   id="qr_fill_color_secondary"
-                                                   name="qr_fill_color_secondary"
-                                                   value="{{ form.qr_fill_color_secondary.value|default:selected_qr_code.qr_fill_color_secondary }}"
-                                                   style="width: 80px;
-                                                          height: 40px;
-                                                          cursor: pointer;
-                                                          padding: 2px">
-                                        </div>
-                                        <div class="input-group mb-3">
-                                            <span class="input-group-text mb-0 w-50 text-center">
-                                                <i class="fa-solid fa-square me-2"></i>
-                                                Fond
-                                            </span>
-                                            <input type="color"
-                                                   class="form-control"
-                                                   id="qr_background_color"
-                                                   name="qr_background_color"
-                                                   value="{{ form.qr_background_color.value|default:selected_qr_code.qr_background_color }}"
-                                                   style="width: 80px;
-                                                          height: 40px;
-                                                          cursor: pointer;
-                                                          padding: 2px">
-                                        </div>
-                                    </div>
-                                    <div class="w-100 flex-grow-1 d-flex flex-column">
-                                        <div class="text-center flex-grow-1 d-flex align-items-center justify-content-center p-3">
-                                            <img id="qrCodePreview"
-                                                 src="{{ qr_code_url }}"
-                                                 alt="QR Code Preview"
-                                                 width="400"
-                                                 height="400"
-                                                 class="img-fluid shadow rounded border">
-                                        </div>
-                                        <div class="row">
-                                            <a href="{{ qr_code_url }}"
-                                               download="qr-code-{{ selected_qr_code.name|slugify }}.png"
-                                               class="btn btn-primary w-100">
-                                                <i class="fa-solid fa-download me-2"></i>
-                                                Télécharger
-                                            </a>
-                                        </div>
-                                        <div class="row mt-2">
-                                            {% component "button"
-                                                text="Copier le lien"
-                                                classes="btn-primary w-100"
-                                                icon="fa-solid fa-copy"
-                                                extra_kwargs={
-                                                "type": "button",
-                                                "onclick": "navigator.clipboard.writeText('{{ full_qr_code_url }}')"
-                                                }
-                                                %}
-                                            {% endcomponent %}
-                                        </div>
-                                    </div>
+                                <div class="col-md-5 d-flex flex-column position-relative"
+                                     id="qrCodePreviewContainer"
+                                     hx-get="{% url 'dashboard:etablissement:qrcode_preview' selected_qr_code.short_code %}"
+                                     hx-trigger="input from:#qrCodeSettingsForm delay:300ms, change from:#qrCodeSettingsForm delay:300ms"
+                                     hx-include="#qrCodeSettingsForm"
+                                     hx-swap="morph:innerHTML">
+                                    {% include "etablissement/qrcodes/qrcode_preview_partial.html" %}
                                 </div>
                             </div>
                         </form>
@@ -493,121 +418,43 @@
     {% endcomponent %}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const fillColorInput = document.getElementById("qr_fill_color");
-            const fillColorTextInput = document.getElementById("fillColorText");
             const fillColorSecondaryInput = document.getElementById("qr_fill_color_secondary");
-            const fillColorSecondaryTextInput = document.getElementById("fillColorSecondaryText");
-            const backgroundColorInput = document.getElementById("qr_background_color");
-            const backgroundColorTextInput = document.getElementById("backgroundColorText");
-            const styleSelect = document.getElementById("qr_style");
+            const fillColorInput = document.getElementById("qr_fill_color");
             const colorMaskSelect = document.getElementById("qr_color_mask");
-            const routingSelect = document.getElementById("routing");
-            const showBadgeInput = document.getElementById("qr_show_badge");
             const resetBtn = document.getElementById("resetToDefaultsBtn");
-            const qrCodePreview = document.getElementById("qrCodePreview");
+            const showBadgeInput = document.getElementById("qr_show_badge");
+            const previewContainer = document.getElementById("qrCodePreviewContainer");
 
-            // Sync color pickers with text inputs
-            if (fillColorInput) {
-                fillColorInput.addEventListener("input", function() {
-                    updatePreview();
-                    console.log(this.value);
-                });
-            }
-
-            if (backgroundColorInput) {
-                backgroundColorInput.addEventListener("input", function() {
-                    updatePreview();
-                    console.log(this.value);
-                });
-            }
-
-            if (fillColorSecondaryInput) {
+            // Auto-switch color mask when secondary differs from primary
+            if (fillColorSecondaryInput && fillColorInput && colorMaskSelect) {
                 fillColorSecondaryInput.addEventListener("input", function() {
-                    if (colorMaskSelect && colorMaskSelect.value === "solid") {
-                        const primaryColor = fillColorInput ? fillColorInput.value : "#000000";
+                    if (colorMaskSelect.value === "solid") {
+                        const primaryColor = fillColorInput.value || "#000000";
                         if (this.value !== primaryColor) {
                             colorMaskSelect.value = "square_radial";
                         }
                     }
-                    updatePreview();
                 });
-            }
-
-            // Update preview when style, color mask, or routing changes
-            if (styleSelect) {
-                styleSelect.addEventListener("change", function() {
-                    updatePreview();
-                });
-            }
-
-            if (colorMaskSelect) {
-                colorMaskSelect.addEventListener("change", function() {
-                    updatePreview();
-                });
-            }
-
-            if (routingSelect) {
-                routingSelect.addEventListener("change", function() {
-                    updatePreview();
-                });
-            }
-
-            if (showBadgeInput) {
-                showBadgeInput.addEventListener("change", function() {
-                    updatePreview();
-                });
-            }
-
-            // Update preview function with debouncing
-            let previewTimeout = null;
-
-            function updatePreview() {
-                clearTimeout(previewTimeout);
-                previewTimeout = setTimeout(function() {
-                    const fillColor = fillColorInput ? fillColorInput.value : "#000000";
-                    const fillColorSecondary = fillColorSecondaryInput ? fillColorSecondaryInput.value : "#000000";
-                    const background_color = backgroundColorInput ? backgroundColorInput.value : "#FFFFFF";
-                    const style = styleSelect ? styleSelect.value : "square";
-                    const colorMask = colorMaskSelect ? colorMaskSelect.value : "solid";
-
-                    // Update preview with query parameters for real-time preview
-                    const baseUrl = "{{ qr_code_url|safe }}";
-                    if (!baseUrl) {
-                        return;
-                    }
-                    const url = new URL(baseUrl, window.location.origin);
-                    url.searchParams.set("fill_color", fillColor);
-                    url.searchParams.set("fill_color_secondary", fillColorSecondary);
-                    url.searchParams.set("background_color", background_color);
-                    url.searchParams.set("style", style);
-                    url.searchParams.set("color_mask", colorMask);
-                    const showBadge = showBadgeInput ? (showBadgeInput.checked ? "1" : "0") : "1";
-                    url.searchParams.set("show_badge", showBadge);
-
-                    if (qrCodePreview) {
-                        qrCodePreview.src = url.toString();
-                    }
-                }, 300);
             }
 
             // Reset to defaults functionality
             if (resetBtn) {
                 resetBtn.addEventListener("click", function() {
-                    const defaultFillColor = "#000000";
-                    const defaultFillColorSecondary = "#000000";
-                    const defaultBackgroundColor = "#FFFFFF";
-
-                    if (fillColorInput) fillColorInput.value = defaultFillColor;
-                    if (fillColorSecondaryInput) fillColorSecondaryInput.value = defaultFillColorSecondary;
-                    if (backgroundColorInput) backgroundColorInput.value = defaultBackgroundColor;
+                    if (fillColorInput) fillColorInput.value = "#000000";
+                    if (fillColorSecondaryInput) fillColorSecondaryInput.value = "#000000";
+                    var backgroundColorInput = document.getElementById("qr_background_color");
+                    if (backgroundColorInput) backgroundColorInput.value = "#FFFFFF";
+                    var styleSelect = document.getElementById("qr_style");
                     if (styleSelect) styleSelect.value = "square";
                     if (colorMaskSelect) colorMaskSelect.value = "solid";
                     if (showBadgeInput) showBadgeInput.checked = true;
 
-                    updatePreview();
+                    // Trigger HTMX refresh
+                    if (previewContainer) {
+                        htmx.trigger(previewContainer, "change");
+                    }
                 });
             }
-
         });
     </script>
 {% endblock dashboard_content %}

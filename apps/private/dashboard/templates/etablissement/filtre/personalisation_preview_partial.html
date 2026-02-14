@@ -1,0 +1,12 @@
+{% include "etablissement/settings/unsaved_indicator.html" %}
+<section class="h-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="py-5">
+                {% with feedback_context=preview_context %}
+                    {% include "reviews/feedback_base_content.html" %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</section>

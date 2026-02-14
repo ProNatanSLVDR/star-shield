@@ -1,0 +1,70 @@
+{% include "etablissement/settings/unsaved_indicator.html" %}
+<div class="h-100 d-flex align-items-center justify-content-center py-4">
+    <div class="d-flex flex-column gap-3 w-100"
+         style="max-width: 420px">
+        <!-- Google header -->
+        <div class="d-flex align-items-center gap-2 pb-3 border-bottom">
+            <i class="fa-brands fa-google text-muted"
+               style="font-size: 1.25rem"></i>
+            <span class="fw-semibold text-muted">Google Avis</span>
+        </div>
+        <!-- Customer review -->
+        <div>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 44px;
+                            height: 44px">
+                    <span class="fw-bold text-primary">M</span>
+                </div>
+                <div>
+                    <div class="fw-semibold">Marie Dupont</div>
+                    <div class="d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                    </div>
+                </div>
+            </div>
+            <p class="mb-0 text-body-secondary"
+               style="line-height: 1.6">
+                {{ customer_review_text }}
+            </p>
+        </div>
+        <hr class="my-0">
+        <!-- AI response -->
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 32px;
+                            height: 32px">
+                    <i class="fa-solid fa-robot text-white"
+                       style="font-size: 0.8rem"></i>
+                </div>
+                <span class="fw-semibold text-primary">Réponse IA</span>
+            </div>
+            <div class="text-body-secondary"
+                 style="line-height: 1.6">
+                {{ ai_preview_text }}
+            </div>
+        </div>
+        <!-- Active settings summary -->
+        <div class="border-top pt-3 mt-1">
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <span class="badge rounded-pill bg-primary-subtle text-primary">
+                    <i class="fa-solid fa-comment-dots me-1"></i>
+                    {{ tone_label }}
+                </span>
+                <span class="badge rounded-pill bg-primary-subtle text-primary">
+                    <i class="fa-solid fa-text-width me-1"></i>
+                    {{ length_label }}
+                </span>
+                <span class="badge rounded-pill bg-primary-subtle text-primary">
+                    <i class="fa-solid fa-language me-1"></i>
+                    {{ language_label }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+{% load component_tags %}
+
+{% include "etablissement/settings/unsaved_indicator.html" %}
+<div>
+    <label class="form-label fw-semibold">
+        <i class="fa-solid fa-palette me-2"></i>
+        Couleurs
+    </label>
+    <div class="input-group mb-3">
+        <span class="input-group-text mb-0 w-50 text-center">
+            <i class="fa-solid fa-circle me-2"></i>
+            Primaire
+        </span>
+        <input type="color"
+               class="form-control"
+               id="qr_fill_color"
+               name="qr_fill_color"
+               value="{{ qr_fill_color }}"
+               style="width: 80px;
+                      height: 40px;
+                      cursor: pointer;
+                      padding: 2px">
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text mb-0 w-50 text-center">
+            <i class="fa-solid fa-circle-half-stroke me-2"></i>
+            Secondaire
+        </span>
+        <input type="color"
+               class="form-control"
+               id="qr_fill_color_secondary"
+               name="qr_fill_color_secondary"
+               value="{{ qr_fill_color_secondary }}"
+               style="width: 80px;
+                      height: 40px;
+                      cursor: pointer;
+                      padding: 2px">
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text mb-0 w-50 text-center">
+            <i class="fa-solid fa-square me-2"></i>
+            Fond
+        </span>
+        <input type="color"
+               class="form-control"
+               id="qr_background_color"
+               name="qr_background_color"
+               value="{{ qr_background_color }}"
+               style="width: 80px;
+                      height: 40px;
+                      cursor: pointer;
+                      padding: 2px">
+    </div>
+</div>
+<div class="w-100 flex-grow-1 d-flex flex-column">
+    <div class="text-center flex-grow-1 d-flex align-items-center justify-content-center p-3">
+        <img id="qrCodePreview"
+             src="{{ preview_image_url }}"
+             alt="QR Code Preview"
+             width="400"
+             height="400"
+             class="img-fluid shadow rounded border">
+    </div>
+    <div class="row">
+        <a href="{{ preview_image_url }}"
+           download="qr-code-{{ selected_qr_code.name|slugify }}.png"
+           class="btn btn-primary w-100">
+            <i class="fa-solid fa-download me-2"></i>
+            Télécharger
+        </a>
+    </div>
+    <div class="row mt-2">
+        {% component "button"
+            text="Copier le lien"
+            classes="btn-primary w-100"
+            icon="fa-solid fa-copy"
+            extra_kwargs={
+            "type": "button",
+            "onclick": "navigator.clipboard.writeText('{{ full_qr_code_url }}')"
+            }
+            %}
+        {% endcomponent %}
+    </div>
+</div>

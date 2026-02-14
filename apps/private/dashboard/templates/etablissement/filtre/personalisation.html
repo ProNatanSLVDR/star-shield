@@ -152,17 +152,14 @@
                  style="min-height: 0">
                 {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="p-0 flex-grow-1 overflow-auto preview-disabled" %}
                     {% slot body %}
-                        <section class="h-100 d-flex align-items-center justify-content-center bg-light">
-                            <div class="container">
-                                <div class="row justify-content-center">
-                                    <div>
-                                        {% with feedback_context=preview_context %}
-                                            {% include "reviews/feedback_base_content.html" %}
-                                        {% endwith %}
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+                        <div id="personalisationPreviewContainer"
+                             class="h-100 position-relative"
+                             hx-get="{% url 'dashboard:etablissement:filtre:personalisation_preview' %}"
+                             hx-trigger="input from:#reviewSettingsForm delay:300ms, change from:#reviewSettingsForm delay:300ms"
+                             hx-include="#reviewSettingsForm"
+                             hx-swap="morph:innerHTML">
+                            {% include "etablissement/filtre/personalisation_preview_partial.html" %}
+                        </div>
                     {% endslot %}
                 {% endcomponent %}
             </div>
@@ -172,8 +169,8 @@
         document.addEventListener("DOMContentLoaded", function() {
             const colorInput = document.getElementById("review_accent_color");
             const colorTextInput = document.getElementById("accentColorText");
-            const form = document.getElementById("reviewSettingsForm");
             const resetBtn = document.getElementById("resetToDefaultsBtn");
+            const previewContainer = document.getElementById("personalisationPreviewContainer");
 
             // Sync color picker with text input
             if (colorInput && colorTextInput) {
@@ -192,7 +189,6 @@
             // Reset to defaults functionality
             if (resetBtn) {
                 resetBtn.addEventListener("click", function() {
-                    // Reset accent color to default
                     const defaultColor = "#0066ff";
                     if (colorInput) {
                         colorInput.value = defaultColor;
@@ -201,22 +197,24 @@
                         colorTextInput.value = defaultColor;
                     }
 
-                    // Reset select to "True" (Oui)
                     const pillSelect = document.getElementById("review_show_etablissement_pill");
                     if (pillSelect) {
                         pillSelect.value = "True";
                     }
 
-                    // Reset review_page_label to empty
                     const pageLabelInput = document.getElementById("review_page_label");
                     if (pageLabelInput) {
                         pageLabelInput.value = "";
                     }
 
-                    // Reset review_page_text to default
                     const pageTextInput = document.getElementById("review_page_text");
                     if (pageTextInput) {
                         pageTextInput.value = "Votre avis nous aide à offrir un meilleur service !";
+                    }
+
+                    // Trigger HTMX refresh
+                    if (previewContainer) {
+                        htmx.trigger(previewContainer, "change");
                     }
                 });
             }

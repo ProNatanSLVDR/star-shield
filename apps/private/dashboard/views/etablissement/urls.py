@@ -18,6 +18,7 @@ urlpatterns = [
     path("roulette/", include(roulette_urls)),
     path("ai-responses/", include(ai_responses_urls)),
     # QR Codes - specific patterns first
+    path("qrcodes/<str:short_code>/preview/", qrcodes.qr_code_preview_view, name="qrcode_preview"),
     path("qrcodes/create/", qrcodes.qr_code_create_view, name="qrcode_create"),
     path("qrcodes/image/<str:identifier>/<str:short_code>/", qrcodes.qr_code_image_view, name="qr_code"),
     path("qrcodes/<str:short_code>/delete/", qrcodes.qr_code_delete_partial, name="qrcode_delete_partial"),
