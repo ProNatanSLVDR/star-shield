@@ -574,6 +574,19 @@ def toggle_etablissement_status_partial(request, id):
             except Exception as e:
                 logger.error(f"Error fetching yearly price from Stripe: {e}")
 
+        # Calculate full price (without discount) and savings for trimestrial and yearly plans
+        if monthly_price_data and trimestrial_price_data:
+            full_price = monthly_price_data["amount"] * 3
+            if full_price > trimestrial_price_data["amount"]:
+                trimestrial_price_data["full_price"] = full_price
+                trimestrial_price_data["savings"] = full_price - trimestrial_price_data["amount"]
+
+        if monthly_price_data and yearly_price_data:
+            full_price = monthly_price_data["amount"] * 12
+            if full_price > yearly_price_data["amount"]:
+                yearly_price_data["full_price"] = full_price
+                yearly_price_data["savings"] = full_price - yearly_price_data["amount"]
+
         context["monthly_price"] = monthly_price_data
         context["trimestrial_price"] = trimestrial_price_data
         context["yearly_price"] = yearly_price_data

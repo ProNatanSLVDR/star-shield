@@ -125,6 +125,7 @@
                                         <strong>Mensuel</strong>
                                     </div>
                                     <span class="d-block small opacity-50 mb-2">Facturé mensuellement</span>
+                                    <span class="badge bg-secondary">Prix de base</span>
                                     <span class="fw-bold fs-4 d-block">{{ monthly_price.amount|floatformat:2 }}</span>
                                     <span class="text-muted small">{% if monthly_price.currency == "EUR" %}€{% else %}{{ monthly_price.currency }}{% endif %}/mois</span>
                                 </div>
@@ -141,6 +142,10 @@
                                         <strong>Trimestriel</strong>
                                     </div>
                                     <span class="d-block small opacity-50 mb-2">Facturé trimestriellement</span>
+                                    {% if trimestrial_price.full_price %}
+                                        <span class="text-decoration-line-through opacity-50">{{ trimestrial_price.full_price|floatformat:2 }}</span>
+                                        <span class="badge bg-success ms-1">-{{ trimestrial_price.savings|floatformat:2 }}€</span>
+                                    {% endif %}
                                     <span class="fw-bold fs-4 d-block">{{ trimestrial_price.amount|floatformat:2 }}</span>
                                     <span class="text-muted small">{% if trimestrial_price.currency == "EUR" %}€{% else %}{{ trimestrial_price.currency }}{% endif %}/trimestre</span>
                                 </div>
@@ -157,6 +162,10 @@
                                         <strong>Annuel</strong>
                                     </div>
                                     <span class="d-block small opacity-50 mb-2">Facturé annuellement - Économique</span>
+                                    {% if yearly_price.full_price %}
+                                        <span class="text-decoration-line-through opacity-50">{{ yearly_price.full_price|floatformat:2 }}</span>
+                                        <span class="badge bg-success ms-1">-{{ yearly_price.savings|floatformat:2 }}€</span>
+                                    {% endif %}
                                     <span class="fw-bold fs-4 d-block">{{ yearly_price.amount|floatformat:2 }}</span>
                                     <span class="text-muted small">{% if yearly_price.currency == "EUR" %}€{% else %}{{ yearly_price.currency }}{% endif %}/an</span>
                                 </div>
