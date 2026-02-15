@@ -4,13 +4,11 @@
 
 {% block dashboard_content %}
     <div class="d-flex flex-column h-100">
-        <div class="mb-3">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">
-                <i class="fa-solid fa-user me-2"></i>
-                Mon profil
-            </h1>
-            <p class="text-muted mb-0 small">Gérez vos informations personnelles et vos paramètres de compte.</p>
-        </div>
+        {% component "page_header"
+            title="Mon profil"
+            subtitle="Gérez vos informations personnelles et vos paramètres de compte."
+            icon="fa-solid fa-user"
+        / %}
 
         <div class="row g-3">
             <!-- Profile Form -->

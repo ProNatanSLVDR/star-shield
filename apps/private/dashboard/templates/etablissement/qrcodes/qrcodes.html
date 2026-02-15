@@ -9,15 +9,11 @@
 
 {% block dashboard_content %}
     <div class="d-flex flex-column h-100">
-        <div class="mb-3">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">
-                <i class="fa-solid fa-qrcode me-2"></i>
-                QR Codes
-            </h1>
-            <p class="text-muted mb-0 small">
-                Gérez et personnalisez vos QR codes pour collecter des avis ou diriger vers la roulette.
-            </p>
-        </div>
+        {% component "page_header"
+            title="QR Codes"
+            subtitle="Gérez et personnalisez vos QR codes pour collecter des avis ou diriger vers la roulette."
+            icon="fa-solid fa-qrcode"
+        / %}
         <div class="row g-3 flex-grow-1">
             <!-- QR Codes List -->
             <div class="col-lg-3 d-flex flex-column">

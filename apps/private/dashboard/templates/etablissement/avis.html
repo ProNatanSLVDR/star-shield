@@ -1,6 +1,7 @@
 {% extends "dashboard_base.html" %}
 {% load static %}
 {% load filters %}
+{% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
@@ -8,13 +9,11 @@
 
 {% block dashboard_content %}
 
-    <div class="mb-3">
-        <h1 class="h4 fw-bold text-body-emphasis mb-1">
-            <i class="fa-solid fa-comments me-2"></i>
-            Avis
-        </h1>
-        <p class="text-muted mb-0 small">Consultez et filtrez tous les avis de votre établissement.</p>
-    </div>
+    {% component "page_header"
+        title="Avis"
+        subtitle="Consultez et filtrez tous les avis de votre établissement."
+        icon="fa-solid fa-comments"
+    / %}
 
     <!-- Filters -->
     <div class="mb-3">

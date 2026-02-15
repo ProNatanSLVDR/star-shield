@@ -9,15 +9,11 @@
 
 {% block dashboard_content %}
     <div class="d-flex flex-column">
-        <div class="mb-3">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">
-                <i class="fa-solid fa-gear me-2"></i>
-                Paramètres
-            </h1>
-            <p class="text-muted mb-0 small">
-                Gérez les paramètres généraux de votre établissement.
-            </p>
-        </div>
+        {% component "page_header"
+            title="Paramètres"
+            subtitle="Gérez les paramètres généraux de votre établissement."
+            icon="fa-solid fa-gear"
+        / %}
         <div class="row g-3">
             <div class="col-lg-6 mx-auto">
                 {% component "card" title="Informations générales" card_classes="overflow-hidden" %}

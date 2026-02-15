@@ -1,6 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% load static %}
+{% load component_tags %}
 
 {% block sidebar_content %}
     {% include "etablissement/sidebar_etablissement.html" %}
@@ -8,15 +9,11 @@
 
 {% block dashboard_content %}
     <div class="d-flex flex-column">
-        <div class="mb-3">
-            <h1 class="h4 fw-bold text-body-emphasis mb-1">
-                <i class="fa-solid fa-chart-line me-2"></i>
-                Statistiques
-            </h1>
-            <p class="text-muted mb-0 small">
-                Vue détaillée des statistiques de {{ etablissement.title }}.
-            </p>
-        </div>
+        {% component "page_header"
+            title="Statistiques"
+            subtitle="Vue détaillée des statistiques de "|add:etablissement.title|add:"."
+            icon="fa-solid fa-chart-line"
+        / %}
         <div class="rounded-4 border bg-white shadow-sm p-1 p-md-3 row g-0 w-100 mb-3">
             <div class="col-12 col-xl-6 p-2">
                 <div class="bg-body-tertiary rounded-4 p-2 d-flex align-items-center h-100">
