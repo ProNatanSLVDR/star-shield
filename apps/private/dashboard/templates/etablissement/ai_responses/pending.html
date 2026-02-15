@@ -14,7 +14,7 @@
             icon="fa-solid fa-clock"
         %}
             {% fill "actions" %}
-                {% component "feature_toggle" feature_name="Réponses IA" icon="fa-solid fa-robot" feature_field="ai_responses_enabled" feature_enabled=etablissement.ai_responses_enabled %}{% endcomponent %}
+                {% component "feature_toggle" feature_name="Réponses IA" icon="fa-solid fa-robot" feature_field="ai_responses_enabled" feature_enabled=request.etablissement.ai_responses_enabled %}{% endcomponent %}
             {% endfill %}
         {% endcomponent %}
         <div id="pending-content"

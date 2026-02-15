@@ -13,9 +13,10 @@
             title="Paramètres et Prix"
             subtitle="Configurez votre roue de la fortune pour inciter les clients à laisser des avis."
             icon="fa-solid fa-gift"
-        %}
+            %}
             {% fill "actions" %}
-                {% component "feature_toggle" feature_name="Roulette" icon="fa-solid fa-record-vinyl" feature_field="roulette_enabled" feature_enabled=etablissement.roulette_enabled %}{% endcomponent %}
+                {% component "feature_toggle" feature_name="Roulette" icon="fa-solid fa-record-vinyl" feature_field="roulette_enabled" feature_enabled=request.etablissement.roulette_enabled %}
+                {% endcomponent %}
             {% endfill %}
         {% endcomponent %}
         <div class="row g-3 flex-grow-1">

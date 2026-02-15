@@ -16,7 +16,7 @@
             icon="fa-solid fa-star-half-stroke"
         %}
             {% fill "actions" %}
-                {% component "feature_toggle" feature_name="Filtrage" icon="fa-solid fa-filter" feature_field="review_filtering_enabled" feature_enabled=etablissement.review_filtering_enabled %}{% endcomponent %}
+                {% component "feature_toggle" feature_name="Filtrage" icon="fa-solid fa-filter" feature_field="review_filtering_enabled" feature_enabled=request.etablissement.review_filtering_enabled %}{% endcomponent %}
             {% endfill %}
         {% endcomponent %}
         <div class="row g-3">

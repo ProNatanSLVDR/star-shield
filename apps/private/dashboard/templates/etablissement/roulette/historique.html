@@ -12,9 +12,10 @@
             title="Historique des gains"
             subtitle="Consultez l'historique des prix gagnés par vos clients sur la roue de la fortune."
             icon="fa-solid fa-trophy"
-        %}
+            %}
             {% fill "actions" %}
-                {% component "feature_toggle" feature_name="Roulette" icon="fa-solid fa-record-vinyl" feature_field="roulette_enabled" feature_enabled=etablissement.roulette_enabled %}{% endcomponent %}
+                {% component "feature_toggle" feature_name="Roulette" icon="fa-solid fa-record-vinyl" feature_field="roulette_enabled" feature_enabled=request.etablissement.roulette_enabled %}
+                {% endcomponent %}
                 {% component "button"
                     text="Vérifier un code"
                     classes="btn-primary"
@@ -29,7 +30,6 @@
         <div id="historique-content"
              hx-get="{% url 'dashboard:etablissement:roulette:historique_content' %}"
              hx-trigger="load, historique-updated from:body"
-             hx-swap="morph:innerHTML">
-        </div>
+             hx-swap="morph:innerHTML"></div>
     </div>
 {% endblock dashboard_content %}
