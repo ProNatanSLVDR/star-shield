@@ -1,8 +1,19 @@
 {
-  "outputStyle": "default",
   "permissions": {
     "allow": [
-      "Bash(ruff check:*)"
+      "Bash(ruff check:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(git -C:*)"
     ]
+  },
+  "outputStyle": "default",
+  "attribution": {
+    "commit": "",
+    "pr": ""
   }
 }
