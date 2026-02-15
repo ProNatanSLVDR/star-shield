@@ -1,4 +1,8 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Bash(ruff check:*)",
@@ -8,12 +12,11 @@
       "Bash(git commit:*)",
       "Bash(docker ps:*)",
       "Bash(docker exec:*)",
-      "Bash(git -C:*)"
+      "Bash(git -C:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   },
-  "outputStyle": "default",
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  }
+  "outputStyle": "default"
 }
