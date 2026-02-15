@@ -11,9 +11,10 @@ class Card(Component):
         title: str
         icon: str | None = None
         card_classes: str = ""
-        body_classes: str = "p-md-4"
+        body_classes: str = ""
         header_classes: str = ""
         card_id: str | None = None
+        no_body_padding: bool = False
 
     def get_template_data(self, args, kwargs: Kwargs, slots, context):
         return {
@@ -23,4 +24,5 @@ class Card(Component):
             "body_classes": kwargs.body_classes,
             "header_classes": kwargs.header_classes,
             "card_id": kwargs.card_id,
+            "no_body_padding": kwargs.no_body_padding,
         }

@@ -22,7 +22,7 @@
         <div class="row g-3">
             <!-- Left Column: Threshold Selection -->
             <div class="col-lg-6 d-flex flex-column">
-                {% component "card" title="Paramètres de seuil" icon="fa-solid fa-sliders" card_classes="d-flex flex-column overflow-hidden" body_classes="px-4 py-3 d-flex flex-column" %}
+                {% component "card" title="Paramètres de seuil" icon="fa-solid fa-sliders" card_classes="d-flex flex-column overflow-hidden" body_classes="d-flex flex-column" %}
                     {% slot body %}
                         <div class="row  position-relative"
                              style="min-height: 400px">
@@ -164,7 +164,7 @@
             </div>
             <!-- Right Column: Configuration -->
             <div class="col-lg-6 d-flex flex-column">
-                {% component "card" title="Estimations et prévisions" icon="fa-solid fa-calculator" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="px-4 py-3 d-flex flex-column flex-grow-1 overflow-auto" %}
+                {% component "card" title="Estimations et prévisions" icon="fa-solid fa-calculator" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="d-flex flex-column flex-grow-1 overflow-auto" %}
                     {% slot body %}
                         <div class="mb-3">
                             <label for="id_notes_per_week"

@@ -90,7 +90,7 @@
             </div>
             <!-- Right Column: Prizes Table -->
             <div class="col-12 col-lg-8 d-flex flex-column">
-                {% component "card" title="Prix" icon="fa-solid fa-gift" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="flex-grow-1 overflow-auto p-0" %}
+                {% component "card" title="Prix" icon="fa-solid fa-gift" card_classes="h-100 d-flex flex-column overflow-hidden" no_body_padding=True body_classes="flex-grow-1 overflow-auto" %}
                     {% slot body %}
                         <div id="prizes-table-container"
                              hx-get="{% url 'dashboard:etablissement:roulette:prizes_table' %}"

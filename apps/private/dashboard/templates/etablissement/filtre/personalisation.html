@@ -24,9 +24,10 @@
             title="Personnalisation"
             subtitle="Personnalisez l'apparence de votre page de collecte d'avis."
             icon="fa-solid fa-palette"
-        %}
+            %}
             {% fill "actions" %}
-                {% component "feature_toggle" feature_name="Filtrage" icon="fa-solid fa-filter" feature_field="review_filtering_enabled" feature_enabled=etablissement.review_filtering_enabled %}{% endcomponent %}
+                {% component "feature_toggle" feature_name="Filtrage" icon="fa-solid fa-filter" feature_field="review_filtering_enabled" feature_enabled=etablissement.review_filtering_enabled %}
+                {% endcomponent %}
             {% endfill %}
         {% endcomponent %}
         <div class="row g-3 flex-grow-1">
@@ -147,7 +148,7 @@
             <!-- Preview -->
             <div class="col-lg-6 d-flex flex-column"
                  style="min-height: 0">
-                {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" body_classes="p-0 flex-grow-1 overflow-auto preview-disabled" %}
+                {% component "card" title="Aperçu" icon="fa-solid fa-eye" card_classes="h-100 d-flex flex-column overflow-hidden" no_body_padding=True body_classes="flex-grow-1 overflow-auto preview-disabled p-0" %}
                     {% slot body %}
                         <div id="personalisationPreviewContainer"
                              class="h-100 position-relative"
