@@ -1,6 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% load i18n %}
+{% load static %}
 {% load component_tags %}
 
 {% block sidebar_content %}
@@ -194,12 +195,6 @@
                                                         {% endif %}>
                                                     Carré
                                                 </option>
-                                                <option value="square_spaced"
-                                                        {% if form.qr_style.value|default:selected_qr_code.qr_style == "square_spaced" %}
-                                                            selected
-                                                        {% endif %}>
-                                                    Carré espacé
-                                                </option>
                                                 <option value="rounded"
                                                         {% if form.qr_style.value|default:selected_qr_code.qr_style == "rounded" %}
                                                             selected
@@ -380,11 +375,7 @@
                                 </div>
                                 <!-- Preview -->
                                 <div class="col-md-5 d-flex flex-column position-relative"
-                                     id="qrCodePreviewContainer"
-                                     hx-get="{% url 'dashboard:etablissement:qrcode_preview' selected_qr_code.short_code %}"
-                                     hx-trigger="input from:#qrCodeSettingsForm delay:300ms, change from:#qrCodeSettingsForm delay:300ms"
-                                     hx-include="#qrCodeSettingsForm"
-                                     hx-swap="morph:innerHTML">
+                                     id="qrCodePreviewContainer">
                                     {% include "etablissement/qrcodes/qrcode_preview_partial.html" %}
                                 </div>
                             </div>
@@ -412,45 +403,159 @@
             Créer un QR Code
         {% endfill %}
     {% endcomponent %}
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const fillColorSecondaryInput = document.getElementById("qr_fill_color_secondary");
-            const fillColorInput = document.getElementById("qr_fill_color");
-            const colorMaskSelect = document.getElementById("qr_color_mask");
-            const resetBtn = document.getElementById("resetToDefaultsBtn");
-            const showBadgeInput = document.getElementById("qr_show_badge");
-            const previewContainer = document.getElementById("qrCodePreviewContainer");
+    {% if selected_qr_code %}
+        <script type="application/json" id="qrBadgeUrls">
+            {
+                "feedback": "{% static 'img/qr-badges/logo-filtering.png' %}",
+                "roulette": "{% static 'img/qr-badges/logo-roulette.png' %}",
+                "verify": "{% static 'img/qr-badges/logo-roulette-verif.png' %}"
+            }
+        </script>
+        <script src="https://unpkg.com/qr-code-styling@1.8.4/lib/qr-code-styling.js"></script>
+        <script src="{% static 'custom/qr-code-renderer.js' %}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const canvas = document.getElementById("qrCodeCanvas");
+                if (!canvas) return;
 
-            // Auto-switch color mask when secondary differs from primary
-            if (fillColorSecondaryInput && fillColorInput && colorMaskSelect) {
-                fillColorSecondaryInput.addEventListener("input", function() {
-                    if (colorMaskSelect.value === "solid") {
-                        const primaryColor = fillColorInput.value || "#000000";
-                        if (this.value !== primaryColor) {
-                            colorMaskSelect.value = "square_radial";
+                const badgeUrls = JSON.parse(
+                    document.getElementById("qrBadgeUrls").textContent
+                );
+
+                const fillColorInput = document.getElementById("qr_fill_color");
+                const fillColorSecondaryInput = document.getElementById("qr_fill_color_secondary");
+                const backgroundColorInput = document.getElementById("qr_background_color");
+                const styleSelect = document.getElementById("qr_style");
+                const colorMaskSelect = document.getElementById("qr_color_mask");
+                const showBadgeInput = document.getElementById("qr_show_badge");
+                const routingSelect = document.getElementById("routing");
+                const logoInput = document.getElementById("qr_logo");
+                const resetBtn = document.getElementById("resetToDefaultsBtn");
+                const downloadBtn = document.getElementById("qrCodeDownloadBtn");
+                const unsavedIndicator = document.getElementById("unsavedIndicator");
+
+                // Build initial badge URL from routing
+                const routing = canvas.dataset.routing;
+                const initialBadgeUrl = badgeUrls[routing] || "";
+
+                const renderer = new QRCodeRenderer(canvas, {
+                    data: canvas.dataset.qrUrl,
+                    fillColor: canvas.dataset.fillColor,
+                    fillColorSecondary: canvas.dataset.fillColorSecondary,
+                    backgroundColor: canvas.dataset.backgroundColor,
+                    style: canvas.dataset.style,
+                    colorMask: canvas.dataset.colorMask,
+                    showBadge: canvas.dataset.showBadge === "true",
+                    badgeUrl: initialBadgeUrl,
+                    logoUrl: canvas.dataset.logoUrl || "",
+                });
+                renderer.render();
+
+                // Gather current form values
+                function getFormValues() {
+                    return {
+                        fillColor: fillColorInput ? fillColorInput.value : "#000000",
+                        fillColorSecondary: fillColorSecondaryInput ? fillColorSecondaryInput.value : "#000000",
+                        backgroundColor: backgroundColorInput ? backgroundColorInput.value : "#FFFFFF",
+                        style: styleSelect ? styleSelect.value : "square",
+                        colorMask: colorMaskSelect ? colorMaskSelect.value : "solid",
+                        showBadge: showBadgeInput ? showBadgeInput.checked : true,
+                    };
+                }
+
+                // Check for unsaved changes
+                function checkUnsaved() {
+                    if (!unsavedIndicator) return;
+                    const vals = getFormValues();
+                    const hasChanges = (
+                        vals.fillColor !== canvas.dataset.savedFillColor ||
+                        vals.fillColorSecondary !== canvas.dataset.savedFillColorSecondary ||
+                        vals.backgroundColor !== canvas.dataset.savedBackgroundColor ||
+                        vals.style !== canvas.dataset.savedStyle ||
+                        vals.colorMask !== canvas.dataset.savedColorMask ||
+                        String(vals.showBadge) !== canvas.dataset.savedShowBadge
+                    );
+                    unsavedIndicator.style.display = hasChanges ? "" : "none";
+                }
+
+                // Re-render QR from current form values
+                let debounceTimer = null;
+                function scheduleRender() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        const vals = getFormValues();
+                        const currentRouting = routingSelect ? routingSelect.value : routing;
+                        renderer.update({
+                            fillColor: vals.fillColor,
+                            fillColorSecondary: vals.fillColorSecondary,
+                            backgroundColor: vals.backgroundColor,
+                            style: vals.style,
+                            colorMask: vals.colorMask,
+                            showBadge: vals.showBadge,
+                            badgeUrl: badgeUrls[currentRouting] || "",
+                        });
+                        checkUnsaved();
+                    }, 100);
+                }
+
+                // Listen to form inputs
+                [fillColorInput, fillColorSecondaryInput, backgroundColorInput].forEach(function(el) {
+                    if (el) {
+                        el.addEventListener("input", scheduleRender);
+                    }
+                });
+                [styleSelect, colorMaskSelect, routingSelect].forEach(function(el) {
+                    if (el) {
+                        el.addEventListener("change", scheduleRender);
+                    }
+                });
+                if (showBadgeInput) {
+                    showBadgeInput.addEventListener("change", scheduleRender);
+                }
+
+                // Auto-switch color mask when secondary differs from primary
+                if (fillColorSecondaryInput && fillColorInput && colorMaskSelect) {
+                    fillColorSecondaryInput.addEventListener("input", function() {
+                        if (colorMaskSelect.value === "solid") {
+                            const primaryColor = fillColorInput.value || "#000000";
+                            if (this.value !== primaryColor) {
+                                colorMaskSelect.value = "square_radial";
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
 
-            // Reset to defaults functionality
-            if (resetBtn) {
-                resetBtn.addEventListener("click", function() {
-                    if (fillColorInput) fillColorInput.value = "#000000";
-                    if (fillColorSecondaryInput) fillColorSecondaryInput.value = "#000000";
-                    var backgroundColorInput = document.getElementById("qr_background_color");
-                    if (backgroundColorInput) backgroundColorInput.value = "#FFFFFF";
-                    var styleSelect = document.getElementById("qr_style");
-                    if (styleSelect) styleSelect.value = "square";
-                    if (colorMaskSelect) colorMaskSelect.value = "solid";
-                    if (showBadgeInput) showBadgeInput.checked = true;
+                // Logo file preview
+                if (logoInput) {
+                    logoInput.addEventListener("change", function() {
+                        if (this.files && this.files[0]) {
+                            renderer.setLogoFromFile(this.files[0]);
+                        }
+                    });
+                }
 
-                    // Trigger HTMX refresh
-                    if (previewContainer) {
-                        htmx.trigger(previewContainer, "change");
-                    }
-                });
-            }
-        });
-    </script>
+                // Download
+                if (downloadBtn) {
+                    downloadBtn.addEventListener("click", function() {
+                        const name = document.getElementById("name");
+                        const filename = name ? "qr-code-" + name.value.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "qr-code";
+                        renderer.download(filename);
+                    });
+                }
+
+                // Reset to defaults
+                if (resetBtn) {
+                    resetBtn.addEventListener("click", function() {
+                        if (fillColorInput) fillColorInput.value = "#000000";
+                        if (fillColorSecondaryInput) fillColorSecondaryInput.value = "#000000";
+                        if (backgroundColorInput) backgroundColorInput.value = "#FFFFFF";
+                        if (styleSelect) styleSelect.value = "square";
+                        if (colorMaskSelect) colorMaskSelect.value = "solid";
+                        if (showBadgeInput) showBadgeInput.checked = true;
+                        scheduleRender();
+                    });
+                }
+            });
+        </script>
+    {% endif %}
 {% endblock dashboard_content %}

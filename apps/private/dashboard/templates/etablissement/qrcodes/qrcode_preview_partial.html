@@ -1,6 +1,13 @@
+{% load static %}
 {% load component_tags %}
 
-{% include "etablissement/settings/unsaved_indicator.html" %}
+<div id="unsavedIndicator"
+     class="position-absolute fa-fade bottom-0 start-50 translate-middle-x mb-2 d-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-warning-subtle text-warning-emphasis small fw-semibold shadow text-nowrap"
+     style="z-index: 10;
+            display: none">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    Modifications non enregistrées
+</div>
 <div>
     <label class="form-label fw-semibold">
         <i class="fa-solid fa-palette me-2"></i>
@@ -54,20 +61,43 @@
 </div>
 <div class="w-100 flex-grow-1 d-flex flex-column">
     <div class="text-center flex-grow-1 d-flex align-items-center justify-content-center p-3">
-        <img id="qrCodePreview"
-             src="{{ preview_image_url }}"
-             alt="QR Code Preview"
-             width="400"
-             height="400"
-             class="img-fluid shadow rounded border">
+        <div id="qrCodeCanvas"
+             class="shadow rounded border d-inline-block"
+             data-qr-url="{{ full_qr_code_url }}"
+             data-logo-url="{{ logo_url }}"
+             data-fill-color="{{ qr_fill_color }}"
+             data-fill-color-secondary="{{ qr_fill_color_secondary }}"
+             data-background-color="{{ qr_background_color }}"
+             data-style="{{ selected_qr_code.qr_style|default:'square' }}"
+             data-color-mask="{{ selected_qr_code.qr_color_mask|default:'solid' }}"
+             data-show-badge="{{ selected_qr_code.qr_show_badge|yesno:'true,false' }}"
+             data-routing="{{ selected_qr_code.routing }}"
+             data-saved-fill-color="{{ qr_fill_color }}"
+             data-saved-fill-color-secondary="{{ qr_fill_color_secondary }}"
+             data-saved-background-color="{{ qr_background_color }}"
+             data-saved-style="{{ selected_qr_code.qr_style|default:'square' }}"
+             data-saved-color-mask="{{ selected_qr_code.qr_color_mask|default:'solid' }}"
+             data-saved-show-badge="{{ selected_qr_code.qr_show_badge|yesno:'true,false' }}">
+        </div>
+        <style>
+            #qrCodeCanvas {
+                max-width: 100%;
+            }
+            #qrCodeCanvas canvas {
+                display: block;
+                width: 100% !important;
+                height: auto !important;
+                max-width: 300px;
+            }
+        </style>
     </div>
     <div class="row">
-        <a href="{{ preview_image_url }}"
-           download="qr-code-{{ selected_qr_code.name|slugify }}.png"
-           class="btn btn-primary w-100">
+        <button type="button"
+                id="qrCodeDownloadBtn"
+                class="btn btn-primary w-100">
             <i class="fa-solid fa-download me-2"></i>
             Télécharger
-        </a>
+        </button>
     </div>
     <div class="row mt-2">
         {% component "button"

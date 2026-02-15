@@ -1,109 +1,20 @@
 import json
-from pathlib import Path
-from urllib.parse import urlencode
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
 from apps.private.auths.models import QRCode
 from apps.private.dashboard.render import starshield_render
-from apps.public.reviews.utils import get_etablissement_by_identifier
 from starshield.decorators import (
     google_gmb_connected_required,
     selected_etablissement_required,
 )
-from starshield.logger import logger
-from starshield.qrcodes import generate_qrcode_png
 
 from .forms import QRCodeCreateForm, QRCodeSettingsForm
-
-QR_PREVIEW_FIELDS = [
-    "qr_fill_color",
-    "qr_fill_color_secondary",
-    "qr_background_color",
-    "qr_style",
-    "qr_color_mask",
-    "qr_show_badge",
-]
-
-
-def _build_preview_image_url(qr_code_url, fill_color, fill_color_secondary, background_color, style, color_mask, show_badge):
-    """Build a QR code image URL with query parameters for preview."""
-    params = {
-        "fill_color": fill_color,
-        "fill_color_secondary": fill_color_secondary,
-        "background_color": background_color,
-        "style": style,
-        "color_mask": color_mask,
-        "show_badge": "1" if show_badge else "0",
-    }
-    return f"{qr_code_url}?{urlencode(params)}"
-
-
-@login_required
-@google_gmb_connected_required
-@selected_etablissement_required
-def qr_code_preview_view(request, short_code):
-    """HTMX preview partial for QR code settings."""
-    etablissement = request.etablissement
-    selected_qr_code = get_object_or_404(QRCode, short_code=short_code, etablissement=etablissement)
-
-    # Read form values from GET params
-    fill_color = request.GET.get("qr_fill_color", selected_qr_code.qr_fill_color) or "#000000"
-    fill_color_secondary = request.GET.get("qr_fill_color_secondary", selected_qr_code.qr_fill_color_secondary) or "#000000"
-    background_color = request.GET.get("qr_background_color", selected_qr_code.qr_background_color) or "#FFFFFF"
-    style = request.GET.get("qr_style", selected_qr_code.qr_style) or "square"
-    color_mask = request.GET.get("qr_color_mask", selected_qr_code.qr_color_mask) or "solid"
-    show_badge = "qr_show_badge" in request.GET if request.GET else selected_qr_code.qr_show_badge
-
-    # Detect unsaved changes
-    saved = QRCode.objects.values(*QR_PREVIEW_FIELDS).get(pk=selected_qr_code.pk)
-    current = {
-        "qr_fill_color": fill_color,
-        "qr_fill_color_secondary": fill_color_secondary,
-        "qr_background_color": background_color,
-        "qr_style": style,
-        "qr_color_mask": color_mask,
-        "qr_show_badge": show_badge,
-    }
-    saved_normalized = {
-        "qr_fill_color": saved["qr_fill_color"] or "#000000",
-        "qr_fill_color_secondary": saved["qr_fill_color_secondary"] or "#000000",
-        "qr_background_color": saved["qr_background_color"] or "#FFFFFF",
-        "qr_style": saved["qr_style"] or "square",
-        "qr_color_mask": saved["qr_color_mask"] or "solid",
-        "qr_show_badge": saved["qr_show_badge"],
-    }
-    has_unsaved_changes = saved_normalized != current
-
-    # Build QR code image URL
-    identifier = str(etablissement.uuid)
-    qr_code_url = reverse("dashboard:etablissement:qr_code", args=[identifier, selected_qr_code.short_code])
-    preview_image_url = _build_preview_image_url(
-        qr_code_url, fill_color, fill_color_secondary, background_color, style, color_mask, show_badge
-    )
-
-    full_qr_code_url = request.build_absolute_uri(
-        reverse("routing:qr_code_redirect", args=[identifier, selected_qr_code.short_code])
-    )
-
-    context = {
-        "selected_qr_code": selected_qr_code,
-        "preview_image_url": preview_image_url,
-        "full_qr_code_url": full_qr_code_url,
-        "qr_fill_color": fill_color,
-        "qr_fill_color_secondary": fill_color_secondary,
-        "qr_background_color": background_color,
-        "has_unsaved_changes": has_unsaved_changes,
-    }
-
-    return TemplateResponse(request, "etablissement/qrcodes/qrcode_preview_partial.html", context)
 
 
 @login_required
@@ -180,22 +91,16 @@ def qr_code_management_view(request, short_code=None):
         else:
             form = QRCodeSettingsForm()
 
-    # Build QR code image URL
+    # Build the target URL that gets encoded in the QR code
     identifier = str(etablissement.uuid)
-    qr_code_url = None
-    if selected_qr_code and selected_qr_code.short_code:
-        qr_code_url = reverse("dashboard:etablissement:qr_code", args=[identifier, selected_qr_code.short_code])
-    elif qr_codes.exists():
-        # Fallback: if no QR code selected or no short_code, use first QR code's short_code
-        first_qr = qr_codes.first()
-        if first_qr and first_qr.short_code:
-            qr_code_url = reverse("dashboard:etablissement:qr_code", args=[identifier, first_qr.short_code])
-
     full_qr_code_url = None
+    logo_url = ""
     if selected_qr_code and selected_qr_code.short_code:
         full_qr_code_url = request.build_absolute_uri(
             reverse("routing:qr_code_redirect", args=[identifier, selected_qr_code.short_code])
         )
+    if selected_qr_code and selected_qr_code.qr_logo:
+        logo_url = selected_qr_code.qr_logo.url
 
     qr_code_count = qr_codes.count()
     max_qr_codes = 8
@@ -206,27 +111,13 @@ def qr_code_management_view(request, short_code=None):
     empty_slots_list = [None] * empty_slots_count
     all_slots = qr_codes_list + empty_slots_list
 
-    # Build preview image URL for initial render
-    preview_image_url = qr_code_url
-    if selected_qr_code and qr_code_url:
-        preview_image_url = _build_preview_image_url(
-            qr_code_url,
-            selected_qr_code.qr_fill_color or "#000000",
-            selected_qr_code.qr_fill_color_secondary or "#000000",
-            selected_qr_code.qr_background_color or "#FFFFFF",
-            selected_qr_code.qr_style or "square",
-            selected_qr_code.qr_color_mask or "solid",
-            selected_qr_code.qr_show_badge,
-        )
-
     context = {
         "etablissement": etablissement,
         "qr_codes": qr_codes,
         "selected_qr_code": selected_qr_code,
         "form": form,
-        "qr_code_url": qr_code_url,
-        "preview_image_url": preview_image_url,
         "full_qr_code_url": full_qr_code_url,
+        "logo_url": logo_url,
         "qr_code_count": qr_code_count,
         "max_qr_codes": max_qr_codes,
         "empty_slots_count": empty_slots_count,
@@ -334,111 +225,3 @@ def qr_code_delete_partial(request, short_code):
         "etablissement/qrcodes/delete_partial.html",
         context=context,
     )
-
-
-@login_required
-def qr_code_image_view(request, identifier=None, short_code=None):
-    """Generate and return QR code image as PNG."""
-    etablissement = get_etablissement_by_identifier(identifier)
-
-    # Get QRCode from short_code path parameter
-    qr_code = None
-
-    if short_code:
-        try:
-            qr_code = QRCode.objects.filter(short_code=short_code, etablissement=etablissement).first()
-        except Exception as e:
-            logger.debug(
-                f"Could not find QRCode with short_code {short_code} for etablissement {etablissement.id}: {e}"
-            )
-
-    # If no QRCode found, try first one
-    if not qr_code:
-        qr_code = etablissement.qr_codes.first()
-
-    # Build redirect URL for QR code - must have short_code
-    if qr_code and qr_code.short_code:
-        redirect_url = reverse("routing:qr_code_redirect", args=[identifier, qr_code.short_code])
-        target_url = request.build_absolute_uri(redirect_url)
-    else:
-        # Fallback to feedback if no QR code or no short_code
-        target_url = request.build_absolute_uri(reverse("reviews:feedback", args=[identifier]))
-
-    # Get customization parameters from query string (for preview) or QRCode
-    if qr_code:
-        fill_color = request.GET.get("fill_color") or qr_code.qr_fill_color or "#000000"
-        fill_color_secondary = request.GET.get("fill_color_secondary") or qr_code.qr_fill_color_secondary or "#000000"
-        background_color = request.GET.get("background_color") or qr_code.qr_background_color or "#FFFFFF"
-        style = request.GET.get("style") or qr_code.qr_style or "square"
-        color_mask = request.GET.get("color_mask") or qr_code.qr_color_mask or "solid"
-
-        # Get logo file if exists
-        logo_file = None
-        if qr_code.qr_logo:
-            try:
-                logo_file = qr_code.qr_logo.open()
-            except Exception as e:
-                logger.debug(f"Could not open QR logo file for QRCode {qr_code.id}: {e}")
-                logo_file = None
-    else:
-        # Fallback to default values if no QRCode exists
-        fill_color = request.GET.get("fill_color") or "#000000"
-        fill_color_secondary = request.GET.get("fill_color_secondary") or "#000000"
-        background_color = request.GET.get("background_color") or "#FFFFFF"
-        style = request.GET.get("style") or "square"
-        color_mask = request.GET.get("color_mask") or "solid"
-        logo_file = None
-
-    # Resolve badge file based on QR code routing
-    # Query param show_badge overrides for real-time preview; otherwise use model field
-    show_badge_param = request.GET.get("show_badge")
-    if show_badge_param is not None:
-        show_badge = show_badge_param != "0"
-    elif qr_code:
-        show_badge = qr_code.qr_show_badge
-    else:
-        show_badge = True
-
-    badge_file = None
-    if show_badge and qr_code:
-        badge_map = {
-            "feedback": "logo-filtering.png",
-            "roulette": "logo-roulette.png",
-            "verify": "logo-roulette-verif.png",
-        }
-        badge_name = badge_map.get(qr_code.routing)
-        if badge_name:
-            badge_path = Path(settings.BASE_DIR) / "static" / "img" / "qr-badges" / badge_name
-            if badge_path.exists():
-                badge_file = badge_path
-
-    # Generate QR code PNG
-    try:
-        qr_image_bytes = generate_qrcode_png(
-            link=target_url,
-            fill_color=fill_color,
-            fill_color_secondary=fill_color_secondary,
-            background_color=background_color,
-            style=style,
-            color_mask=color_mask,
-            logo_file=logo_file,
-            badge_file=badge_file,
-        )
-
-        return HttpResponse(qr_image_bytes, content_type="image/png")
-    except Exception as e:
-        logger.error(f"Error generating QR code for etablissement {etablissement.id}: {e}", exc_info=True)
-        # Return a simple error response or default QR code
-        try:
-            qr_image_bytes = generate_qrcode_png(
-                link=target_url,
-                fill_color="#000000",
-                fill_color_secondary="#000000",
-                background_color="#FFFFFF",
-                style="square",
-                color_mask="solid",
-            )
-            return HttpResponse(qr_image_bytes, content_type="image/png")
-        except Exception:
-            # If even default fails, return 500
-            return HttpResponse("Error generating QR code", status=500)
