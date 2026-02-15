@@ -14,7 +14,7 @@
             icon="fa-solid fa-trophy"
         %}
             {% fill "actions" %}
-                {% include "etablissement/settings/feature_header_toggle_partial.html" with feature_field="roulette_enabled" feature_enabled=etablissement.roulette_enabled %}
+                {% component "feature_toggle" feature_name="Roulette" icon="fa-solid fa-record-vinyl" feature_field="roulette_enabled" feature_enabled=etablissement.roulette_enabled %}{% endcomponent %}
                 {% component "button"
                     text="Vérifier un code"
                     classes="btn-primary"

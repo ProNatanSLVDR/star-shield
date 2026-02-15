@@ -26,7 +26,7 @@
             icon="fa-solid fa-palette"
         %}
             {% fill "actions" %}
-                {% include "etablissement/settings/feature_header_toggle_partial.html" with feature_field="review_filtering_enabled" feature_enabled=etablissement.review_filtering_enabled %}
+                {% component "feature_toggle" feature_name="Filtrage" icon="fa-solid fa-filter" feature_field="review_filtering_enabled" feature_enabled=etablissement.review_filtering_enabled %}{% endcomponent %}
             {% endfill %}
         {% endcomponent %}
         <div class="row g-3 flex-grow-1">

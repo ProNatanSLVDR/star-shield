@@ -89,6 +89,12 @@ def toggle_feature_view(request):
 
 ALLOWED_FEATURE_FIELDS = {"roulette_enabled", "ai_responses_enabled", "review_filtering_enabled"}
 
+FEATURE_DISPLAY = {
+    "roulette_enabled": ("Roulette", "fa-solid fa-record-vinyl"),
+    "ai_responses_enabled": ("Réponses IA", "fa-solid fa-robot"),
+    "review_filtering_enabled": ("Filtrage", "fa-solid fa-filter"),
+}
+
 
 @selected_etablissement_required
 @require_POST
@@ -105,6 +111,8 @@ def toggle_single_feature_view(request):
     etablissement.save(update_fields=[feature])
     etablissement.refresh_from_db()
 
+    feature_name, icon = FEATURE_DISPLAY[feature]
+
     return starshield_render(
         request,
         "etablissement/settings/feature_header_toggle_partial.html",
@@ -112,5 +120,7 @@ def toggle_single_feature_view(request):
             "etablissement": etablissement,
             "feature_field": feature,
             "feature_enabled": getattr(etablissement, feature),
+            "feature_name": feature_name,
+            "icon": icon,
         },
     )

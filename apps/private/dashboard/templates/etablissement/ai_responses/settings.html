@@ -25,7 +25,7 @@
             icon="fa-solid fa-robot"
         %}
             {% fill "actions" %}
-                {% include "etablissement/settings/feature_header_toggle_partial.html" with feature_field="ai_responses_enabled" feature_enabled=etablissement.ai_responses_enabled %}
+                {% component "feature_toggle" feature_name="Réponses IA" icon="fa-solid fa-robot" feature_field="ai_responses_enabled" feature_enabled=etablissement.ai_responses_enabled %}{% endcomponent %}
             {% endfill %}
         {% endcomponent %}
         <div class="row g-3 flex-grow-1">
