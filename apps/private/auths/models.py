@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import secrets
 import uuid
+from uuid import uuid4
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -19,6 +20,16 @@ from starshield.kms import decrypt_symmetric, encrypt_symmetric
 from starshield.logger import logger
 
 from . import choices
+
+
+def profile_picture_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1]
+    return f"profile_pictures/{instance.pk}/{uuid4().hex}.{ext}"
+
+
+def qr_logo_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1]
+    return f"qr_logos/{instance.etablissement.pk}/{uuid4().hex}.{ext}"
 
 
 class UserManager(BaseUserManager):
@@ -80,7 +91,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Infos Personnelles
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
-    profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)
+    profile_picture = models.ImageField(upload_to=profile_picture_path, blank=True, null=True)
 
     # Misc
     is_active = models.BooleanField(default=True)
@@ -519,7 +530,7 @@ class QRCode(models.Model):
         help_text="Style de masque de couleur pour le QR code.",
     )
     qr_logo = models.ImageField(
-        upload_to="qr_logos/",
+        upload_to=qr_logo_path,
         blank=True,
         null=True,
         help_text="Logo à afficher au centre du QR code.",
