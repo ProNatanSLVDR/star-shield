@@ -454,7 +454,7 @@ class Etablissement(models.Model):
         choices=choices.AI_LANGUAGE_CHOICES,
         default="fr",
     )
-    ai_response_validation_required = models.BooleanField(default=False)
+    ai_response_validation_required = models.BooleanField(default=True)
     ai_response_malicious_protection = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
