@@ -29,7 +29,6 @@
         opacity: .5;
     }
 </style>
-
 <!-- Toggle Status Modal -->
 <div class="modal-header border-bottom">
     <h5 class="modal-title fw-bold text-dark mb-0">
@@ -40,23 +39,32 @@
         {% else %}
             <i class="fa-solid fa-toggle-off pe-2"></i>
         {% endif %}
-        {% if is_reactivation %}Réactivation{% elif is_activation %}Activation{% else %}Désactivation{% endif %}
+        {% if is_reactivation %}
+            Réactivation
+        {% elif is_activation %}
+            Activation
+        {% else %}
+            Désactivation
+        {% endif %}
     </h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"></button>
 </div>
-
-<form method="post" action="{{ toggle_url }}" id="activation-form" class="w-100">
+<form method="post"
+      action="{{ toggle_url }}"
+      id="activation-form"
+      class="w-100">
     {% csrf_token %}
-
     <div class="modal-body p-4">
-    <!-- Establishment Information Card -->
+        <!-- Establishment Information Card -->
         <div class="card mb-4">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center flex-wrap gap-3">
                     <i class="fa-solid fa-building text-primary"></i>
                     <h6 class="mb-0 fw-bold fs-6">{{ etablissement.title }}</h6>
-                    <div class="ms-auto">
-                    </div>
+                    <div class="ms-auto"></div>
                     {% if etablissement.created_at %}
                         <div class="d-flex align-items-center gap-1 text-muted small">
                             <i class="fa-solid fa-calendar"></i>
@@ -70,9 +78,8 @@
                 </div>
             </div>
         </div>
-
         {% if is_reactivation %}
-        <!-- Reactivation -->
+            <!-- Reactivation -->
             <div class="card border-success mb-0 shadow-sm">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-4">
@@ -82,11 +89,14 @@
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <h6 class="card-title fw-bold mb-2 text-success">Confirmation de réactivation</h6>
-                            <p class="mb-0 text-muted">Votre abonnement sera réactivé et continuera normalement.</p>
+                            <h6 class="card-title fw-bold mb-2 text-success">
+                                Confirmation de réactivation
+                            </h6>
+                            <p class="mb-0 text-muted">
+                                Votre abonnement sera réactivé et continuera normalement.
+                            </p>
                         </div>
                     </div>
-
                     <div class="card bg-light border-0 mb-0">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-start gap-3">
@@ -108,17 +118,21 @@
                     </div>
                 </div>
             </div>
-
         {% elif is_activation %}
-
             <!-- Activation without subscription: Show price selection -->
             <div>
                 <h6 class="mb-4 fw-semibold">Sélectionnez votre plan d'abonnement</h6>
                 <div class="list-group list-group-checkable d-flex flex-column flex-md-row gap-3 border-0 w-100">
                     {% if monthly_price %}
                         <div class="flex-fill">
-                            <input class="list-group-item-check pe-none" type="radio" name="price_id" id="price_monthly" value="{{ monthly_price.id }}" checked="">
-                            <label class="list-group-item rounded-3 py-3" for="price_monthly">
+                            <input class="list-group-item-check pe-none"
+                                   type="radio"
+                                   name="price_id"
+                                   id="price_monthly"
+                                   value="{{ monthly_price.id }}"
+                                   checked="">
+                            <label class="list-group-item rounded-3 py-3"
+                                   for="price_monthly">
                                 <div class="text-center">
                                     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
                                         <i class="fa-solid fa-calendar-day"></i>
@@ -127,15 +141,30 @@
                                     <span class="d-block small opacity-50 mb-2">Facturé mensuellement</span>
                                     <span class="badge bg-secondary">Prix de base</span>
                                     <span class="fw-bold fs-4 d-block">{{ monthly_price.amount|floatformat:2 }}</span>
-                                    <span class="text-muted small">{% if monthly_price.currency == "EUR" %}€{% else %}{{ monthly_price.currency }}{% endif %}/mois</span>
+                                    <span class="text-muted small">
+                                        {% if monthly_price.currency == "EUR" %}
+                                            €
+                                        {% else %}
+                                            {{ monthly_price.currency }}
+                                        {% endif %}
+                                    /mois</span>
                                 </div>
                             </label>
                         </div>
                     {% endif %}
                     {% if trimestrial_price %}
-                        <div class="flex-fill">
-                            <input class="list-group-item-check pe-none" type="radio" name="price_id" id="price_trimestrial" value="{{ trimestrial_price.id }}">
-                            <label class="list-group-item rounded-3 py-3" for="price_trimestrial">
+                        <div class="flex-fill position-relative">
+                            <span class="badge bg-primary position-absolute border border-primary-subtle top-0 start-50 translate-middle px-3 py-1"
+                                  style="z-index: 1">
+                                <i class="fa-solid fa-ranking-star me-1"></i>Populaire
+                            </span>
+                            <input class="list-group-item-check pe-none"
+                                   type="radio"
+                                   name="price_id"
+                                   id="price_trimestrial"
+                                   value="{{ trimestrial_price.id }}">
+                            <label class="list-group-item rounded-3 py-3"
+                                   for="price_trimestrial">
                                 <div class="text-center">
                                     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
                                         <i class="fa-solid fa-calendar-week"></i>
@@ -144,18 +173,29 @@
                                     <span class="d-block small opacity-50 mb-2">Facturé trimestriellement</span>
                                     {% if trimestrial_price.full_price %}
                                         <span class="text-decoration-line-through opacity-50">{{ trimestrial_price.full_price|floatformat:2 }}</span>
-                                        <span class="badge bg-success ms-1">-{{ trimestrial_price.savings|floatformat:2 }}€</span>
+                                        <span class="badge bg-success ms-1">-{{ trimestrial_price.savings_percent }}%</span>
                                     {% endif %}
                                     <span class="fw-bold fs-4 d-block">{{ trimestrial_price.amount|floatformat:2 }}</span>
-                                    <span class="text-muted small">{% if trimestrial_price.currency == "EUR" %}€{% else %}{{ trimestrial_price.currency }}{% endif %}/trimestre</span>
+                                    <span class="text-muted small">
+                                        {% if trimestrial_price.currency == "EUR" %}
+                                            €
+                                        {% else %}
+                                            {{ trimestrial_price.currency }}
+                                        {% endif %}
+                                    /trimestre</span>
                                 </div>
                             </label>
                         </div>
                     {% endif %}
                     {% if yearly_price %}
                         <div class="flex-fill">
-                            <input class="list-group-item-check pe-none" type="radio" name="price_id" id="price_yearly" value="{{ yearly_price.id }}">
-                            <label class="list-group-item rounded-3 py-3" for="price_yearly">
+                            <input class="list-group-item-check pe-none"
+                                   type="radio"
+                                   name="price_id"
+                                   id="price_yearly"
+                                   value="{{ yearly_price.id }}">
+                            <label class="list-group-item rounded-3 py-3"
+                                   for="price_yearly">
                                 <div class="text-center">
                                     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
                                         <i class="fa-solid fa-calendar"></i>
@@ -164,10 +204,16 @@
                                     <span class="d-block small opacity-50 mb-2">Facturé annuellement - Économique</span>
                                     {% if yearly_price.full_price %}
                                         <span class="text-decoration-line-through opacity-50">{{ yearly_price.full_price|floatformat:2 }}</span>
-                                        <span class="badge bg-success ms-1">-{{ yearly_price.savings|floatformat:2 }}€</span>
+                                        <span class="badge bg-success ms-1">-{{ yearly_price.savings_percent }}%</span>
                                     {% endif %}
                                     <span class="fw-bold fs-4 d-block">{{ yearly_price.amount|floatformat:2 }}</span>
-                                    <span class="text-muted small">{% if yearly_price.currency == "EUR" %}€{% else %}{{ yearly_price.currency }}{% endif %}/an</span>
+                                    <span class="text-muted small">
+                                        {% if yearly_price.currency == "EUR" %}
+                                            €
+                                        {% else %}
+                                            {{ yearly_price.currency }}
+                                        {% endif %}
+                                    /an</span>
                                 </div>
                             </label>
                         </div>
@@ -180,9 +226,8 @@
                     </div>
                 </div>
             </div>
-
         {% else %}
-        <!-- Deactivation -->
+            <!-- Deactivation -->
             <div class="card border-warning mb-0 shadow-sm">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-4">
@@ -192,11 +237,12 @@
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <h6 class="card-title fw-bold mb-2 text-warning">Confirmation de désactivation</h6>
+                            <h6 class="card-title fw-bold mb-2 text-warning">
+                                Confirmation de désactivation
+                            </h6>
                             <p class="mb-0 text-muted">L'établissement sera désactivé immédiatement.</p>
                         </div>
                     </div>
-
                     <div class="d-flex flex-column gap-3">
                         <!-- No Refunds Card -->
                         <div class="card bg-light border-0">
@@ -214,7 +260,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Cancelled at Period End Card -->
                         <div class="card bg-light border-0">
                             <div class="card-body p-3">
@@ -231,7 +276,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Everything Works Until Period Ends Card -->
                         <div class="card bg-light border-0">
                             <div class="card-body p-3">
@@ -240,7 +284,9 @@
                                         <i class="fa-solid fa-check-circle text-success mt-1"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="fw-semibold mb-2 small">Tout fonctionne jusqu'à la fin de la période</h6>
+                                        <h6 class="fw-semibold mb-2 small">
+                                            Tout fonctionne jusqu'à la fin de la période
+                                        </h6>
                                         <p class="mb-0 small text-muted">
                                             Toutes les fonctionnalités de votre établissement resteront actives jusqu'à la fin de la période de facturation.
                                             Vous pourrez continuer à utiliser le service normalement jusqu'à cette date.
@@ -260,39 +306,37 @@
             </div>
         {% endif %}
     </div>
-
     <div class="modal-footer border-top bg-light p-3">
         {% if is_reactivation %}
             {% component "button"
-            text="Confirmer la réactivation"
-            classes="btn-primary btn-lg w-100"
-            icon="fa-solid fa-toggle-on"
-            extra_kwargs={
-            "type": "submit",
-            }
-            %}
+                text="Confirmer la réactivation"
+                classes="btn-primary btn-lg w-100"
+                icon="fa-solid fa-toggle-on"
+                extra_kwargs={
+                "type": "submit",
+                }
+                %}
             {% endcomponent %}
         {% elif is_activation %}
             {% component "button"
-            text="Continuer vers le paiement"
-            classes="btn-primary btn-lg w-100"
-            icon="fa-solid fa-toggle-on"
-            extra_kwargs={
-            "type": "submit",
-            }
-            %}
+                text="Continuer vers le paiement"
+                classes="btn-primary btn-lg w-100"
+                icon="fa-solid fa-toggle-on"
+                extra_kwargs={
+                "type": "submit",
+                }
+                %}
             {% endcomponent %}
         {% else %}
             {% component "button"
-            text="Confirmer la désactivation"
-            classes="btn-primary btn-lg w-100"
-            icon="fa-solid fa-toggle-off"
-            extra_kwargs={
-            "type": "submit",
-            }
-            %}
+                text="Confirmer la désactivation"
+                classes="btn-primary btn-lg w-100"
+                icon="fa-solid fa-toggle-off"
+                extra_kwargs={
+                "type": "submit",
+                }
+                %}
             {% endcomponent %}
         {% endif %}
     </div>
-
 </form>
