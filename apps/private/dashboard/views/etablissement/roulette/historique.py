@@ -116,23 +116,35 @@ def historique_content_partial(request):
             "centered": True,
             "icon": "fa-solid fa-circle-info",
         },
+        {
+            "label": "Actions",
+            "key": "actions",
+            "centered": True,
+            "icon": "fa-solid fa-bolt",
+        },
     ]
 
     rows = []
     for spin in spins_qs:
+        toggle_url = reverse("dashboard:etablissement:roulette:toggle_spin_status", args=[spin.id])
+
         if spin.is_used:
-            status_html = (
-                f'<button class="btn btn-sm btn-success" '
-                f'hx-post="{reverse("dashboard:etablissement:roulette:toggle_spin_status", args=[spin.id])}" '
-                f'hx-swap="none" title="Cliquer pour marquer en attente">'
-                f'<i class="fa-solid fa-check me-1"></i>Réclamé</button>'
+            status_html = '<span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Réclamé</span>'
+            action_html = (
+                f'<button class="btn btn-sm btn-outline-primary" '
+                f'hx-post="{toggle_url}" hx-swap="none" '
+                f'hx-confirm="Voulez-vous marquer ce prix comme non réclamé ?" '
+                f'title="Marquer en attente">'
+                f'<i class="fa-solid fa-clock me-1"></i>Marquer comme non réclamé</button>'
             )
         else:
-            status_html = (
-                f'<button class="btn btn-sm btn-warning" '
-                f'hx-post="{reverse("dashboard:etablissement:roulette:toggle_spin_status", args=[spin.id])}" '
-                f'hx-swap="none" title="Cliquer pour marquer réclamé">'
-                f'<i class="fa-solid fa-clock me-1"></i>En attente</button>'
+            status_html = '<span class="badge bg-warning"><i class="fa-solid fa-clock me-1"></i>En attente</span>'
+            action_html = (
+                f'<button class="btn btn-sm btn-outline-primary" '
+                f'hx-post="{toggle_url}" hx-swap="none" '
+                f'hx-confirm="Voulez-vous marquer ce prix comme réclamé ?" '
+                f'title="Marquer réclamé">'
+                f'<i class="fa-solid fa-check me-1"></i>Marquer comme réclamé</button>'
             )
 
         rows.append(
@@ -150,6 +162,11 @@ def historique_content_partial(request):
                     "type": "html",
                     "value": status_html,
                     "sort_value": 1 if spin.is_used else 0,
+                    "centered": True,
+                },
+                "actions": {
+                    "type": "html",
+                    "value": action_html,
                     "centered": True,
                 },
             }
