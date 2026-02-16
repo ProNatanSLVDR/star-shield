@@ -4,6 +4,7 @@ import stripe
 from allauth.account.decorators import reverse
 from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_http_methods, require_POST
 
@@ -633,7 +634,12 @@ def toggle_etablissement_status(request, id):
                 if form.is_valid():
                     request.session["price_id"] = form.cleaned_data["price_id"]
                     request.session["etablissement_id"] = etablissement.id
-                    return redirect("payments:create_checkout_session")
+                    checkout_url = reverse("payments:create_checkout_session")
+                    if request.htmx:
+                        response = HttpResponse()
+                        response["HX-Redirect"] = checkout_url
+                        return response
+                    return redirect(checkout_url)
                 logger.debug(f"ToggleEtablissementStatusForm errors: {form.errors}")
                 messages.error(request, "Une erreur est survenue lors de la sélection du plan d'abonnement.")
 
@@ -656,4 +662,9 @@ def toggle_etablissement_status(request, id):
         logger.error(f"Error toggling etablissement {etablissement.id} status: {e}")
         messages.error(request, "Une erreur est survenue.")
 
-    return redirect("dashboard:etablissements:list")
+    redirect_url = reverse("dashboard:etablissements:list")
+    if request.htmx:
+        response = HttpResponse()
+        response["HX-Redirect"] = redirect_url
+        return response
+    return redirect(redirect_url)
