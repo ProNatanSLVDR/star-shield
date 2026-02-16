@@ -48,20 +48,28 @@
             </div>
             <div class="w-100 mb-3">
                 <div class="rounded-4 border bg-white shadow-sm p-1 p-md-3 row g-0">
-                    <div class="col-12 col-xl-12 p-2 h-100">
-                        <div class="bg-body-tertiary rounded-4 p-3 h-100 d-flex flex-column">
+                    <div class="col-12 col-xl-6 p-2 d-flex">
+                        <div class="bg-body-tertiary rounded-4 p-3 d-flex flex-column flex-fill">
                             <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-                                <h3 class="h6 fw-semibold mb-0">Répartition des notes</h3>
-                                <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">{{ total_reviews }} avis</span>
+                                <h3 class="h6 fw-semibold mb-0">
+                                    Répartition des notes
+                                </h3>
+                                <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">
+                                    {{ total_reviews }} avis
+                                </span>
                             </div>
                             {% if rating_distribution %}
-                                <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-center"
+                                <div class="d-flex flex-column gap-2 flex-grow-1 justify-content-evenly"
                                      style="min-height: 0">
                                     {% for item in rating_distribution %}
                                         <div>
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <span class="fw-semibold small">{{ item.rating }}★</span>
-                                                <span class="text-muted small">{{ item.count }} avis</span>
+                                                <span class="fw-semibold small">
+                                                    {{ item.rating }}★
+                                                </span>
+                                                <span class="text-muted small">
+                                                    {{ item.count }} avis
+                                                </span>
                                             </div>
                                             {% widthratio item.google_count total_reviews 100 as google_percentage %}
                                             {% widthratio item.internal_count total_reviews 100 as internal_percentage %}
@@ -95,9 +103,37 @@
                                 </div>
                             {% else %}
                                 <div class="d-flex align-items-center justify-content-center flex-grow-1">
-                                    <p class="text-muted mb-0 small">Aucunes données pour le moment.</p>
+                                    <p class="text-muted mb-0 small">
+                                        Aucunes données pour le moment.
+                                    </p>
                                 </div>
                             {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-6 p-2 d-flex">
+                        <div class="bg-body-tertiary rounded-4 p-3 d-flex flex-column flex-fill">
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                                <h3 class="h6 fw-semibold mb-0">
+                                    Avis par semaine
+                                </h3>
+                                <div class="d-flex gap-2">
+                                    <span class="badge rounded-pill"
+                                          style="background-color: rgba(25, 135, 84, 0.15);
+                                                 color: #198754">
+                                        Google
+                                    </span>
+                                    <span class="badge rounded-pill"
+                                          style="background-color: rgba(13, 110, 253, 0.15);
+                                                 color: #0d6efd">
+                                        Interne
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1"
+                                 style="min-height: 200px">
+                                <canvas id="weeklyReviewsChart"
+                                        class="w-100 h-100"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -363,6 +399,95 @@
                                             return label + ' (' + reviewCount + ' avis)';
                                         }
                                         return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })();
+
+            (function() {
+                const canvas = document.getElementById('weeklyReviewsChart');
+                if (!canvas) {
+                    return;
+                }
+
+                let weeklyData;
+                try {
+                    weeklyData = JSON.parse('{{ weekly_reviews_json|escapejs }}');
+                } catch (error) {
+                    console.error('Unable to parse weekly reviews payload', error);
+                    return;
+                }
+
+                if (!weeklyData || !weeklyData.length) {
+                    const context = canvas.getContext('2d');
+                    if (!context) {
+                        return;
+                    }
+                    context.font = '14px "Inter", system-ui';
+                    context.fillStyle = '#6c757d';
+                    context.textAlign = 'center';
+                    context.fillText('Aucune donnée disponible.', canvas.width / 2, canvas.height / 2);
+                    return;
+                }
+
+                const labels = weeklyData.map(function(d) { return d.week_label; });
+                const googleCounts = weeklyData.map(function(d) { return d.google_count; });
+                const internalCounts = weeklyData.map(function(d) { return d.internal_count; });
+
+                new window.Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Google',
+                                data: googleCounts,
+                                backgroundColor: '#198754',
+                                borderRadius: 4,
+                            },
+                            {
+                                label: 'Interne',
+                                data: internalCounts,
+                                backgroundColor: '#0d6efd',
+                                borderRadius: 4,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { display: false },
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    precision: 0,
+                                },
+                                grid: {
+                                    color: 'rgba(108, 117, 125, 0.15)',
+                                },
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        if (!context.length) {
+                                            return '';
+                                        }
+                                        return 'Semaine du ' + context[0].label;
+                                    },
+                                    label: function(context) {
+                                        return context.dataset.label + ' : ' + context.raw + ' avis';
                                     }
                                 }
                             }

@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Case, Count, IntegerField, Q, When
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, TruncWeek
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -175,6 +175,27 @@ def stats_view(request):
             }
         )
 
+    # Weekly reviews aggregation (last 12 weeks)
+    twelve_weeks_ago = timezone.now() - timedelta(weeks=12)
+    weekly_reviews_qs = (
+        reviews_queryset.filter(writen_at__isnull=False, writen_at__gte=twelve_weeks_ago)
+        .annotate(week=TruncWeek("writen_at"))
+        .values("week")
+        .annotate(
+            google_count=Count("id", filter=Q(source="google")),
+            internal_count=Count("id", filter=Q(source="internal")),
+        )
+        .order_by("week")
+    )
+    weekly_reviews_data = [
+        {
+            "week_label": entry["week"].strftime("%d %b"),
+            "google_count": entry["google_count"],
+            "internal_count": entry["internal_count"],
+        }
+        for entry in weekly_reviews_qs
+    ]
+
     # Analytics stats from ReviewAnalytics
     analytics_queryset = ReviewAnalytics.objects.filter(etablissement=etablissement)
     qr_page_visits = analytics_queryset.filter(type="feedback_viewed").count()
@@ -306,6 +327,7 @@ def stats_view(request):
         "rating_distribution": rating_distribution,
         "qr_codes_stats": qr_codes_stats,
         "roulette_stats": roulette_stats,
+        "weekly_reviews_json": json.dumps(weekly_reviews_data),
     }
 
     return starshield_render(
