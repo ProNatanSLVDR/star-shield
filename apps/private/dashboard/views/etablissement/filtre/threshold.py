@@ -44,6 +44,7 @@ def threshold_settings_view(request):
         "form": form,
         "current_rating": current_rating,
         "total_reviews": total_reviews,
+        "target_rating": float(etablissement.target_rating),
     }
 
     return starshield_render(

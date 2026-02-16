@@ -14,9 +14,10 @@
             title="Seuil de redirection"
             subtitle="Trouvez le seuil de redirection optimal pour optimiser la collecte d'avis de votre établissement."
             icon="fa-solid fa-star-half-stroke"
-        %}
+            %}
             {% fill "actions" %}
-                {% component "feature_toggle" feature_name="Filtrage" icon="fa-solid fa-filter" feature_field="review_filtering_enabled" feature_enabled=request.etablissement.review_filtering_enabled %}{% endcomponent %}
+                {% component "feature_toggle" feature_name="Filtrage" icon="fa-solid fa-filter" feature_field="review_filtering_enabled" feature_enabled=request.etablissement.review_filtering_enabled %}
+                {% endcomponent %}
             {% endfill %}
         {% endcomponent %}
         <div class="row g-3">
@@ -147,7 +148,9 @@
                                         <label class="btn btn-outline-primary flex-fill d-flex align-items-center justify-content-center py-3"
                                                for="threshold_{{ value }}"
                                                style="font-size: 1.1rem;
-                                                      font-weight: 600">{{ label }}</label>
+                                                      font-weight: 600">
+                                            {{ label }}
+                                        </label>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -186,7 +189,9 @@
                                     <span id="notes_per_week_display">20</span>
                                 </div>
                             </div>
-                            <div class="form-text">Nombre d'avis reçus par semaine pour le calcul des estimations.</div>
+                            <div class="form-text">
+                                Nombre d'avis reçus par semaine pour le calcul des estimations.
+                            </div>
                         </div>
                         <div class="pt-3 border-top d-flex flex-column flex-grow-1"
                              style="min-height: 0">
@@ -212,6 +217,13 @@
                                         </span>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                        <span class="text-muted">Objectif cible:</span>
+                                        <span class="fw-bold">
+                                            {{ target_rating|stringformat:'.1f' }}
+                                            <i class="fa-solid fa-star text-warning ms-1"></i>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
                                         <span class="text-muted">Total avis:</span>
                                         <span class="fw-bold"
                                               id="total-reviews-display">
@@ -232,7 +244,7 @@
                                 <div class="card border-primary d-flex flex-column shadow-sm w-100"
                                      style="border-width: 2px">
                                     <!-- Main Estimation -->
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center p-3">
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center p-2">
                                         <div class="row">
                                             <div class="col-3 d-flex justify-content-center align-items-center">
                                                 <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10"
@@ -245,35 +257,57 @@
                                             </div>
                                             <div class="col d-flex flex-column justify-content-center">
                                                 <div class="h6 fw-bold text-primary mb-1"
-                                                     id="selected-threshold-label">-</div>
+                                                     id="selected-threshold-label">
+                                                    -
+                                                </div>
                                                 <div class="h3 fw-bold text-primary mb-0"
-                                                     id="selected-threshold-weeks">-</div>
+                                                     id="selected-threshold-weeks">
+                                                    -
+                                                </div>
                                                 <div class="text-muted small mb-0"
-                                                     style="font-size: 0.75rem">pour atteindre l'objectif</div>
+                                                     style="font-size: 0.75rem"
+                                                     id="selected-threshold-subtext">
+                                                    estimation pour atteindre {{ target_rating|stringformat:'.1f' }} ★
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <!-- Footer with Other Thresholds -->
                                     <div class="card-footer bg-white border-top p-3 pt-1">
-                                        <div class="text-muted small text-center mb-3">Estimations supplémentaires</div>
+                                        <div class="text-muted small text-center mb-3">
+                                            Estimations supplémentaires
+                                        </div>
                                         <div class="row g-2">
                                             <div class="col-6 border-end pe-3 text-center">
                                                 <div class="text-muted small mb-1"
-                                                     id="other-threshold-1-label">-</div>
+                                                     id="other-threshold-1-label">
+                                                    -
+                                                </div>
                                                 <div class="fw-bold text-primary opacity-75"
-                                                     id="other-threshold-1">-</div>
+                                                     id="other-threshold-1">
+                                                    -
+                                                </div>
                                             </div>
                                             <div class="col-6 ps-3 text-center">
                                                 <div class="text-muted small mb-1"
-                                                     id="other-threshold-2-label">-</div>
+                                                     id="other-threshold-2-label">
+                                                    -
+                                                </div>
                                                 <div class="fw-bold text-primary opacity-75"
-                                                     id="other-threshold-2">-</div>
+                                                     id="other-threshold-2">
+                                                    -
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <p class="text-muted small mb-0 mt-auto pt-3"
+                           style="font-size: 0.75rem">
+                            <i class="fa-solid fa-circle-info me-1"></i>
+                            Ces estimations sont des prévisions basées sur les données actuelle et peuvent varier.
+                        </p>
                     {% endslot %}
                 {% endcomponent %}
             </div>
@@ -293,6 +327,7 @@
             // Current rating and total reviews from backend
             const CURRENT_RATING = {% if current_rating %}{{ current_rating|stringformat:'.2f' }}{% else %}null{% endif %};
             const TOTAL_REVIEWS = {% if total_reviews %}{{ total_reviews }}{% else %}0{% endif %};
+            const TARGET_RATING = {{ target_rating|stringformat:'.1f' }};
 
             // Distribution notes matching utils.py
             const DISTRIBUTION_NOTES = {
@@ -411,7 +446,7 @@
                     return 'Plus de 5 ans';
                 }
                 if (weeks === 0) {
-                    return 'Déjà atteint';
+                    return 'Objectif déjà atteint';
                 }
 
                 const WEEKS_PER_YEAR = 52;
@@ -480,14 +515,24 @@
 
                 const selectedThreshold = parseThreshold(checkedRadio.value);
                 const notesPerWeek = parseInt(notesPerWeekSlider.value, 10);
-                const targetRating = {% if etablissement.target_rating %}{{ etablissement.target_rating|stringformat:'.1f' }}{% else %} 3.5 {% endif %};
-
                 // Calculate estimations
-                const results = estimations(CURRENT_RATING, TOTAL_REVIEWS, targetRating, notesPerWeek);
+                const results = estimations(CURRENT_RATING, TOTAL_REVIEWS, TARGET_RATING, notesPerWeek);
 
                 // Display selected threshold prominently
                 const selectedWeeks = results[`at_threshold_${selectedThreshold}`];
-                document.getElementById('selected-threshold-weeks').textContent = formatWeeks(selectedWeeks);
+                const weeksEl = document.getElementById('selected-threshold-weeks');
+                const subtextEl = document.getElementById('selected-threshold-subtext');
+                weeksEl.textContent = formatWeeks(selectedWeeks);
+
+                if (selectedWeeks === 0) {
+                    subtextEl.textContent = 'Votre note actuelle (' + CURRENT_RATING.toFixed(2) + ') dépasse déjà l\'objectif de ' + TARGET_RATING.toFixed(1) + ' ★';
+                    weeksEl.classList.remove('text-primary');
+                    weeksEl.classList.add('text-success');
+                } else {
+                    subtextEl.textContent = 'estimation pour atteindre ' + TARGET_RATING.toFixed(1) + ' ★';
+                    weeksEl.classList.remove('text-success');
+                    weeksEl.classList.add('text-primary');
+                }
 
                 // Display other thresholds as small info
                 const otherThresholds = [3, 4, 5].filter(t => t !== selectedThreshold);
