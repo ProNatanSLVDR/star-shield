@@ -99,13 +99,15 @@
             </a>
         </div>
     {% endif %}
-    <div class="text-center mt-4">
-        <a href="{% url 'roulette:wheel' identifier %}"
-           class="btn btn-outline-secondary">
-            <i class="fa-solid fa-arrow-left me-2"></i>
-            Retour à la roue
-        </a>
-    </div>
+    {% if request.user.is_authenticated %}
+        <div class="text-center mt-4">
+            <a href="{% url 'dashboard:etablissement:roulette:roulette' %}"
+               class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Paramètres et Prix
+            </a>
+        </div>
+    {% endif %}
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
