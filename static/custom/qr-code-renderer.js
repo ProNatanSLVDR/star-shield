@@ -29,6 +29,7 @@ class QRCodeRenderer {
     this.container = container;
     this.options = options;
     this.qrCode = null;
+    this._renderVersion = 0;
   }
 
   _buildGradient(colorMask, fillColor, fillColorSecondary) {
@@ -142,17 +143,17 @@ class QRCodeRenderer {
   }
 
   _drawBadgeAfterRender() {
-    // Wait for canvas to be drawn, then overlay the badge
-    const check = () => {
+    const renderVersion = ++this._renderVersion;
+
+    const drawBadge = () => {
+      if (this._renderVersion !== renderVersion) return;
       const canvas = this.container.querySelector("canvas");
-      if (!canvas) {
-        requestAnimationFrame(check);
-        return;
-      }
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
+        if (this._renderVersion !== renderVersion) return;
         const badgeSize = Math.round(canvas.width * 0.05);
         const margin = Math.round(canvas.width * 0.02);
         const x = canvas.width - badgeSize - margin;
@@ -161,8 +162,8 @@ class QRCodeRenderer {
       };
       img.src = this.options.badgeUrl;
     };
-    // Small delay to let qr-code-styling finish rendering
-    setTimeout(check, 50);
+
+    this.qrCode.getRawData("png").then(drawBadge).catch(drawBadge);
   }
 
   update(newOptions) {
