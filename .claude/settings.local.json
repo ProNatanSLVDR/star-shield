@@ -16,7 +16,10 @@
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "mcp__plugin_playwright_playwright__browser_install",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_close"
     ]
   },
   "outputStyle": "default"
