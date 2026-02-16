@@ -105,16 +105,39 @@ class QRCodeRenderer {
   }
 
   render() {
-    // Clear previous render
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
     }
+
+    // Phase 1: render without logo so the QR appears instantly
     const opts = this._buildQROptions();
+    const logoUrl = opts.image;
+    delete opts.image;
+    delete opts.imageOptions;
+
     this.qrCode = new QRCodeStyling(opts);
     this.qrCode.append(this.container);
 
     if (this.options.showBadge && this.options.badgeUrl) {
       this._drawBadgeAfterRender();
+    }
+
+    // Phase 2: pre-load logo, re-render with it on success
+    if (logoUrl) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const fullOpts = this._buildQROptions();
+        this.qrCode = new QRCodeStyling(fullOpts);
+        while (this.container.firstChild) {
+          this.container.removeChild(this.container.firstChild);
+        }
+        this.qrCode.append(this.container);
+        if (this.options.showBadge && this.options.badgeUrl) {
+          this._drawBadgeAfterRender();
+        }
+      };
+      img.src = logoUrl;
     }
   }
 
