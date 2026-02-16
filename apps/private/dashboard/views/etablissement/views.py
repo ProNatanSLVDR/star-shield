@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+
 from apps.private.auths.models import WeeklyPerformanceSummary
 from apps.private.dashboard.render import starshield_render
 from apps.public.reviews.models import Review, ReviewAnalytics
@@ -77,12 +78,15 @@ def overview_view(request):
         etablissement=etablissement,
     ).first()
 
+    details_url = reverse("dashboard:etablissements:details_partial", args=[etablissement.id])
+
     context = {
         "etablissement": etablissement,
         "starshield_feedback_url": reverse("dashboard:etablissement:qrcodes"),
         "general_stats": general_stats,
         "latest_reviews": list(latest_reviews),
         "weekly_summary": weekly_summary,
+        "details_url": details_url,
     }
 
     return starshield_render(

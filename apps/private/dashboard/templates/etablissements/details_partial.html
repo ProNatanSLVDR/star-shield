@@ -146,43 +146,81 @@
                 </div>
             </div>
         </div>
-        <!-- Section 2: Fonctionnalites actives -->
+        <!-- Section 2: Paramètres -->
         <div class="col-md-5">
             <div class="h-100 d-flex flex-column">
                 <h6 class="fw-bold text-muted text-uppercase small mb-3">
-                    <i class="fa-solid fa-toggle-on me-1"></i>
-                    Fonctionnalités actives
+                    <i class="fa-solid fa-gear me-1"></i>
+                    Paramètres
                 </h6>
-                <div class="card mb-3">
-                    <div class="list-group list-group-flush">
-                        {% for feature in features %}
-                            <div class="list-group-item d-flex align-items-center gap-3 py-3">
-                                <div class="flex-grow-1">
-                                    <i class="{{ feature.icon }} me-1
-                                              {% if feature.enabled %}
-                                                  text-dark
-                                              {% else %}
-                                                  text-muted
-                                              {% endif %}"></i>
-                                    <span class="{% if not feature.enabled %}
-                                                     text-muted
-                                                 {% endif %}">
-                                        {{ feature.label }}
-                                    </span>
+                <div class="card flex-grow-1">
+                    <div class="card-body p-3">
+                        <form method="post"
+                              hx-post="{{ details_url }}"
+                              hx-target="closest [id$='-inner-content']"
+                              hx-swap="innerHTML">
+                            {% csrf_token %}
+                            {% if settings_form.errors %}
+                                <div class="alert alert-danger p-2 small"
+                                     role="alert">
+                                    {% for field, errors in settings_form.errors.items %}
+                                        {% for error in errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    {% endfor %}
                                 </div>
-                                {% if feature.enabled %}
-                                    <span class="badge bg-success-subtle text-success">Activé</span>
-                                {% else %}
-                                    <span class="badge bg-body-secondary text-muted">Désactivé</span>
-                                {% endif %}
+                            {% endif %}
+                            <div class="mb-3">
+                                <label for="id_title"
+                                       class="form-label fw-semibold small">
+                                    Nom de l'établissement
+                                </label>
+                                <input type="text"
+                                       class="form-control form-control-sm"
+                                       id="id_title"
+                                       name="title"
+                                       value="{{ settings_form.title.value }}"
+                                       maxlength="255"
+                                       required>
                             </div>
-                        {% endfor %}
+                            <div class="mb-3">
+                                <label for="id_target_rating"
+                                       class="form-label fw-semibold small">
+                                    <i class="fa-solid fa-bullseye me-1"></i>
+                                    Objectif
+                                </label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="range"
+                                           class="form-range flex-grow-1"
+                                           id="id_target_rating"
+                                           name="target_rating"
+                                           value="{{ settings_form.target_rating.value|default:'3.5'|stringformat:'.1f' }}"
+                                           step="0.1"
+                                           min="3.5"
+                                           max="4.9">
+                                    <div class="text-primary fw-bold d-flex align-items-center gap-1"
+                                         style="min-width: 50px;
+                                                justify-content: center">
+                                        <span id="target_rating_display">
+                                            {{ settings_form.target_rating.value|default:'3.5'|stringformat:'.1f' }}
+                                        </span>
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="form-text small">
+                                    Note cible à atteindre.
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit"
+                                        class="btn btn-sm btn-primary w-100">
+                                    <i class="fa-solid fa-save"></i>
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <hr class="mt-auto opacity-25">
-                <p class="small text-muted mb-0">
-                    Pour modifier les fonctionnalités activées, sélectionnez l'établissement dans la barre latérale.
-                </p>
             </div>
         </div>
     </div>
@@ -224,3 +262,14 @@
         </div>
     </div>
 </div>
+<script>
+    (function() {
+        var slider = document.getElementById("id_target_rating");
+        var display = document.getElementById("target_rating_display");
+        if (slider && display) {
+            slider.addEventListener("input", function() {
+                display.textContent = parseFloat(this.value).toFixed(1);
+            });
+        }
+    })();
+</script>

@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.private.auths.models import Etablissement
 from apps.private.dashboard.render import starshield_render
+from apps.private.dashboard.views.etablissement.settings.forms import EtablissementSettingsForm
 from apps.private.payments.services import (
     cancel_subscription_for_etablissement,
     check_existing_subscription_for_etablissement,
@@ -76,14 +77,15 @@ def list_etablissements_view(request):
         if not subscription:
             subscription_badge = {
                 "type": "badge",
-                "value": "Aucun abonnement",
-                "variant": "secondary",
-                "icon": "fa-solid fa-circle",
+                "value": "Non abonné",
+                "variant": "danger",
+                "icon": "fa-solid fa-circle-xmark",
+                "tooltip": "Cliquez sur 'Gérer' pour souscrire à un abonnement",
             }
         elif subscription.cancel_at_period_end:
             subscription_badge = {
                 "type": "badge",
-                "value": "Actif (annulation)",
+                "value": "Abonné (annulation)",
                 "variant": "warning",
                 "icon": "fa-solid fa-clock",
                 "tooltip": "L'abonnement sera annulé à la fin de la période en cours",
@@ -91,9 +93,10 @@ def list_etablissements_view(request):
         else:
             subscription_badge = {
                 "type": "badge",
-                "value": "Actif",
+                "value": "Abonné",
                 "variant": "success",
                 "icon": "fa-solid fa-check-circle",
+                "tooltip": "L'abonnement est actif, merci de votre fidélité !",
             }
 
         # Date formatting with tooltip
@@ -170,9 +173,11 @@ def list_etablissements_view(request):
 
 
 @google_gmb_connected_required
+@require_http_methods(["GET", "POST"])
 def etablissement_details_partial(request, id):
     """
-    Show establishment details modal with subscription status, features, and actions.
+    Show establishment details modal with subscription status, settings form, and actions.
+    On POST: save settings (title, target_rating) and re-render the modal.
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
     # Determine subscription state
@@ -205,24 +210,24 @@ def etablissement_details_partial(request, id):
         except Exception as e:
             logger.error(f"Error fetching subscription for etablissement {etablissement.id}: {e}")
 
-    # Features
-    features = [
-        {
-            "label": "Filtrage des avis",
-            "enabled": etablissement.review_filtering_enabled and etablissement.active,
-            "icon": "fa-solid fa-filter",
-        },
-        {
-            "label": "Roulette",
-            "enabled": etablissement.roulette_enabled and etablissement.active,
-            "icon": "fa-solid fa-record-vinyl",
-        },
-        {
-            "label": "Réponses IA",
-            "enabled": etablissement.ai_responses_enabled and etablissement.active,
-            "icon": "fa-solid fa-robot",
-        },
-    ]
+    # Settings form (POST = save, GET = prefill)
+    hx_triggers = {}
+    if request.method == "POST":
+        settings_form = EtablissementSettingsForm(request.POST)
+        if settings_form.is_valid():
+            etablissement.title = settings_form.cleaned_data["title"]
+            etablissement.target_rating = settings_form.cleaned_data.get("target_rating")
+            etablissement.save(update_fields=["title", "target_rating"])
+            messages.success(request, "Paramètres mis à jour avec succès.")
+            hx_triggers["etablissements-updated"] = True
+            # Re-populate form with saved values
+            settings_form = EtablissementSettingsForm(
+                initial={"title": etablissement.title, "target_rating": etablissement.target_rating}
+            )
+    else:
+        settings_form = EtablissementSettingsForm(
+            initial={"title": etablissement.title, "target_rating": etablissement.target_rating}
+        )
 
     # Build subscription_data for template
 
@@ -251,15 +256,17 @@ def etablissement_details_partial(request, id):
         if items_data.get("created"):
             subscription_data["created"] = datetime.fromtimestamp(items_data["created"])
 
+    details_url = reverse("dashboard:etablissements:details_partial", args=[etablissement.id])
     context = {
         "etablissement": etablissement,
         "subscription_data": subscription_data,
-        "features": features,
+        "settings_form": settings_form,
+        "details_url": details_url,
         "toggle_status_url": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
         "delete_url": reverse("dashboard:etablissements:delete_partial", args=[etablissement.id]),
     }
 
-    return starshield_render(request, "etablissements/details_partial.html", context=context)
+    return starshield_render(request, "etablissements/details_partial.html", context=context, hx_triggers=hx_triggers)
 
 
 @google_gmb_connected_required

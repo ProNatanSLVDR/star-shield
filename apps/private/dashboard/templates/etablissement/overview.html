@@ -162,11 +162,16 @@
                                 Gérez les paramètres généraux de votre établissement
                             </p>
                         </div>
-                        <a href="{% url 'dashboard:etablissement:settings:settings' %}"
-                           class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold">
+                        <button type="button"
+                                class="btn btn-primary rounded-pill d-inline-flex align-items-center gap-2 px-4 py-2 fw-semibold"
+                                hx-get="{{ details_url }}"
+                                hx-target="#settingsModal-inner-content"
+                                hx-swap="innerHTML"
+                                data-bs-toggle="modal"
+                                data-bs-target="#settingsModal">
                             <i class="fa-solid fa-gear"></i>
                             <span>Accéder aux paramètres</span>
-                        </a>
+                        </button>
                     </div>
                 {% endslot %}
             {% endcomponent %}
@@ -204,6 +209,15 @@
             {% endcomponent %}
         </div>
     </div>
+    {% component "empty_modal"
+        modal_id="settingsModal"
+        size="lg"
+        %}
+        {% fill "title" %}
+            <i class="fa-solid fa-building me-2"></i>
+            Détails de l'établissement
+        {% endfill %}
+    {% endcomponent %}
     {% if weekly_summary %}
         {% component "empty_modal" modal_id="shieldyReportModal" size="lg" %}
             {% fill "title" %}
