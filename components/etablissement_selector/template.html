@@ -21,7 +21,7 @@
         {% if request.etablissement %}
             {{ request.etablissement|truncatechars:25 }}
         {% else %}
-            Aucun
+            {{ etablissement_count }} disponible{{ etablissement_count|pluralize:"s" }}
         {% endif %}
     </div>
 </div>
