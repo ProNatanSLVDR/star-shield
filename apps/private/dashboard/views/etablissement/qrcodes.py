@@ -24,7 +24,7 @@ def qr_code_management_view(request, short_code=None):
     etablissement = request.etablissement
 
     # Get all QR codes for this establishment
-    qr_codes = etablissement.qr_codes.all()
+    qr_codes = etablissement.qr_codes.order_by("-locked", "id")
 
     # Get selected QR code from short_code path parameter
     selected_qr_code = None
