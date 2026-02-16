@@ -107,7 +107,7 @@
                                        class="form-control"
                                        id="review_page_label"
                                        name="review_page_label"
-                                       value="{{ form.review_page_label.value|default:etablissement.review_page_label }}"
+                                       value="{{ form.review_page_label.value|default_if_none:'' }}"
                                        placeholder="{{ etablissement.title }}"
                                        maxlength="255">
                                 <div class="form-text">

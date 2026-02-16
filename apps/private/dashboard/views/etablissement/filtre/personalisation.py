@@ -102,8 +102,8 @@ def personalisation_settings_view(request):
             initial={
                 "review_accent_color": etablissement.review_accent_color,
                 "review_show_etablissement_pill": etablissement.review_show_etablissement_pill,
-                "review_page_label": etablissement.review_page_label,
-                "review_page_text": etablissement.review_page_text,
+                "review_page_label": etablissement.review_page_label or "",
+                "review_page_text": etablissement.review_page_text or "",
             }
         )
 
