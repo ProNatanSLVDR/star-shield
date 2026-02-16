@@ -150,28 +150,7 @@ def stats_view(request):
     if etablissement.target_rating is not None:
         goal_rating = float(etablissement.target_rating)
 
-    goal_projection_points: list[dict] = []
-    if goal_rating is not None:
-        origin_date = today
-
-        start_rating = goal_rating
-        if current_rating is not None and rating_history_points:
-            last_point_date = datetime.strptime(rating_history_points[-1]["date"], "%Y-%m-%d").date()
-            origin_date = last_point_date
-            start_rating = current_rating
-
-        projected_goal_date = origin_date + timedelta(days=30 * 6)
-
-        goal_projection_points = [
-            {
-                "date": origin_date.strftime("%Y-%m-%d"),
-                "rating": float(start_rating),
-            },
-            {
-                "date": projected_goal_date.strftime("%Y-%m-%d"),
-                "rating": goal_rating,
-            },
-        ]
+    # goal_rating is passed directly to the chart as a horizontal line value
 
     reviews_queryset = Review.objects.filter(etablissement=etablissement)
     ordered_reviews = reviews_queryset.order_by("-writen_at", "-created_at")
@@ -220,7 +199,7 @@ def stats_view(request):
 
     chart_payload = {
         "history": rating_history_points,
-        "goal": goal_projection_points,
+        "goal": goal_rating,
     }
 
     stats_items = [
