@@ -218,6 +218,11 @@
             Détails de l'établissement
         {% endfill %}
     {% endcomponent %}
+    {% component "empty_modal"
+        modal_id="dynamicModal2"
+        size="lg"
+        %}
+    {% endcomponent %}
     {% if weekly_summary %}
         {% component "empty_modal" modal_id="shieldyReportModal" size="lg" %}
             {% fill "title" %}
