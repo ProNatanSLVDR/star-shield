@@ -1,0 +1,219 @@
+{% load component_tags %}
+<style>
+    .list-group {
+        width: 100%;
+    }
+
+    .list-group-checkable .list-group-item {
+        cursor: pointer;
+    }
+
+    .list-group-item-check {
+        position: absolute;
+        clip: rect(0, 0, 0, 0);
+    }
+
+    .list-group-item-check:hover + .list-group-item {
+        background-color: var(--bs-secondary-bg);
+    }
+
+    .list-group-item-check:checked + .list-group-item {
+        color: #fff;
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+
+    .list-group-item-check[disabled] + .list-group-item,
+    .list-group-item-check:disabled + .list-group-item {
+        pointer-events: none;
+        filter: none;
+        opacity: .5;
+    }
+</style>
+<div class="modal-header border-bottom">
+    <h5 class="modal-title fw-bold text-dark mb-0">
+        <i class="fa-solid fa-arrow-right-arrow-left pe-2"></i>
+        Changer de plan
+    </h5>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"></button>
+</div>
+<form method="post"
+      action="{{ change_plan_url }}"
+      id="change-plan-form"
+      class="w-100">
+    {% csrf_token %}
+    <div class="modal-body p-4">
+        {% if etablissement %}
+            <!-- Establishment Information Card -->
+            <div class="card mb-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center
+                                flex-wrap gap-3">
+                        <i class="fa-solid fa-building
+                                  text-primary"></i>
+                        <h6 class="mb-0 fw-bold fs-6">
+                            {{ etablissement.title }}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+            <h6 class="mb-4 fw-semibold">
+                Sélectionnez votre nouveau plan
+            </h6>
+            <div class="list-group list-group-checkable
+                        d-flex flex-column flex-md-row
+                        gap-3 border-0 w-100">
+                {% for price in prices %}
+                    <div class="flex-fill position-relative">
+                        {% if price.is_current %}
+                            <span class="badge bg-secondary
+                                         position-absolute
+                                         border
+                                         border-secondary-subtle
+                                         top-0 start-50
+                                         translate-middle
+                                         px-3 py-1"
+                                  style="z-index: 1">
+                                Plan actuel
+                            </span>
+                        {% elif price.is_pending %}
+                            <span class="badge bg-primary
+                                         position-absolute
+                                         border
+                                         border-primary-subtle
+                                         top-0 start-50
+                                         translate-middle
+                                         px-3 py-1"
+                                  style="z-index: 1">
+                                <i class="fa-solid fa-clock me-1"></i>
+                                Prochain
+                            </span>
+                        {% endif %}
+                        <input class="list-group-item-check pe-none"
+                               type="radio"
+                               name="price_id"
+                               id="price_{{ forloop.counter }}"
+                               value="{{ price.id }}"
+                               data-is-current="{{ price.is_current|yesno:'true,false' }}"
+                               data-is-pending="{{ price.is_pending|yesno:'true,false' }}"
+                               {% if price.is_current and not has_pending_change %}
+                                   disabled
+                               {% endif %}>
+                        <label class="list-group-item
+                                      rounded-3 py-3"
+                               for="price_{{ forloop.counter }}">
+                            <div class="text-center">
+                                <div class="d-flex
+                                            align-items-center
+                                            justify-content-center
+                                            gap-2 mb-1">
+                                    <i class="{{ price.icon }}"></i>
+                                    <strong>
+                                        {{ price.label }}
+                                    </strong>
+                                </div>
+                                {% if price.full_price %}
+                                    <span class="text-decoration-line-through
+                                                 opacity-50">
+                                        {{ price.full_price|floatformat:2 }}
+                                    </span>
+                                    <span class="badge bg-success ms-1">
+                                        -{{ price.savings_percent }}%
+                                    </span>
+                                {% endif %}
+                                <span class="fw-bold fs-4 d-block">
+                                    {{ price.amount|floatformat:2 }}
+                                </span>
+                                <span class="text-muted small">
+                                    {% if price.currency == "EUR" %}
+                                        €
+                                    {% else %}
+                                        {{ price.currency }}
+                                    {% endif %}
+                                    {{ price.period_label }}
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% for price in prices %}
+                {% if price.is_pending %}
+                    <div class="alert alert-warning mt-4 mb-0">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fa-solid fa-clock mt-1"></i>
+                            <small class="mb-0">
+                                Un changement vers le plan
+                                <strong>{{ price.label }}</strong>
+                                est déjà programmé pour la
+                                prochaine période de facturation.
+                                Vous pouvez le remplacer en
+                                sélectionnant un autre plan.
+                            </small>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <div class="alert alert-info mt-4 mb-0">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="fa-solid fa-calendar-check mt-1"></i>
+                    <small class="mb-0">
+                        Le changement de plan prendra effet
+                        à la fin de votre période de facturation
+                        en cours. Vous continuerez à bénéficier
+                        de votre plan actuel jusqu'à cette date.
+                    </small>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-danger mb-0">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="fa-solid fa-circle-xmark mt-1"></i>
+                    <small class="mb-0">
+                        Aucun abonnement actif trouvé.
+                    </small>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% if etablissement %}
+        <div class="modal-footer border-top bg-light p-3">
+            {% component "button"
+                text="Confirmer le changement"
+                classes="btn-primary btn-lg w-100"
+                icon="fa-solid fa-arrow-right-arrow-left"
+                extra_kwargs={
+                "type": "submit",
+                "id": "change-plan-submit",
+                }
+                %}
+            {% endcomponent %}
+        </div>
+    {% endif %}
+</form>
+{% if etablissement %}
+    <script>
+        (function() {
+            var radios = document.querySelectorAll(
+                '#change-plan-form input[name="price_id"]:not([disabled])'
+            );
+            // Pre-select pending plan, or first non-current
+            var pending = document.querySelector(
+                '#change-plan-form input[data-is-pending="true"]'
+            );
+            if (pending) {
+                pending.checked = true;
+            } else {
+                for (var i = 0; i < radios.length; i++) {
+                    if (radios[i].dataset.isCurrent !== 'true') {
+                        radios[i].checked = true;
+                        break;
+                    }
+                }
+            }
+        })();
+    </script>
+{% endif %}

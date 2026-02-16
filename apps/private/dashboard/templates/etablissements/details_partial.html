@@ -69,6 +69,19 @@
                                     <strong>{{ subscription_data.current_period_start|date:"d/m/y" }} - {{ subscription_data.current_period_end|date:"d/m/y" }}</strong>
                                 </div>
                             </div>
+                            {% if subscription_data.pending_plan_label %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="small">
+                                        <i class="fa-solid fa-arrow-right-arrow-left me-1 text-muted"></i>
+                                        Prochain plan :
+                                    </div>
+                                    <div class="small d-flex align-items-center gap-1">
+                                        <span class="text-muted">{{ subscription_data.plan_label }}</span>
+                                        <i class="fa-solid fa-arrow-right text-primary" style="font-size: 0.6rem;"></i>
+                                        <strong class="text-primary">{{ subscription_data.pending_plan_label }}</strong>
+                                    </div>
+                                </div>
+                            {% endif %}
                             {% if subscription_data.status == "cancellation_pending" %}
                                 <div class="alert alert-warning p-2 my-2 small"
                                      role="alert">
@@ -83,7 +96,11 @@
                                         icon="fa-solid fa-arrow-right-arrow-left"
                                         classes="btn-sm btn-outline-primary w-100 mb-1"
                                         extra_kwargs={
-                                        "disabled": True,
+                                        "hx-get": change_plan_url,
+                                        "hx-target":
+                                        "#dynamicModal2 .modal-content",
+                                        "data-bs-toggle": "modal",
+                                        "data-bs-target": "#dynamicModal2",
                                         }
                                         %}
                                     {% endcomponent %}

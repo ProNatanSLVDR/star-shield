@@ -166,6 +166,103 @@ def reactivate_subscription_for_etablissement(user, etablissement_id):
         return None
 
 
+def change_plan_for_etablissement(user, etablissement_id, new_price_id):
+    """
+    Schedule a plan change for an etablissement at the end of the current billing period.
+    Uses Stripe Subscription Schedules. Returns True on success, None on failure.
+    """
+    if not user.stripe_customer_id:
+        logger.warning(f"Cannot change plan: User {user.id} has no stripe_customer_id")
+        return None
+
+    try:
+        subscription = check_existing_subscription_for_etablissement(user, etablissement_id)
+
+        if not subscription:
+            logger.warning(f"No subscription found for etablissement {etablissement_id}")
+            return None
+
+        subscription_id = subscription["id"]
+        subscription_status = subscription.get("status")
+
+        if subscription_status not in ("active", "trialing"):
+            logger.warning(f"Subscription {subscription_id} is not active (status: {subscription_status})")
+            return None
+
+        # Get current price
+        items_data = subscription.get("items", {}).get("data", [])
+        if not items_data:
+            logger.error(f"Subscription {subscription_id} has no items")
+            return None
+
+        current_item = items_data[0]
+        current_price_id = current_item.get("price", {}).get("id") or current_item.get("plan", {}).get("id")
+
+        if current_price_id == new_price_id:
+            # User selected their current plan — cancel any pending schedule
+            _release_existing_schedule(subscription_id, user.stripe_customer_id)
+            logger.info(f"Cancelled pending plan change for subscription {subscription_id}")
+            return "cancelled"
+
+        # Release any existing schedule before creating a new one
+        _release_existing_schedule(subscription_id, user.stripe_customer_id)
+
+        schedule = stripe.SubscriptionSchedule.create(from_subscription=subscription_id)
+        current_phase = schedule.phases[0]
+
+        stripe.SubscriptionSchedule.modify(
+            schedule.id,
+            end_behavior="release",
+            phases=[
+                {
+                    "items": [{"price": current_price_id}],
+                    "start_date": current_phase["start_date"],
+                    "end_date": current_phase["end_date"],
+                },
+                {
+                    "items": [{"price": new_price_id}],
+                },
+            ],
+        )
+        logger.info(f"Scheduled plan change for subscription {subscription_id} to price {new_price_id}")
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to change plan for etablissement {etablissement_id}: {e}")
+        return None
+
+
+def get_pending_plan_change(subscription_id, customer_id):
+    """
+    Check if a subscription has a pending plan change via a Subscription Schedule.
+    Returns the upcoming price_id or None.
+    """
+    try:
+        schedules = stripe.SubscriptionSchedule.list(customer=customer_id, limit=100)
+        for schedule in schedules.data:
+            if schedule.subscription == subscription_id and schedule.status == "active" and len(schedule.phases) > 1:
+                next_phase = schedule.phases[1]
+                items = next_phase.get("items", [])
+                if items:
+                    return items[0].get("price") or items[0].get("plan")
+    except Exception as e:
+        logger.error(f"Error checking pending plan change for subscription {subscription_id}: {e}")
+    return None
+
+
+def _release_existing_schedule(subscription_id, customer_id):
+    """Release any existing active subscription schedule before creating a new one."""
+    try:
+        schedules = stripe.SubscriptionSchedule.list(customer=customer_id, limit=100)
+        for schedule in schedules.data:
+            if schedule.subscription == subscription_id and schedule.status in ("active", "not_started"):
+                stripe.SubscriptionSchedule.release(schedule.id)
+                logger.info(f"Released existing schedule {schedule.id} for subscription {subscription_id}")
+                return
+    except Exception as e:
+        logger.error(f"Error releasing schedule for subscription {subscription_id}: {e}")
+
+
 def sync_stripe_data(user):
     """
     Sync subscription data from Stripe to the local database.

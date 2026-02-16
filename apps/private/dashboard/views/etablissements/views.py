@@ -13,7 +13,9 @@ from apps.private.dashboard.render import starshield_render
 from apps.private.dashboard.views.etablissement.settings.forms import EtablissementSettingsForm
 from apps.private.payments.services import (
     cancel_subscription_for_etablissement,
+    change_plan_for_etablissement,
     check_existing_subscription_for_etablissement,
+    get_pending_plan_change,
     reactivate_subscription_for_etablissement,
     sync_stripe_data,
 )
@@ -230,10 +232,23 @@ def etablissement_details_partial(request, id):
             initial={"title": etablissement.title, "target_rating": etablissement.target_rating}
         )
 
-    # Build subscription_data for template
+    # Check for pending plan change
+    pending_plan_label = ""
+    if stripe_subscription:
+        pending_price_id = get_pending_plan_change(stripe_subscription["id"], request.user.stripe_customer_id)
+        if pending_price_id:
+            price_map = settings.STRIPE_PRODUCTS.get("basic_subscription", {})
+            if pending_price_id == price_map.get("monthly"):
+                pending_plan_label = "Mensuel"
+            elif pending_price_id == price_map.get("trimestrial"):
+                pending_plan_label = "Trimestriel"
+            elif pending_price_id == price_map.get("yearly"):
+                pending_plan_label = "Annuel"
 
+    # Build subscription_data for template
     subscription_data = {
         "plan_label": plan_label,
+        "pending_plan_label": pending_plan_label,
         "status": subscription_state,
         "price": None,
         "currency": "",
@@ -264,6 +279,7 @@ def etablissement_details_partial(request, id):
         "settings_form": settings_form,
         "details_url": details_url,
         "toggle_status_url": reverse("dashboard:etablissements:toggle_status_partial", args=[etablissement.id]),
+        "change_plan_url": reverse("dashboard:etablissements:change_plan_partial", args=[etablissement.id]),
         "delete_url": reverse("dashboard:etablissements:delete_partial", args=[etablissement.id]),
     }
 
@@ -660,6 +676,117 @@ def toggle_etablissement_status(request, id):
     except Exception as e:
         logger.error(f"Error toggling etablissement {etablissement.id} status: {e}")
         messages.error(request, "Une erreur est survenue.")
+
+    redirect_url = reverse("dashboard:etablissements:list")
+    if request.htmx:
+        response = HttpResponse()
+        response["HX-Redirect"] = redirect_url
+        return response
+    return redirect(redirect_url)
+
+
+@google_gmb_connected_required
+def change_plan_partial(request, id):
+    """
+    Show change plan modal with price selection (current plan disabled).
+    """
+    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
+
+    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
+    if not subscription or subscription.cancel_at_period_end:
+        messages.error(request, "Aucun abonnement actif trouvé pour cet établissement.")
+        return starshield_render(request, "etablissements/change_plan_partial.html", context={})
+
+    current_price_id = subscription.price_id
+
+    # Check for pending plan change
+    stripe_subscription = check_existing_subscription_for_etablissement(request.user, etablissement.id)
+    pending_price_id = None
+    if stripe_subscription:
+        pending_price_id = get_pending_plan_change(stripe_subscription["id"], request.user.stripe_customer_id)
+
+    # Fetch prices from Stripe
+    monthly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly")
+    trimestrial_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("trimestrial")
+    yearly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly")
+
+    prices = []
+    for label, price_id, icon, period_label in [
+        ("Mensuel", monthly_price_id, "fa-solid fa-calendar-day", "/mois"),
+        ("Trimestriel", trimestrial_price_id, "fa-solid fa-calendar-week", "/trimestre"),
+        ("Annuel", yearly_price_id, "fa-solid fa-calendar", "/an"),
+    ]:
+        if not price_id:
+            continue
+        try:
+            stripe_price = stripe.Price.retrieve(price_id)
+            price_data = {
+                "id": price_id,
+                "label": label,
+                "icon": icon,
+                "period_label": period_label,
+                "amount": stripe_price.unit_amount / 100 if stripe_price.unit_amount else 0,
+                "currency": (stripe_price.currency or "eur").upper(),
+                "is_current": price_id == current_price_id,
+                "is_pending": price_id == pending_price_id,
+            }
+            prices.append(price_data)
+        except Exception as e:
+            logger.error(f"Error fetching price {price_id} from Stripe: {e}")
+
+    # Calculate savings relative to monthly
+    monthly_amount = next((p["amount"] for p in prices if p["label"] == "Mensuel"), None)
+    if monthly_amount:
+        for price_data in prices:
+            if price_data["label"] == "Trimestriel":
+                full_price = monthly_amount * 3
+                if full_price > price_data["amount"]:
+                    price_data["full_price"] = full_price
+                    price_data["savings_percent"] = int((full_price - price_data["amount"]) / full_price * 100)
+            elif price_data["label"] == "Annuel":
+                full_price = monthly_amount * 12
+                if full_price > price_data["amount"]:
+                    price_data["full_price"] = full_price
+                    price_data["savings_percent"] = int((full_price - price_data["amount"]) / full_price * 100)
+
+    context = {
+        "etablissement": etablissement,
+        "prices": prices,
+        "has_pending_change": pending_price_id is not None,
+        "change_plan_url": reverse("dashboard:etablissements:change_plan", args=[etablissement.id]),
+    }
+
+    return starshield_render(request, "etablissements/change_plan_partial.html", context=context)
+
+
+@google_gmb_connected_required
+@require_POST
+def change_plan(request, id):
+    """
+    Process the plan change for an etablissement.
+    """
+    etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
+
+    form = ToggleEtablissementStatusForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Le plan d'abonnement sélectionné n'est pas valide.")
+    else:
+        new_price_id = form.cleaned_data["price_id"]
+        try:
+            result = change_plan_for_etablissement(request.user, etablissement.id, new_price_id)
+            if result == "cancelled":
+                messages.success(request, "Le changement de plan programmé a été annulé.")
+            elif result:
+                sync_stripe_data(request.user)
+                messages.success(
+                    request,
+                    "Le changement de plan prendra effet à la fin de votre période de facturation en cours.",
+                )
+            else:
+                messages.error(request, "Impossible de modifier le plan d'abonnement.")
+        except Exception as e:
+            logger.error(f"Error changing plan for etablissement {etablissement.id}: {e}")
+            messages.error(request, "Une erreur est survenue lors du changement de plan.")
 
     redirect_url = reverse("dashboard:etablissements:list")
     if request.htmx:
