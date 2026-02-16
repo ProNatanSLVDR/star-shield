@@ -384,7 +384,6 @@ def unselect_etablissement(request):
     """
     if "selected_etablissement" in request.session:
         del request.session["selected_etablissement"]
-        messages.success(request, "Établissement désélectionné.")
 
     return redirect("dashboard:accueil")
 
