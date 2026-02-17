@@ -1,8 +1,6 @@
 from datetime import datetime
 
-import stripe
 from allauth.account.decorators import reverse
-from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -11,6 +9,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from apps.private.auths.models import Etablissement
 from apps.private.dashboard.render import starshield_render
 from apps.private.dashboard.views.etablissement.settings.forms import EtablissementSettingsForm
+from apps.private.payments.helpers import get_plan_label, get_stripe_prices, get_subscription_state
 from apps.private.payments.services import (
     cancel_subscription_for_etablissement,
     change_plan_for_etablissement,
@@ -23,8 +22,6 @@ from starshield.decorators import google_gmb_connected_required, unselect_etabli
 from starshield.logger import logger
 
 from .forms import ImportEtablissementForm, ToggleEtablissementStatusForm
-
-stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @google_gmb_connected_required
@@ -76,8 +73,9 @@ def list_etablissements_view(request):
     rows = []
     for etablissement in etablissements:
         # Subscription status logic
-        subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-        if not subscription:
+        sub_info = get_subscription_state(etablissement)
+        state = sub_info["state"]
+        if state == "inactive":
             subscription_badge = {
                 "type": "badge",
                 "value": "Non abonné",
@@ -85,7 +83,7 @@ def list_etablissements_view(request):
                 "icon": "fa-solid fa-circle-xmark",
                 "tooltip": "Cliquez sur 'Gérer' pour souscrire à un abonnement",
             }
-        elif subscription.cancel_at_period_end:
+        elif state == "cancellation_pending":
             subscription_badge = {
                 "type": "badge",
                 "value": "Abonné (annulation)",
@@ -184,26 +182,12 @@ def etablissement_details_partial(request, id):
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
     # Determine subscription state
-    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-    is_cancelled_at_period_end = subscription and subscription.cancel_at_period_end
-
-    if is_cancelled_at_period_end:
-        subscription_state = "cancellation_pending"
-    elif subscription and etablissement.active:
-        subscription_state = "active"
-    else:
-        subscription_state = "inactive"
+    sub_info = get_subscription_state(etablissement)
+    subscription = sub_info["subscription"]
+    subscription_state = sub_info["state"]
 
     # Determine plan label from price_id
-    plan_label = ""
-    if subscription and subscription.price_id:
-        price_map = settings.STRIPE_PRODUCTS.get("basic_subscription", {})
-        if subscription.price_id == price_map.get("monthly"):
-            plan_label = "Mensuel"
-        elif subscription.price_id == price_map.get("trimestrial"):
-            plan_label = "Trimestriel"
-        elif subscription.price_id == price_map.get("yearly"):
-            plan_label = "Annuel"
+    plan_label = get_plan_label(subscription.price_id if subscription else None)
 
     # Fetch subscription details from Stripe
     stripe_subscription = None
@@ -237,13 +221,7 @@ def etablissement_details_partial(request, id):
     if stripe_subscription:
         pending_price_id = get_pending_plan_change(stripe_subscription["id"], request.user.stripe_customer_id)
         if pending_price_id:
-            price_map = settings.STRIPE_PRODUCTS.get("basic_subscription", {})
-            if pending_price_id == price_map.get("monthly"):
-                pending_plan_label = "Mensuel"
-            elif pending_price_id == price_map.get("trimestrial"):
-                pending_plan_label = "Trimestriel"
-            elif pending_price_id == price_map.get("yearly"):
-                pending_plan_label = "Annuel"
+            pending_plan_label = get_plan_label(pending_price_id)
 
     # Build subscription_data for template
     subscription_data = {
@@ -411,9 +389,7 @@ def etablissement_selector_partial(request):
     Handles invalid credentials gracefully by showing an error message.
     """
     # Check credential validity without using decorator to avoid redirect
-    has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
-
-    if not has_credential:
+    if not request.user.has_google_credential:
         context = {
             "error": True,
             "error_message": "Aucun compte Google My Business n'est connecté.",
@@ -504,8 +480,9 @@ def toggle_etablissement_status_partial(request, id):
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
     # Check subscription status first to determine reactivation
-    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-    is_reactivation = subscription is not None and subscription.cancel_at_period_end
+    sub_info = get_subscription_state(etablissement)
+    subscription = sub_info["subscription"]
+    is_reactivation = sub_info["state"] == "cancellation_pending"
     is_activation = not etablissement.active and not is_reactivation
 
     context = {
@@ -527,8 +504,6 @@ def toggle_etablissement_status_partial(request, id):
         try:
             stripe_subscription = check_existing_subscription_for_etablissement(request.user, etablissement.id)
             if stripe_subscription and stripe_subscription.get("current_period_end"):
-                from datetime import datetime
-
                 period_end_timestamp = stripe_subscription["current_period_end"]
                 period_end_date = datetime.fromtimestamp(period_end_timestamp)
                 # Format date in French
@@ -556,67 +531,10 @@ def toggle_etablissement_status_partial(request, id):
 
     # For activation: if no subscription, fetch price options
     if is_activation and not has_active_subscription:
-        monthly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly")
-        trimestrial_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("trimestrial")
-        yearly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly")
-
-        monthly_price_data = None
-        trimestrial_price_data = None
-        yearly_price_data = None
-
-        if monthly_price_id:
-            try:
-                monthly_price = stripe.Price.retrieve(monthly_price_id)
-                monthly_price_data = {
-                    "id": monthly_price_id,
-                    "amount": monthly_price.unit_amount / 100 if monthly_price.unit_amount else 0,
-                    "currency": (monthly_price.currency or "eur").upper(),
-                }
-            except Exception as e:
-                logger.error(f"Error fetching monthly price from Stripe: {e}")
-
-        if trimestrial_price_id:
-            try:
-                trimestrial_price = stripe.Price.retrieve(trimestrial_price_id)
-                trimestrial_price_data = {
-                    "id": trimestrial_price_id,
-                    "amount": trimestrial_price.unit_amount / 100 if trimestrial_price.unit_amount else 0,
-                    "currency": (trimestrial_price.currency or "eur").upper(),
-                }
-            except Exception as e:
-                logger.error(f"Error fetching trimestrial price from Stripe: {e}")
-
-        if yearly_price_id:
-            try:
-                yearly_price = stripe.Price.retrieve(yearly_price_id)
-                yearly_price_data = {
-                    "id": yearly_price_id,
-                    "amount": yearly_price.unit_amount / 100 if yearly_price.unit_amount else 0,
-                    "currency": (yearly_price.currency or "eur").upper(),
-                }
-            except Exception as e:
-                logger.error(f"Error fetching yearly price from Stripe: {e}")
-
-        # Calculate full price (without discount) and savings percentage for trimestrial and yearly plans
-        if monthly_price_data and trimestrial_price_data:
-            full_price = monthly_price_data["amount"] * 3
-            if full_price > trimestrial_price_data["amount"]:
-                trimestrial_price_data["full_price"] = full_price
-                trimestrial_price_data["savings_percent"] = int(
-                    (full_price - trimestrial_price_data["amount"]) / full_price * 100
-                )
-
-        if monthly_price_data and yearly_price_data:
-            full_price = monthly_price_data["amount"] * 12
-            if full_price > yearly_price_data["amount"]:
-                yearly_price_data["full_price"] = full_price
-                yearly_price_data["savings_percent"] = int(
-                    (full_price - yearly_price_data["amount"]) / full_price * 100
-                )
-
-        context["monthly_price"] = monthly_price_data
-        context["trimestrial_price"] = trimestrial_price_data
-        context["yearly_price"] = yearly_price_data
+        prices = get_stripe_prices()
+        context["monthly_price"] = prices["monthly"]
+        context["trimestrial_price"] = prices["trimestrial"]
+        context["yearly_price"] = prices["yearly"]
 
     return starshield_render(
         request,
@@ -636,8 +554,8 @@ def toggle_etablissement_status(request, id):
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
-    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-    is_reactivation = subscription is not None and subscription.cancel_at_period_end
+    sub_info = get_subscription_state(etablissement)
+    is_reactivation = sub_info["state"] == "cancellation_pending"
     is_activation = not etablissement.active and not is_reactivation
 
     try:
@@ -692,8 +610,9 @@ def change_plan_partial(request, id):
     """
     etablissement = get_object_or_404(Etablissement, id=id, google_credential=request.user.google_credential)
 
-    subscription = etablissement.stripe_subscription.filter(status__in=["active", "trialing"]).first()
-    if not subscription or subscription.cancel_at_period_end:
+    sub_info = get_subscription_state(etablissement)
+    subscription = sub_info["subscription"]
+    if not subscription or sub_info["state"] == "cancellation_pending":
         messages.error(request, "Aucun abonnement actif trouvé pour cet établissement.")
         return starshield_render(request, "etablissements/change_plan_partial.html", context={})
 
@@ -706,48 +625,22 @@ def change_plan_partial(request, id):
         pending_price_id = get_pending_plan_change(stripe_subscription["id"], request.user.stripe_customer_id)
 
     # Fetch prices from Stripe
-    monthly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly")
-    trimestrial_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("trimestrial")
-    yearly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly")
-
+    stripe_prices = get_stripe_prices()
     prices = []
-    for label, price_id, icon, period_label in [
-        ("Mensuel", monthly_price_id, "fa-solid fa-calendar-day", "/mois"),
-        ("Trimestriel", trimestrial_price_id, "fa-solid fa-calendar-week", "/trimestre"),
-        ("Annuel", yearly_price_id, "fa-solid fa-calendar", "/an"),
+    for label, key, icon, period_label in [
+        ("Mensuel", "monthly", "fa-solid fa-calendar-day", "/mois"),
+        ("Trimestriel", "trimestrial", "fa-solid fa-calendar-week", "/trimestre"),
+        ("Annuel", "yearly", "fa-solid fa-calendar", "/an"),
     ]:
-        if not price_id:
+        price_data = stripe_prices.get(key)
+        if not price_data:
             continue
-        try:
-            stripe_price = stripe.Price.retrieve(price_id)
-            price_data = {
-                "id": price_id,
-                "label": label,
-                "icon": icon,
-                "period_label": period_label,
-                "amount": stripe_price.unit_amount / 100 if stripe_price.unit_amount else 0,
-                "currency": (stripe_price.currency or "eur").upper(),
-                "is_current": price_id == current_price_id,
-                "is_pending": price_id == pending_price_id,
-            }
-            prices.append(price_data)
-        except Exception as e:
-            logger.error(f"Error fetching price {price_id} from Stripe: {e}")
-
-    # Calculate savings relative to monthly
-    monthly_amount = next((p["amount"] for p in prices if p["label"] == "Mensuel"), None)
-    if monthly_amount:
-        for price_data in prices:
-            if price_data["label"] == "Trimestriel":
-                full_price = monthly_amount * 3
-                if full_price > price_data["amount"]:
-                    price_data["full_price"] = full_price
-                    price_data["savings_percent"] = int((full_price - price_data["amount"]) / full_price * 100)
-            elif price_data["label"] == "Annuel":
-                full_price = monthly_amount * 12
-                if full_price > price_data["amount"]:
-                    price_data["full_price"] = full_price
-                    price_data["savings_percent"] = int((full_price - price_data["amount"]) / full_price * 100)
+        price_data["label"] = label
+        price_data["icon"] = icon
+        price_data["period_label"] = period_label
+        price_data["is_current"] = price_data["id"] == current_price_id
+        price_data["is_pending"] = price_data["id"] == pending_price_id
+        prices.append(price_data)
 
     context = {
         "etablissement": etablissement,

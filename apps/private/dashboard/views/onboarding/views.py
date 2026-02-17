@@ -85,7 +85,7 @@ def ai_responses_view(request):
 @login_required
 @check_onboarding_completed
 def connect_google_view(request):
-    has_google_connected = hasattr(request.user, "google_credential") and request.user.google_credential.is_valid
+    has_google_connected = request.user.has_google_credential and request.user.google_credential.is_valid
 
     context = {
         "step": 6,
@@ -102,7 +102,7 @@ def connect_google_view(request):
 @check_onboarding_completed
 def import_etablissements_view(request):
     # Check if Google is connected
-    if not hasattr(request.user, "google_credential") or not request.user.google_credential.is_valid:
+    if not request.user.has_google_credential or not request.user.google_credential.is_valid:
         messages.warning(request, _("Veuillez d'abord connecter votre compte Google My Business."))
         return redirect(reverse("dashboard:onboarding:connect_google"))
 
@@ -194,7 +194,7 @@ def reconnect_google_view(request):
     """
     Page for reconnecting Google credentials when they expire or become invalid.
     """
-    has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
+    has_credential = request.user.has_google_credential
     google_credential = getattr(request.user, "google_credential", None)
 
     # Determine the reason for reconnection

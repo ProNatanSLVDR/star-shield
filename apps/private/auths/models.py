@@ -113,6 +113,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             return f"{self.first_name} {self.last_name}".strip()
         return self.email
 
+    @property
+    def has_google_credential(self):
+        return hasattr(self, "google_credential") and self.google_credential is not None
+
 
 # Google GMB
 class GoogleCredentials(models.Model):

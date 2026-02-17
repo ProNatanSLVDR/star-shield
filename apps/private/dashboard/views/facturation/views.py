@@ -1,7 +1,7 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 
 from apps.private.dashboard.render import starshield_render
+from apps.private.payments.helpers import get_price_id_map
 
 
 @login_required
@@ -17,7 +17,7 @@ def facturation_view(request):
     active_etablissements_count = 0
     plan_breakdown = {}  # {price_id: count}
 
-    if hasattr(user, "google_credential"):
+    if user.has_google_credential:
         etablissements = user.google_credential.etablissements.all()
         active_etablissements_count = etablissements.filter(active=True).count()
 
@@ -31,9 +31,10 @@ def facturation_view(request):
                     plan_breakdown[subscription.price_id] += 1
 
     # Get monthly, trimestrial, and yearly price IDs from settings
-    monthly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("monthly")
-    trimestrial_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("trimestrial")
-    yearly_price_id = settings.STRIPE_PRODUCTS.get("basic_subscription", {}).get("yearly")
+    price_map = get_price_id_map()
+    monthly_price_id = price_map.get("monthly")
+    trimestrial_price_id = price_map.get("trimestrial")
+    yearly_price_id = price_map.get("yearly")
 
     # Categorize plan breakdown into monthly, trimestrial, and yearly counts
     monthly_count = 0

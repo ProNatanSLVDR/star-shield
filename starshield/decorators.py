@@ -14,9 +14,7 @@ def google_gmb_connected_required(view_func):
 
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        has_credential = hasattr(request.user, "google_credential") and request.user.google_credential is not None
-
-        if not has_credential:
+        if not request.user.has_google_credential:
             # No credential exists
             return redirect(reverse("dashboard:onboarding:reconnect_google"))
 

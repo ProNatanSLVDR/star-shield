@@ -5,6 +5,7 @@ from django.test import TestCase
 from apps.public.reviews.models import ReviewAnalytics
 from tests.factories import (
     EtablissementFactory,
+    GoogleCredentialsFactory,
     QRCodeFactory,
     QRCodeScanFactory,
     RatingHistoryFactory,
@@ -12,7 +13,20 @@ from tests.factories import (
     RoulettePrizeFactory,
     RouletteSpinFactory,
     StripeSubscriptionFactory,
+    UserFactory,
 )
+
+
+class TestUser(TestCase):
+    def test_has_google_credential_true(self):
+        credential = GoogleCredentialsFactory()
+
+        self.assertTrue(credential.user.has_google_credential)
+
+    def test_has_google_credential_false(self):
+        user = UserFactory()
+
+        self.assertFalse(user.has_google_credential)
 
 
 class TestEtablissement(TestCase):

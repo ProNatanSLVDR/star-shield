@@ -19,7 +19,7 @@ def accueil_view(request):
     total_qr_consultations = 0
 
     # Calculate statistics if user has google_credential
-    if hasattr(request.user, "google_credential") and request.user.google_credential:
+    if request.user.has_google_credential:
         etablissements = request.user.google_credential.etablissements.all()
 
         # Total establishments count
