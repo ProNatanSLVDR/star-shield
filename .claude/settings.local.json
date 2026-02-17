@@ -19,7 +19,10 @@
       "Bash(git status:*)",
       "mcp__plugin_playwright_playwright__browser_install",
       "mcp__plugin_playwright_playwright__browser_navigate",
-      "mcp__plugin_playwright_playwright__browser_close"
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(xargs:*)",
+      "Bash(done)",
+      "Bash(grep:*)"
     ]
   },
   "outputStyle": "default"
