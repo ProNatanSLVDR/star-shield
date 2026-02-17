@@ -1,10 +1,18 @@
 import factory
 from django.contrib.auth import get_user_model
 
-from apps.private.auths.models import Etablissement, GoogleCredentials, QRCode, QRCodeScan, RatingHistory
+from apps.private.auths.models import (
+    Etablissement,
+    GoogleCredentials,
+    QRCode,
+    QRCodeScan,
+    RatingHistory,
+    WeeklyPerformanceSummary,
+)
 from apps.private.payments.models import StripeSubscription
 from apps.public.reviews.models import Review, ReviewAnalytics
-from apps.public.roulette.models import RoulettePrize, RouletteSpin
+from apps.public.roulette.models import RouletteAnalytics, RoulettePrize, RouletteSpin
+from apps.tasks_api.models import TaskExecution
 
 User = get_user_model()
 
@@ -127,3 +135,33 @@ class StripeSubscriptionFactory(factory.django.DjangoModelFactory):
     status = "active"
     price_id = "price_test123"
     cancel_at_period_end = False
+
+
+class TaskExecutionFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = TaskExecution
+
+    task_type = "fetch_reviews"
+    etablissement = factory.SubFactory(EtablissementFactory)
+    status = "pending"
+    metadata = factory.LazyFunction(dict)
+
+
+class WeeklyPerformanceSummaryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = WeeklyPerformanceSummary
+
+    etablissement = factory.SubFactory(EtablissementFactory)
+    week_start_date = factory.LazyFunction(lambda: __import__("datetime").date(2026, 2, 9))
+    short_summary = "Résumé court"
+    summary_text = "Rapport complet"
+    advice_text = "Conseils"
+    metrics_data = factory.LazyFunction(dict)
+
+
+class RouletteAnalyticsFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = RouletteAnalytics
+
+    etablissement = factory.SubFactory(EtablissementFactory)
+    type = "roulette_viewed"
