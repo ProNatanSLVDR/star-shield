@@ -211,9 +211,7 @@
                     }
 
                     // Trigger HTMX refresh
-                    if (previewContainer) {
-                        htmx.trigger(previewContainer, "change");
-                    }
+                    htmx.trigger(document.getElementById("reviewSettingsForm"), "change");
                 });
             }
         });
