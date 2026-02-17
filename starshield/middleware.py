@@ -1,9 +1,25 @@
 import json
 
 from django.contrib.messages import get_messages
+from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
 
 from apps.private.auths.models import Etablissement
+
+
+class HtmxVaryMiddleware:
+    """
+    Adds Vary: HX-Request to all responses so the browser caches
+    HTMX partial responses and full-page responses separately.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        patch_vary_headers(response, ["HX-Request"])
+        return response
 
 
 class CustomMessageMiddleware(MiddlewareMixin):

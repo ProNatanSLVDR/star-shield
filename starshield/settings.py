@@ -81,6 +81,7 @@ class Base(Configuration):
         "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.LoginRequiredMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
+        "starshield.middleware.HtmxVaryMiddleware",
         "starshield.middleware.CustomMessageMiddleware",
         "starshield.middleware.EtablissementMiddleware",
         "hijack.middleware.HijackUserMiddleware",
