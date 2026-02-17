@@ -1,6 +1,7 @@
 from django.contrib.admin.sites import login_not_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils import timezone
 
 from .forms import FeedbackForm
 from .models import Review, ReviewAnalytics
@@ -79,6 +80,7 @@ def internal_feedback_view(request, identifier=None):
                     rating=rating,
                     comment=comment,
                     source="internal",
+                    writen_at=timezone.now(),
                 )
                 ReviewAnalytics.objects.create(
                     etablissement=etablissement,

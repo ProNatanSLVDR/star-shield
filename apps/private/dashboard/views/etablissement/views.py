@@ -104,10 +104,12 @@ def stats_view(request):
     etablissement = request.etablissement
 
     # Build chart data from actual review publish dates
+    # Use Coalesce to fall back to created_at for internal reviews missing writen_at
     reviews_with_dates = (
-        Review.objects.filter(etablissement=etablissement, writen_at__isnull=False)
-        .order_by("writen_at")
-        .values_list("writen_at", "rating")
+        Review.objects.filter(etablissement=etablissement)
+        .annotate(effective_date=Coalesce("writen_at", "created_at"))
+        .order_by("effective_date")
+        .values_list("effective_date", "rating")
     )
 
     # Generate 24 checkpoints: mid-month (15th) + end-of-month for the last 12 months
@@ -176,10 +178,12 @@ def stats_view(request):
         )
 
     # Weekly reviews aggregation (last 12 weeks)
+    # Use Coalesce to fall back to created_at for internal reviews missing writen_at
     twelve_weeks_ago = timezone.now() - timedelta(weeks=12)
     weekly_reviews_qs = (
-        reviews_queryset.filter(writen_at__isnull=False, writen_at__gte=twelve_weeks_ago)
-        .annotate(week=TruncWeek("writen_at"))
+        reviews_queryset.annotate(effective_date=Coalesce("writen_at", "created_at"))
+        .filter(effective_date__gte=twelve_weeks_ago)
+        .annotate(week=TruncWeek("effective_date"))
         .values("week")
         .annotate(
             google_count=Count("id", filter=Q(source="google")),
