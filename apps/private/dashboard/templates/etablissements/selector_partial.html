@@ -23,6 +23,15 @@
     title="Liste de vos établissements"
     modal_size="lg"
     %}
+        {% fill actions %}
+            {% component "button"
+                text="Ajouter"
+                classes="btn-primary btn-sm"
+                icon="fa-solid fa-plus"
+                href="{% url 'dashboard:etablissements:list' %}"
+                %}
+            {% endcomponent %}
+        {% endfill %}
     {% endcomponent %}
 {% else %}
     <div class="p-4 text-center">
