@@ -223,7 +223,7 @@ def roulette_settings_view(request):
 
     # Build roulette URL for preview
     identifier = str(etablissement.uuid)
-    roulette_url = request.build_absolute_uri(reverse("roulette:wheel", args=[identifier]))
+    roulette_url = request.build_absolute_uri(reverse("roulette:wheel", args=[identifier])) + "?preview=true"
 
     context = {
         "etablissement": etablissement,

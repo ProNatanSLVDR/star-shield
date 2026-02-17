@@ -79,31 +79,29 @@ def roulette_view(request, identifier=None):
     if not etablissement.active or not etablissement.roulette_enabled:
         return redirect("routing:feature_inactive")
 
-    # Check if user is in cooldown - redirect to cooldown page if so
-    if is_in_cooldown(request, etablissement):
-        return redirect(reverse("roulette:cooldown", args=[identifier]))
+    preview = request.GET.get("preview") == "true"
 
-    # Track analytics
-    analytics_key = f"roulette_viewed_{etablissement.id}"
-    if not get_valid_session_key(request, analytics_key, valid_minutes=5):
-        RouletteAnalytics.objects.create(
-            etablissement=etablissement,
-            type="roulette_viewed",
-        )
-        set_valid_session_key(request, analytics_key, True)
+    if not preview:
+        # Check if user is in cooldown - redirect to cooldown page if so
+        if is_in_cooldown(request, etablissement):
+            return redirect(reverse("roulette:cooldown", args=[identifier]))
 
-    # Check if user can spin
-    can_spin_now = not is_in_cooldown(request, etablissement)
-
-    # Build review URL
-    review_url = etablissement.new_reviews_uri
+        # Track analytics
+        analytics_key = f"roulette_viewed_{etablissement.id}"
+        if not get_valid_session_key(request, analytics_key, valid_minutes=5):
+            RouletteAnalytics.objects.create(
+                etablissement=etablissement,
+                type="roulette_viewed",
+            )
+            set_valid_session_key(request, analytics_key, True)
 
     context = {
         "etablissement": etablissement,
-        "can_spin": can_spin_now,
-        "review_url": review_url,
+        "can_spin": not preview and not is_in_cooldown(request, etablissement),
+        "review_url": etablissement.new_reviews_uri,
         "spin_url": reverse("roulette:spin", args=[identifier]),
         "prizes": etablissement.roulette_prizes.exclude(probability=0),
+        "preview": preview,
     }
 
     return render(request, "roulette/wheel.html", context)

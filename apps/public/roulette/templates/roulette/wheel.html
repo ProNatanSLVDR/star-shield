@@ -24,231 +24,258 @@
         {% component "spinwheel" prizes=prizes mode="showcase" wheel_id="public-roulette-wheel" %}
         {% endcomponent %}
     </div>
-    <!-- MAIN CONTENT: INSTRUCTIONS & LINK -->
-    <div id="step-intro"
-         class="text-center">
-        <h3 class="text-primary fw-bold mb-4">Tentez votre chance !</h3>
-        <div class="d-grid gap-2 col-md-8 mx-auto">
-            {% component "button"
-                text="Lancer la roue"
-                classes="btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
-                icon="fa-solid fa-play me-2"
-                extra_kwargs={
-                "type": "button",
-                "data-bs-toggle": "modal",
-                "data-bs-target": "#instructionsModal"
-                }
-                %}
-            {% endcomponent %}
+    {% if preview %}
+        <!-- PREVIEW MODE -->
+        <div class="text-center">
+            <span class="badge bg-secondary fs-6 px-4 py-2">
+                <i class="fa-solid fa-eye me-2"></i>Prévisualisation
+            </span>
         </div>
-    </div>
-    {% component "empty_modal" modal_id="instructionsModal" size="lg" %}
-        {% fill "title" %}
-            <i class="fa-solid fa-circle-info me-2"></i>Comment ça marche ?
-        {% endfill %}
-        {% fill "body" %}
-            <div class="p-3">
-                <div class="mb-4 text-start g-0">
-                    <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
-                        <div class="col-2 d-flex justify-content-center align-items-center text-primary">
-                            <i class="fa-solid fs-3 fa-star"></i>
-                        </div>
-                        <div class="col-10">
-                            <h6 class="fw-bold fs-6 mb-0">1. Avis de 5 étoiles</h6>
-                            <p class="small text-muted mb-0">
-                                Postez un avis de 5 étoiles pour nous soutenir.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
-                        <div class="col-2 d-flex justify-content-center align-items-center text-primary">
-                            <i class="fa-solid fs-3 fa-circle-check"></i>
-                        </div>
-                        <div class="col-10">
-                            <h6 class="fw-bold fs-6 mb-0">2. Vérification</h6>
-                            <p class="small text-muted mb-0">
-                                Nous vérifions rapidement vous avez posté un avis de 5 étoiles.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
-                        <div class="col-2 d-flex justify-content-center align-items-center text-primary">
-                            <i class="fa-solid fs-3 fa-gift"></i>
-                        </div>
-                        <div class="col-10">
-                            <h6 class="fw-bold fs-6 mb-0">3. Cadeau</h6>
-                            <p class="small text-muted mb-0">
-                                Lancez la roue et tentez de gagner un cadeau !
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-muted small mb-0 text-center">
-                    Une nouvelle page va s'ouvrir.
-                    <br>
-                    <span class="fw-bold">Revenez ici après avoir posté votre avis !</span>
-                </p>
-            </div>
-        {% endfill %}
-        {% fill "footer" %}
-            <div class="d-flex justify-content-center align-items-center w-100">
+    {% else %}
+        <!-- MAIN CONTENT: INSTRUCTIONS & LINK -->
+        <div id="step-intro"
+             class="text-center">
+            <h3 class="text-primary fw-bold mb-4">
+                Tentez votre chance !
+            </h3>
+            <div class="d-grid gap-2 col-md-8 mx-auto">
                 {% component "button"
-                    text="Poster mon avis 5 étoiles !"
-                    classes="btn-primary btn-lg rounded-pill px-5 shadow-sm"
-                    icon="fa-solid fa-star me-2"
+                    text="Lancer la roue"
+                    classes="btn-primary btn-lg rounded-pill p-3 shadow-sm hover-scale"
+                    icon="fa-solid fa-play me-2"
                     extra_kwargs={
                     "type": "button",
-                    "id": "reviewLinkBtn",
-                    "data-review-url": review_url,
-                    "data-bs-dismiss": "modal",
                     "data-bs-toggle": "modal",
-                    "data-bs-target": "#verificationModal"
+                    "data-bs-target": "#instructionsModal"
                     }
                     %}
                 {% endcomponent %}
             </div>
-        {% endfill %}
-    {% endcomponent %}
-    <!-- Verification Modal -->
-    {% component "empty_modal" modal_id="verificationModal" size="lg" %}
-        {% fill "title" %}
-            <i class="fa-solid fa-circle-check me-2"></i>Vérification
-        {% endfill %}
-        {% fill "body" %}
-            <!-- Spinner State -->
-            <div class="p-4">
-                <div id="verificationSpinner"
-                     class="text-center">
-                    <div class="mb-4">
-                        <div class="spinner-border text-primary"
-                             style="width: 3rem;
-                                    height: 3rem"
-                             role="status">
-                            <span class="visually-hidden">Loading...</span>
+        </div>
+        {% component "empty_modal" modal_id="instructionsModal" size="lg" %}
+            {% fill "title" %}
+                <i class="fa-solid fa-circle-info me-2"></i>Comment ça marche ?
+            {% endfill %}
+            {% fill "body" %}
+                <div class="p-3">
+                    <div class="mb-4 text-start g-0">
+                        <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
+                            <div class="col-2 d-flex justify-content-center align-items-center text-primary">
+                                <i class="fa-solid fs-3 fa-star"></i>
+                            </div>
+                            <div class="col-10">
+                                <h6 class="fw-bold fs-6 mb-0">
+                                    1. Avis de 5 étoiles
+                                </h6>
+                                <p class="small text-muted mb-0">
+                                    Postez un avis de 5 étoiles pour nous soutenir.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
+                            <div class="col-2 d-flex justify-content-center align-items-center text-primary">
+                                <i class="fa-solid fs-3 fa-circle-check"></i>
+                            </div>
+                            <div class="col-10">
+                                <h6 class="fw-bold fs-6 mb-0">
+                                    2. Vérification
+                                </h6>
+                                <p class="small text-muted mb-0">
+                                    Nous vérifions rapidement vous avez posté un avis de 5 étoiles.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row mb-2 bg-light p-2 rounded-4 border g-0">
+                            <div class="col-2 d-flex justify-content-center align-items-center text-primary">
+                                <i class="fa-solid fs-3 fa-gift"></i>
+                            </div>
+                            <div class="col-10">
+                                <h6 class="fw-bold fs-6 mb-0">
+                                    3. Cadeau
+                                </h6>
+                                <p class="small text-muted mb-0">
+                                    Lancez la roue et tentez de gagner un cadeau !
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    <h3 class="h5 fw-bold mb-2">Vérification en cours...</h3>
-                    <p class="text-muted mb-0">
-                        Nous vérifions votre participation auprès de Google.
+                    <p class="text-muted small mb-0 text-center">
+                        Une nouvelle page va s'ouvrir.
+                        <br>
+                        <span class="fw-bold">
+                            Revenez ici après avoir posté votre avis !
+                        </span>
                     </p>
                 </div>
-                <!-- Ready State -->
-                <div id="verificationReady"
-                     class="text-center d-none">
-                    <div class="mb-4">
-                        <div class="display-1 text-success mb-3">
-                            <i class="fa-solid fa-check-circle"></i>
-                        </div>
-                    </div>
-                    <h3 class="h5 fw-bold mb-2">Participation validée !</h3>
-                    <p class="text-muted mb-0">Vous pouvez maintenant lancer la roue.</p>
+            {% endfill %}
+            {% fill "footer" %}
+                <div class="d-flex justify-content-center align-items-center w-100">
+                    {% component "button"
+                        text="Poster mon avis 5 étoiles !"
+                        classes="btn-primary btn-lg rounded-pill px-5 shadow-sm"
+                        icon="fa-solid fa-star me-2"
+                        extra_kwargs={
+                        "type": "button",
+                        "id": "reviewLinkBtn",
+                        "data-review-url": review_url,
+                        "data-bs-dismiss": "modal",
+                        "data-bs-toggle": "modal",
+                        "data-bs-target": "#verificationModal"
+                        }
+                        %}
+                    {% endcomponent %}
                 </div>
-            </div>
-        {% endfill %}
-        {% fill "footer" %}
-            <form id="spinForm"
-                  method="post"
-                  action="{{ spin_url }}"
-                  class="w-100 d-flex justify-content-center">
-                {% csrf_token %}
-                <button type="submit"
-                        id="spinButton"
-                        class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg"
-                        disabled>
-                    <i class="fa-solid fa-play me-2"></i>
-                    Lancer la roue !
-                </button>
-            </form>
-        {% endfill %}
-    {% endcomponent %}
-    <script>
-        (function() {
-            const STORAGE_KEY = `roulette_review_clicked_{{ etablissement.id }}`;
-            const REQUIRED_WAIT_SECONDS = 30;
-            const POLL_INTERVAL = 5000; // 5 seconds
+            {% endfill %}
+        {% endcomponent %}
+        <!-- Verification Modal -->
+        {% component "empty_modal" modal_id="verificationModal" size="lg" %}
+            {% fill "title" %}
+                <i class="fa-solid fa-circle-check me-2"></i>Vérification
+            {% endfill %}
+            {% fill "body" %}
+                <!-- Spinner State -->
+                <div class="p-4">
+                    <div id="verificationSpinner"
+                         class="text-center">
+                        <div class="mb-4">
+                            <div class="spinner-border text-primary"
+                                 style="width: 3rem;
+                                        height: 3rem"
+                                 role="status">
+                                <span class="visually-hidden">
+                                    Loading...
+                                </span>
+                            </div>
+                        </div>
+                        <h3 class="h5 fw-bold mb-2">
+                            Vérification en cours...
+                        </h3>
+                        <p class="text-muted mb-0">
+                            Nous vérifions votre participation auprès de Google.
+                        </p>
+                    </div>
+                    <!-- Ready State -->
+                    <div id="verificationReady"
+                         class="text-center d-none">
+                        <div class="mb-4">
+                            <div class="display-1 text-success mb-3">
+                                <i class="fa-solid fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <h3 class="h5 fw-bold mb-2">
+                            Participation validée !
+                        </h3>
+                        <p class="text-muted mb-0">
+                            Vous pouvez maintenant lancer la roue.
+                        </p>
+                    </div>
+                </div>
+            {% endfill %}
+            {% fill "footer" %}
+                <form id="spinForm"
+                      method="post"
+                      action="{{ spin_url }}"
+                      class="w-100 d-flex justify-content-center">
+                    {% csrf_token %}
+                    <button type="submit"
+                            id="spinButton"
+                            class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg"
+                            disabled>
+                        <i class="fa-solid fa-play me-2"></i>
+                        Lancer la roue !
+                    </button>
+                </form>
+            {% endfill %}
+        {% endcomponent %}
+        <script>
+            (function() {
+                const STORAGE_KEY = `roulette_review_clicked_{{ etablissement.id }}`;
+                const REQUIRED_WAIT_SECONDS = 30;
+                const POLL_INTERVAL = 5000; // 5 seconds
 
-            let pollInterval = null;
+                let pollInterval = null;
 
-            const reviewBtn = document.getElementById('reviewLinkBtn');
-            const verificationModalEl = document.getElementById('verificationModal');
-            const spinnerEl = document.getElementById('verificationSpinner');
-            const readyEl = document.getElementById('verificationReady');
-            const spinButtonEl = document.getElementById('spinButton');
-            const spinForm = document.getElementById('spinForm');
+                const reviewBtn = document.getElementById('reviewLinkBtn');
+                const verificationModalEl = document.getElementById('verificationModal');
+                const spinnerEl = document.getElementById('verificationSpinner');
+                const readyEl = document.getElementById('verificationReady');
+                const spinButtonEl = document.getElementById('spinButton');
+                const spinForm = document.getElementById('spinForm');
 
-            function setReadyState(isReady) {
-                if (spinnerEl) spinnerEl.classList.toggle('d-none', isReady);
-                if (readyEl) readyEl.classList.toggle('d-none', !isReady);
-                if (spinButtonEl) {
-                    spinButtonEl.disabled = !isReady;
-                    spinButtonEl.classList.toggle('fa-beat-fade', isReady);
-                }
-            }
-
-            function stopPolling() {
-                if (pollInterval) {
-                    clearInterval(pollInterval);
-                    pollInterval = null;
-                }
-            }
-
-            function startPolling() {
-                if (!pollInterval) {
-                    pollInterval = setInterval(updateStatus, POLL_INTERVAL);
-                }
-            }
-
-            function updateStatus() {
-                const clickedTime = localStorage.getItem(STORAGE_KEY);
-                if (!clickedTime) return;
-
-                const elapsed = (Date.now() - Number(clickedTime)) / 1000;
-                const isReady = elapsed >= REQUIRED_WAIT_SECONDS;
-
-                setReadyState(isReady);
-
-                if (isReady) stopPolling();
-            }
-
-            function openReviewLink() {
-                if (!reviewBtn) return;
-                const reviewUrl = reviewBtn.getAttribute('data-review-url');
-                if (!reviewUrl) return;
-                const newWindow = window.open(reviewUrl, '_blank', 'noopener');
-                if (newWindow) newWindow.opener = null;
-            }
-
-            function handleReviewClick() {
-                localStorage.setItem(STORAGE_KEY, Date.now().toString());
-                openReviewLink();
-                updateStatus();
-                startPolling();
-            }
-
-            function handleFormSubmit() {
-                localStorage.removeItem(STORAGE_KEY);
-                stopPolling();
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                if (reviewBtn) {
-                    reviewBtn.addEventListener('click', handleReviewClick);
-                }
-
-                if (spinForm) {
-                    spinForm.addEventListener('submit', handleFormSubmit);
-                }
-
-                if (localStorage.getItem(STORAGE_KEY)) {
-                    updateStatus();
-                    startPolling();
-                    if (verificationModalEl) {
-                        bootstrap.Modal.getOrCreateInstance(verificationModalEl).show();
+                function setReadyState(isReady) {
+                    if (spinnerEl) spinnerEl.classList.toggle('d-none', isReady);
+                    if (readyEl) readyEl.classList.toggle('d-none', !isReady);
+                    if (spinButtonEl) {
+                        spinButtonEl.disabled = !isReady;
+                        spinButtonEl.classList.toggle('fa-beat-fade', isReady);
                     }
                 }
-            });
-        })();
-    </script>
+
+                function stopPolling() {
+                    if (pollInterval) {
+                        clearInterval(pollInterval);
+                        pollInterval = null;
+                    }
+                }
+
+                function startPolling() {
+                    if (!pollInterval) {
+                        pollInterval = setInterval(updateStatus, POLL_INTERVAL);
+                    }
+                }
+
+                function updateStatus() {
+                    const clickedTime = localStorage.getItem(STORAGE_KEY);
+                    if (!clickedTime) return;
+
+                    const elapsed = (Date.now() - Number(clickedTime)) / 1000;
+                    const isReady = elapsed >= REQUIRED_WAIT_SECONDS;
+
+                    setReadyState(isReady);
+
+                    if (isReady) stopPolling();
+                }
+
+                function openReviewLink() {
+                    if (!reviewBtn) return;
+                    const reviewUrl = reviewBtn.getAttribute('data-review-url');
+                    if (!reviewUrl) return;
+                    const newWindow = window.open(reviewUrl, '_blank', 'noopener');
+                    if (newWindow) newWindow.opener = null;
+                }
+
+                function handleReviewClick() {
+                    localStorage.setItem(STORAGE_KEY, Date.now().toString());
+                    openReviewLink();
+                    updateStatus();
+                    startPolling();
+                }
+
+                function handleFormSubmit() {
+                    localStorage.removeItem(STORAGE_KEY);
+                    stopPolling();
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (reviewBtn) {
+                        reviewBtn.addEventListener('click', handleReviewClick);
+                    }
+
+                    if (spinForm) {
+                        spinForm.addEventListener('submit', handleFormSubmit);
+                    }
+
+                    if (localStorage.getItem(STORAGE_KEY)) {
+                        updateStatus();
+                        startPolling();
+                        if (verificationModalEl) {
+                            bootstrap.Modal.getOrCreateInstance(verificationModalEl).show();
+                        }
+                    }
+                });
+            })();
+        </script>
+    {% endif %}
 {% endblock card_content %}
 
 {% block card_styles %}
