@@ -103,7 +103,7 @@ def roulette_view(request, identifier=None):
         "can_spin": can_spin_now,
         "review_url": review_url,
         "spin_url": reverse("roulette:spin", args=[identifier]),
-        "prizes": etablissement.roulette_prizes.all(),
+        "prizes": etablissement.roulette_prizes.exclude(probability=0),
     }
 
     return render(request, "roulette/wheel.html", context)
@@ -218,8 +218,8 @@ def roulette_result_view(request, identifier=None, prize_code=None):
             # Invalid code - treat as no prize
             prize_code = None
 
-    prizes = etablissement.roulette_prizes.all()
-    nothing_prize = prizes.filter(is_nothing_prize=True).first()
+    prizes = etablissement.roulette_prizes.exclude(probability=0)
+    nothing_prize = etablissement.roulette_prizes.filter(is_nothing_prize=True).first()
     stop_on_prize = spin.prize if spin and spin.prize else nothing_prize
 
     context = {
