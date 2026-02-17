@@ -105,8 +105,8 @@
                 <input type="hidden" id="orderDirInput" name="order_dir" value="{{ filters.order_dir }}">
 
                 <!-- Hidden inputs for custom dates -->
-                <input type="hidden" id="dateFromInput" {% if filters.date_from %}name="date_from"{% endif %} value="{{ filters.date_from }}">
-                <input type="hidden" id="dateToInput" {% if filters.date_to %}name="date_to"{% endif %} value="{{ filters.date_to }}">
+                <input type="hidden" id="dateFromInput" {% if filters.date_from and not filters.date_preset %}name="date_from"{% endif %} value="{{ filters.date_from }}">
+                <input type="hidden" id="dateToInput" {% if filters.date_to and not filters.date_preset %}name="date_to"{% endif %} value="{{ filters.date_to }}">
 
                 <!-- Active Filters Display -->
                 {% if filters.source != 'all' or filters.rating != 'all' or filters.date_preset or filters.date_from %}
@@ -392,7 +392,7 @@
                 const dateFromInput = document.getElementById('dateFromInput');
                 const dateToInput = document.getElementById('dateToInput');
 
-                datePresetInput.value = '30days'; // Reset to default
+                datePresetInput.value = 'all_time';
                 dateFromInput.value = '';
                 dateToInput.value = '';
                 dateFromInput.removeAttribute('name');
