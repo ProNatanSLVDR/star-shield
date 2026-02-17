@@ -66,6 +66,7 @@ def pending_content_partial(request):
         "review": review,
         "reviewer_name": _get_reviewer_name(review),
         "remaining_count": remaining,
+        "validation_required": etablissement.ai_response_validation_required,
     }
 
     return starshield_render(

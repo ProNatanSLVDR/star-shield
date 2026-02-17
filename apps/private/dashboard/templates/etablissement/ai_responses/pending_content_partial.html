@@ -1,11 +1,30 @@
 {% if not review %}
-    <div class="text-center text-muted py-5">
-        <i class="fa-solid fa-check-circle mb-3"
-           style="font-size: 3rem;"></i>
-        <p class="mb-0">
-            Aucune réponse en attente de validation.
-        </p>
-    </div>
+    {% if not validation_required %}
+        <div class="text-center py-5">
+            <i class="fa-solid fa-robot mb-3 text-primary"
+               style="font-size: 3rem;"></i>
+            <p class="mb-1 fw-semibold">
+                Mode automatique activé
+            </p>
+            <p class="text-muted mb-3">
+                Les réponses IA sont publiées automatiquement
+                sur Google sans validation manuelle.
+            </p>
+            <a href="{% url 'dashboard:etablissement:ai_responses:settings' %}"
+               class="btn btn-primary">
+                <i class="fa-solid fa-gear me-1"></i>
+                Activer la validation manuelle
+            </a>
+        </div>
+    {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-check-circle mb-3"
+               style="font-size: 3rem;"></i>
+            <p class="mb-0">
+                Aucune réponse en attente de validation.
+            </p>
+        </div>
+    {% endif %}
 {% else %}
     {% if remaining_count > 1 %}
         <div class="text-muted small text-end mb-2">
