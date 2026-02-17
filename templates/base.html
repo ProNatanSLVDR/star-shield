@@ -111,16 +111,20 @@
             })
         });
         document.addEventListener("htmx:beforeRequest", (e) => {
-            e.detail.target.classList.add('htmx-loading');
+            const target = e.detail.target;
+            target.classList.add('htmx-loading');
+            if (target.offsetHeight === 0) {
+                target.classList.add('htmx-loading-empty');
+            }
         });
         document.addEventListener("htmx:afterSwap", (e) => {
-            e.detail.target.classList.remove('htmx-loading');
+            e.detail.target.classList.remove('htmx-loading', 'htmx-loading-empty');
         });
         document.addEventListener("htmx:responseError", (e) => {
-            e.detail.target.classList.remove('htmx-loading');
+            e.detail.target.classList.remove('htmx-loading', 'htmx-loading-empty');
         });
         document.addEventListener("htmx:sendError", (e) => {
-            e.detail.target.classList.remove('htmx-loading');
+            e.detail.target.classList.remove('htmx-loading', 'htmx-loading-empty');
         });
     </script>
     {% include "confirmation_modal.html" %}

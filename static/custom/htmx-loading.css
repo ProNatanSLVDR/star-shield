@@ -1,5 +1,8 @@
 .htmx-loading {
     position: relative !important;
+}
+
+.htmx-loading-empty {
     min-height: 500px;
 }
 
