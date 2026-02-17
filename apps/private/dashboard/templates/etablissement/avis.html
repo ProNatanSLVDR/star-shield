@@ -150,11 +150,13 @@
                                 </span>
                             {% endif %}
 
+                            {% if filters.source != 'all' or filters.rating != 'all' or filters.date_preset and filters.date_preset != '30days' or filters.date_from and not filters.date_preset %}
                             <button type="button"
                                 class="btn btn-sm btn-outline-primary ms-2"
                                 onclick="clearAllFilters()">
                                 <i class="fa-solid fa-xmark me-1"></i>Effacer tout
                             </button>
+                            {% endif %}
                         {% endif %}
 
                         <span class="small text-muted ms-auto">
