@@ -76,7 +76,6 @@
     .spinwheel-frame {
         position: relative;
         width: var(--wheel-size);
-        height: calc(var(--wheel-size) + var(--wheel-indicator-space));
         display: flex;
         align-items: center;
         justify-content: center;
@@ -88,12 +87,11 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 50%;
-        width: var(--wheel-size);
-        height: var(--wheel-size);
+        left: 0;
+        width: 100%;
+        aspect-ratio: 1;
         border-radius: 50%;
         box-shadow: var(--wheel-shadow);
-        transform: translateX(-50%);
         pointer-events: none;
         z-index: 1;
     }
@@ -101,7 +99,6 @@
     .spinwheel-wheel {
         position: relative;
         width: var(--wheel-size);
-        height: var(--wheel-size);
         max-width: 100%;
         aspect-ratio: 1;
         border-radius: 50%;
