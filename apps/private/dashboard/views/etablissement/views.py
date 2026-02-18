@@ -11,7 +11,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-
 from apps.private.auths.models import WeeklyPerformanceSummary
 from apps.private.dashboard.render import starshield_render
 from apps.public.reviews.models import Review, ReviewAnalytics

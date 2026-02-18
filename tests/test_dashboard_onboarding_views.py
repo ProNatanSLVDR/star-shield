@@ -3,7 +3,7 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.urls import reverse
 
-from tests.factories import EtablissementFactory, GoogleCredentialsFactory, UserFactory
+from tests.factories import GoogleCredentialsFactory, UserFactory
 
 
 class TestOnboardingStepViews(TestCase):

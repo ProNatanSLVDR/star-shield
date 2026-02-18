@@ -347,6 +347,324 @@ class TestChangePlan(TestCase):
 
 
 @override_settings(STRIPE_SECRET_KEY="sk_test_fake")
+class TestReleaseExistingSchedule(TestCase):
+    @patch("apps.private.payments.services.stripe.SubscriptionSchedule.release")
+    @patch("apps.private.payments.services.stripe.SubscriptionSchedule.list")
+    def test_releases_active_schedule(self, mock_list, mock_release):
+        from apps.private.payments.services import _release_existing_schedule
+
+        mock_schedule = MagicMock()
+        mock_schedule.subscription = "sub_1"
+        mock_schedule.status = "active"
+        mock_schedule.id = "sched_1"
+        mock_list.return_value = MagicMock(data=[mock_schedule])
+
+        _release_existing_schedule("sub_1", "cus_123")
+
+        mock_release.assert_called_once_with("sched_1")
+
+    @patch("apps.private.payments.services.stripe.SubscriptionSchedule.list")
+    def test_no_schedule_to_release(self, mock_list):
+        from apps.private.payments.services import _release_existing_schedule
+
+        mock_list.return_value = MagicMock(data=[])
+
+        # Should not raise
+        _release_existing_schedule("sub_1", "cus_123")
+
+    @patch("apps.private.payments.services.stripe.SubscriptionSchedule.list")
+    def test_handles_api_error(self, mock_list):
+        from apps.private.payments.services import _release_existing_schedule
+
+        mock_list.side_effect = Exception("Stripe error")
+
+        # Should not raise
+        _release_existing_schedule("sub_1", "cus_123")
+
+
+@override_settings(STRIPE_SECRET_KEY="sk_test_fake")
+class TestSyncStripeDataEdgeCases(TestCase):
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_skips_subscription_without_metadata(self, mock_list):
+        etab = EtablissementFactory(active=False)
+        user = etab.google_credential.user
+        user.stripe_customer_id = "cus_123"
+        user.save(update_fields=["stripe_customer_id"])
+
+        mock_sub_no_meta = {
+            "id": "sub_no_meta",
+            "status": "active",
+            "metadata": {},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }
+        mock_response = MagicMock()
+        mock_response.data = [mock_sub_no_meta]
+        mock_response.has_more = False
+        mock_list.return_value = mock_response
+
+        sync_stripe_data(user)
+
+        etab.refresh_from_db()
+        # Should be deactivated since no subscription was processed
+        self.assertFalse(etab.active)
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_handles_pagination(self, mock_list):
+        etab = EtablissementFactory(active=False)
+        user = etab.google_credential.user
+        user.stripe_customer_id = "cus_123"
+        user.save(update_fields=["stripe_customer_id"])
+
+        mock_sub_obj = MagicMock()
+        mock_sub_obj.id = "sub_1"
+        mock_sub_obj.__getitem__ = lambda self, key: {
+            "id": "sub_1",
+            "status": "active",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }[key]
+        mock_sub_obj.get = lambda key, default=None: {
+            "id": "sub_1",
+            "status": "active",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }.get(key, default)
+
+        # First page: has_more=True
+        mock_response1 = MagicMock()
+        mock_response1.data = [mock_sub_obj]
+        mock_response1.has_more = True
+
+        # Second page: has_more=False
+        mock_response2 = MagicMock()
+        mock_response2.data = []
+        mock_response2.has_more = False
+
+        mock_list.side_effect = [mock_response1, mock_response2]
+
+        sync_stripe_data(user)
+
+        etab.refresh_from_db()
+        self.assertTrue(etab.active)
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_keeps_most_recent_subscription_per_etablissement(self, mock_list):
+        etab = EtablissementFactory(active=False)
+        user = etab.google_credential.user
+        user.stripe_customer_id = "cus_123"
+        user.save(update_fields=["stripe_customer_id"])
+
+        old_sub = {
+            "id": "sub_old",
+            "status": "canceled",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1600000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }
+        new_sub = {
+            "id": "sub_new",
+            "status": "active",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_456"}}]},
+        }
+
+        mock_response = MagicMock()
+        mock_response.data = [old_sub, new_sub]
+        mock_response.has_more = False
+        mock_list.return_value = mock_response
+
+        sync_stripe_data(user)
+
+        etab.refresh_from_db()
+        self.assertTrue(etab.active)
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_cancel_at_sets_cancel_at_period_end(self, mock_list):
+        from apps.private.payments.models import StripeSubscription
+
+        etab = EtablissementFactory(active=False)
+        user = etab.google_credential.user
+        user.stripe_customer_id = "cus_123"
+        user.save(update_fields=["stripe_customer_id"])
+
+        mock_sub = {
+            "id": "sub_cancel_at",
+            "status": "active",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": 1700000000,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }
+        mock_response = MagicMock()
+        mock_response.data = [mock_sub]
+        mock_response.has_more = False
+        mock_list.return_value = mock_response
+
+        sync_stripe_data(user)
+
+        local_sub = StripeSubscription.objects.get(subscription_id="sub_cancel_at")
+        self.assertTrue(local_sub.cancel_at_period_end)
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_inactive_status_activates_etablissement(self, mock_list):
+        etab = EtablissementFactory(active=False)
+        user = etab.google_credential.user
+        user.stripe_customer_id = "cus_123"
+        user.save(update_fields=["stripe_customer_id"])
+
+        mock_sub = {
+            "id": "sub_past_due",
+            "status": "past_due",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }
+        mock_response = MagicMock()
+        mock_response.data = [mock_sub]
+        mock_response.has_more = False
+        mock_list.return_value = mock_response
+
+        sync_stripe_data(user)
+
+        etab.refresh_from_db()
+        self.assertTrue(etab.active)
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_api_error_returns_without_crash(self, mock_list):
+        user = UserFactory(stripe_customer_id="cus_123")
+        mock_list.side_effect = Exception("Stripe API down")
+
+        # Should not raise
+        sync_stripe_data(user)
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_subscription_without_items_has_no_price(self, mock_list):
+        from apps.private.payments.models import StripeSubscription
+
+        etab = EtablissementFactory(active=False)
+        user = etab.google_credential.user
+        user.stripe_customer_id = "cus_123"
+        user.save(update_fields=["stripe_customer_id"])
+
+        mock_sub = {
+            "id": "sub_no_items",
+            "status": "active",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": []},
+        }
+        mock_response = MagicMock()
+        mock_response.data = [mock_sub]
+        mock_response.has_more = False
+        mock_list.return_value = mock_response
+
+        sync_stripe_data(user)
+
+        local_sub = StripeSubscription.objects.get(subscription_id="sub_no_items")
+        self.assertIsNone(local_sub.price_id)
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_canceled_deletes_local_subscription(self, mock_list):
+        from apps.private.payments.models import StripeSubscription
+
+        etab = EtablissementFactory(active=True)
+        user = etab.google_credential.user
+        user.stripe_customer_id = "cus_123"
+        user.save(update_fields=["stripe_customer_id"])
+
+        # Pre-create a local subscription record
+        StripeSubscription.objects.create(
+            etablissement=etab,
+            subscription_id="sub_to_delete",
+            status="active",
+            price_id="price_123",
+        )
+
+        mock_sub = {
+            "id": "sub_to_delete",
+            "status": "canceled",
+            "metadata": {"etablissement_id": str(etab.id)},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }
+        mock_response = MagicMock()
+        mock_response.data = [mock_sub]
+        mock_response.has_more = False
+        mock_list.return_value = mock_response
+
+        sync_stripe_data(user)
+
+        self.assertFalse(StripeSubscription.objects.filter(subscription_id="sub_to_delete").exists())
+
+    @patch("apps.private.payments.services.stripe.Subscription.list")
+    def test_subscription_for_nonexistent_etablissement_skipped(self, mock_list):
+        user = UserFactory(stripe_customer_id="cus_123")
+
+        mock_sub = {
+            "id": "sub_orphan",
+            "status": "active",
+            "metadata": {"etablissement_id": "99999"},
+            "cancel_at_period_end": False,
+            "cancel_at": None,
+            "created": 1700000000,
+            "items": {"data": [{"price": {"id": "price_123"}}]},
+        }
+        mock_response = MagicMock()
+        mock_response.data = [mock_sub]
+        mock_response.has_more = False
+        mock_list.return_value = mock_response
+
+        # Should not raise
+        sync_stripe_data(user)
+
+
+@override_settings(STRIPE_SECRET_KEY="sk_test_fake")
+class TestChangePlanEdgeCases(TestCase):
+    @patch("apps.private.payments.services.check_existing_subscription_for_etablissement")
+    def test_returns_none_when_no_items(self, mock_check):
+        user = UserFactory(stripe_customer_id="cus_123")
+        mock_check.return_value = {
+            "id": "sub_1",
+            "status": "active",
+            "items": {"data": []},
+        }
+
+        result = change_plan_for_etablissement(user, 1, "price_new")
+
+        self.assertIsNone(result)
+
+    @patch("apps.private.payments.services.check_existing_subscription_for_etablissement")
+    def test_returns_none_on_api_error(self, mock_check):
+        user = UserFactory(stripe_customer_id="cus_123")
+        mock_check.side_effect = Exception("Stripe error")
+
+        result = change_plan_for_etablissement(user, 1, "price_new")
+
+        self.assertIsNone(result)
+
+
+@override_settings(STRIPE_SECRET_KEY="sk_test_fake")
 class TestGetPendingPlanChange(TestCase):
     @patch("apps.private.payments.services.stripe.SubscriptionSchedule.list")
     def test_returns_pending_price_id(self, mock_list):

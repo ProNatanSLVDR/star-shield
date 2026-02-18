@@ -1,12 +1,29 @@
 from __future__ import annotations
 
+import fnmatch
 import logging
+import os
+import subprocess
+import sys
 import time
 import unittest
 from typing import Any
 
 from django.core.management.base import BaseCommand
 from django.test.runner import DiscoverRunner
+
+# ── Coverage config ─────────────────────────────────────────
+
+COVERAGE_SOURCE_DIRS = ("apps/", "starshield/")
+COVERAGE_OMIT_PATTERNS = (
+    "*/migrations/*",
+    "*/tests/*",
+    "tests/*",
+    "*/management/commands/*",
+    "*/wsgi.py",
+    "*/asgi.py",
+    "*/settings.py",
+)
 
 
 # ── ANSI helpers ─────────────────────────────────────────────
@@ -34,7 +51,7 @@ class SilentTestResult(unittest.TestResult):
         super().__init__()
         self.successes: list[unittest.TestCase] = []
 
-    def addSuccess(self, test: unittest.TestCase) -> None:
+    def addSuccess(self, test: unittest.TestCase) -> None:  # noqa: N802
         super().addSuccess(test)
         self.successes.append(test)
 
@@ -68,16 +85,18 @@ class Command(BaseCommand):
         no_coverage = options["no_coverage"]
         fail_under = options["fail_under"]
 
-        # ── Start coverage ──
-        cov = None
-        if not no_coverage:
-            try:
-                import coverage
-
-                cov = coverage.Coverage()
-                cov.start()
-            except ImportError:
-                pass
+        # When coverage is requested, re-launch as a subprocess so that
+        # coverage.start() runs BEFORE Django imports any app modules.
+        # This ensures module-level code (class/function definitions) is
+        # counted in the coverage report.
+        if not no_coverage and "_RUN_TESTS_SUBPROCESS" not in os.environ:
+            cmd = [sys.executable, "-m", "run_tests_with_coverage"]
+            if test_labels:
+                cmd.extend(test_labels)
+            if fail_under:
+                cmd.extend(["--fail-under", str(fail_under)])
+            proc = subprocess.run(cmd, cwd=os.getcwd())
+            raise SystemExit(proc.returncode)
 
         # ── Run tests (full Django lifecycle) ──
         runner = DiscoverRunner(verbosity=0)
@@ -98,13 +117,6 @@ class Command(BaseCommand):
             runner.teardown_databases(old_config)
             runner.teardown_test_environment()
 
-        # ── Stop coverage & compute total ──
-        cover_pct = None
-        if cov:
-            cov.stop()
-            cov.save()
-            cover_pct = self._total_coverage(cov)
-
         # ── One-line summary ──
         passed = len(result.successes)
         failed = len(result.failures)
@@ -123,10 +135,6 @@ class Command(BaseCommand):
 
         summary = ", ".join(parts) + c(f" in {duration:.2f}s", DIM)
 
-        if cover_pct is not None:
-            cov_color = GREEN if cover_pct >= 80 else YELLOW if cover_pct >= 60 else RED
-            summary += "  " + c(f"({cover_pct:.0f}% coverage)", cov_color, BOLD)
-
         mark = c("✓", GREEN, BOLD) if ok else c("✗", RED, BOLD)
         self.stdout.write(f"\n {mark} {summary}\n")
 
@@ -137,20 +145,31 @@ class Command(BaseCommand):
                 self.stdout.write(c(f"     {line}", DIM))
             self.stdout.write("")
 
-        # ── Exit code ──
-        coverage_too_low = fail_under and cover_pct is not None and cover_pct < fail_under
-        if coverage_too_low:
-            self.stderr.write(c(f"\n   Coverage {cover_pct:.1f}% is below --fail-under {fail_under}%\n", RED, BOLD))
-
-        if not ok or coverage_too_low:
+        if not ok:
             raise SystemExit(1)
 
     @staticmethod
+    def _is_app_file(filepath: str) -> bool:
+        """Check if a file belongs to our app source directories and isn't omitted."""
+        rel = filepath
+        for prefix in ("/app/", os.getcwd() + "/"):
+            if rel.startswith(prefix):
+                rel = rel[len(prefix) :]
+                break
+
+        if not any(rel.startswith(d) for d in COVERAGE_SOURCE_DIRS):
+            return False
+
+        return not any(fnmatch.fnmatch(rel, pat) for pat in COVERAGE_OMIT_PATTERNS)
+
+    @staticmethod
     def _total_coverage(cov) -> float:
-        """Compute total coverage percentage."""
+        """Compute total coverage percentage over app source files only."""
         total_stmts = 0
         total_miss = 0
         for filename in cov.get_data().measured_files():
+            if not Command._is_app_file(filename):
+                continue
             try:
                 _, statements, _, missing, _ = cov.analysis2(filename)
             except Exception:

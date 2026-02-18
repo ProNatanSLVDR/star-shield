@@ -83,6 +83,97 @@ class TestInternalFeedbackView(TestCase):
         )
 
 
+class TestInternalFeedbackViewEdgeCases(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.etab = EtablissementFactory(active=True)
+
+    def test_get_with_rating_param(self):
+        response = self.client.get(
+            reverse("reviews:internal_feedback", args=[self.etab.slug]),
+            {"rating": "4"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_with_invalid_rating_param(self):
+        response = self.client.get(
+            reverse("reviews:internal_feedback", args=[self.etab.slug]),
+            {"rating": "abc"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_with_out_of_range_rating_param(self):
+        response = self.client.get(
+            reverse("reviews:internal_feedback", args=[self.etab.slug]),
+            {"rating": "10"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_updates_existing_review_within_session(self):
+        # First submission
+        self.client.post(
+            reverse("reviews:internal_feedback", args=[self.etab.slug]),
+            data={"rating": 3, "comment": "First"},
+        )
+
+        self.assertEqual(Review.objects.filter(etablissement=self.etab).count(), 1)
+
+        # Second submission within same session
+        self.client.post(
+            reverse("reviews:internal_feedback", args=[self.etab.slug]),
+            data={"rating": 5, "comment": "Updated"},
+        )
+
+        # Should still be 1 review, updated
+        self.assertEqual(Review.objects.filter(etablissement=self.etab).count(), 1)
+        review = Review.objects.get(etablissement=self.etab)
+        self.assertEqual(review.rating, 5)
+        self.assertEqual(review.comment, "Updated")
+
+    def test_post_creates_analytics(self):
+        self.client.post(
+            reverse("reviews:internal_feedback", args=[self.etab.slug]),
+            data={"rating": 4, "comment": "Good"},
+        )
+
+        self.assertTrue(
+            ReviewAnalytics.objects.filter(
+                etablissement=self.etab,
+                type="feedback_internal_submitted",
+            ).exists()
+        )
+
+
+class TestFeedbackThanksView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.etab = EtablissementFactory(active=True)
+
+    def test_renders_thanks_page(self):
+        response = self.client.get(reverse("reviews:feedback_thanks", args=[self.etab.slug]))
+
+        self.assertEqual(response.status_code, 200)
+
+
+class TestFeedbackViewDedup(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.etab = EtablissementFactory(active=True, review_filtering_enabled=True)
+
+    def test_no_duplicate_analytics_on_rapid_visits(self):
+        url = reverse("reviews:feedback", args=[self.etab.slug])
+        self.client.get(url)
+        self.client.get(url)
+
+        self.assertEqual(
+            ReviewAnalytics.objects.filter(etablissement=self.etab, type="feedback_viewed").count(),
+            1,
+        )
+
+
 class TestExternalFeedbackView(TestCase):
     def setUp(self):
         self.client = Client()
@@ -99,6 +190,16 @@ class TestExternalFeedbackView(TestCase):
 
     def test_creates_analytics(self):
         self.client.get(reverse("reviews:external_feedback", args=[self.etab.slug]))
+
+        self.assertEqual(
+            ReviewAnalytics.objects.filter(etablissement=self.etab, type="feedback_external").count(),
+            1,
+        )
+
+    def test_no_duplicate_analytics_on_rapid_visits(self):
+        url = reverse("reviews:external_feedback", args=[self.etab.slug])
+        self.client.get(url)
+        self.client.get(url)
 
         self.assertEqual(
             ReviewAnalytics.objects.filter(etablissement=self.etab, type="feedback_external").count(),
