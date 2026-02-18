@@ -97,16 +97,18 @@ class TestUnselectEtablissement(TestCase):
         self.factory = RequestFactory()
         self.decorated = unselect_etablissement(dummy_view)
 
-    def test_redirects_when_etablissement_selected(self):
+    def test_clears_session_when_etablissement_selected(self):
         request = self.factory.get("/test/")
         request.user = UserFactory()
         request.session = SessionStore()
         request.session["selected_etablissement"] = 1
+        request.etablissement = object()
 
         response = self.decorated(request)
 
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("unselect", response.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("selected_etablissement", request.session)
+        self.assertFalse(hasattr(request, "etablissement"))
 
     def test_allows_when_no_etablissement(self):
         request = self.factory.get("/test/")
