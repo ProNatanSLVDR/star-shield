@@ -468,14 +468,15 @@
                     if (!unsavedIndicator) return;
                     const vals = getFormValues();
                     const hasChanges = (
-                        vals.fillColor !== canvas.dataset.savedFillColor ||
-                        vals.fillColorSecondary !== canvas.dataset.savedFillColorSecondary ||
-                        vals.backgroundColor !== canvas.dataset.savedBackgroundColor ||
+                        vals.fillColor.toLowerCase() !== canvas.dataset.savedFillColor.toLowerCase() ||
+                        vals.fillColorSecondary.toLowerCase() !== canvas.dataset.savedFillColorSecondary.toLowerCase() ||
+                        vals.backgroundColor.toLowerCase() !== canvas.dataset.savedBackgroundColor.toLowerCase() ||
                         vals.style !== canvas.dataset.savedStyle ||
                         vals.colorMask !== canvas.dataset.savedColorMask ||
                         String(vals.showBadge) !== canvas.dataset.savedShowBadge
                     );
-                    unsavedIndicator.style.display = hasChanges ? "" : "none";
+                    unsavedIndicator.classList.toggle("d-none", !hasChanges);
+                    unsavedIndicator.classList.toggle("d-flex", hasChanges);
                 }
 
                 // Re-render QR from current form values
