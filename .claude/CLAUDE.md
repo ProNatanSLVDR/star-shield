@@ -26,6 +26,12 @@ ruff format .
 djlint --lint .
 djlint --reformat .
 
+# Run tests
+python manage.py run_tests                    # all tests + coverage
+python manage.py run_tests --no-coverage      # faster, no coverage
+python manage.py run_tests --fail-under 80    # exit 1 if coverage < 80%
+python manage.py run_tests tests.test_models  # specific test module
+
 # Make migrations (NEVER run migrate)
 python manage.py makemigrations
 
