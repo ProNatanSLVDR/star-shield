@@ -85,7 +85,7 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.6.3
-uv==0.10.2
+uv==0.11.6
 virtualenv==20.36.1
 zope.event==6.1
 zope.interface==8.2
